@@ -23,10 +23,11 @@
 
   <!-- CSS files -->
   <link rel="stylesheet" type="text/css" href="css/grids.css">
-  <link rel="stylesheet" type="text/css" href="css/index.css">
+  <link rel="stylesheet" type="text/css" href="css/common.css">
   <link rel="stylesheet" type="text/css" href="css/testing_interface.css">
 
   <!-- JS files -->
+  <script src="js/common.js"></script>
   <script src="js/grids.js"></script>
   <script src="js/more_grids.js"></script>
   <script src="js/self_play_desc.js"></script>
@@ -38,25 +39,30 @@
 
 <body>
 
+    <div class="alert alert-success" id="info_display"></div>
+    <div class="alert alert-danger" id="error_display"></div>
+
     <div id="container-fluid">
         <div class="row">
             <div class="col-md-2"></div>
             <div class="col-md-4" id="io_ex_col">
                 <div class="col-header">
-                    <h1 id="pattern-header">Pattern 1</h1>
+                    <h1 class="col-title" id="pattern-header">Pattern 1</h1>
+                    <a href="#" class="help-btn" data-toggle="tooltip" title="Describe the pattern that transforms each grid on the left to the grid on its right.">Help</a>
                 </div>
                 <div id="task_preview"></div>
             </div>
     
             <div class="col-md-4">
                 <div class="col-header">
-                    <h1>Description</h1>
+                    <h1 class="col-title">Description</h1>
                 </div>
                 <div class="input-group">
                     <textarea id="desciption-text" class="form-control" aria-label="With textarea" placeholder="Enter a description describing the pattern"></textarea>
                 </div>
                 </br>
                 <button onclick="submit()" type="button" class="btn btn-primary">Submit Description</button>
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#giveUpModal">Give up</button>
             </div>
             <div class="col-md-2"></div>
         </div>
@@ -70,8 +76,8 @@
                 <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
             </div>
             <div class="modal-body" id="gen-modal-body">
-                <p>Now, you will do both tasks: write a description of a pattern, and then later use this description to create the correct grid.</p>
-                <p>First, you will describe 3 different patterns.</p>
+                <p>Now, you will do both tasks. First, you will write a description of the pattern, and then later use this description to create the correct grid.</p>
+                <p>You will do this for 3 different patterns.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="$('#instructionsModal').one('hidden.bs.modal', function() { $('#instructions2Modal').modal('show'); }).modal('hide');">Okay</button>
@@ -88,16 +94,34 @@
                     <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
                 </div>
                 <div class="modal-body" id="gen-modal-body">
-                    <p>On the left of the screen, is the <strong>pattern area</strong>. Here you will see multiple grids where the pattern is applied.</p>
+                    <p>On the left of the screen is the <strong>pattern area</strong>. Here you will see multiple grids where the pattern is applied.</p>
                     <img class="img-responsive" src="img/pattern_ex.png">
 
-                    <p>On the right of the screen, is the <strong>description area</strong>. Here is where you will describe the pattern you see. Make sure you use enough detail so that you can create any output based on the description alone. Once you submit 3 descriptions, you will be taken to the portion of the task where you use the descriptions to create the output.</p>
+                    <p>On the right of the screen is the <strong>description area</strong>. Here is where you will describe the pattern you see.</p>
+                    <p>Make sure you use enough detail so that you can create the output based on only the description and an input grid that <strong>you have not seen before</strong>. Once you submit descriptions for 3 patterns, you will then try to create the correct output using your descriptions.</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Let's do it!</button>
                 </div>
             </div>
         </div>
       </div>
 
+    <!-- Give-up Modal -->
+    <div class="modal fade" id="giveUpModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Give Up</h3>
+                </div>
+                <div class="modal-body" id="gen-modal-body">
+                    <p>Are you sure that you can't determine the pattern?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No, I'll try some more</button>
+                    <button onclick="give_up()" type="button" class="btn btn-danger" data-dismiss="modal">Give Up</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </html>

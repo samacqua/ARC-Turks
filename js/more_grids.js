@@ -195,6 +195,8 @@ function nextTestInput() {
 
 function fillTestInput(inputGrid) {
     jqInputGrid = $('#evaluation_input');
+    console.log(inputGrid);
+    console.log(jqInputGrid);
     fillJqGridWithData(jqInputGrid, inputGrid);
     fitCellsToContainer(jqInputGrid, inputGrid.height, inputGrid.width, 400, 400);
 }

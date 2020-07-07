@@ -1,6 +1,9 @@
 var USER_ID;
+var START_DATE;
 
 $(window).on('load',function(){
+    START_DATE = new Date();
+
     $('#error_display').hide();
     $('#info_display').hide();
 
@@ -109,4 +112,50 @@ function exit_task_qs() {
             exit_message();
         }
     }
+}
+
+function give_up() {
+
+    const newTime = new Date();
+    console.log((newTime - START_DATE)/1000);
+    if ((newTime - START_DATE)/1000 < 30) {
+        errorMsg("Please try to figure out the pattern for a bit before you give up.");
+        return;
+    }
+
+    // different if gives up writing description vs solving task
+    if ( $('#validation-col').css('display') == 'none' || $('#validation-col').css("visibility") == "hidden"){
+        for (var i = 0; i < 8; i++) {
+            var pairSlot = $('#pair_preview_' + i);
+            var jqInputGrid = pairSlot.find('.input_preview');
+            var jqArrow = pairSlot.find('.arrow');
+            var jqOutputGrid = pairSlot.find('.output_preview');
+            jqInputGrid.empty();
+            // TODO: fix arrows and put when submitting
+            // jqArrow.empty();
+            jqOutputGrid.empty();
+        }
+    
+        randomTask();
+        $('textarea').val("");
+    } else {
+        const answer = convertSerializedGridToGridObject(TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output']);
+        // TEST_PAIRS = new Array();
+    
+        console.log(answer);
+        showAnswer(answer);
+    }
+    START_DATE = new Date();
+}
+
+function showAnswer(grid) {
+    // jqInputGrid = $('#evaluation_answer');
+    // console.log(grid);
+    // console.log(jqInputGrid);
+    // fillJqGridWithData(jqInputGrid, grid);
+    // fitCellsToContainer(jqInputGrid, grid.height, grid.width, 400, 400);
+
+    CURRENT_OUTPUT_GRID = grid;
+    syncFromDataGridToEditionGrid();
+    $('#output_grid_size').val(CURRENT_OUTPUT_GRID.height + 'x' + CURRENT_OUTPUT_GRID.width);
 }

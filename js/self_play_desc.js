@@ -1,4 +1,11 @@
+var START_DATE;
+
 $(window).on('load',function(){
+    $('#error_display').hide();
+    $('#info_display').hide();
+
+    START_DATE = new Date();
+
     $('#instructionsModal').modal('show');
     randomTask();
 });
@@ -6,6 +13,12 @@ $(window).on('load',function(){
 TASK_DESCRIPTIONS = []; 
 
 function submit() {
+
+    if ($("#desciption-text").val().trim().length < 5) {
+        errorMsg("Please enter a description.");
+        return
+    }
+
     console.log(TASK_DESCRIPTIONS);
     console.log(TASK_DESCRIPTIONS.length);
 
@@ -40,4 +53,29 @@ function submit() {
         window.location.href = `/self_play_test.html?t1=${t1}&d1=${d1}&t2=${t2}&d2=${d2}&t3=${t3}&d3=${d3}`;
     }
     $('textarea').val("");
+}
+
+function give_up() {
+    const newTime = new Date();
+    console.log((newTime - START_DATE)/1000);
+    if ((newTime - START_DATE)/1000 < 30) {
+        errorMsg("Please try to figure out the pattern for a bit before you give up.");
+        return;
+    }
+
+    for (var i = 0; i < 8; i++) {
+        var pairSlot = $('#pair_preview_' + i);
+        var jqInputGrid = pairSlot.find('.input_preview');
+        var jqArrow = pairSlot.find('.arrow');
+        var jqOutputGrid = pairSlot.find('.output_preview');
+        jqInputGrid.empty();
+        // TODO: fix arrows and put when submitting
+        // jqArrow.empty();
+        jqOutputGrid.empty();
+    }
+
+    randomTask();
+    $('textarea').val("");
+
+    START_DATE = new Date();
 }

@@ -1,0 +1,33 @@
+img {
+    width: 100%;
+    padding-bottom: 15px;
+    height: auto;
+}
+
+#arrow {
+    width: 15px;
+    height: auto;
+}
+
+.tooltip.show {
+    opacity: 1;
+}
+
+.col-header {
+    clear:both;
+    margin-bottom: 15px;
+}
+
+.col-title {
+    display: inline-block;
+}
+
+.help-btn {
+    float:right;   
+    padding-top: 5px;
+}
+
+video {
+    width: 100%    !important;
+    height: auto   !important;
+}

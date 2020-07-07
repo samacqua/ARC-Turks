@@ -63,6 +63,7 @@ function fillJqGridWithData(jqGrid, dataGrid) {
     jqGrid.empty();
     height = dataGrid.height;
     width = dataGrid.width;
+
     for (var i = 0; i < height; i++){
         var row = $(document.createElement('div'));
         row.addClass('row');

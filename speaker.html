@@ -28,6 +28,7 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
   <!-- CSS files -->
+  <link rel="stylesheet" type="text/css" href="css/common.css">
   <link rel="stylesheet" type="text/css" href="css/speaker.css">
   <link rel="stylesheet" type="text/css" href="css/grids.css">
   <link rel="stylesheet" type="text/css" href="css/testing_interface.css">
@@ -68,6 +69,7 @@
                 </div>
                 </br>
                 <button onclick="continue_to_verify()" type="button" class="btn btn-primary">Submit Description and Continue to Verification</button>
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#giveUpModal">Give up</button>
             </div>
     
             <div class="col-md-4" id="validation-col">
@@ -137,6 +139,9 @@
                     <div class="symbol_preview symbol_8" symbol="8"></div>
                     <div class="symbol_preview symbol_9" symbol="9"></div>
                 </div>
+
+                </br>
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#giveUpModal">Give up</button>
             </div>
         </div>
     </div>
@@ -149,7 +154,7 @@
                     <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
                 </div>
                     <div class="modal-body" id="gen-modal-body">
-                        <p>You are now playing the part of describing the pattern. However, these descriptions will be going to another person (in the student story, they are going to your friend). So, you have to make sure they are descriptive enough so that they can solve the problem even though they have never seen the pattern examples that you will see.</p>
+                        <p>You are now playing the part of describing the pattern. However, these descriptions will be going to another person (in the student story, they are going to your friend). So, you have to make sure they are descriptive enough so that they can solve the problem even though <strong>they have never seen the pattern examples that you will see.</strong></p>
                         <p>Because your description is going to another person, we need to make sure you understand the pattern as well. So, after you submit your description, you will be asked to solve the problem.</p>
                     </div>
                 <div class="modal-footer">
@@ -284,6 +289,24 @@
                 <div class="modal-body" id="final-modal-body">
                     <p>Thank you for participating in this study. Your user ID is: </p>
                     <h5 id="finish_modal_uid"></h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Give-up Modal -->
+    <div class="modal fade" id="giveUpModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Give Up</h3>
+                </div>
+                <div class="modal-body" id="gen-modal-body">
+                    <p>Are you sure that you can't determine the pattern?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No, I'll try some more</button>
+                    <button onclick="give_up()" type="button" class="btn btn-danger" data-dismiss="modal">Give Up</button>
                 </div>
             </div>
         </div>

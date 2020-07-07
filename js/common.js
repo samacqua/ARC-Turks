@@ -30,3 +30,10 @@ function exit_message() {
     // so the modal can't be dismissed, from https://stackoverflow.com/questions/22207377/disable-click-outside-of-bootstrap-modal-area-to-close-modal
     $('#finished_modal').modal({backdrop: 'static', keyboard: false}); 
 }
+
+$(window).on('load',function(){
+    $('a[data-toggle="tooltip"]').tooltip({
+        animated: 'fade',
+        html: true
+    });
+});

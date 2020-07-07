@@ -16,8 +16,12 @@ console.log(d3);
 const ts = [t1, t3];
 const ds = [d1, d3];
 
+var START_DATE;
+
 
 $(window).on('load',function(){
+    START_DATE = new Date();
+
     $('#error_display').hide();
     $('#info_display').hide();
 
@@ -30,6 +34,8 @@ $(window).on('load',function(){
 
 function check_grid() {
     syncFromEditionGridToDataGrid();
+    console.log(TEST_PAIRS);
+    console.log(CURRENT_TEST_PAIR_INDEX);
     reference_output = TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output'];
     submitted_output = CURRENT_OUTPUT_GRID.grid;
 
@@ -53,7 +59,6 @@ function check_grid() {
     console.log(ts.length);
 
     if (ts.length == 0) {
-        console.log("ya");
         $("#exitModal").modal("show");
     }
 
@@ -63,6 +68,8 @@ function check_grid() {
     TEST_PAIRS = new Array();
     loadTask(ts.pop());
     $("#description_p").text(ds.pop());
+
+    START_DATE = new Date();
 }
 
 function finish_self_play() {
@@ -74,4 +81,34 @@ function finish_self_play() {
         // 'file:///Users/samacquaviva/Documents/Summer%20UROP/Turk/Website%20Complete/listener.html?first=true'
         window.location.href = '/listener.html?first=true';
     }
+}
+
+function give_up() {
+    const newTime = new Date();
+    console.log((newTime - START_DATE)/1000);
+    if ((newTime - START_DATE)/1000 < 30) {
+        errorMsg("Please try to figure out the pattern for a bit before you give up.");
+        return;
+    }
+
+    const answer = convertSerializedGridToGridObject(TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output']);
+    // TEST_PAIRS = new Array();
+
+    console.log(answer);
+
+    showAnswer(answer);
+
+    START_DATE = new Date();
+}
+
+function showAnswer(grid) {
+    // jqInputGrid = $('#evaluation_answer');
+    // console.log(grid);
+    // console.log(jqInputGrid);
+    // fillJqGridWithData(jqInputGrid, grid);
+    // fitCellsToContainer(jqInputGrid, grid.height, grid.width, 400, 400);
+
+    CURRENT_OUTPUT_GRID = grid;
+    syncFromDataGridToEditionGrid();
+    $('#output_grid_size').val(CURRENT_OUTPUT_GRID.height + 'x' + CURRENT_OUTPUT_GRID.width);
 }
