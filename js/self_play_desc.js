@@ -50,7 +50,7 @@ function submit() {
         const d3 = TASK_DESCRIPTIONS[2][1];
 
         // `file:///Users/samacquaviva/Documents/Summer%20UROP/Turk/Website%20Complete/self_play_test.html?t1=${t1}&d1=${d1}&t2=${t2}&d2=${d2}&t3=${t3}&d3=${d3}`
-        window.location.href = `/self_play_test.html?t1=${t1}&d1=${d1}&t2=${t2}&d2=${d2}&t3=${t3}&d3=${d3}`;
+        window.location.href = `self_play_test.html?t1=${t1}&d1=${d1}&t2=${t2}&d2=${d2}&t3=${t3}&d3=${d3}`;
     }
     $('textarea').val("");
 }

@@ -64,7 +64,7 @@ function check() {
 
         if (first == 'true') {
             // 'file:///Users/samacquaviva/Documents/Summer%20UROP/Turk/Website%20Complete/speaker.html?first=false'
-            window.location.href = '/speaker.html?first=false';
+            window.location.href = 'speaker.html?first=false';
         } else {
             exit_message();
         }

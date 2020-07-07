@@ -76,10 +76,10 @@ function finish_self_play() {
     const rand_num = Math.random();
     if (rand_num < 0.5) {
         // 'file:///Users/samacquaviva/Documents/Summer%20UROP/Turk/Website%20Complete/speaker.html?first=true'
-        window.location.href = '/speaker.html?first=true';
+        window.location.href = 'speaker.html?first=true';
     } else {
         // 'file:///Users/samacquaviva/Documents/Summer%20UROP/Turk/Website%20Complete/listener.html?first=true'
-        window.location.href = '/listener.html?first=true';
+        window.location.href = 'listener.html?first=true';
     }
 }
 

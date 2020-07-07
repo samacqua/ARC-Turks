@@ -107,7 +107,7 @@ function exit_task_qs() {
 
         if (first == 'true') {
             // 'file:///Users/samacquaviva/Documents/Summer%20UROP/Turk/Website%20Complete/listener.html?first=false'
-            window.location.href = '/listener.html?first=false';
+            window.location.href = 'listener.html?first=false';
         } else {
             exit_message();
         }
