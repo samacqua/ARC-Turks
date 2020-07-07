@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ARC labeling interface</title>
+
+  <!-- Just to silence warning about not having icon -->
+  <link rel="shortcut icon" href="#" />
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
+
+  <!-- JS Libraries -->
+  <!-- jQuery library -->
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+ 
+  <!-- Bootstrap JS (must be listed after jQuery) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+  <!-- CSS files -->
+  <link rel="stylesheet" type="text/css" href="css/grids.css">
+  <link rel="stylesheet" type="text/css" href="css/testing_interface.css">
+
+  <!-- JS files -->
+  <script src="js/grids.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/more_grids.js"></script>
+  <script src="js/self_play_test.js"></script>
+
+  <!-- Font reference -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet" />
+
+</head>
+
+<body>
+
+    <div id="container-fluid">
+
+        <div class="alert alert-success" id="info_display"></div>
+        <div class="alert alert-danger" id="error_display"></div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="col-header">
+                    <h1>Description</h1>
+                </div>
+                <p id="description_p">This is an example description.</p>
+            </div>
+
+            <div class="col-md-4">
+                <div class="col-header">
+                    <h1>Input</h1>
+                </div>
+
+                <div id="evaluation_input" class="selectable_grid"></div>
+            </div>
+    
+            <div class="col-md-4">
+
+                <div class="col-header">
+                    <h1>Output</h1>
+                </div>
+
+                <div id="output_grid">
+                    <div class="edition_grid selectable_grid">
+                        <div class="row">
+                            <div class="cell" symbol="0" x="0" y="0"></div>
+                            <div class="cell" symbol="0" x="0" y="1"></div>
+                            <div class="cell" symbol="0" x="0" y="2"></div>
+                        </div>
+                        <div class="row">
+                            <div class="cell" symbol="0" x="1" y="0"></div>
+                            <div class="cell" symbol="0" x="1" y="1"></div>
+                            <div class="cell" symbol="0" x="1" y="2"></div>
+                        </div>
+                        <div class="row">
+                            <div class="cell" symbol="0" x="2" y="0"></div>
+                            <div class="cell" symbol="0" x="2" y="1"></div>
+                            <div class="cell" symbol="0" x="2" y="2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="resize_control_btns">
+                    <label for="output_grid_size">Change grid size: </label>
+                    <input type="text" id="output_grid_size" class="grid_size_field" name="size" value="3x3">
+                    <button type="button" class="btn btn-primary" onclick="resizeOutputGrid()" id="resize_btn">Resize</button>
+                </div>
+
+                <button type="button" class="btn btn-secondary" onclick="copyFromInput()">Copy from input</button>
+                <button type="button" class="btn btn-secondary" onclick="resetOutputGrid()">Reset grid</button>
+                <button type="button" class="btn btn-secondary" onclick="check_grid()" id="submit_solution_btn">Check!</button>
+
+                <div id="toolbar">
+                    <div>
+                        <input type="radio" id="tool_edit"
+                         name="tool_switching" value="edit" checked>
+                        <label for="tool_edit">Draw</label>
+
+                        <input type="radio" id="tool_floodfill"
+                         name="tool_switching" value="floodfill">
+                        <label for="tool_floodfill">Flood fill</label>
+                    </div>
+                </div>
+
+                <div id="symbol_picker">
+                    <div class="symbol_preview symbol_0 selected-symbol-preview" symbol="0"></div>
+                    <div class="symbol_preview symbol_1" symbol="1"></div>
+                    <div class="symbol_preview symbol_2" symbol="2"></div>
+                    <div class="symbol_preview symbol_3" symbol="3"></div>
+                    <div class="symbol_preview symbol_4" symbol="4"></div>
+                    <div class="symbol_preview symbol_5" symbol="5"></div>
+                    <div class="symbol_preview symbol_6" symbol="6"></div>
+                    <div class="symbol_preview symbol_7" symbol="7"></div>
+                    <div class="symbol_preview symbol_8" symbol="8"></div>
+                    <div class="symbol_preview symbol_9" symbol="9"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions Modal -->
+  <div class="modal fade" id="instructionsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
+            </div>
+            <div class="modal-body" id="gen-modal-body">
+                <p>Now, you will try to create the correct grid given a <i>different</i> first grid using the 3 description you just created.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="$('#instructionsModal').one('hidden.bs.modal', function() { $('#instructions2Modal').modal('show'); }).modal('hide');">Okay</button>
+            </div>
+        </div>
+    </div>
+  </div>
+
+    <!-- Instructions2 Modal -->
+    <div class="modal fade" id="instructions2Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
+            </div>
+            <div class="modal-body" id="gen-modal-body">
+                <p>On the left of the screen, is the <strong>description area</strong>. Here you will see the description for the task that you just wrote.</p>
+
+                <p>In the middle of the screen is the <strong>input area</strong>. Here you will see a single grid. This is the input (the grid before the arrow), and you will apply your description to this grid.</p>
+
+                <p>On the right of the screen, is the <strong>output area</strong>. Here is where you can create the grid based on the description and input grid, this is the answer on the test. You have options to resize the grid, copy the input grid, and reset the grid. You can also draw individual grid blocks any color, or 'flood fill'. Watch the demo below to see an example.</p>
+                <video width="320" height="240" controls>
+                    <source src="img/self_play_output_example.mp4" type="video/mp4" autoplay>
+                </video>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Exit Modal -->
+    <div class="modal fade" id="exitModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
+            </div>
+            <div class="modal-body" id="gen-modal-body">
+                <p>Great job! Now, you will do each role seperately.</p>
+            </div>
+            <div class="modal-footer">
+                <button onclick="finish_self_play()" type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+</html>

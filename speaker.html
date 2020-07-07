@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ARC labeling interface</title>
+
+  <!-- Just to silence warning about not having icon -->
+  <link rel="shortcut icon" href="#" />
+
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-database.js"></script>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
+
+  <!-- JS Libraries -->
+  <!-- jQuery library -->
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script> -->
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+ 
+  <!-- Bootstrap JS (must be listed after jQuery) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+  <!-- CSS files -->
+  <link rel="stylesheet" type="text/css" href="css/speaker.css">
+  <link rel="stylesheet" type="text/css" href="css/grids.css">
+  <link rel="stylesheet" type="text/css" href="css/testing_interface.css">
+
+  <!-- JS files -->
+  <script src="js/speaker.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/grids.js"></script>
+  <script src="js/more_grids.js"></script>
+  <script src="js/fire.js"></script>
+
+  <!-- Font reference -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet" />
+
+</head>
+
+<body>
+    <div id="container-fluid">
+
+        <div class="alert alert-success" id="info_display"></div>
+        <div class="alert alert-danger" id="error_display"></div>
+
+        <div class="row">
+            <div class="col-md-4" id="io_ex_col">
+                <div class="col-header">
+                    <h1>Input-Output Pairs</h1>
+                </div>
+
+                <div id="task_preview"></div>
+            </div>
+    
+            <div class="col-md-4">
+                <div class="col-header">
+                    <h1>Description</h1>
+                </div>
+                <div class="input-group">
+                    <textarea id="desciption-text" class="form-control" aria-label="With textarea" placeholder="Enter a description describing the pattern that maps the input grid to the output grid."></textarea>
+                </div>
+                </br>
+                <button onclick="continue_to_verify()" type="button" class="btn btn-primary">Submit Description and Continue to Verification</button>
+            </div>
+    
+            <div class="col-md-4" id="validation-col">
+
+                <div class="col-header">
+                    <h1>Validation</h1>
+                </div>
+                
+                <h3>Validation Input</h3>
+                <div id="evaluation_input" class="selectable_grid"></div>
+
+                <hr/>
+
+                <h3>Validation Output</h3>
+
+                <div id="output_grid">
+                    <div class="edition_grid selectable_grid">
+                        <div class="row">
+                            <div class="cell" symbol="0" x="0" y="0"></div>
+                            <div class="cell" symbol="0" x="0" y="1"></div>
+                            <div class="cell" symbol="0" x="0" y="2"></div>
+                        </div>
+                        <div class="row">
+                            <div class="cell" symbol="0" x="1" y="0"></div>
+                            <div class="cell" symbol="0" x="1" y="1"></div>
+                            <div class="cell" symbol="0" x="1" y="2"></div>
+                        </div>
+                        <div class="row">
+                            <div class="cell" symbol="0" x="2" y="0"></div>
+                            <div class="cell" symbol="0" x="2" y="1"></div>
+                            <div class="cell" symbol="0" x="2" y="2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="resize_control_btns">
+                    <label for="output_grid_size">Change grid size: </label>
+                    <input type="text" id="output_grid_size" class="grid_size_field" name="size" value="3x3">
+                    <button type="button" class="btn btn-primary" onclick="resizeOutputGrid()" id="resize_btn">Resize</button>
+                </div>
+
+                <button type="button" class="btn btn-primary" onclick="copyFromInput()">Copy from input</button>
+                <button type="button" class="btn btn-primary" onclick="resetOutputGrid()">Reset grid</button>
+                <button type="button" class="btn btn-primary" onclick="check()" id="submit_solution_btn">Check!</button>
+
+                <div id="toolbar">
+                    <div>
+                        <input type="radio" id="tool_edit"
+                         name="tool_switching" value="edit" checked>
+                        <label for="tool_edit">Draw</label>
+
+                        <input type="radio" id="tool_floodfill"
+                         name="tool_switching" value="floodfill">
+                        <label for="tool_floodfill">Flood fill</label>
+                    </div>
+                </div>
+
+                <div id="symbol_picker">
+                    <div class="symbol_preview symbol_0 selected-symbol-preview" symbol="0"></div>
+                    <div class="symbol_preview symbol_1" symbol="1"></div>
+                    <div class="symbol_preview symbol_2" symbol="2"></div>
+                    <div class="symbol_preview symbol_3" symbol="3"></div>
+                    <div class="symbol_preview symbol_4" symbol="4"></div>
+                    <div class="symbol_preview symbol_5" symbol="5"></div>
+                    <div class="symbol_preview symbol_6" symbol="6"></div>
+                    <div class="symbol_preview symbol_7" symbol="7"></div>
+                    <div class="symbol_preview symbol_8" symbol="8"></div>
+                    <div class="symbol_preview symbol_9" symbol="9"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+  
+    <!-- Instructions Modal -->
+    <div class="modal fade" id="instructionsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
+                </div>
+                    <div class="modal-body" id="gen-modal-body">
+                        <p>You are now playing the part of describing the pattern. However, these descriptions will be going to another person (in the student story, they are going to your friend). So, you have to make sure they are descriptive enough so that they can solve the problem even though they have never seen the pattern examples that you will see.</p>
+                        <p>Because your description is going to another person, we need to make sure you understand the pattern as well. So, after you submit your description, you will be asked to solve the problem.</p>
+                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="$('#instructionsModal').one('hidden.bs.modal', function() { $('#layoutModal').modal('show'); }).modal('hide');">Continue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Layout Modal -->
+    <div class="modal fade" id="layoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Layout of this Page</h3>
+                </div>
+                    <div class="modal-body" id="gen-modal-body">
+                        <!-- <h4>Overall Layout</h4>
+                        <img class="img-responsive" src="img/layout.png" alt="Website Layout">
+
+                        <p>There are 3 sections as shown in the picture above. Below is each section covered in more detail.</p>
+
+                        <h4>Section 1: Input-Output Pairs</h4>
+                        <img class="img-responsive" src="img/layout-io.png" alt="Website Layout IO">
+                        <p>On the very left are the <strong>input-output pairs</strong>. There will be 2-8 total pairs, with the input on the left, and the output on the right.</p>
+
+                        <h4>Section 2: Description</h4>
+                        <img class="img-responsive" src="img/layout-desc.png" alt="Website Layout DESC">
+                        <p>In the middle is the <strong>description</strong>. This is where you will write your description describing the pattern. Once you have a complete description, press the button to continue.</p>
+
+                        <h4>Section 3: Validation</h4>
+                        <img class="img-responsive" src="img/layout-val.png" alt="Website Layout VAL">
+                        <p>On the very right is the <strong>validation area</strong>. This section will be hidden until you submit your description. At the top, there is the input. Using the same pattern you described, create the correct output. You can resize the grid, copy the input grid, or reset the grid. You can use <strong>draw</strong> to color individual grid squares, or <strong>flood fill</strong> to color entire areas.</p>
+                        </br>
+                        <p>Ensure that you try your best to create the correct output in <strong>as little attempts as possible.</strong></p> -->
+                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="$('#layoutModal').one('hidden.bs.modal', function() { $('#exampleModal').modal('show'); }).modal('hide');">Continue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+  
+    <!-- Examples Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Example</h3>
+                </div>
+                    <div class="modal-body" id="gen-modal-body">
+                        <p>Here is a video showing one run through the process. Keep in mind, this may not be the best description, and it is sped up. So, please take more time to ensure you have a good description.</p>
+
+                        <!-- <video width="320" height="240" controls>
+                            <source src="img/example.mp4" type="video/mp4" autoplay>
+                        </video> -->
+                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="$('#exampleModal').one('hidden.bs.modal', function() { $('#demographic_modal').modal('show'); }).modal('hide');">Okay!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demographic Modal -->
+    <div class="modal fade" id="demographic_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Demographics</h3>
+                </div>
+                <div class="modal-body" id="final-modal-body">
+                    <p>Before you begin, please enter your age and gender.</p>
+
+                    <label for="gender_form">What is your gender?</label>
+                    <select class="form-control" id="gender_form">
+                        <option>Male</option>
+                        <option>Female</option>
+                        <option>Other</option>
+                    </select>
+
+                    <label for="age_form">What is your age?</label>
+                    </br>
+                    <input type="range" class="custom-range" min="18" max="100" step="1" id="age_form">
+                    <label id="age_result"></label>
+
+                    <div class="modal-footer">
+                        <button onclick="exit_demographic()" type="button" class="btn btn-primary" data-dismiss="modal">Finish</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Qs Modal -->
+    <div class="modal fade" id="task_qs_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Exit Survey</h3>
+                </div>
+                <div class="modal-body" id="final-modal-body">
+
+                    <label for="dif_patt_form">How difficult was recognizing the pattern, on a scale from 1-10?</label>
+                    <input type="range" class="custom-range" min="1" max="10" step="1" id="dif_patt_form">
+                    <label id="dif_patt_result"></label>
+
+                    <label for="desc_form">How difficult was describing the pattern, on a scale from 1-10?</label>
+                    <input type="range" class="custom-range" min="1" max="10" step="1" id="desc_form">
+                    <label id="desc_result"></label>
+
+                    <label for="conf_form">After creating the output based on the new input, how confident are you in your original description, on a scale from 1-10?</label>
+                    <input type="range" class="custom-range" min="1" max="10" step="1" id="conf_form">
+                    <label id="conf_result"></label>
+
+                    <div class="modal-footer">
+                        <button onclick="exit_task_qs()" type="button" class="btn btn-primary" data-dismiss="modal">Finish</button>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Finished Modal -->
+    <div class="modal fade" id="finished_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Thank You!</h3>
+                </div>
+                <div class="modal-body" id="final-modal-body">
+                    <p>Thank you for participating in this study. Your user ID is: </p>
+                    <h5 id="finish_modal_uid"></h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
