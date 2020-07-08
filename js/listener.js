@@ -15,7 +15,7 @@ $(window).on('load',function(){
     $('#info_display').hide();
     $('#instructionsModal').modal('show');
 
-    random_listen_retrieve();
+    random_listen_retrieve(TASK_ID);
 });
 
 
@@ -49,20 +49,21 @@ function check() {
     const do_desc = $.trim($("#do_p").text());
     const grid_desc = $.trim($("#grid_size_p").text());
 
-    store_listener(see_desc, do_desc, grid_desc, TASK_ID, uid, ATTEMPTS, age, gender);
-    setTimeout(next_task(s, l, age, gender, uid), 3000);
+    store_listener(DESC_ID, see_desc, do_desc, grid_desc, TASK_ID, uid, ATTEMPTS, age, gender)
+        .then(function() {next_task(s, l, age, gender, uid);})
+        .catch(function() {console.log("error");});
 }
 
 function give_up() {
     /**
      * if after 1 minute, cannot figure out pattern or get correct output, give them the answer
      */
-    const newTime = new Date();
-    console.log((newTime - START_DATE)/1000);
-    if ((newTime - START_DATE)/1000 < 30) {
-        errorMsg("Please try to figure out the pattern for a bit before you give up.");
-        return;
-    }
+    // const newTime = new Date();
+    // console.log((newTime - START_DATE)/1000);
+    // if ((newTime - START_DATE)/1000 < 30) {
+    //     errorMsg("Please try to figure out the pattern for a bit before you give up.");
+    //     return;
+    // }
 
     const answer = convertSerializedGridToGridObject(TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output']);
 

@@ -1,3 +1,6 @@
+$.fn.modal.prototype.constructor.Constructor.Default.backdrop = 'static';
+$.fn.modal.prototype.constructor.Constructor.Default.keyboard =  false;
+
 function errorMsg(msg) {
     $('#error_display').stop(true, true);
     $('#info_display').stop(true, true);
@@ -16,7 +19,6 @@ function infoMsg(msg) {
     $('#info_display').stop(true, true);
 
     console.log(msg);
-
 
     $('#info_display').html(msg);
     $('#info_display').css({"visibility": "visible"});

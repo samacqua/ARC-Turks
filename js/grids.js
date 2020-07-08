@@ -81,7 +81,6 @@ function fillJqGridWithData(jqGrid, dataGrid) {
         }
         jqGrid.append(row);
     }
-    console.log(jqGrid);
 }
 
 function copyJqGridToDataGrid(jqGrid, dataGrid) {

@@ -129,10 +129,10 @@ function exit_task_qs() {
     if (grid_size_desc == "The grid size...") {
         grid_size_desc = "The grid size... does not change."
     }
-    store_response_speaker(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPTS, age, gender, pattern_dif, desc_diff, conf);
-
-    // not async yet
-    setTimeout(next_task(s, l, age, gender, uid), 3000);
+    
+    store_response_speaker(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPTS, age, gender, pattern_dif, desc_diff, conf)
+        .then(function() { next_task(s, l, age, gender, uid); })
+        .catch(function() { console.log('Issue'); });
 }
 
 function give_up() {
@@ -141,11 +141,11 @@ function give_up() {
      */
 
     const newTime = new Date();
-    console.log((newTime - START_DATE)/1000);
-    if ((newTime - START_DATE)/1000 < 60) {
-        errorMsg("Please try to figure out the pattern for a bit before you give up.");
-        return;
-    }
+    // console.log((newTime - START_DATE)/1000);
+    // if ((newTime - START_DATE)/1000 < 60) {
+    //     errorMsg("Please try to figure out the pattern for a bit before you give up.");
+    //     return;
+    // }
 
     // different if gives up writing description vs solving task
     if ( $('#validation-col').css('display') == 'none' || $('#validation-col').css("visibility") == "hidden"){

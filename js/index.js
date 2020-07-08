@@ -6,6 +6,7 @@ var AGE;
 var GENDER;
 
 $(window).on('load',function(){
+
     $('#error_display').hide();
     $('#info_display').hide();
 
