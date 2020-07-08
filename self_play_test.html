@@ -50,7 +50,12 @@
                     <h1 class="col-title">Description</h1>
                     <a href="#" class="help-btn" data-toggle="tooltip" title="This is the description of the pattern that you wrote on the last page.">Help</a>
                 </div>
-                <p id="description_p"></p>
+
+                <p id="see_p"></p>
+
+                <p id="do_p"></p>
+
+                <p id="grid_size_p"></p>
             </div>
 
             <div class="col-md-4">
@@ -133,9 +138,6 @@
                     <div class="symbol_preview symbol_8" symbol="8"></div>
                     <div class="symbol_preview symbol_9" symbol="9"></div>
                 </div>
-
-                </br>
-                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#giveUpModal">Give up</button>
             </div>
         </div>
     </div>
@@ -148,7 +150,7 @@
                 <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
             </div>
             <div class="modal-body" id="gen-modal-body">
-                <p>Now, you will try to create the correct grid for each pattern you just looked at, given only your description and a <i>different</i> first grid.</p>
+                <p>Now, you will try to create the correct grid for the pattern you just described, given only your description and a <i>different</i> input grid.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="$('#instructionsModal').one('hidden.bs.modal', function() { $('#instructions2Modal').modal('show'); }).modal('hide');">Okay</button>
@@ -169,7 +171,8 @@
 
                 <p>In the middle of the screen is the <strong>input area</strong>. Here you will see a single grid. This is the input (the grid before the arrow), and you will apply your description to this grid.</p>
 
-                <p>On the right of the screen, is the <strong>output area</strong>. Here is where you can create the grid based on the description and input grid. In the student scenario, this is the answer on the test. You have options to resize the grid, copy the input grid, and reset the grid. You can also <strong>draw</strong> individual grid blocks any color, or <strong>flood fill</strong>.</p>
+                <p>On the right of the screen, is the <strong>output area</strong>. Here is where you can create the grid based on the description and input grid. It has the same tools as when you completed the patterns earlier.</p>
+                
                 <p>Watch this demo to see an example.</p>
                 <video width="320" height="240" controls>
                     <source src="img/self_play_output_example.mp4" type="video/mp4" autoplay>
@@ -194,24 +197,6 @@
                 </div>
                 <div class="modal-footer">
                     <button onclick="finish_self_play()" type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Give-up Modal -->
-    <div class="modal fade" id="giveUpModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title" id="gen-modal-title">Give Up</h3>
-                </div>
-                <div class="modal-body" id="gen-modal-body">
-                    <p>Are you sure?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No, I'll try some more</button>
-                    <button onclick="give_up()" type="button" class="btn btn-danger" data-dismiss="modal">Give Up</button>
                 </div>
             </div>
         </div>

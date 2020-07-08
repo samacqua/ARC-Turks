@@ -57,12 +57,37 @@
                 <div class="col-header">
                     <h1 class="col-title">Description</h1>
                 </div>
-                <div class="input-group">
-                    <textarea id="desciption-text" class="form-control" aria-label="With textarea" placeholder="Enter a description describing the pattern"></textarea>
-                </div>
+
+                <div class="form-group">
+                    <label for="what_you_see">What should you expect to see in the input grid?</label>
+                    <textarea class="form-control" id="what_you_see" rows="2" placeholder="You should see..."></textarea>
+                    <small id="emailHelp" class="form-text text-muted">Start with "You should see..."</small>
+                  </div>
                 </br>
+
+                <div class="form-group">
+                    <label for="what_you_do">What do you change about the input grid?</label>
+                    <textarea class="form-control" id="what_you_do" rows="2" placeholder="You have to..."></textarea>
+                    <small id="emailHelp" class="form-text text-muted">Start with "You have to..."</small>
+                  </div>
+                </br>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="grid_size_changes" data-toggle="toggle">
+                    <label class="form-check-label" for="defaultCheck1">
+                      Grid size changes
+                    </label>
+                  </div>
+                </br>
+
+                <div class="form-group" id="grid_size_form">
+                    <label for="grid_size_desc">How does the grid size change?</label>
+                    <textarea class="form-control" id="grid_size_desc" rows="1" placeholder="The grid size..."></textarea>
+                    <small id="emailHelp" class="form-text text-muted">Start with "The grid size..."</small>
+                  </div>
+                </br>
+
                 <button onclick="submit()" type="button" class="btn btn-primary">Submit Description</button>
-                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#giveUpModal">Give up</button>
             </div>
             <div class="col-md-2"></div>
         </div>
@@ -73,11 +98,10 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
+                <h3 class="modal-title" id="gen-modal-title">Practice</h3>
             </div>
             <div class="modal-body" id="gen-modal-body">
-                <p>Now, you will do both tasks. First, you will write a description of the pattern, and then later use this description to create the correct grid.</p>
-                <p>You will do this for 3 different patterns.</p>
+                <p>Now, as practice, you will describe the task. Make sure to include enough detail in the description so that, given a new input grid, you can create the correct output.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="$('#instructionsModal').one('hidden.bs.modal', function() { $('#instructions2Modal').modal('show'); }).modal('hide');">Okay</button>
@@ -95,10 +119,20 @@
                 </div>
                 <div class="modal-body" id="gen-modal-body">
                     <p>On the left of the screen is the <strong>pattern area</strong>. Here you will see multiple grids where the pattern is applied.</p>
-                    <img class="img-responsive" src="img/pattern_ex.png">
 
                     <p>On the right of the screen is the <strong>description area</strong>. Here is where you will describe the pattern you see.</p>
-                    <p>Make sure you use enough detail so that you can create the output based on only the description and an input grid that <strong>you have not seen before</strong>. Once you submit descriptions for 3 patterns, you will then try to create the correct output using your descriptions.</p>
+                    <p>We have broken up the description into 3 areas to make sure that you include enough information. These 3 description categories are: 
+                        <ul>
+                            <li>What You See: Here, you should describe what you should see on the input grid.</li>
+                            <li>What You Do: Here, you should describe what you do to transform the input grid into the output grid. This is the pattern.</li>
+                            <li>What You See: Here, if the grid size changes, you should describe how it changed.</li>
+                        </ul>
+                    </p>
+                    <p>Make sure you use enough detail so that you can create the output based on only the description and an input grid that <strong>you have not seen before</strong>.</p>
+                    <p>What the video below to see a walkthrough.</p>
+                    <video width="320" height="240" controls>
+                        <source src="img/self_play_output_example.mp4" type="video/mp4" autoplay>
+                    </video>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-dismiss="modal">Let's do it!</button>
@@ -106,22 +140,4 @@
             </div>
         </div>
       </div>
-
-    <!-- Give-up Modal -->
-    <div class="modal fade" id="giveUpModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title" id="gen-modal-title">Give Up</h3>
-                </div>
-                <div class="modal-body" id="gen-modal-body">
-                    <p>Are you sure that you can't determine the pattern?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No, I'll try some more</button>
-                    <button onclick="give_up()" type="button" class="btn btn-danger" data-dismiss="modal">Give Up</button>
-                </div>
-            </div>
-        </div>
-    </div>
 </html>

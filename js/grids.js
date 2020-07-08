@@ -49,6 +49,7 @@ function convertSerializedGridToGridObject(values) {
 }
 
 function fitCellsToContainer(jqGrid, height, width, containerHeight, containerWidth) {
+
     candidate_height = Math.floor((containerHeight - height) / height);
     candidate_width = Math.floor((containerWidth - width) / width);
 
@@ -57,6 +58,9 @@ function fitCellsToContainer(jqGrid, height, width, containerHeight, containerWi
 
     jqGrid.find('.cell').css('height', size + 'px');
     jqGrid.find('.cell').css('width', size + 'px');
+
+    const col_width = $("#container-fluid").width() / 6;
+    $(".pair_preview").height(col_width);
 }
 
 function fillJqGridWithData(jqGrid, dataGrid) {

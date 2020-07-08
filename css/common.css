@@ -5,7 +5,8 @@ img {
 }
 
 #arrow {
-    width: 15px;
+    width: 90%;
+    z-index: 999;
     height: auto;
 }
 

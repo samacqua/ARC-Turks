@@ -82,10 +82,13 @@ function fillPairPreview(pairId, inputGrid, outputGrid) {
         jqOutputGrid.appendTo(pairSlot);
     }
 
+    console.log($("#container-fluid").width());
+    const col_width = $("#container-fluid").width() / 6 - 60;
+
     fillJqGridWithData(jqInputGrid, inputGrid);
-    fitCellsToContainer(jqInputGrid, inputGrid.height, inputGrid.width, 190, $("#io_ex_col").width()/2-40);
+    fitCellsToContainer(jqInputGrid, inputGrid.height, inputGrid.width, col_width, col_width);
     fillJqGridWithData(jqOutputGrid, outputGrid);
-    fitCellsToContainer(jqOutputGrid, outputGrid.height, outputGrid.width, 190, $("#io_ex_col").width()/2-40);
+    fitCellsToContainer(jqOutputGrid, outputGrid.height, outputGrid.width, col_width, col_width);
 }
 
 function loadJSONTask(train, test) {
@@ -105,7 +108,8 @@ function loadJSONTask(train, test) {
     }
     values = TEST_PAIRS[0]['input'];
 
-    CURRENT_INPUT_GRID = convertSerializedGridToGridObject(values)
+    CURRENT_INPUT_GRID = convertSerializedGridToGridObject(values);
+
     fillTestInput(CURRENT_INPUT_GRID);
     CURRENT_TEST_PAIR_INDEX = 0;
     $('#current_test_input_id_display').html('1');
@@ -137,7 +141,7 @@ function loadTaskFromFile(e) {
     reader.readAsText(file);
 }
 
-TASKS_DESCRIBED = [];
+var TASKS_DESCRIBED = [];
 
 function randomTask() {
     var subset = "training";
@@ -164,6 +168,7 @@ function loadTask(task_index) {
     var subset = "training";
     $.getJSON("https://api.github.com/repos/fchollet/ARC/contents/data/" + subset, function(tasks) {
         var task = tasks[task_index];
+        TASKS_DESCRIBED.push(task_index);
 
         $.getJSON(task["download_url"], function(json) {
             try {
@@ -180,25 +185,15 @@ function loadTask(task_index) {
     })
 }
 
-function nextTestInput() {
-    if (TEST_PAIRS.length <= CURRENT_TEST_PAIR_INDEX + 1) {
-        errorMsg('No next test input. Pick another file?')
-        return
-    }
-    CURRENT_TEST_PAIR_INDEX += 1;
-    values = TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['input'];
-    CURRENT_INPUT_GRID = convertSerializedGridToGridObject(values)
-    fillTestInput(CURRENT_INPUT_GRID);
-    $('#current_test_input_id_display').html(CURRENT_TEST_PAIR_INDEX + 1);
-    $('#total_test_input_count_display').html(test.length);
-}
-
 function fillTestInput(inputGrid) {
+
     jqInputGrid = $('#evaluation_input');
     console.log(inputGrid);
     console.log(jqInputGrid);
     fillJqGridWithData(jqInputGrid, inputGrid);
-    fitCellsToContainer(jqInputGrid, inputGrid.height, inputGrid.width, 400, 400);
+
+    const col_width = $("#container-fluid").width() / 3;
+    fitCellsToContainer(jqInputGrid, inputGrid.height, inputGrid.width, col_width, col_width);
 }
 
 function copyToOutput() {

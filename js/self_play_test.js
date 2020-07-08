@@ -1,35 +1,20 @@
 const urlParams = new URLSearchParams(window.location.search);
-const t1 = urlParams.get('t1');
-const d1 = urlParams.get('d1');
-const t2 = urlParams.get('t2');
-const d2 = urlParams.get('d2');
-const t3 = urlParams.get('t3');
-const d3 = urlParams.get('d3');
-
-console.log(t1);
-console.log(d1);
-console.log(t2);
-console.log(d2);
-console.log(t3);
-console.log(d3);
-
-const ts = [t1, t3];
-const ds = [d1, d3];
-
-var START_DATE;
-
+const task = urlParams.get('task');
+const see_desc = urlParams.get('see');
+const do_desc = urlParams.get('do');
+const grid_desc = urlParams.get('grid');
 
 $(window).on('load',function(){
-    START_DATE = new Date();
-
     $('#error_display').hide();
     $('#info_display').hide();
 
     $('#instructionsModal').modal('show');
 
     // to make it appear random
-    loadTask(t2);
-    $("#description_p").text(d2);
+    loadTask(task);
+    $("#see_p").text(see_desc);
+    $("#do_p").text(do_desc);
+    $("#grid_size_p").text(grid_desc);
 });
 
 function check_grid() {
@@ -53,23 +38,7 @@ function check_grid() {
             }
         }
     }
-    infoMsg("Correct!");
-
-    console.log(ts);
-    console.log(ts.length);
-
-    if (ts.length == 0) {
-        $("#exitModal").modal("show");
-    }
-
-    resetOutputGrid();
-
-    // breaks if you don't reset array
-    TEST_PAIRS = new Array();
-    loadTask(ts.pop());
-    $("#description_p").text(ds.pop());
-
-    START_DATE = new Date();
+    $("#exitModal").modal("show");
 }
 
 function finish_self_play() {

@@ -1,9 +1,3 @@
-img {
-    width: 100%;
-    padding-bottom: 5px;
-    height: auto;
-}
-
 h1 {
     padding-top: 15px;
     padding-bottom: 15px;
@@ -16,13 +10,7 @@ hr {
 
 body {
     font-family: 'Open Sans', sans-serif;
-    min-width: 1410px;
-}
-
-#workspace {
-    width: 1410px;
-    margin-left: auto;
-    margin-right: auto;
+    /* min-width: 1410px; */
 }
 
 .col-md-4 {
@@ -31,13 +19,13 @@ body {
     border: 5px solid transparent;
 }
 
-#demonstration_examples_view {
+/* #demonstration_examples_view {
     float: left;
     width: 450px;
     margin: 10px;
     margin-right: 5px;
     background-color: #d5d5d5;
-}
+} */
 
 #evaluation_view {
     float: left;
@@ -149,31 +137,30 @@ input, button {
     border-bottom: solid 1px #a1a1a1;
 }
 .input_preview {
-    height: 200px;
-    width: 200px;
+    padding-top: 100%;
+    width: 40%;
     float: left;
     margin: 0px;
     padding: 0px;
     padding-top: 5px;
+    padding-left: 5%;
 }
 .output_preview {
-    height: 200px;
-    width: 200px;
+    padding-top: 100%;
+    width: 40%;
     float: left;
     margin: 0px;
     padding: 0px;
     padding-top: 5px;
-    padding-left: 30px;
+    padding-left: 20px;
 }
 
 .arrow {
     height: 200px;
-    width: 20px;
+    width: 10%;
     float: left;
     display : flex;
     align-items : center;
-    justify-content: center;
-    /* margin: 10px; */
 }
 
 .text {
@@ -222,5 +209,5 @@ input, button {
 }
 
 #task_preview {
-    padding-left: 10px;
+    width: 100%;
 }
