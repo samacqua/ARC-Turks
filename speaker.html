@@ -64,10 +64,36 @@
                 <div class="col-header">
                     <h1>Description</h1>
                 </div>
-                <div class="input-group">
-                    <textarea id="desciption-text" class="form-control" aria-label="With textarea" placeholder="Enter a description describing the pattern that maps the input grid to the output grid."></textarea>
-                </div>
+
+                <div class="form-group">
+                    <label for="what_you_see">What should you expect to see in the input grid?</label>
+                    <textarea class="form-control" id="what_you_see" rows="2" placeholder="You should see..."></textarea>
+                    <small id="emailHelp" class="form-text text-muted">Start with "You should see..."</small>
+                  </div>
                 </br>
+
+                <div class="form-group">
+                    <label for="what_you_do">What do you change about the input grid?</label>
+                    <textarea class="form-control" id="what_you_do" rows="2" placeholder="You have to..."></textarea>
+                    <small id="emailHelp" class="form-text text-muted">Start with "You have to..."</small>
+                  </div>
+                </br>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="grid_size_changes" data-toggle="toggle">
+                    <label class="form-check-label" for="defaultCheck1">
+                      Grid size changes
+                    </label>
+                  </div>
+                </br>
+
+                <div class="form-group" id="grid_size_form">
+                    <label for="grid_size_desc">How does the grid size change?</label>
+                    <textarea class="form-control" id="grid_size_desc" rows="1" placeholder="The grid size..."></textarea>
+                    <small id="emailHelp" class="form-text text-muted">Start with "The grid size..."</small>
+                  </div>
+                </br>
+
                 <button onclick="continue_to_verify()" type="button" class="btn btn-primary">Submit Description and Continue to Verification</button>
                 <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#giveUpModal">Give up</button>
             </div>
@@ -154,96 +180,29 @@
                     <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
                 </div>
                     <div class="modal-body" id="gen-modal-body">
-                        <p>You are now playing the part of describing the pattern. However, these descriptions will be going to another person (in the student story, they are going to your friend). So, you have to make sure they are descriptive enough so that they can solve the problem even though <strong>they have never seen the pattern examples that you will see.</strong></p>
+                        <p>You are now playing the part of describing the pattern. However, these descriptions will be going to another person. So, you have to make sure they are descriptive enough so that they can solve the problem even though <strong>they have never seen the pattern examples that you will see.</strong></p>
                         <p>Because your description is going to another person, we need to make sure you understand the pattern as well. So, after you submit your description, you will be asked to solve the problem.</p>
+                        <p>If, after some time, you do not understand the pattern, you can give up and we will give you a new problem to describe.</p>
                     </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="$('#instructionsModal').one('hidden.bs.modal', function() { $('#layoutModal').modal('show'); }).modal('hide');">Continue</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Continue</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Layout Modal -->
-    <div class="modal fade" id="layoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <!-- Quick Instructions Modal -->
+    <div class="modal fade" id="quickInstructionsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title" id="gen-modal-title">Layout of this Page</h3>
+                    <h3 class="modal-title" id="gen-modal-title">You are Describing</h3>
                 </div>
                     <div class="modal-body" id="gen-modal-body">
-                        <!-- <h4>Overall Layout</h4>
-                        <img class="img-responsive" src="img/layout.png" alt="Website Layout">
-
-                        <p>There are 3 sections as shown in the picture above. Below is each section covered in more detail.</p>
-
-                        <h4>Section 1: Input-Output Pairs</h4>
-                        <img class="img-responsive" src="img/layout-io.png" alt="Website Layout IO">
-                        <p>On the very left are the <strong>input-output pairs</strong>. There will be 2-8 total pairs, with the input on the left, and the output on the right.</p>
-
-                        <h4>Section 2: Description</h4>
-                        <img class="img-responsive" src="img/layout-desc.png" alt="Website Layout DESC">
-                        <p>In the middle is the <strong>description</strong>. This is where you will write your description describing the pattern. Once you have a complete description, press the button to continue.</p>
-
-                        <h4>Section 3: Validation</h4>
-                        <img class="img-responsive" src="img/layout-val.png" alt="Website Layout VAL">
-                        <p>On the very right is the <strong>validation area</strong>. This section will be hidden until you submit your description. At the top, there is the input. Using the same pattern you described, create the correct output. You can resize the grid, copy the input grid, or reset the grid. You can use <strong>draw</strong> to color individual grid squares, or <strong>flood fill</strong> to color entire areas.</p>
-                        </br>
-                        <p>Ensure that you try your best to create the correct output in <strong>as little attempts as possible.</strong></p> -->
+                        <p>You are now playing the part of describing the pattern.</p>
                     </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="$('#layoutModal').one('hidden.bs.modal', function() { $('#exampleModal').modal('show'); }).modal('hide');">Continue</button>
-                </div>
-            </div>
-        </div>
-    </div>
-  
-    <!-- Examples Modal -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title" id="gen-modal-title">Example</h3>
-                </div>
-                    <div class="modal-body" id="gen-modal-body">
-                        <p>Here is a video showing one run through the process. Keep in mind, this may not be the best description, and it is sped up. So, please take more time to ensure you have a good description.</p>
-
-                        <!-- <video width="320" height="240" controls>
-                            <source src="img/example.mp4" type="video/mp4" autoplay>
-                        </video> -->
-                    </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="$('#exampleModal').one('hidden.bs.modal', function() { $('#demographic_modal').modal('show'); }).modal('hide');">Okay!</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Demographic Modal -->
-    <div class="modal fade" id="demographic_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title" id="gen-modal-title">Demographics</h3>
-                </div>
-                <div class="modal-body" id="final-modal-body">
-                    <p>Before you begin, please enter your age and gender.</p>
-
-                    <label for="gender_form">What is your gender?</label>
-                    <select class="form-control" id="gender_form">
-                        <option>Male</option>
-                        <option>Female</option>
-                        <option>Other</option>
-                    </select>
-
-                    <label for="age_form">What is your age?</label>
-                    </br>
-                    <input type="range" class="custom-range" min="18" max="100" step="1" id="age_form">
-                    <label id="age_result"></label>
-
-                    <div class="modal-footer">
-                        <button onclick="exit_demographic()" type="button" class="btn btn-primary" data-dismiss="modal">Finish</button>
-                    </div>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Continue</button>
                 </div>
             </div>
         </div>

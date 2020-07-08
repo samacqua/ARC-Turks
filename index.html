@@ -152,11 +152,41 @@
             </div>
             <div class="modal-footer">
                 <!-- from https://stackoverflow.com/a/44391959/5416200 to address an issue I realize wasn't there-->
-                <button type="button" class="btn btn-primary" onclick="$('#consentModal').one('hidden.bs.modal', function() { $('#introModal').modal('show'); }).modal('hide');">I AGREE</button>
+                <button type="button" class="btn btn-primary" onclick="$('#consentModal').one('hidden.bs.modal', function() { $('#demographic_modal').modal('show'); }).modal('hide');">I AGREE</button>
             </div>
         </div>
     </div>
   </div>
+
+    <!-- Demographic Modal -->
+    <div class="modal fade" id="demographic_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Demographics</h3>
+                </div>
+                <div class="modal-body" id="final-modal-body">
+                    <p>Before you begin, please enter your age and gender.</p>
+
+                    <label for="gender_form">What is your gender?</label>
+                    <select class="form-control" id="gender_form">
+                        <option>Male</option>
+                        <option>Female</option>
+                        <option>Other</option>
+                    </select>
+
+                    <label for="age_form">What is your age?</label>
+                    </br>
+                    <input type="range" class="custom-range" min="18" max="100" step="1" id="age_form">
+                    <label id="age_result"></label>
+
+                    <div class="modal-footer">
+                        <button onclick="exit_demographic()" type="button" class="btn btn-primary" data-dismiss="modal">Finish</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Introduction Modal -->
     <div class="modal fade" id="introModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
@@ -254,7 +284,7 @@
 
                     </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="location.href='self_play_desc.html'">Continue</button>
+                    <button type="button" class="btn btn-primary" onclick="go_to_self_play()">Continue</button>
                 </div>
             </div>
         </div>

@@ -1,35 +1,49 @@
+// easy task
 const PRAC_TASK = 301;
 
 $(window).on('load',function(){
     $('#error_display').hide();
     $('#info_display').hide();
-
     $("#grid_size_form").css("visibility", "hidden");
 
+    // fill forms with actual text
     $("#what_you_see").val("You should see...");
     $("#what_you_do").val("You have to...");
     $("#grid_size_desc").val("The grid size...");
 
+    // show instructions
     $('#instructionsModal').modal('show');
     loadTask(PRAC_TASK);
 });
 
-TASK_DESCRIPTIONS = []; 
-
 function submit() {
+    /**
+     * If starting with right phrase and actually entered text, then bring to listening task and pass all info
+     */
 
-    if ($("#what_you_see").val().trim().length < 5) {
+    if ($("#what_you_see").val().trim().length < 20) {
         errorMsg("Please enter a description of what you see.");
         return
     }
-
-    if ($("#what_you_do").val().trim().length < 5) {
+    if ($("#what_you_do").val().trim().length < 20) {
         errorMsg("Please enter a description of what you change.");
         return
     }
-
-    if ($("#grid_size_desc").val().trim().length < 5) {
+    if ($("#grid_size_desc").val().trim().length < 10) {
         errorMsg("Please enter a description of the grid size.");
+        return
+    }
+
+    if (!$("#what_you_see").val().trim().startsWith("You should see")) {
+        errorMsg("What you see has to start with \"You should see\"");
+        return
+    }
+    if (!$("#what_you_do").val().trim().startsWith("You have to")) {
+        errorMsg("What you do has to start with \"You have to\"");
+        return
+    }
+    if (!$("#grid_size_desc").val().trim().startsWith("The grid size")) {
+        errorMsg("The grid size field has to start with \"The grid size\"");
         return
     }
     
@@ -39,10 +53,19 @@ function submit() {
     if ( $('#grid_size_desc').css('display') == 'none' || $('#grid_size_desc').css("visibility") == "hidden"){
         desc_grid = "The grid size... does not change";
     }
-    window.location.href = `self_play_test.html?task=${PRAC_TASK}&see=${desc_see}&do=${desc_do}&grid=${desc_grid}`;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const uid = urlParams.get('uid');
+    const age = urlParams.get('age');
+    const gender = urlParams.get('gender');
+
+    window.location.href = `self_play_test.html?task=${PRAC_TASK}&see=${desc_see}&do=${desc_do}&grid=${desc_grid}&uid=${uid}&age=${age}&gender=${gender}`;
 }
 
 $(function()
+/**
+ * listen for change in check box if grid size changes
+ */
 {
     $('#grid_size_changes').on('change', function()
     {

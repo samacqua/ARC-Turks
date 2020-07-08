@@ -37,3 +37,37 @@ $(window).on('load',function(){
         html: true
     });
 });
+
+function next_task(s, l, age, gender, uid) {
+    /**
+     * go to next task, randomly choose listener or speaker
+     * but make sure listener and speaker in first two tasks
+     * pass all info about demographics and uid
+     */
+
+    if (s+l >= 10) {
+        $("finished_modal").modal('show');
+    }
+
+    // to ensure speaker and listener in first two tasks
+    if (s == 0 && l != 0) {
+        s++;
+        window.location.href = 'speaker.html?s=' + s + '&l=' + l +'&age=' + age + '&gender=' + gender + '&uid=' + uid;
+        return;
+    }
+
+    if (l == 0 && s != 0) {
+        l++;
+        window.location.href = 'listener.html?s=' + s + '&l=' + l + '&age=' + age + '&gender=' + gender + '&uid=' + uid;
+        return;
+    }
+
+    const rand_num = Math.random();
+    if (rand_num < 0.5) {
+        s++;
+        window.location.href = 'speaker.html?s=' + s + '&l=' + l +'&age=' + age + '&gender=' + gender + '&uid=' + uid;
+    } else {
+        l++
+        window.location.href = 'listener.html?s=' + s + '&l=' + l +'&age=' + age + '&gender=' + gender + '&uid=' + uid;
+    }
+}

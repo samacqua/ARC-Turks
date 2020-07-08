@@ -1,28 +1,29 @@
-var USER_ID;
 var START_DATE;
+var ATTEMPTS = 0;
+
+const urlParams = new URLSearchParams(window.location.search);
+const uid = urlParams.get('uid');
+const age = urlParams.get('age');
+const gender = urlParams.get('gender');
+const s = urlParams.get('s');
+const l = urlParams.get('l');
 
 $(window).on('load',function(){
     START_DATE = new Date();
+
     $('#error_display').hide();
     $('#info_display').hide();
-
-    USER_ID = Math.floor(Math.random()*1e10);
+    $('#instructionsModal').modal('show');
 
     random_listen_retrieve();
-    $('#instructionsModal').modal('show');
 });
 
-$(document).ready(function(){
-    $("#age_result").html($("#age_form").val());
-    $("#age_form").change(function(){
-        $("#age_result").html($(this).val());
-    });
-});  
-
-var PATTERNS_COMPLETED = 0;
-var ATTEMPTS = 0;
 
 function check() {
+    /**
+     * check if output grid same as correct answer. if so, store info and move to next task
+     */
+
     ATTEMPTS++;
 
     syncFromEditionGridToDataGrid();
@@ -44,43 +45,18 @@ function check() {
         }
     }
 
-    PATTERNS_COMPLETED++;
+    const see_desc = $.trim($("#see_p").text());
+    const do_desc = $.trim($("#do_p").text());
+    const grid_desc = $.trim($("#grid_size_p").text());
 
-    const desc = $("#description_p").text();
-
-    store_listener(desc, TASK_ID, USER_ID, ATTEMPTS, AGE, GENDER);
-
-    if (PATTERNS_COMPLETED < 3) {
-        ATTEMPTS = 0;
-
-        resetOutputGrid();
-        infoMsg("You have solved " + PATTERNS_COMPLETED.toString() + " of 3 patterns");
-    
-        TEST_PAIRS = new Array();
-        random_listen_retrieve();
-    } else {
-        const urlParams = new URLSearchParams(window.location.search);
-        const first = urlParams.get('first');
-
-        if (first == 'true') {
-            // 'file:///Users/samacquaviva/Documents/Summer%20UROP/Turk/Website%20Complete/speaker.html?first=false'
-            window.location.href = 'speaker.html?first=false';
-        } else {
-            exit_message();
-        }
-    }
-}
-
-var AGE;
-var GENDER;
-
-function exit_demographic() {
-    GENDER = $('#gender_form').find("option:selected").text();
-    AGE = $('#age_form').val().trim();
+    store_listener(see_desc, do_desc, grid_desc, TASK_ID, uid, ATTEMPTS, age, gender);
+    setTimeout(next_task(s, l, age, gender, uid), 3000);
 }
 
 function give_up() {
-
+    /**
+     * if after 1 minute, cannot figure out pattern or get correct output, give them the answer
+     */
     const newTime = new Date();
     console.log((newTime - START_DATE)/1000);
     if ((newTime - START_DATE)/1000 < 30) {
@@ -89,7 +65,6 @@ function give_up() {
     }
 
     const answer = convertSerializedGridToGridObject(TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output']);
-    // TEST_PAIRS = new Array();
 
     console.log(answer);
     showAnswer(answer);
@@ -97,12 +72,9 @@ function give_up() {
 }
 
 function showAnswer(grid) {
-    // jqInputGrid = $('#evaluation_answer');
-    // console.log(grid);
-    // console.log(jqInputGrid);
-    // fillJqGridWithData(jqInputGrid, grid);
-    // fitCellsToContainer(jqInputGrid, grid.height, grid.width, 400, 400);
-
+    /**
+     * set output grid to right answer
+     */
     CURRENT_OUTPUT_GRID = grid;
     syncFromDataGridToEditionGrid();
     $('#output_grid_size').val(CURRENT_OUTPUT_GRID.height + 'x' + CURRENT_OUTPUT_GRID.width);
