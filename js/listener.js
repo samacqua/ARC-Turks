@@ -58,12 +58,12 @@ function give_up() {
     /**
      * if after 1 minute, cannot figure out pattern or get correct output, give them the answer
      */
-    // const newTime = new Date();
-    // console.log((newTime - START_DATE)/1000);
-    // if ((newTime - START_DATE)/1000 < 30) {
-    //     errorMsg("Please try to figure out the pattern for a bit before you give up.");
-    //     return;
-    // }
+    const newTime = new Date();
+    console.log((newTime - START_DATE)/1000);
+    if ((newTime - START_DATE)/1000 < 30) {
+        errorMsg("Please try to figure out the pattern for a bit before you give up.");
+        return;
+    }
 
     const answer = convertSerializedGridToGridObject(TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output']);
 

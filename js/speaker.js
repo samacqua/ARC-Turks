@@ -141,11 +141,11 @@ function give_up() {
      */
 
     const newTime = new Date();
-    // console.log((newTime - START_DATE)/1000);
-    // if ((newTime - START_DATE)/1000 < 60) {
-    //     errorMsg("Please try to figure out the pattern for a bit before you give up.");
-    //     return;
-    // }
+    console.log((newTime - START_DATE)/1000);
+    if ((newTime - START_DATE)/1000 < 60) {
+        errorMsg("Please try to figure out the pattern for a bit before you give up.");
+        return;
+    }
 
     // different if gives up writing description vs solving task
     if ( $('#validation-col').css('display') == 'none' || $('#validation-col').css("visibility") == "hidden"){
