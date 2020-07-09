@@ -103,7 +103,7 @@ function check_grid() {
 
     infoMsg("Correct! Solve " + (TASKS.length).toString() + " more problems.");
 
-    $("#pattern_title").text(`Pattern ${3-TASKS.length}`);
+    $("#pattern_title").text(`Pattern ${4-TASKS.length}`);
 
     resetOutputGrid();
     // breaks if you don't reset array
