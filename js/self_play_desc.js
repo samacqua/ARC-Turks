@@ -17,6 +17,18 @@ $(window).on('load',function(){
     loadTask(PRAC_TASK);
 });
 
+$(function(){
+    /**
+     * auto play and auto pause modal videos
+     */
+    $('#instructions2Modal').on('hidden.bs.modal', function(){
+        $(this).find('video')[0].pause();
+    });
+    $('#instructions2Modal').on('shown.bs.modal', function () {
+         $(this).find('video')[0].play();
+      });
+});
+
 function submit() {
     /**
      * If starting with right phrase and actually entered text, then bring to listening task and pass all info

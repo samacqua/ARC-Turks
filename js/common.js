@@ -1,5 +1,7 @@
 $.fn.modal.prototype.constructor.Constructor.Default.backdrop = 'static';
 $.fn.modal.prototype.constructor.Constructor.Default.keyboard =  false;
+const TOTAL_TASKS_TO_COMPLETE = 6;
+
 
 function errorMsg(msg) {
     $('#error_display').stop(true, true);
@@ -29,13 +31,6 @@ function infoMsg(msg) {
     $('#info_display').delay(6000).fadeOut(300);
 }
 
-function exit_message() {
-    console.log(USER_ID);
-    $("#finish_modal_uid").text(USER_ID.toString());
-    // so the modal can't be dismissed, from https://stackoverflow.com/questions/22207377/disable-click-outside-of-bootstrap-modal-area-to-close-modal
-    $('#finished_modal').modal('show'); 
-}
-
 $(window).on('load',function(){
     $('a[data-toggle="tooltip"]').tooltip({
         animated: 'fade',
@@ -49,18 +44,11 @@ function next_task() {
      * but make sure listener and speaker in first two tasks
      */
 
-     const total_tasks_to_complete = 10;
-
-     var speaker_tasks_done = sessionStorage.getItem('s');
-     var listener_tasks_done = sessionStorage.getItem('l');
-
-    if (speaker_tasks_done + listener_tasks_done == total_tasks_to_complete) {
-        $("finished_modal").modal('show');
-    }
+     var speaker_tasks_done = parseInt(sessionStorage.getItem('s'));
+     var listener_tasks_done = parseInt(sessionStorage.getItem('l'));
 
     // to ensure speaker and listener in first two tasks
     if (speaker_tasks_done == 0 && listener_tasks_done != 0) {
-        // js implicitly converts string to int so this works
         speaker_tasks_done++;
         sessionStorage.setItem('s', speaker_tasks_done);
         window.location.href = 'speaker.html';

@@ -17,6 +17,18 @@ $(window).on('load',function(){
     $("#grid_size_p").text(grid_desc);
 });
 
+$(function(){
+    /**
+     * auto play and auto pause modal videos
+     */
+    $('#instructions2Modal').on('hidden.bs.modal', function(){
+        $(this).find('video')[0].pause();
+    });
+    $('#instructions2Modal').on('shown.bs.modal', function () {
+         $(this).find('video')[0].play();
+      });
+});
+
 function check_grid() {
     /**
      * checks if output is correct. If so and completed enough tasks, move on to actual task

@@ -263,6 +263,11 @@ $(document).ready(function () {
     });
 
     $('body').keydown(function(event) {
+        mode = $('input[name=tool_switching]:checked').val();
+
+        if (mode != 'select') {
+            return;
+        }
         // Copy and paste functionality.
         if (event.which == 67) {
             // Press C

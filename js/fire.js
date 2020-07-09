@@ -151,7 +151,7 @@ function random_listen_retrieve(limit_size) {
 
         querySnapshot.forEach(function(doc) {
 
-            if (i == rand_selection) {
+            if (i++ == rand_selection) {
                 TASK_ID = doc.data().task_num;
                 const desc_id = doc.id;
 

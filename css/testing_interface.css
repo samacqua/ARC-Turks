@@ -62,7 +62,7 @@ input, button {
 }
 .input_preview {
     padding-top: 100%;
-    width: 40%;
+    width: 45%;
     float: left;
     margin: 0px;
     padding: 0px;
@@ -71,7 +71,7 @@ input, button {
 }
 .output_preview {
     padding-top: 100%;
-    width: 40%;
+    width: 45%;
     float: left;
     margin: 0px;
     padding: 0px;

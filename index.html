@@ -46,7 +46,7 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="col-header">
-                    <h1 class="col-title">Input-Outputs</h1>
+                    <h1 class="col-title" id ="pattern_title">Pattern 1</h1>
                     <a href="#" class="help-btn" data-toggle="tooltip" title="These are the examples of the pattern.">Help</a>
                 </div>
                 <div id="task_preview"></div>
@@ -54,7 +54,7 @@
 
             <div class="col-md-4">
                 <div class="col-header">
-                    <h1 class="col-title">Test Input</h1>
+                    <h1 class="col-title">Input Grid</h1>
                     <a href="#" class="help-btn" data-toggle="tooltip" title="This is the grid before the arrow.">Help</a>
                 </div>
 
@@ -64,7 +64,7 @@
     
             <div class="col-md-4">
                 <div class="col-header">
-                    <h1 class="col-title">Test Output</h1>
+                    <h1 class="col-title">Output Grid</h1>
                     <a href="#" data-placement="left" class="help-btn" data-toggle="tooltip" title="<p>This is where you create the output. Here is a list of the tools: </p>
                         <ul>
                             <li>Resize: Change the size of the grid</li>
@@ -138,7 +138,7 @@
                 </div>
 
                 </br>
-                <button type="button" class="btn btn-danger" onclick="give_up()">Hint</button>
+                <button type="button" class="btn btn-danger" onclick="give_hint()" data-toggle="popover" data-placement="left" data-content="There is no video for this task. You have to solve it on your own. Look at the input-output pairs to find the pattern." id="hint_button">Hint</button>
             </div>
         </div>
     </div>
@@ -186,7 +186,7 @@
                     <label id="age_result"></label>
 
                     <div class="modal-footer">
-                        <button onclick="exit_demographic()" type="button" class="btn btn-primary" data-dismiss="modal">Finish</button>
+                        <button onclick="exit_demographic()" type="button" class="btn btn-primary" data-dismiss="modal">Submit</button>
                     </div>
                 </div>
             </div>
@@ -261,15 +261,36 @@
                 </div>
                     <div class="modal-body" id="gen-modal-body">
     
-                        Watch this 2-minute video to understand the layout and the task.
+                        Watch this short video to understand the layout and the task.
 
                         <video width="320" height="240" controls>
-                            <source src="img/self_play_output_example.mp4" type="video/mp4" autoplay>
+                            <source src="img/pattern_solve_ex.mp4" type="video/mp4" autoplay>
                         </video>
 
                     </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-dismiss="modal">Okay!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hint Modal -->
+    <div class="modal fade bd-example-modal-lg" tabindex="-1" id="hint_modal" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="width:90%">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Finished Solving Tasks</h3>
+                </div>
+                    <div class="modal-body" id="gen-modal-body">
+
+                        <video width="320" height="240" id="hint_video" controls>
+                            <!-- <source src="img/hint_2.mp4" type="video/mp4" id="hint_vid_src" autoplay> -->
+                        </video>
+
+                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>

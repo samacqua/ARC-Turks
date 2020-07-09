@@ -30,6 +30,18 @@ $(document).ready(function(){
     });
 });  
 
+$(function(){
+    /**
+     * auto play and auto pause modal videos
+     */
+    $('#introModal3').on('hidden.bs.modal', function(){
+        $(this).find('video')[0].pause();
+    });
+    $('#introModal3').on('shown.bs.modal', function () {
+         $(this).find('video')[0].play();
+      });
+});
+
 function exit_demographic() {
     /**
      * Get info from demographic modal
@@ -67,12 +79,31 @@ function check_grid() {
         }
     }
 
+    // allow popover for last hint, make it fade out after 5 seconds
+    if (TASKS.length == 1) {
+        $('[data-toggle="popover"]').popover({
+            delay: {
+                "show": 500,
+                "hide": 100
+            }
+        });
+        $('[data-toggle="popover"]').click(function () {
+
+            setTimeout(function () {
+                $('.popover').fadeOut('slow');
+            }, 5000);
+    
+        });
+    }
+
     if (TASKS.length == 0) {    // bc popping front each time
         $("#done_modal").modal("show");
         return;
     }
 
     infoMsg("Correct! Solve " + (TASKS.length).toString() + " more problems.");
+
+    $("#pattern_title").text(`Pattern ${3-TASKS.length}`);
 
     resetOutputGrid();
     // breaks if you don't reset array
@@ -82,12 +113,22 @@ function check_grid() {
     loadTask(TASKS.shift());
 }
 
-function give_up() {
+function give_hint() {
     /**
      * get a hint if can't figure out problem
      */
-    const answer = convertSerializedGridToGridObject(TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output']);
-    showAnswer(answer);
+    if (TASKS.length != 0) {
+        $("#hint_modal").modal('show');
+
+        var video = document.getElementById("hint_video");
+        video.setAttribute("src", `img/hint_${3-TASKS.length}.mp4`);
+        video.load();
+        video.onloadeddata = function () {
+            video.play();
+        };
+    }
+    // const answer = convertSerializedGridToGridObject(TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output']);
+    // showAnswer(answer);
 }
 
 function showAnswer(grid) {

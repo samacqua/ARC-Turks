@@ -5,8 +5,8 @@ var GAVE_UP = false;
 const uid = sessionStorage.getItem('uid');
 const age = sessionStorage.getItem('age');
 const gender = sessionStorage.getItem('gender');
-const listener_tasks_done = sessionStorage.getItem('l');
-const speaker_tasks_done = sessionStorage.getItem('s');
+const listener_tasks_done = parseInt(sessionStorage.getItem('l'));
+const speaker_tasks_done = parseInt(sessionStorage.getItem('s'));
 
 $(window).on('load',function(){
     START_DATE = new Date();
@@ -15,7 +15,7 @@ $(window).on('load',function(){
     $('#info_display').hide();
     $('#instructionsModal').modal('show');
 
-    if (listener_tasks_done + speaker_tasks_done == 10) {
+    if (listener_tasks_done + speaker_tasks_done == TOTAL_TASKS_TO_COMPLETE) {
         retrieve_own_description();
         return;
     }
@@ -58,6 +58,16 @@ function check() {
                 return
             }
         }
+    }
+
+    // if last task, show final message
+    if (listener_tasks_done + speaker_tasks_done == TOTAL_TASKS_TO_COMPLETE) {
+        if (ATTEMPT_JSONS.length > 2 || GAVE_UP) {
+            $("#final_message").text("You failed to interpret your own description, showing you did not put enough thought into them. Your user ID is:");
+        }
+        $("#finish_modal_uid").text(user_id.toString());
+        $("#finished_modal").modal('show');
+        return;
     }
 
     if (ATTEMPT_JSONS.length > 1 || GAVE_UP) {
