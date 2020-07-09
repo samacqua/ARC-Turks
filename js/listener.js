@@ -1,12 +1,9 @@
 var START_DATE;
 var ATTEMPT_JSONS = [];
 
-const urlParams = new URLSearchParams(window.location.search);
-const uid = urlParams.get('uid');
-const age = urlParams.get('age');
-const gender = urlParams.get('gender');
-const s = urlParams.get('s');
-const l = urlParams.get('l');
+const uid = sessionStorage.getItem('uid');
+const age = sessionStorage.getItem('age');
+const gender = sessionStorage.getItem('gender');
 
 $(window).on('load',function(){
     START_DATE = new Date();
@@ -50,7 +47,7 @@ function check() {
     const grid_desc = $.trim($("#grid_size_p").text());
 
     store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, age, gender)
-        .then(function() {next_task(s, l, age, gender, uid);})
+        .then(function() {next_task();})
         .catch(function(error) {console.log("Error storing response: " + error);});
 }
 

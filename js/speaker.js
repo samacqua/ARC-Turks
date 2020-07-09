@@ -1,12 +1,10 @@
 var START_DATE;
 var ATTEMPT_JSONS = [];
 
-const urlParams = new URLSearchParams(window.location.search);
-const uid = urlParams.get('uid');
-const age = urlParams.get('age');
-const gender = urlParams.get('gender');
-const s = urlParams.get('s');
-const l = urlParams.get('l');
+const uid = sessionStorage.getItem('uid');
+const age = sessionStorage.getItem('age');
+const gender = sessionStorage.getItem('gender');
+const speaker_tasks_done = sessionStorage.getItem('s');
 
 $(window).on('load',function(){
     START_DATE = new Date();
@@ -20,7 +18,7 @@ $(window).on('load',function(){
     $("#grid_size_desc").val("The grid size...");
 
     // only give full instructions if first time through
-    if (s == 1) {
+    if (speaker_tasks_done == 1) {
         $('#instructionsModal').modal('show');
     } else {
         $('#quickInstructionsModal').modal('show');
@@ -33,16 +31,6 @@ $(document).ready(function(){
     /**
      * Make it so modal with sliders has labels of slider values
      */
-    $("#dif_patt_result").html($("#dif_patt_form").val());
-    $("#dif_patt_form").change(function(){
-        $("#dif_patt_result").html($(this).val());
-    });
-
-    $("#desc_result").html($("#desc_form").val());
-    $("#desc_form").change(function(){
-        $("#desc_result").html($(this).val());
-    });
-
     $("#conf_result").html($("#conf_form").val());
     $("#conf_form").change(function(){
         $("#conf_result").html($(this).val());
@@ -118,8 +106,6 @@ function exit_task_qs() {
      */
 
     // get entered values
-    var pattern_dif = $('#dif_patt_form').val().trim();
-    var desc_diff = $('#desc_form').val().trim();
     var conf = $('#conf_form').val().trim();
     const see_desc = $.trim($("#what_you_see").val());
     const do_desc = $.trim($("#what_you_do").val());
@@ -129,8 +115,8 @@ function exit_task_qs() {
         grid_size_desc = "The grid size... does not change."
     }
     
-    store_response_speaker(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, age, gender, pattern_dif, desc_diff, conf)
-        .then(function() { next_task(s, l, age, gender, uid); })
+    store_response_speaker(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, age, gender, conf)
+        .then(function() { next_task(); })
         .catch(function(error) { console.log('Error storing response ' + error); });
 }
 
@@ -159,7 +145,7 @@ function give_up() {
             jqOutputGrid.empty();
         }
     
-        randomTask();
+        random_speaker_retrieve(5);
         $('textarea').val("");
     } else {
         const answer = convertSerializedGridToGridObject(TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output']);    
@@ -179,7 +165,7 @@ function showAnswer(grid) {
 
 $(function()
 /**
- * listen for change in check box if grid size changes
+ * listen for change in check box about if grid size changes
  */
 {
     $('#grid_size_changes').on('change', function()

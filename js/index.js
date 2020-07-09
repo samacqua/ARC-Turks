@@ -1,10 +1,6 @@
 // easy tasks for demonstration purposes
 const TASKS = [54, 4, 345];
 
-var USER_ID;
-var AGE;
-var GENDER;
-
 $(window).on('load',function(){
 
     $('#error_display').hide();
@@ -14,7 +10,8 @@ $(window).on('load',function(){
     $('#consentModal').modal('show');
 
     // assign a random id
-    USER_ID = Math.floor(Math.random()*1e10);
+    const user_id = Math.floor(Math.random()*1e10);
+    sessionStorage.setItem("uid", user_id);
     loadTask(TASKS.shift());
 });
 
@@ -37,8 +34,12 @@ function exit_demographic() {
     /**
      * Get info from demographic modal
      */
-    GENDER = $('#gender_form').find("option:selected").text();
-    AGE = $('#age_form').val().trim();
+    gender = $('#gender_form').find("option:selected").text();
+    sessionStorage.setItem("gender", gender);
+
+    age = $('#age_form').val().trim();
+    sessionStorage.setItem("age", age);
+
     $("#introModal").modal('show');
 }
 
@@ -68,6 +69,7 @@ function check_grid() {
 
     if (TASKS.length == 0) {    // bc popping front each time
         $("#done_modal").modal("show");
+        return;
     }
 
     infoMsg("Correct! Solve " + (TASKS.length).toString() + " more problems.");
@@ -86,10 +88,6 @@ function give_up() {
      */
     const answer = convertSerializedGridToGridObject(TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output']);
     showAnswer(answer);
-}
-
-function go_to_self_play() {
-    window.location.href = 'self_play_desc.html?uid=' + USER_ID + '&age=' + AGE + '&gender=' + GENDER;
 }
 
 function showAnswer(grid) {

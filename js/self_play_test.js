@@ -3,9 +3,6 @@ const task = urlParams.get('task');
 const see_desc = urlParams.get('see');
 const do_desc = urlParams.get('do');
 const grid_desc = urlParams.get('grid');
-const uid = urlParams.get('uid');
-const age = urlParams.get('age');
-const gender = urlParams.get('gender');
 
 $(window).on('load',function(){
     $('#error_display').hide();
@@ -51,6 +48,12 @@ function finish_self_play() {
     /**
      * pass info to next
      */
-    // speaker tasks done, listener tasks done, age, gender, uid
-    next_task(0, 0, age, gender, uid);
+    // s is speaker tasks done, l is listener tasks done
+    sessionStorage.setItem('s', 0);
+    sessionStorage.setItem('l', 0);
+
+    // so when calling includes() is not null (no task '400')
+    sessionStorage.setItem('speaker_tasks_complete', ['400']);
+    
+    next_task();
 }

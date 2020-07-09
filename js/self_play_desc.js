@@ -2,6 +2,7 @@
 const PRAC_TASK = 301;
 
 $(window).on('load',function(){
+
     $('#error_display').hide();
     $('#info_display').hide();
     $("#grid_size_form").css("visibility", "hidden");
@@ -54,12 +55,7 @@ function submit() {
         desc_grid = "The grid size... does not change";
     }
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const uid = urlParams.get('uid');
-    const age = urlParams.get('age');
-    const gender = urlParams.get('gender');
-
-    window.location.href = `self_play_test.html?task=${PRAC_TASK}&see=${desc_see}&do=${desc_do}&grid=${desc_grid}&uid=${uid}&age=${age}&gender=${gender}`;
+    window.location.href = `self_play_test.html?task=${PRAC_TASK}&see=${desc_see}&do=${desc_do}&grid=${desc_grid}`;
 }
 
 $(function()

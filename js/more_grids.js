@@ -84,7 +84,6 @@ function fillPairPreview(pairId, inputGrid, outputGrid) {
         jqOutputGrid.appendTo(pairSlot);
     }
 
-    console.log($("#container-fluid").width());
     const col_width = $("#container-fluid").width() / 6 - 60;
 
     fillJqGridWithData(jqInputGrid, inputGrid);
@@ -192,8 +191,6 @@ function loadTask(task_index) {
 function fillTestInput(inputGrid) {
 
     jqInputGrid = $('#evaluation_input');
-    console.log(inputGrid);
-    console.log(jqInputGrid);
     fillJqGridWithData(jqInputGrid, inputGrid);
 
     const col_width = $("#container-fluid").width() / 3.1;

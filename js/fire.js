@@ -22,15 +22,15 @@ Collections:      tasks                     all_descriptions                    
                     
 Documents:   0  1   2   ...   399             all desc_ids                        desc_ids (for that task)
 
-Fields:     num_descriptions             num_uses        task_num               age, gender, num_uses, confidence, description_difficulty, 
+Fields:     num_descriptions             num_uses        task_num               age, gender, num_uses, confidence, 
                                                                                 do_description, see_description, grid_description, verification_attempts,
-                                                                                pattern_difficulty, task_num, uid
+                                                                                attempt_jsons, task_num, uid
 
 Sub-collection:                                                                         description_uses
 
 Documents:                                                                              desc_use_ids
 
-Fields:                                                                             attempts, age, gender, uid
+Fields:                                                                             attempts, attempt_jsons, age, gender, uid
 
 Purpose:
     tasks - Used to get the speaking task. Can easily sort based on num_descriptions to make sure that we choose a task that needs descriptions. Can also use this to remove some tasks that we do not want to bother with.
@@ -42,17 +42,30 @@ function random_speaker_retrieve(limit_size) {
     /**
      * stochastically retrieve the task for speaker, sorted by number of descriptions
      */
+    const finished_speaker_tasks = sessionStorage.getItem('speaker_tasks_complete');
     var tasks_ref = db.collection("tasks");
     tasks_ref.orderBy("num_descriptions").limit(limit_size);
 
      tasks_ref.get().then(function(querySnapshot) {
         // select randomly, making sure not to not index document that is not there at very beginning of database
+        // not the most efficient way to do this, but max 400 documents so not a big deal
         const scale = Math.min(limit_size, querySnapshot.size);
+        console.log(querySnapshot.size);
         const rand_selection = Math.floor(Math.random() * scale);
+        console.log(rand_selection);
         var i = 0;
 
         querySnapshot.forEach(function(doc) {
             if (i++ == rand_selection) {
+                if (finished_speaker_tasks.includes(doc.id)) {
+                    // if already described task, give it another task (not most efficient but it'll work)
+                    random_speaker_retrieve(limit_size+5);
+                    return;
+                }
+
+                finished_speaker_tasks.push(doc.id);
+                sessionStorage.setItem('speaker_tasks_complete', finished_speaker_tasks);
+
                 TASK_ID = doc.id;
                 loadTask(TASK_ID);
                 return;
@@ -63,7 +76,7 @@ function random_speaker_retrieve(limit_size) {
     });
 }
 
-function store_response_speaker(see_desc, do_desc, grid_desc, task_id, user_id, attempts, attemp_jsons, age, gender, pattern_dif, desc_diff, conf) {
+function store_response_speaker(see_desc, do_desc, grid_desc, task_id, user_id, attempts, attemp_jsons, age, gender, conf) {
     /**
      * store descriptions, task info and user info and user answers in firebase
      * returns promise so that can transition to next task after storing
@@ -79,8 +92,6 @@ function store_response_speaker(see_desc, do_desc, grid_desc, task_id, user_id, 
             'attempt_jsons' : attemp_jsons,
             'age' : parseInt(age),
             'gender' : gender,
-            'pattern_difficulty' : parseInt(pattern_dif),
-            'description_difficulty' : parseInt(desc_diff),
             'confidence' : parseInt(conf),
             'uid' : parseInt(user_id),
             'num_uses' : 0,

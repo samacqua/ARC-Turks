@@ -43,37 +43,40 @@ $(window).on('load',function(){
     });
 });
 
-function next_task(s, l, age, gender, uid) {
+function next_task() {
     /**
      * go to next task, randomly choose listener or speaker
      * but make sure listener and speaker in first two tasks
-     * pass all info about demographics and uid
      */
 
-    if (s+l >= 10) {
+     var speaker_tasks_done = sessionStorage.getItem('s');
+     var listener_tasks_done = sessionStorage.getItem('l');
+
+    if (speaker_tasks_done + listener_tasks_done >= 10) {
         $("finished_modal").modal('show');
     }
 
     // to ensure speaker and listener in first two tasks
-    if (s == 0 && l != 0) {
-        s++;
-        window.location.href = 'speaker.html?s=' + s + '&l=' + l +'&age=' + age + '&gender=' + gender + '&uid=' + uid;
-        return;
+    if (speaker_tasks_done == 0 && listener_tasks_done != 0) {
+        speaker_tasks_done++;
+        sessionStorage.setItem('s', speaker_tasks_done);
+        window.location.href = 'speaker.html';
     }
-
-    if (l == 0 && s != 0) {
-        l++;
-        window.location.href = 'listener.html?s=' + s + '&l=' + l + '&age=' + age + '&gender=' + gender + '&uid=' + uid;
-        return;
+    if (listener_tasks_done == 0 && speaker_tasks_done != 0) {
+        listener_tasks_done++;
+        sessionStorage.setItem('l', listener_tasks_done);
+        window.location.href = 'listener.html';
     }
 
     const rand_num = Math.random();
     if (rand_num < 0.5) {
-        s++;
-        window.location.href = 'speaker.html?s=' + s + '&l=' + l +'&age=' + age + '&gender=' + gender + '&uid=' + uid;
+        speaker_tasks_done++;
+        sessionStorage.setItem('s', speaker_tasks_done);
+        window.location.href = 'speaker.html';
     } else {
-        l++
-        window.location.href = 'listener.html?s=' + s + '&l=' + l +'&age=' + age + '&gender=' + gender + '&uid=' + uid;
+        listener_tasks_done++;
+        sessionStorage.setItem('l', listener_tasks_done);
+        window.location.href = 'listener.html';
     }
 }
 
