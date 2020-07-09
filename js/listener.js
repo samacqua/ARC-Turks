@@ -15,7 +15,7 @@ $(window).on('load',function(){
     $('#info_display').hide();
     $('#instructionsModal').modal('show');
 
-    random_listen_retrieve(TASK_ID);
+    random_listen_retrieve(5);
 });
 
 
@@ -49,9 +49,9 @@ function check() {
     const do_desc = $.trim($("#do_p").text());
     const grid_desc = $.trim($("#grid_size_p").text());
 
-    store_listener(DESC_ID, see_desc, do_desc, grid_desc, TASK_ID, uid, ATTEMPTS, age, gender)
+    store_listener(DESC_ID, TASK_ID, uid, ATTEMPTS, age, gender)
         .then(function() {next_task(s, l, age, gender, uid);})
-        .catch(function() {console.log("error");});
+        .catch(function(error) {console.log("Error storing response: " + error);});
 }
 
 function give_up() {

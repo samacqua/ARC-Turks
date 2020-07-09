@@ -26,8 +26,7 @@ $(window).on('load',function(){
         $('#quickInstructionsModal').modal('show');
     }
 
-    // TODO: make not random, but sorted in some way
-    randomTask();
+    random_speaker_retrieve(5);
 });
 
 $(document).ready(function(){
@@ -132,7 +131,7 @@ function exit_task_qs() {
     
     store_response_speaker(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPTS, age, gender, pattern_dif, desc_diff, conf)
         .then(function() { next_task(s, l, age, gender, uid); })
-        .catch(function() { console.log('Issue'); });
+        .catch(function(error) { console.log('Error storing response ' + error); });
 }
 
 function give_up() {
