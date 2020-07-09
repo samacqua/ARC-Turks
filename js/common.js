@@ -60,7 +60,7 @@ function next_task() {
     }
 
     // last one is self-play to ensure was actually doing tasks
-    if (listener_tasks_done + speaker_tasks_done == total_tasks_to_complete - 1) {
+    if (listener_tasks_done + speaker_tasks_done == TOTAL_TASKS_TO_COMPLETE - 1) {
         listener_tasks_done++;
         sessionStorage.setItem('l', listener_tasks_done);
         window.location.href = 'listener.html';
