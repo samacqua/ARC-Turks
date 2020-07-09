@@ -114,6 +114,14 @@ function exit_task_qs() {
     if (grid_size_desc == "The grid size...") {
         grid_size_desc = "The grid size... does not change."
     }
+
+    // store first task for validation
+    if (speaker_tasks_done == 1) {
+        sessionStorage.setItem('val_task', TASK_ID);
+        sessionStorage.setItem('val_see', see_desc);
+        sessionStorage.setItem('val_do', do_desc);
+        sessionStorage.setItem('val_grid', grid_size_desc);
+    }
     
     store_response_speaker(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, age, gender, conf)
         .then(function() { next_task(); })

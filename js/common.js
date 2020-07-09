@@ -49,10 +49,12 @@ function next_task() {
      * but make sure listener and speaker in first two tasks
      */
 
+     const total_tasks_to_complete = 10;
+
      var speaker_tasks_done = sessionStorage.getItem('s');
      var listener_tasks_done = sessionStorage.getItem('l');
 
-    if (speaker_tasks_done + listener_tasks_done >= 10) {
+    if (speaker_tasks_done + listener_tasks_done == total_tasks_to_complete) {
         $("finished_modal").modal('show');
     }
 
@@ -63,6 +65,13 @@ function next_task() {
         window.location.href = 'speaker.html';
     }
     if (listener_tasks_done == 0 && speaker_tasks_done != 0) {
+        listener_tasks_done++;
+        sessionStorage.setItem('l', listener_tasks_done);
+        window.location.href = 'listener.html';
+    }
+
+    // last one is self-play to ensure was actually doing tasks
+    if (listener_tasks_done + speaker_tasks_done == total_tasks_to_complete - 1) {
         listener_tasks_done++;
         sessionStorage.setItem('l', listener_tasks_done);
         window.location.href = 'listener.html';

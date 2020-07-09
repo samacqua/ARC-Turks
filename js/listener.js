@@ -4,6 +4,8 @@ var ATTEMPT_JSONS = [];
 const uid = sessionStorage.getItem('uid');
 const age = sessionStorage.getItem('age');
 const gender = sessionStorage.getItem('gender');
+const listener_tasks_done = sessionStorage.getItem('l');
+const speaker_tasks_done = sessionStorage.getItem('s');
 
 $(window).on('load',function(){
     START_DATE = new Date();
@@ -12,8 +14,23 @@ $(window).on('load',function(){
     $('#info_display').hide();
     $('#instructionsModal').modal('show');
 
+    if (listener_tasks_done + speaker_tasks_done == 10) {
+        retrieve_own_description();
+        return;
+    }
+
     random_listen_retrieve(5);
 });
+
+function retrieve_own_description() {
+    TASK_ID = sessionStorage.getItem('val_task');
+
+    $("#see_p").text(sessionStorage.getItem('val_see'));
+    $("#do_p").text(sessionStorage.getItem('val_do'));
+    $("#grid_size_p").text(sessionStorage.getItem('val_grid'));
+
+    loadTask(TASK_ID);
+}
 
 
 function check() {
@@ -64,7 +81,6 @@ function give_up() {
 
     const answer = convertSerializedGridToGridObject(TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output']);
 
-    console.log(answer);
     showAnswer(answer);
     START_DATE = new Date();
 }
