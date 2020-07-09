@@ -46,9 +46,17 @@
 /*Symbol picker*/
 
 .symbol_preview {
-    width: 20px;
-    height: 20px;
+    width: 8%;
+    height: 0;
+    padding-bottom: 8%;
     float: left;
+}
+
+#symbol_picker {
+    float: left;
+    margin-left: 20px;
+    padding-bottom: 8px;
+    width: 100%;
 }
 
 .grid_size_field {
@@ -56,7 +64,8 @@
 }
 
 .selected-symbol-preview {
-    border: 2px solid orange;
+    border: 2px solid rgb(255, 255, 255);
+    
 }
 
 button {

@@ -19,8 +19,6 @@
 
   <!-- JS Libraries -->
   <!-- jQuery library -->
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script> -->
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
  
@@ -140,7 +138,7 @@
 
                 <button type="button" class="btn btn-primary" onclick="copyFromInput()">Copy from input</button>
                 <button type="button" class="btn btn-primary" onclick="resetOutputGrid()">Reset grid</button>
-                <button type="button" class="btn btn-primary" onclick="check()" id="submit_solution_btn">Check!</button>
+                <button type="button" class="btn btn-success" onclick="check()">Check!</button>
 
                 <div id="toolbar">
                     <div>
@@ -151,6 +149,10 @@
                         <input type="radio" id="tool_floodfill"
                          name="tool_switching" value="floodfill">
                         <label for="tool_floodfill">Flood fill</label>
+
+                        <input type="radio" id="tool_select"
+                        name="tool_switching" value="select">
+                       <label for="tool_select">Copy-Paste</label>
                     </div>
                 </div>
 

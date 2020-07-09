@@ -4,26 +4,29 @@ $.fn.modal.prototype.constructor.Constructor.Default.keyboard =  false;
 function errorMsg(msg) {
     $('#error_display').stop(true, true);
     $('#info_display').stop(true, true);
+    $('#error_display').hide();
+    $('#info_display').hide();
 
     console.log(msg);
 
-
     $('#error_display').html(msg);
     $('#error_display').css({"visibility": "visible"});
-    $('#error_display').show();
-    $('#error_display').fadeOut(5000);
+    $('#error_display').fadeIn(300);
+    $('#error_display').delay(6000).fadeOut(300);
 }
 
 function infoMsg(msg) {
     $('#error_display').stop(true, true);
     $('#info_display').stop(true, true);
+    $('#error_display').hide();
+    $('#info_display').hide();
 
     console.log(msg);
 
     $('#info_display').html(msg);
     $('#info_display').css({"visibility": "visible"});
     $('#info_display').fadeIn(300);
-    $('#info_display').delay(3000).fadeOut(300);
+    $('#info_display').delay(6000).fadeOut(300);
 }
 
 function exit_message() {
@@ -73,3 +76,13 @@ function next_task(s, l, age, gender, uid) {
         window.location.href = 'listener.html?s=' + s + '&l=' + l +'&age=' + age + '&gender=' + gender + '&uid=' + uid;
     }
 }
+
+var globalResizeTimer = null;
+
+$(window).resize(function() {
+    if(globalResizeTimer != null) window.clearTimeout(globalResizeTimer);
+    globalResizeTimer = window.setTimeout(function() {
+        resizeOutputGrid();
+        loadTask(TASK_ID);
+    }, 500);
+});

@@ -1,5 +1,5 @@
 var START_DATE;
-var ATTEMPTS = 0;
+var ATTEMPT_JSONS = [];
 
 const urlParams = new URLSearchParams(window.location.search);
 const uid = urlParams.get('uid');
@@ -23,12 +23,12 @@ function check() {
     /**
      * check if output grid same as correct answer. if so, store info and move to next task
      */
-
-    ATTEMPTS++;
-
     syncFromEditionGridToDataGrid();
     reference_output = TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output'];
     submitted_output = CURRENT_OUTPUT_GRID.grid;
+
+    // have to store as json string bc firebase cannot store nested arrays
+    ATTEMPT_JSONS.push(JSON.stringify(submitted_output));
 
     if (reference_output.length != submitted_output.length) {
         errorMsg("Wrong answer. Try again.");
@@ -49,7 +49,7 @@ function check() {
     const do_desc = $.trim($("#do_p").text());
     const grid_desc = $.trim($("#grid_size_p").text());
 
-    store_listener(DESC_ID, TASK_ID, uid, ATTEMPTS, age, gender)
+    store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, age, gender)
         .then(function() {next_task(s, l, age, gender, uid);})
         .catch(function(error) {console.log("Error storing response: " + error);});
 }

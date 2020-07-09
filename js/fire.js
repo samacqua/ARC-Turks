@@ -63,7 +63,7 @@ function random_speaker_retrieve(limit_size) {
     });
 }
 
-function store_response_speaker(see_desc, do_desc, grid_desc, task_id, user_id, attempts, age, gender, pattern_dif, desc_diff, conf) {
+function store_response_speaker(see_desc, do_desc, grid_desc, task_id, user_id, attempts, attemp_jsons, age, gender, pattern_dif, desc_diff, conf) {
     /**
      * store descriptions, task info and user info and user answers in firebase
      * returns promise so that can transition to next task after storing
@@ -76,6 +76,7 @@ function store_response_speaker(see_desc, do_desc, grid_desc, task_id, user_id, 
             'do_description' : do_desc,
             'grid_description' : grid_desc,
             'verification_attempts' : parseInt(attempts),
+            'attempt_jsons' : attemp_jsons,
             'age' : parseInt(age),
             'gender' : gender,
             'pattern_difficulty' : parseInt(pattern_dif),
@@ -156,7 +157,7 @@ function random_listen_retrieve(limit_size) {
     });
 }
 
-function store_listener(desc_id, task_id, user_id, attempts, age, gender) {
+function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, age, gender) {
     /**
      * store info for listener task in firebase
      * returns promise so that can transition to next task after storing
@@ -165,6 +166,7 @@ function store_listener(desc_id, task_id, user_id, attempts, age, gender) {
         // store description use in description doc
         db.collection(task_id.toString()).doc(desc_id).collection("description_uses").add({
             'attempts' : attempts,
+            'attemp_jsons' : attempt_jsons,
             'age' : age,
             'gender' : gender,
             'uid' : user_id

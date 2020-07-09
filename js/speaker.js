@@ -1,5 +1,5 @@
 var START_DATE;
-var ATTEMPTS = 0;
+var ATTEMPT_JSONS = [];
 
 const urlParams = new URLSearchParams(window.location.search);
 const uid = urlParams.get('uid');
@@ -83,16 +83,16 @@ function continue_to_verify() {
     document.getElementById("validation-col").style.visibility = "visible";
 }
 
-
 function check() {
     /**
      * check if output grid same as correct answer. if so, ask more questions about task
      */
-    ATTEMPTS++;
-
     syncFromEditionGridToDataGrid();
     reference_output = TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output'];
     submitted_output = CURRENT_OUTPUT_GRID.grid;
+
+    // have to store as json string bc firebase cannot store nested arrays
+    ATTEMPT_JSONS.push(JSON.stringify(submitted_output));
 
     if (reference_output.length != submitted_output.length) {
         errorMsg("Wrong answer. Try again.");
@@ -129,7 +129,7 @@ function exit_task_qs() {
         grid_size_desc = "The grid size... does not change."
     }
     
-    store_response_speaker(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPTS, age, gender, pattern_dif, desc_diff, conf)
+    store_response_speaker(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, age, gender, pattern_dif, desc_diff, conf)
         .then(function() { next_task(s, l, age, gender, uid); })
         .catch(function(error) { console.log('Error storing response ' + error); });
 }

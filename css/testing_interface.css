@@ -19,74 +19,12 @@ body {
     border: 5px solid transparent;
 }
 
-/* #demonstration_examples_view {
-    float: left;
-    width: 450px;
-    margin: 10px;
-    margin-right: 5px;
-    background-color: #d5d5d5;
-} */
-
-#evaluation_view {
-    float: left;
-    width: 450px;
-    margin: 10px;
-    margin-left: 5px;
-    background-color: #d5d5d5;
-    padding: 10px;
-}
-
-#evaluation-input-view {
-    float: left;
-    width: 400px;
-    margin: 10px;
-}
-
-#evaluation_output_editor {
-    float: left;
-    width: 500px;
-    margin-bottom: 20px;
-}
-
-#load_task_control_btns {
-    float: left;
-    margin-top: 10px;
-    margin-bottom: 0;
-    background: white;
-    width: 100%;
-    padding-top: 5px;
-    padding-bottom: 5px;
-}
-
-#editor_grid_control_btns {
-    float: left;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    background: white;
-    width: 100%;
-    padding-top: 5px;
-    padding-bottom: 5px;
-}
-
 #resize_control_btns {
     width: 100%;
     float:left;
     margin-top: 20px;
     margin-bottom: 5px;
 }
-
-#submit_solution_btn {
-    color: white;
-    border-radius: 4px;
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-    background: rgb(28, 184, 65);
-}
-
-#submit_solution_btn:active {
-  background: blue;
-}
-
-button:focus {outline:0;}
 
 #output_grid {
     padding-left: 5px;
@@ -101,20 +39,6 @@ button:focus {outline:0;}
     float: left;
     margin-left: 10px;
     width: 100%;
-
-}
-
-#symbol_picker {
-    float: left;
-    margin-left: 20px;
-    padding-bottom: 8px;
-    width: 100%;
-}
-
-.symbol_preview {
-    width: 25px;
-    height: 25px;
-    float: left;
 }
 
 label {
@@ -169,10 +93,6 @@ input, button {
     padding-top: 5px;
     padding-bottom: 5px;
     margin-bottom: 10px;
-}
-
-#task_demo_header {
-    margin: 10px;
 }
 
 #modal_bg {

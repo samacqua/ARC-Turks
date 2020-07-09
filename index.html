@@ -73,6 +73,7 @@
                             <li>Check!: Check if the grid is the correct answer</li>
                             <li>Draw: In this mode, you color individual blocks</li>
                             <li>Floodfill: In this mode, you fill in entire areas</li>
+                            <li>Copy-Paste: In this mode, you can copy from the input or output grid, or fill in a selected area with a color.</li>
                             <li>color bar: Use the color bar to select which color to draw or floodfill with</li>
                         </ul>">Help</a>
                 </div>
@@ -105,7 +106,7 @@
 
                 <button type="button" class="btn btn-secondary" onclick="copyFromInput()">Copy from input</button>
                 <button type="button" class="btn btn-secondary" onclick="resetOutputGrid()">Reset grid</button>
-                <button type="button" class="btn btn-secondary" onclick="check_grid()" id="submit_solution_btn">Check!</button>
+                <button type="button" class="btn btn-success" onclick="check_grid()">Check!</button>
 
                 <div id="toolbar">
                     <div>
@@ -116,6 +117,10 @@
                         <input type="radio" id="tool_floodfill"
                          name="tool_switching" value="floodfill">
                         <label for="tool_floodfill">Flood fill</label>
+
+                        <input type="radio" id="tool_select"
+                        name="tool_switching" value="select">
+                       <label for="tool_select">Copy-Paste</label>
                     </div>
                 </div>
 

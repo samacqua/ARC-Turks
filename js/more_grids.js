@@ -16,7 +16,9 @@ var TASK_ID;
 function refreshEditionGrid(jqGrid, dataGrid) {
     fillJqGridWithData(jqGrid, dataGrid);
     setUpEditionGridListeners(jqGrid);
-    fitCellsToContainer(jqGrid, dataGrid.height, dataGrid.width, EDITION_GRID_HEIGHT, EDITION_GRID_HEIGHT);
+
+    const col_width = $("#container-fluid").width() / 3.2;
+    fitCellsToContainer(jqGrid, dataGrid.height, dataGrid.width, col_width, col_width);
     initializeSelectable();
 }
 
@@ -194,7 +196,7 @@ function fillTestInput(inputGrid) {
     console.log(jqInputGrid);
     fillJqGridWithData(jqInputGrid, inputGrid);
 
-    const col_width = $("#container-fluid").width() / 3;
+    const col_width = $("#container-fluid").width() / 3.1;
     fitCellsToContainer(jqInputGrid, inputGrid.height, inputGrid.width, col_width, col_width);
 }
 
@@ -262,7 +264,74 @@ $(document).ready(function () {
     $('input[type=radio][name=tool_switching]').change(function() {
         initializeSelectable();
     });
-    
+
+    $('body').keydown(function(event) {
+        // Copy and paste functionality.
+        if (event.which == 67) {
+            // Press C
+
+            selected = $('.ui-selected');
+            if (selected.length == 0) {
+                return;
+            }
+
+            COPY_PASTE_DATA = [];
+            for (var i = 0; i < selected.length; i ++) {
+                x = parseInt($(selected[i]).attr('x'));
+                y = parseInt($(selected[i]).attr('y'));
+                symbol = parseInt($(selected[i]).attr('symbol'));
+                COPY_PASTE_DATA.push([x, y, symbol]);
+            }
+            infoMsg('Cells copied! Select a target cell and press V to paste at location.');
+
+        }
+        if (event.which == 86) {
+            // Press P
+            if (COPY_PASTE_DATA.length == 0) {
+                errorMsg('No data to paste.');
+                return;
+            }
+            selected = $('.edition_grid').find('.ui-selected');
+            if (selected.length == 0) {
+                errorMsg('Select a target cell on the output grid.');
+                return;
+            }
+
+            jqGrid = $(selected.parent().parent()[0]);
+
+            if (selected.length == 1) {
+                targetx = parseInt(selected.attr('x'));
+                targety = parseInt(selected.attr('y'));
+
+                xs = new Array();
+                ys = new Array();
+                symbols = new Array();
+
+                for (var i = 0; i < COPY_PASTE_DATA.length; i ++) {
+                    xs.push(COPY_PASTE_DATA[i][0]);
+                    ys.push(COPY_PASTE_DATA[i][1]);
+                    symbols.push(COPY_PASTE_DATA[i][2]);
+                }
+
+                minx = Math.min(...xs);
+                miny = Math.min(...ys);
+                for (var i = 0; i < xs.length; i ++) {
+                    x = xs[i];
+                    y = ys[i];
+                    symbol = symbols[i];
+                    newx = x - minx + targetx;
+                    newy = y - miny + targety;
+                    res = jqGrid.find('[x="' + newx + '"][y="' + newy + '"] ');
+                    if (res.length == 1) {
+                        cell = $(res[0]);
+                        setCellSymbol(cell, symbol);
+                    }
+                }
+            } else {
+                errorMsg('Can only paste at a specific location; only select *one* cell as paste destination.');
+            }
+        }
+    });
 });
 
 
