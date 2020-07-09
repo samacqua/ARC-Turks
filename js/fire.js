@@ -85,8 +85,11 @@ function store_response_speaker(see_desc, do_desc, grid_desc, task_id, user_id, 
      */
     return new Promise(function(resolve, reject) {
 
+        var batch = db.batch();
+
         // set actual info for description in the specific task's collection
-        db.collection(task_id.toString()).add({
+        var task_doc_ref = db.collection(task_id.toString()).doc();
+        batch.set(task_doc_ref, {
             'see_description' : see_desc,
             'do_description' : do_desc,
             'grid_description' : grid_desc,
@@ -99,39 +102,38 @@ function store_response_speaker(see_desc, do_desc, grid_desc, task_id, user_id, 
             'uid' : parseInt(user_id),
             'num_uses' : 0,
             'task_num' : task_id
-        }).then(function(docRef) {
+        });
 
-            // increment num_descriptions for task in tasks collection
-            const increment = firebase.firestore.FieldValue.increment(1);
-            var gave_up_increment = firebase.firestore.FieldValue.increment(0);
 
-            if (gave_up_verification) {
-                // only increment if gave up
-                gave_up_increment = increment; 
-            }
+        // increment num_descriptions for task in tasks collection
+        const increment = firebase.firestore.FieldValue.increment(1);
+        var gave_up_increment = firebase.firestore.FieldValue.increment(0);
 
-            const task_doc_ref = db.collection("tasks").doc(task_id.toString());
-            task_doc_ref.update({num_descriptions : increment, gave_up_count : gave_up_increment})
-            .then(function () {
+        if (gave_up_verification) {
+            // only increment if gave up
+            gave_up_increment = increment; 
+        }
 
-                // put in all_descriptions, so that easy to query all descriptions to sort based on number of uses
-                const descriptions_ref = db.collection("all_descriptions");
-                descriptions_ref.doc(docRef.id).set({
-                    'num_uses' : 0,
-                    'task_num' : task_id,
-                    'gave_up_count' : 0
-                }).then(function () {
-                    return resolve();
-                }).catch(function (err) {
-                    return reject(err);
-                });
-            })
-            .catch(function (err) {
-                return reject(err);
-            });
-        })
-        .catch(function(error) {
-            return reject(error);
+        const task_doc_ref = db.collection("tasks").doc(task_id.toString());
+        batch.update(task_doc_ref, 
+            {num_descriptions : increment, 
+            gave_up_count : gave_up_increment
+        });
+
+
+        // put in all_descriptions, so that easy to query all descriptions to sort based on number of uses
+        const desc_id = task_doc_ref.key;
+        const description_ref = db.collection("all_descriptions").doc(desc_id);
+        batch.set(description_ref, {
+            'num_uses' : 0,
+            'task_num' : task_id,
+            'gave_up_count' : 0
+        });
+
+        batch.commit().then(function () {
+            return resolve();
+        }).catch(function (err) {
+            return reject(err);
         });
     });
 }
@@ -184,8 +186,12 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, age,
      * returns promise so that can transition to next task after storing
      */
     return new Promise(function(resolve, reject) {
+
+        var batch = db.batch();
+
         // store description use in description doc
-        db.collection(task_id.toString()).doc(desc_id).collection("description_uses").add({
+        var desc_ref = db.collection(task_id.toString()).doc(desc_id).collection("description_uses").doc();
+        batch.set(desc_ref, {
             'attempts' : attempts,
             'attemp_jsons' : attempt_jsons,
             'age' : age,
@@ -193,25 +199,26 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, age,
             'uid' : user_id,
             'description_critique' : description_critique,
             'gave_up' : gave_up
-        }).then(function(docRef) {
-            // increment num_uses in all_descriptions
-            const increment = firebase.firestore.FieldValue.increment(1);
-            var gave_up_increment = firebase.firestore.FieldValue.increment(0);
-            if (gave_up) {
-                gave_up_increment = increment;
-            }
-            const task_doc_ref = db.collection("all_descriptions").doc(desc_id);
+        });
 
-            task_doc_ref.update({num_uses : increment, gave_up_count : gave_up_increment})
-            .then(function () {
-                return resolve();
-            })
-            .catch(function (err) {
-                return reject(err);
-            });
-        })
-        .catch(function(error) {
-            return reject(error);
+
+        // increment num_uses in all_descriptions
+        const increment = firebase.firestore.FieldValue.increment(1);
+        var gave_up_increment = firebase.firestore.FieldValue.increment(0);
+        if (gave_up) {
+            gave_up_increment = increment;
+        }
+        const task_doc_ref = db.collection("all_descriptions").doc(desc_id);
+
+        batch.update(task_doc_ref, {
+            num_uses : increment, 
+            gave_up_count : gave_up_increment
+        });
+
+        batch.set().then(function () {
+            return resolve();
+        }).catch(function (err) {
+            return reject(err);
         });
     });
 }
