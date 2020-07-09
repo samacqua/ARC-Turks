@@ -18,19 +18,20 @@ var db = firebase.firestore();
 /*
 DATABASE STRUCTURE:
 
-Collections:      tasks                     all_descriptions                       0, 1, 2 ... 399 (collection for each task)
+Collections:      tasks                                  all_descriptions                       0, 1, 2 ... 399 (collection for each task)
                     
-Documents:   0  1   2   ...   399             all desc_ids                        desc_ids (for that task)
+Documents:   0  1   2   ...   399                           all desc_ids                        desc_ids (for that task)
 
-Fields:     num_descriptions             num_uses        task_num               age, gender, num_uses, confidence, 
-                                                                                do_description, see_description, grid_description, verification_attempts,
-                                                                                attempt_jsons, task_num, uid
+Fields:     num_descriptions    gave_up_count             num_uses        task_num               age, gender, num_uses, confidence, 
+                                                            gave_up_count               do_description, see_description, grid_description, verification_attempts,
+                                                                                            attempt_jsons, task_num, uid, gave_up_verification
 
-Sub-collection:                                                                         description_uses
+Sub-collection:                                                                                     description_uses
 
-Documents:                                                                              desc_use_ids
+Documents:                                                                                          desc_use_ids
 
-Fields:                                                                             attempts, attempt_jsons, age, gender, uid
+Fields:                                                                                         attempts, attempt_jsons, age, gender, uid, gave_up,
+                                                                                                description_critique
 
 Purpose:
     tasks - Used to get the speaking task. Can easily sort based on num_descriptions to make sure that we choose a task that needs descriptions. Can also use this to remove some tasks that we do not want to bother with.
@@ -57,14 +58,15 @@ function random_speaker_retrieve(limit_size) {
 
         querySnapshot.forEach(function(doc) {
             if (i++ == rand_selection) {
-                if (finished_speaker_tasks.includes(doc.id)) {
+
+                const sub_str = '.' + doc.id + '.';
+                if (finished_speaker_tasks.includes(sub_str)) {
                     // if already described task, give it another task (not most efficient but it'll work)
                     random_speaker_retrieve(limit_size+5);
                     return;
                 }
-
-                finished_speaker_tasks.push(doc.id);
-                sessionStorage.setItem('speaker_tasks_complete', finished_speaker_tasks);
+                // sessionsStorage stores as string, so using substring with '.' as a sort of list ex: 55 250 43
+                sessionStorage.setItem('speaker_tasks_complete', finished_speaker_tasks.concat('.', doc.id, '.'));
 
                 TASK_ID = doc.id;
                 loadTask(TASK_ID);
@@ -76,7 +78,7 @@ function random_speaker_retrieve(limit_size) {
     });
 }
 
-function store_response_speaker(see_desc, do_desc, grid_desc, task_id, user_id, attempts, attemp_jsons, age, gender, conf) {
+function store_response_speaker(see_desc, do_desc, grid_desc, task_id, user_id, attempts, attemp_jsons, age, gender, conf, gave_up_verification=false) {
     /**
      * store descriptions, task info and user info and user answers in firebase
      * returns promise so that can transition to next task after storing
@@ -89,6 +91,7 @@ function store_response_speaker(see_desc, do_desc, grid_desc, task_id, user_id, 
             'do_description' : do_desc,
             'grid_description' : grid_desc,
             'verification_attempts' : parseInt(attempts),
+            'gave_up_verification' : gave_up_verification,
             'attempt_jsons' : attemp_jsons,
             'age' : parseInt(age),
             'gender' : gender,
@@ -100,16 +103,23 @@ function store_response_speaker(see_desc, do_desc, grid_desc, task_id, user_id, 
 
             // increment num_descriptions for task in tasks collection
             const increment = firebase.firestore.FieldValue.increment(1);
+            var gave_up_increment = firebase.firestore.FieldValue.increment(0);
+
+            if (gave_up_verification) {
+                // only increment if gave up
+                gave_up_increment = increment; 
+            }
 
             const task_doc_ref = db.collection("tasks").doc(task_id.toString());
-            task_doc_ref.update({num_descriptions : increment})
+            task_doc_ref.update({num_descriptions : increment, gave_up_count : gave_up_increment})
             .then(function () {
 
                 // put in all_descriptions, so that easy to query all descriptions to sort based on number of uses
                 const descriptions_ref = db.collection("all_descriptions");
                 descriptions_ref.doc(docRef.id).set({
                     'num_uses' : 0,
-                    'task_num' : task_id
+                    'task_num' : task_id,
+                    'gave_up_count' : 0
                 }).then(function () {
                     return resolve();
                 }).catch(function (err) {
@@ -168,7 +178,7 @@ function random_listen_retrieve(limit_size) {
     });
 }
 
-function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, age, gender) {
+function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, age, gender, description_critique="None", gave_up=false) {
     /**
      * store info for listener task in firebase
      * returns promise so that can transition to next task after storing
@@ -180,13 +190,19 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, age,
             'attemp_jsons' : attempt_jsons,
             'age' : age,
             'gender' : gender,
-            'uid' : user_id
+            'uid' : user_id,
+            'description_critique' : description_critique,
+            'gave_up' : gave_up
         }).then(function(docRef) {
             // increment num_uses in all_descriptions
             const increment = firebase.firestore.FieldValue.increment(1);
+            var gave_up_increment = firebase.firestore.FieldValue.increment(0);
+            if (gave_up) {
+                gave_up_increment = increment;
+            }
             const task_doc_ref = db.collection("all_descriptions").doc(desc_id);
 
-            task_doc_ref.update({num_uses : increment})
+            task_doc_ref.update({num_uses : increment, gave_up_count : gave_up_increment})
             .then(function () {
                 return resolve();
             })
@@ -207,9 +223,10 @@ function init_tasks_collection() {
      */
     for (i=0; i<400; i++) {
         db.collection("tasks").doc(i.toString()).set({
-            'num_descriptions' : 0
-        }).then(function () {
-            console.log(i + ' complete');
+            'num_descriptions' : 0,
+            'gave_up_count' : 0
+        }).then(function (doc) {
+            console.log(doc.id + ' complete');
         }).catch(function (err) {
             console.log(err);
         });

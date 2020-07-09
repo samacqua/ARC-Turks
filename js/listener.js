@@ -1,5 +1,6 @@
 var START_DATE;
 var ATTEMPT_JSONS = [];
+var GAVE_UP = false;
 
 const uid = sessionStorage.getItem('uid');
 const age = sessionStorage.getItem('age');
@@ -59,11 +60,36 @@ function check() {
         }
     }
 
+    if (ATTEMPT_JSONS.length > 1 || GAVE_UP) {
+        if (GAVE_UP) {
+            $("#description_critique_label").text("You gave up/could not create the correct output. What was wrong about the description?")
+        }
+        $("#task_qs_modal").modal('show');
+        return;
+    }
+
     const see_desc = $.trim($("#see_p").text());
     const do_desc = $.trim($("#do_p").text());
     const grid_desc = $.trim($("#grid_size_p").text());
 
     store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, age, gender)
+    .then(function() {next_task();})
+    .catch(function(error) {console.log("Error storing response: " + error);});
+}
+
+function exit_task_qs() {
+    /**
+     * If they were presented with this modal, they either gave up or took multiple attempts
+     * So, store why they got it wrong
+     */
+    const see_desc = $.trim($("#see_p").text());
+    const do_desc = $.trim($("#do_p").text());
+    const grid_desc = $.trim($("#grid_size_p").text());
+
+    const desc_critique = $.trim($('#desc_critique').val());
+    console.log(desc_critique);
+
+    store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, age, gender, description_critique=desc_critique, gave_up=GAVE_UP)
         .then(function() {next_task();})
         .catch(function(error) {console.log("Error storing response: " + error);});
 }
@@ -79,6 +105,7 @@ function give_up() {
         return;
     }
 
+    GAVE_UP = true;
     const answer = convertSerializedGridToGridObject(TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output']);
 
     showAnswer(answer);

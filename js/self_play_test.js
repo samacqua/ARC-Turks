@@ -53,7 +53,7 @@ function finish_self_play() {
     sessionStorage.setItem('l', 0);
 
     // so when calling includes() is not null (no task '400')
-    sessionStorage.setItem('speaker_tasks_complete', ['400']);
-    
+    sessionStorage.setItem('speaker_tasks_complete', '');
+
     next_task();
 }

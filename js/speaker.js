@@ -1,5 +1,6 @@
 var START_DATE;
 var ATTEMPT_JSONS = [];
+var GAVE_UP = false;
 
 const uid = sessionStorage.getItem('uid');
 const age = sessionStorage.getItem('age');
@@ -69,6 +70,10 @@ function continue_to_verify() {
     }
 
     document.getElementById("validation-col").style.visibility = "visible";
+    $("#what_you_see").attr("readonly", true);
+    $("#what_you_do").attr("readonly", true);
+    $("#grid_size_changes").click(function () { return false; });
+    $("#grid_size_desc").attr("readonly", true);
 }
 
 function check() {
@@ -97,7 +102,7 @@ function check() {
         }
     }
 
-    $("#task_qs_modal").modal({backdrop: 'static', keyboard: false});
+    $("#task_qs_modal").modal('show');
 }
 
 function exit_task_qs() {
@@ -116,14 +121,14 @@ function exit_task_qs() {
     }
 
     // store first task for validation
-    if (speaker_tasks_done == 1) {
+    if (parseInt(speaker_tasks_done) == 1) {
         sessionStorage.setItem('val_task', TASK_ID);
         sessionStorage.setItem('val_see', see_desc);
         sessionStorage.setItem('val_do', do_desc);
         sessionStorage.setItem('val_grid', grid_size_desc);
     }
     
-    store_response_speaker(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, age, gender, conf)
+    store_response_speaker(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, age, gender, conf, gave_up_verification=GAVE_UP)
         .then(function() { next_task(); })
         .catch(function(error) { console.log('Error storing response ' + error); });
 }
@@ -156,6 +161,7 @@ function give_up() {
         random_speaker_retrieve(5);
         $('textarea').val("");
     } else {
+        GAVE_UP = true;
         const answer = convertSerializedGridToGridObject(TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output']);    
         showAnswer(answer);
     }

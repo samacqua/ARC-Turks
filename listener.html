@@ -171,6 +171,27 @@
         </div>
     </div>
 
+    <!-- Task Qs Modal -->
+    <div class="modal fade" id="task_qs_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Exit Survey</h3>
+                </div>
+                <div class="modal-body" id="final-modal-body">
+
+                    <label for="desc_critique" id="description_critique_label">It took you more than 1 attempt to create the correct output. What was wrong about the description?</label>
+                    <input class="form-control" type="text" placeholder="What was wrong about the description?" id="desc_critique">
+
+                    <div class="modal-footer">
+                        <button onclick="exit_task_qs()" type="button" class="btn btn-primary" data-dismiss="modal">Finish</button>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Give-up Modal -->
     <div class="modal fade" id="giveUpModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
