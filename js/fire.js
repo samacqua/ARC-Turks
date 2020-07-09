@@ -58,33 +58,42 @@ function random_listen_retrieve(task_id) {
     /**
      * retrieve the task and description that has already been described
      */
-     db.collection('tasks').get().then(function(querySnapshot) {
+    var tasks_ref = db.collection("tasks");
+    tasks_ref.orderBy("num_descriptions").limit(5);
+
+    const rand_selection = Math.floor(Math.random()*5);
+
+     tasks_ref.get().then(function(querySnapshot) {
         querySnapshot.forEach(function(doc) {
             // doc.data() is never undefined for query doc snapshots
             console.log(doc.id, " => ", doc.data());
             TASK_ID = doc.id;
 
             db.collection(doc.id.toString()).get().then(function(querySnapshot) {
-                    querySnapshot.forEach(function(doc2) {
+                var i = 0;
+                querySnapshot.forEach(function(doc2) {
+                    // doing it this way so that if less than the number you limit the query to, does not through an error
+                    if (i == rand_selection+1) {
+                        return;
+                    }
+                    DESC_ID = doc2.id;
 
-                        DESC_ID = doc2.id;
+                    // doc.data() is never undefined for query doc snapshots
+                    console.log(doc2.id, " => ", doc2.data());
+                    var childData = doc2.data();
 
-                        // doc.data() is never undefined for query doc snapshots
-                        console.log(doc2.id, " => ", doc2.data());
-                        var childData = doc2.data();
-
-                        const see_desc = childData.see_description;
-                        const do_desc = childData.do_description;
-                        const grid_desc = childData.grid_description;
-        
-                        $("#see_p").text(see_desc);
-                        $("#do_p").text(do_desc);
-                        $("#grid_size_p").text(grid_desc);
-                        loadTask(TASK_ID);
-                    });
+                    const see_desc = childData.see_description;
+                    const do_desc = childData.do_description;
+                    const grid_desc = childData.grid_description;
+    
+                    $("#see_p").text(see_desc);
+                    $("#do_p").text(do_desc);
+                    $("#grid_size_p").text(grid_desc);
+                    loadTask(TASK_ID);
                 });
+            });
         });
-     });
+    });
 }
 
 function store_listener(desc_id, see_desc, do_desc, grid_desc, task_id, user_id, attempts, age, gender) {
