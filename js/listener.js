@@ -20,7 +20,7 @@ $(window).on('load',function(){
         return;
     }
 
-    random_listen_retrieve(5);
+    random_listen_retrieve(TOTAL_TASKS_TO_COMPLETE);
 });
 
 function retrieve_own_description() {
@@ -65,7 +65,7 @@ function check() {
         if (ATTEMPT_JSONS.length > 2 || GAVE_UP) {
             $("#final_message").text("You failed to interpret your own description, showing you did not put enough thought into them. Your user ID is:");
         }
-        $("#finish_modal_uid").text(user_id.toString());
+        $("#finish_modal_uid").text(uid.toString());
         $("#finished_modal").modal('show');
         return;
     }
@@ -82,9 +82,14 @@ function check() {
     const do_desc = $.trim($("#do_p").text());
     const grid_desc = $.trim($("#grid_size_p").text());
 
-    store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, age, gender)
-    .then(function() {next_task();})
-    .catch(function(error) {console.log("Error storing response: " + error);});
+    infoMsg("Correct!");
+
+    // timeout is so they see the message before transitioning
+    setTimeout(function() {
+        store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, age, gender)
+        .then(function() {next_task();})
+        .catch(function(error) {console.log("Error storing response: " + error);});
+    }, 1000);
 }
 
 function exit_task_qs() {

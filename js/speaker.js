@@ -5,7 +5,7 @@ var GAVE_UP = false;
 const uid = sessionStorage.getItem('uid');
 const age = sessionStorage.getItem('age');
 const gender = sessionStorage.getItem('gender');
-const speaker_tasks_done = sessionStorage.getItem('s');
+const speaker_tasks_done = parseInt(sessionStorage.getItem('s'));
 
 $(window).on('load',function(){
     START_DATE = new Date();
@@ -25,7 +25,7 @@ $(window).on('load',function(){
         $('#quickInstructionsModal').modal('show');
     }
 
-    random_speaker_retrieve(5);
+    random_speaker_retrieve(TOTAL_TASKS_TO_COMPLETE);
 });
 
 $(document).ready(function(){
@@ -158,6 +158,7 @@ function give_up() {
             jqOutputGrid.empty();
         }
     
+        give_up_description(TASK_ID);
         random_speaker_retrieve(5);
         $('textarea').val("");
     } else {

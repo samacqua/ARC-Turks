@@ -46,17 +46,21 @@ function next_task() {
 
      var speaker_tasks_done = parseInt(sessionStorage.getItem('s'));
      var listener_tasks_done = parseInt(sessionStorage.getItem('l'));
+     console.log(speaker_tasks_done);
+     console.log(listener_tasks_done);
 
     // to ensure speaker and listener in first two tasks
     if (speaker_tasks_done == 0 && listener_tasks_done != 0) {
         speaker_tasks_done++;
         sessionStorage.setItem('s', speaker_tasks_done);
         window.location.href = 'speaker.html';
+        return;
     }
     if (listener_tasks_done == 0 && speaker_tasks_done != 0) {
         listener_tasks_done++;
         sessionStorage.setItem('l', listener_tasks_done);
         window.location.href = 'listener.html';
+        return;
     }
 
     // last one is self-play to ensure was actually doing tasks
@@ -64,6 +68,7 @@ function next_task() {
         listener_tasks_done++;
         sessionStorage.setItem('l', listener_tasks_done);
         window.location.href = 'listener.html';
+        return;
     }
 
     const rand_num = Math.random();
@@ -71,10 +76,12 @@ function next_task() {
         speaker_tasks_done++;
         sessionStorage.setItem('s', speaker_tasks_done);
         window.location.href = 'speaker.html';
+        return;
     } else {
         listener_tasks_done++;
         sessionStorage.setItem('l', listener_tasks_done);
         window.location.href = 'listener.html';
+        return;
     }
 }
 
