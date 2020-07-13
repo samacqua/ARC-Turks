@@ -1,8 +1,12 @@
 const urlParams = new URLSearchParams(window.location.search);
-const task = urlParams.get('task');
-const see_desc = urlParams.get('see');
-const do_desc = urlParams.get('do');
-const grid_desc = urlParams.get('grid');
+var tasks = urlParams.get('tasks').split('.');
+console.log(tasks);
+var see_descs = urlParams.get('see').split('~');
+console.log(see_descs);
+var do_descs = urlParams.get('do').split('~');
+var grid_descs = urlParams.get('grid').split('~');
+
+var START_TIME;
 
 $(window).on('load',function(){
     $('#error_display').hide();
@@ -11,20 +15,22 @@ $(window).on('load',function(){
     $('#instructionsModal').modal('show');
 
     // load task and descriptions
-    loadTask(task);
-    $("#see_p").text(see_desc);
-    $("#do_p").text(do_desc);
-    $("#grid_size_p").text(grid_desc);
+    const f_task = tasks.shift();
+    console.log(f_task);
+    loadTask(f_task);
+    $("#see_p").text(see_descs.shift());
+    $("#do_p").text(do_descs.shift());
+    $("#grid_size_p").text(grid_descs.shift());
 });
 
 $(function(){
     /**
      * auto play and auto pause modal videos
      */
-    $('#instructions2Modal').on('hidden.bs.modal', function(){
+    $('#examples_modal').on('hidden.bs.modal', function(){
         $(this).find('video')[0].pause();
     });
-    $('#instructions2Modal').on('shown.bs.modal', function () {
+    $('#examples_modal').on('shown.bs.modal', function () {
          $(this).find('video')[0].play();
       });
 });
@@ -53,6 +59,21 @@ function check_grid() {
             }
         }
     }
+    if (tasks.length != 0) {
+        infoMsg("Correct! Solve " + (tasks.length).toString() + " more problems.");
+
+        // reset values
+        resetOutputGrid();
+        TEST_PAIRS = new Array();
+        
+        // load next task and descriptions
+        loadTask(tasks.shift());
+        $("#see_p").text(see_descs.shift());
+        $("#do_p").text(do_descs.shift());
+        $("#grid_size_p").text(grid_descs.shift());
+
+        return;
+    }
     $("#exitModal").modal("show");
 }
 
@@ -65,4 +86,15 @@ function finish_self_play() {
     sessionStorage.setItem('l', 0);
 
     next_task();
+}
+
+function exit_examples_modal() {
+    const cur_time = new Date();
+    const min_watch_time = 120;
+    const time_watched = Math.round((cur_time - START_TIME) / 1000);
+    if (time_watched < min_watch_time) {
+        errorMsg(`Please watch at least ${min_watch_time - time_watched} more seconds of the video`);
+        return;
+    }
+    $('#examples_modal').modal('hide');
 }

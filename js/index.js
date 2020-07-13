@@ -1,10 +1,25 @@
 // easy tasks for demonstration purposes
-const TASKS = [54, 4, 345];
+// const TASKS = [54, 52, 345]; for video demonstration
+const TASKS = [370, 258];
+const URL_TASKS = TASKS.join('.');
+
+var DESC_SEES = [];
+var DESC_DOS = [];
+var DESC_GRIDS = [];
+
+var START_TIME;
 
 $(window).on('load',function(){
 
     $('#error_display').hide();
     $('#info_display').hide();
+
+    $("#grid_size_form").css("visibility", "hidden");
+
+    // fill forms with actual text
+    $("#what_you_see").val("You should see...");
+    $("#what_you_do").val("You have to...");
+    $("#grid_size_desc").val("The grid size...");
 
     // get consent, then demographic, then present study, then begin solving patterns
     $('#consentModal').modal('show');
@@ -34,12 +49,28 @@ $(function(){
     /**
      * auto play and auto pause modal videos
      */
-    $('#introModal3').on('hidden.bs.modal', function(){
+    $('#examples_modal').on('hidden.bs.modal', function(){
         $(this).find('video')[0].pause();
     });
-    $('#introModal3').on('shown.bs.modal', function () {
+    $('#examples_modal').on('shown.bs.modal', function () {
          $(this).find('video')[0].play();
       });
+});
+
+$(function()
+/**
+ * listen for change in check box if grid size changes
+ */
+{
+    $('#grid_size_changes').on('change', function()
+    {
+        if (this.checked)
+        {
+            $("#grid_size_form").css("visibility", "visible");
+        } else {
+            $("#grid_size_form").css("visibility", "hidden");
+        }
+    });
 });
 
 function exit_demographic() {
@@ -52,90 +83,71 @@ function exit_demographic() {
     age = $('#age_form').val().trim();
     sessionStorage.setItem("age", age);
 
-    $("#introModal").modal('show');
+    $('#demographic_modal').one('hidden.bs.modal', function() { $('#introModal').modal('show'); }).modal('hide');
 }
 
-function check_grid() {
+function submit() {
     /**
-     * checks if output is correct. If so and completed enough tasks, move on to self play
+     * If starting with right phrase and actually entered text, then bring to listening task and pass all info
      */
-    syncFromEditionGridToDataGrid();
 
-    reference_output = TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output'];
-    submitted_output = CURRENT_OUTPUT_GRID.grid;
+     DESC_SEES.push($("#what_you_see").val().trim());
+     DESC_DOS.push($("#what_you_do").val().trim());
+     if ( $('#grid_size_desc').css('display') == 'none' || $('#grid_size_desc').css("visibility") == "hidden"){
+        DESC_GRIDS.push("The grid size... does not change");
+    } else {
+        DESC_GRIDS.push($("#grid_size_desc").val().trim());
+    }
 
-    if (reference_output.length != submitted_output.length) {
-        errorMsg("Wrong answer. Try again.");
+     if (TASKS.length != 0) {
+        $("#what_you_see").val("You should see...");
+        $("#what_you_do").val("You have to...");
+        $("#grid_size_desc").val("The grid size...");
+
+        loadTask(TASKS.shift());
+        return;
+     }
+
+    if ($("#what_you_see").val().trim().length < 20) {
+        errorMsg("Please enter a description of what you see.");
+        return
+    }
+    if ($("#what_you_do").val().trim().length < 20) {
+        errorMsg("Please enter a description of what you change.");
+        return
+    }
+    if ($("#grid_size_desc").val().trim().length < 10) {
+        errorMsg("Please enter a description of the grid size.");
         return
     }
 
-    for (var i = 0; i < reference_output.length; i++){
-        ref_row = reference_output[i];
-        for (var j = 0; j < ref_row.length; j++){
-            if (ref_row[j] != submitted_output[i][j]) {
-                errorMsg("Wrong answer. Try again.");
-                return
-            }
-        }
+    if (!$("#what_you_see").val().trim().startsWith("You should see")) {
+        errorMsg("What you see has to start with \"You should see\"");
+        return
+    }
+    if (!$("#what_you_do").val().trim().startsWith("You have to")) {
+        errorMsg("What you do has to start with \"You have to\"");
+        return
+    }
+    if (!$("#grid_size_desc").val().trim().startsWith("The grid size")) {
+        errorMsg("The grid size field has to start with \"The grid size\"");
+        return
     }
 
-    // allow popover for last hint, make it fade out after 5 seconds
-    if (TASKS.length == 1) {
-        $('[data-toggle="popover"]').popover({
-            delay: {
-                "show": 500,
-                "hide": 100
-            }
-        });
-        $('[data-toggle="popover"]').click(function () {
+    DESC_SEES = DESC_SEES.join('~');
+    DESC_DOS = DESC_DOS.join('~');
+    DESC_GRIDS = DESC_GRIDS.join('~');
 
-            setTimeout(function () {
-                $('.popover').fadeOut('slow');
-            }, 5000);
-    
-        });
-    }
+    window.location.href = `self_play_test.html?tasks=${URL_TASKS}&see=${DESC_SEES}&do=${DESC_DOS}&grid=${DESC_GRIDS}`;
+}
 
-    if (TASKS.length == 0) {    // bc popping front each time
-        $("#done_modal").modal("show");
+function exit_examples_modal() {
+    const cur_time = new Date();
+    const min_watch_time = 120;
+    const time_watched = Math.round((cur_time - START_TIME) / 1000);
+    if (time_watched < min_watch_time) {
+        errorMsg(`Please watch at least ${min_watch_time - time_watched} more seconds of the video`);
         return;
     }
-
-    infoMsg("Correct! Solve " + (TASKS.length).toString() + " more problems.");
-
-    $("#pattern_title").text(`Pattern ${4-TASKS.length}`);
-
-    resetOutputGrid();
-    // breaks if you don't reset array
-    TEST_PAIRS = new Array();
-
-    // load the next task
-    loadTask(TASKS.shift());
-}
-
-function give_hint() {
-    /**
-     * get a hint if can't figure out problem
-     */
-    if (TASKS.length != 0) {
-        $("#hint_modal").modal('show');
-
-        var video = document.getElementById("hint_video");
-        video.setAttribute("src", `img/hint_${3-TASKS.length}.mp4`);
-        video.load();
-        video.onloadeddata = function () {
-            video.play();
-        };
-    }
-    // const answer = convertSerializedGridToGridObject(TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output']);
-    // showAnswer(answer);
-}
-
-function showAnswer(grid) {
-    /**
-     * changes output grid to right answer
-     */
-    CURRENT_OUTPUT_GRID = grid;
-    syncFromDataGridToEditionGrid();
-    $('#output_grid_size').val(CURRENT_OUTPUT_GRID.height + 'x' + CURRENT_OUTPUT_GRID.width);
+    $('#examples_modal').one('hidden.bs.modal', function() { $('#instructionsModal').modal('show'); }).modal('hide');
 }

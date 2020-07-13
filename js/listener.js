@@ -116,7 +116,11 @@ function give_up() {
     const newTime = new Date();
     console.log((newTime - START_DATE)/1000);
     if ((newTime - START_DATE)/1000 < 30) {
-        errorMsg("Please try to figure out the pattern for a bit before you give up.");
+        errorMsg("Please try to figure out the pattern for at least 30 seconds before you give up.");
+        return;
+    }
+    if (ATTEMPT_JSONS.length < 1) {
+        errorMsg("Please try your best guess at least once before giving up.");
         return;
     }
 

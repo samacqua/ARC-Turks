@@ -153,36 +153,31 @@
                 <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
             </div>
             <div class="modal-body" id="gen-modal-body">
-                <p>Now, you will try to create the correct grid for the pattern you just described, given only your description and a <i>different</i> input grid.</p>
+                <p>Now, you will try to create the correct grid for the pattern you just described, given only your description and a <i>different</i> input grid than you have seen before.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="$('#instructionsModal').one('hidden.bs.modal', function() { $('#instructions2Modal').modal('show'); }).modal('hide');">Okay</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="$('#instructionsModal').one('hidden.bs.modal', function() { $('#instructions2Modal').modal('show'); }).modal('hide'); START_TIME = new Date();">Okay</button>
             </div>
         </div>
     </div>
   </div>
 
-    <!-- Instructions2 Modal -->
-    <div class="modal fade" id="instructions2Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <!-- Examples Modal -->
+    <div class="modal fade" id="examples_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
             </div>
             <div class="modal-body" id="gen-modal-body">
-                <p>On the left of the screen, is the <strong>description area</strong>. Here you will see the description that you wrote for the task.</p>
+                <p>Watch this video to see a few examples of the layout and the task.</p>
 
-                <p>In the middle of the screen is the <strong>input area</strong>. Here you will see a single grid. This is the input (the grid before the arrow), and you will apply your description to this grid.</p>
-
-                <p>On the right of the screen, is the <strong>output area</strong>. Here is where you can create the grid based on the description and input grid. It has the same tools as when you completed the patterns earlier.</p>
-                
-                <p>Watch this demo to see an example.</p>
                 <video width="320" height="240" controls>
-                    <source src="img/self_play_test_ex.mp4" type="video/mp4" autoplay>
+                    <source src="img/listen_examples.mp4" type="video/mp4" autoplay>
                 </video>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
+                <button type="button" class="btn btn-primary" onclick="exit_examples_modal()">Okay</button>
             </div>
         </div>
     </div>
@@ -197,7 +192,9 @@
                 </div>
                 <div class="modal-body" id="gen-modal-body">
                     <p>Great job! You have finished the tutorial. Now, you will do each role seperately. You will create descriptions for someone else to use, and you will use descriptions made by someone else to create an answer.</p>
-                    <p>You will do a total of 6 tasks, which will be a random combination of describing patterns and creating grids based on descriptions.</p>
+                    <p>Remember that when you are describing a pattern, the person who will use your description <strong>has not seen</strong> the examples you are seeing, so you have to be very clear. They will only see one input grid and your description.</p>
+                    <p>You will do a total of 6 "tasks", which will be a random combination of describing patterns and creating grids based on descriptions.</p>
+                    <p></p>
                 </div>
                 <div class="modal-footer">
                     <button onclick="finish_self_play()" type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>

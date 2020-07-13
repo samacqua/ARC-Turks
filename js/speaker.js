@@ -140,8 +140,8 @@ function give_up() {
 
     const newTime = new Date();
     console.log((newTime - START_DATE)/1000);
-    if ((newTime - START_DATE)/1000 < 60) {
-        errorMsg("Please try to figure out the pattern for a bit before you give up.");
+    if ((newTime - START_DATE)/1000 < 30) {
+        errorMsg("Please try to figure out the pattern for at least thirty seconds before you give up.");
         return;
     }
 

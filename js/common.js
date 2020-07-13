@@ -90,7 +90,12 @@ var globalResizeTimer = null;
 $(window).resize(function() {
     if(globalResizeTimer != null) window.clearTimeout(globalResizeTimer);
     globalResizeTimer = window.setTimeout(function() {
-        resizeOutputGrid();
+        console.log('resize');
+        try {
+            resizeOutputGrid();
+        } catch (err) {
+            console.log("no output grid");
+        }
         loadTask(TASK_ID);
     }, 500);
 });

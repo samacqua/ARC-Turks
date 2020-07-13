@@ -38,108 +38,58 @@
 </head>
 
 <body>
+
+    <div class="alert alert-success" id="info_display"></div>
+    <div class="alert alert-danger" id="error_display"></div>
+
     <div id="container-fluid">
-
-        <div class="alert alert-success" id="info_display"></div>
-        <div class="alert alert-danger" id="error_display"></div>
-
         <div class="row">
-            <div class="col-md-4">
+            <div class="col-md-2"></div>
+            <div class="col-md-4" id="io_ex_col">
                 <div class="col-header">
-                    <h1 class="col-title" id ="pattern_title">Pattern 1</h1>
-                    <a href="#" class="help-btn" data-toggle="tooltip" title="These are the examples of the pattern.">Help</a>
+                    <h1 class="col-title" id="pattern-header">Pattern</h1>
+                    <a href="#" class="help-btn" data-toggle="tooltip" title="Describe the pattern that transforms each grid on the left to the grid on its right.">Help</a>
                 </div>
                 <div id="task_preview"></div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="col-header">
-                    <h1 class="col-title">Input Grid</h1>
-                    <a href="#" class="help-btn" data-toggle="tooltip" title="This is the grid before the arrow.">Help</a>
-                </div>
-
-                <div id="evaluation_input" class="selectable_grid"></div>
-                <div id="evaluation_answer" class="selectable_grid"></div>
             </div>
     
             <div class="col-md-4">
                 <div class="col-header">
-                    <h1 class="col-title">Output Grid</h1>
-                    <a href="#" data-placement="left" class="help-btn" data-toggle="tooltip" title="<p>This is where you create the output. Here is a list of the tools: </p>
-                        <ul>
-                            <li>Resize: Change the size of the grid</li>
-                            <li>Copy from Input: Copy the grid of the input</li>
-                            <li>Reset Grid: Make the grid entirely empty</li>
-                            <li>Check!: Check if the grid is the correct answer</li>
-                            <li>Draw: In this mode, you color individual blocks</li>
-                            <li>Floodfill: In this mode, you fill in entire areas</li>
-                            <li>Copy-Paste: In this mode, you can copy from the input or output grid, or fill in a selected area with a color.</li>
-                            <li>color bar: Use the color bar to select which color to draw or floodfill with</li>
-                        </ul>">Help</a>
+                    <h1 class="col-title">Description</h1>
                 </div>
 
-                <div id="output_grid">
-                    <div class="edition_grid selectable_grid">
-                        <div class="row">
-                            <div class="cell" symbol="0" x="0" y="0"></div>
-                            <div class="cell" symbol="0" x="0" y="1"></div>
-                            <div class="cell" symbol="0" x="0" y="2"></div>
-                        </div>
-                        <div class="row">
-                            <div class="cell" symbol="0" x="1" y="0"></div>
-                            <div class="cell" symbol="0" x="1" y="1"></div>
-                            <div class="cell" symbol="0" x="1" y="2"></div>
-                        </div>
-                        <div class="row">
-                            <div class="cell" symbol="0" x="2" y="0"></div>
-                            <div class="cell" symbol="0" x="2" y="1"></div>
-                            <div class="cell" symbol="0" x="2" y="2"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="resize_control_btns">
-                    <label for="output_grid_size">Change grid size: </label>
-                    <input type="text" id="output_grid_size" class="grid_size_field" name="size" value="3x3">
-                    <button type="button" class="btn btn-primary" onclick="resizeOutputGrid()" id="resize_btn">Resize</button>
-                </div>
-
-                <button type="button" class="btn btn-secondary" onclick="copyFromInput()">Copy from input</button>
-                <button type="button" class="btn btn-secondary" onclick="resetOutputGrid()">Reset grid</button>
-                <button type="button" class="btn btn-success" onclick="check_grid()">Check!</button>
-
-                <div id="toolbar">
-                    <div>
-                        <input type="radio" id="tool_edit"
-                         name="tool_switching" value="edit" checked>
-                        <label for="tool_edit">Draw</label>
-
-                        <input type="radio" id="tool_floodfill"
-                         name="tool_switching" value="floodfill">
-                        <label for="tool_floodfill">Flood fill</label>
-
-                        <input type="radio" id="tool_select"
-                        name="tool_switching" value="select">
-                       <label for="tool_select">Copy-Paste</label>
-                    </div>
-                </div>
-
-                <div id="symbol_picker">
-                    <div class="symbol_preview symbol_0 selected-symbol-preview" symbol="0"></div>
-                    <div class="symbol_preview symbol_1" symbol="1"></div>
-                    <div class="symbol_preview symbol_2" symbol="2"></div>
-                    <div class="symbol_preview symbol_3" symbol="3"></div>
-                    <div class="symbol_preview symbol_4" symbol="4"></div>
-                    <div class="symbol_preview symbol_5" symbol="5"></div>
-                    <div class="symbol_preview symbol_6" symbol="6"></div>
-                    <div class="symbol_preview symbol_7" symbol="7"></div>
-                    <div class="symbol_preview symbol_8" symbol="8"></div>
-                    <div class="symbol_preview symbol_9" symbol="9"></div>
-                </div>
-
+                <div class="form-group">
+                    <label for="what_you_see">What should you expect to see in the input grid?</label>
+                    <textarea class="form-control" id="what_you_see" rows="2" placeholder="You should see..."></textarea>
+                    <small id="emailHelp" class="form-text text-muted">Start with "You should see..."</small>
+                  </div>
                 </br>
-                <button type="button" class="btn btn-danger" onclick="give_hint()" data-toggle="popover" data-placement="left" data-content="There is no video for this task. You have to solve it on your own. Look at the input-output pairs to find the pattern." id="hint_button">Hint</button>
+
+                <div class="form-group">
+                    <label for="what_you_do">How do you make the output grid?</label>
+                    <textarea class="form-control" id="what_you_do" rows="2" placeholder="You have to..."></textarea>
+                    <small id="emailHelp" class="form-text text-muted">Start with "You have to..."</small>
+                  </div>
+                </br>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="grid_size_changes" data-toggle="toggle">
+                    <label class="form-check-label" for="defaultCheck1">
+                      Grid size changes
+                    </label>
+                  </div>
+                </br>
+
+                <div class="form-group" id="grid_size_form">
+                    <label for="grid_size_desc">How does the grid size change?</label>
+                    <textarea class="form-control" id="grid_size_desc" rows="1" placeholder="The grid size..."></textarea>
+                    <small id="emailHelp" class="form-text text-muted">Start with "The grid size..."</small>
+                  </div>
+                </br>
+
+                <button onclick="submit()" type="button" class="btn btn-primary">Submit Description</button>
             </div>
+            <div class="col-md-2"></div>
         </div>
     </div>
 
@@ -151,7 +101,7 @@
                 <h3 class="modal-title" id="gen-modal-title">Informed Consent</h3>
             </div>
             <div class="modal-body" id="gen-modal-body">
-                <p>In this study, you will describe and interpret descriptions of an abstract pattern that you observe in grids. At the end, you will be asked a few unrelated demographic questions.</p>
+                <p>In this study, you will describe and interpret descriptions of an abstract pattern that you observe in grids.</p>
                 </br>
                 <p>By answering the following questions, you are participating in a study performed by cognitive scientists in the MIT Department of Brain and Cognitive Science. If you have questions about this research, please contact Sam Acquaviva at samacqua@mit.edu. Your participation in this research is voluntary. You may decline to answer any or all of the following questions. You may decline further participation, at any time, without adverse consequences. Your anonymity is assured; the researchers who have requested your participation will not receive any personal identifying information about you. By clicking <b>'I AGREE'</b> you indicate your consent to participate in this study.</p>
             </div>
@@ -186,7 +136,7 @@
                     <label id="age_result"></label>
 
                     <div class="modal-footer">
-                        <button onclick="exit_demographic()" type="button" class="btn btn-primary" data-dismiss="modal">Submit</button>
+                        <button onclick="exit_demographic()" type="button" class="btn btn-primary">Submit</button>
                     </div>
                 </div>
             </div>
@@ -198,33 +148,6 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
-                </div>
-                    <div class="modal-body" id="gen-modal-body">
-
-                        <h4>Overview</h4>
-                        <p>In this study, there will be 3 sections:
-                            <ol>
-                                <li>Solving patterns</li>
-                                <li>Describing a pattern for yourself and using that description</li>
-                                <li>Describing patterns for others, and using others' descriptions</li>
-                            </ol>
-
-                            First, you will solve some patterns.
-                        </p>
-                    </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="$('#introModal').one('hidden.bs.modal', function() { $('#introModal2').modal('show'); }).modal('hide');">Okay!</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Introduction 2 Modal -->
-    <div class="modal fade" id="introModal2" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
                     <h3 class="modal-title" id="gen-modal-title">Solving Patterns</h3>
                 </div>
                     <div class="modal-body" id="gen-modal-body">
@@ -232,28 +155,42 @@
                         <h4>Overview</h4>
                         <p>If I gave you this problem:
                             <br><br>
-                            <strong>7 --> 14</br>3 --> 6</br>5 --> ? </strong></p>
-                            </br>
-                            You would determine that the answer is 10 because you recognized the pattern: multiply the input number by 2 to get the output number.
+                            <strong>7 --> 14</br>3 --> 6</br>5 --> ? </strong>
+                            </br></br>
+                            You would determine that the answer is <strong>10</strong> because you recognized the pattern: multiply the input number by 2 to get the output number.
                         </p>
 
-                        <p>You will now solve the same kind of problem, but with grids instead of numbers. Here is an example: </p>
+                        <p>Similarly, if I told you the pattern was to multiply the input number by 2 and gave you this problem:
+                            <br><br>
+                            <strong>12 --> ?</strong>
+                            </br></br>
+                            You would determine the answer is 24 because you could apply my description to the test input (12).
+                        </p>
+
+                        <p>However, describing patterns can be more difficult. For example, if the pattern involved grids instead of numbers, it would be more difficult. Here is an example: </p>
                         <img class="img-responsive" src="img/pattern_test_ex.png">
 
-                        <p>Okay, this is more difficult, but after a bit of thinking, you see the pattern. You have to place a dark blue square in the missing corner of the light-blue square shapes, making them into a square. So, this is the answer:</p>
+                        <p>Okay, this is more difficult to solve, but after a bit of thinking, you might see the pattern. Is this the output you were expecting?:</p>
                         <img class="img-responsive" src="img/pattern_test_ans.png">
 
-                        <p>You will solve tasks like this.</p>
+                        <p>You can solve this problem, but what if I <i>described</i> the pattern instead of showing you examples, and then gave you the last grid? Here is the same problem with that format:</p>
+
+                        </br>
+                        <p><strong>In the input grid, you should see a few 2x2 squares with one corner missing. Fill in each square's missing corner with dark blue.</strong></p>
+                        <img class="img-responsive" src="img/pattern_test_ex 2.png">
+                        </br>
+
+                        <p>This second formulation was likely more difficult. And that is what this study is about. You will write these descriptions given only the examples (not the final test grid) for someone else to solve. Likewise, you will use descriptions that other people have made to solve the pattern.</p>
                     </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="$('#introModal2').one('hidden.bs.modal', function() { $('#introModal3').modal('show'); }).modal('hide');">Okay!</button>
+                    <button type="button" class="btn btn-primary" onclick="$('#introModal').one('hidden.bs.modal', function() { $('#examples_modal').modal('show'); }).modal('hide'); START_TIME = new Date()">Continue to Examples</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Layout -->
-    <div class="modal fade" id="introModal3" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <!-- Examples -->
+    <div class="modal fade" id="examples_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -261,36 +198,32 @@
                 </div>
                     <div class="modal-body" id="gen-modal-body">
     
-                        Watch this short video to understand the layout and the task.
+                        Watch this video to see a few examples of the layout and the task.
 
-                        <video width="320" height="240" controls>
-                            <source src="img/pattern_solve_ex.mp4" type="video/mp4" autoplay>
+                        <video id="examples_video" width="320" height="240" controls>
+                            <source src="img/desc_examples.mp4" type="video/mp4" autoplay>
                         </video>
 
                     </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Okay!</button>
+                    <button type="button" class="btn btn-primary" onclick="exit_examples_modal()">Okay!</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Hint Modal -->
-    <div class="modal fade bd-example-modal-lg" tabindex="-1" id="hint_modal" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="width:90%">
-        <div class="modal-dialog modal-lg" role="document">
+        <!-- Instructions Modal -->
+    <div class="modal fade" id="instructionsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title" id="gen-modal-title">Finished Solving Tasks</h3>
+                    <h3 class="modal-title" id="gen-modal-title">Practice</h3>
                 </div>
-                    <div class="modal-body" id="gen-modal-body">
-
-                        <video width="320" height="240" id="hint_video" controls>
-                            <!-- <source src="img/hint_2.mp4" type="video/mp4" id="hint_vid_src" autoplay> -->
-                        </video>
-
-                    </div>
+                <div class="modal-body" id="gen-modal-body">
+                    <p>Now, as practice, you will describe a pattern. Make sure to include enough detail in the description so that, given a new input grid, you can create the correct output.</p>
+                </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Okay!</button>
                 </div>
             </div>
         </div>
@@ -305,8 +238,7 @@
                 </div>
                     <div class="modal-body" id="gen-modal-body">
     
-                        <p>Great job! Now you know how to solve these patterns. But, what if instead of showing you input-output pairs, we gave you a description of the pattern?</p>
-                        <p>That is the idea of this study. We want you to be able to describe the pattern so that someone else, given the test input, can create the correct output grid, like you did. Likewise, we want you to be able to create the correct output based on someone else's description.</p>
+                        <p>Great job! Now you know how to describe these patterns. Now, we will practice using descriptions to create the correct output</p>
 
                     </div>
                 <div class="modal-footer">
