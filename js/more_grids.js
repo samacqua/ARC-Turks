@@ -358,8 +358,8 @@ function parseSizeTuple(size) {
 function resizeOutputGrid() {
     size = $('#output_grid_size').val();
     size = parseSizeTuple(size);
-    height = size[0];
-    width = size[1];
+    height = size[1];
+    width = size[0];
 
     jqGrid = $('#output_grid .edition_grid');
     syncFromEditionGridToDataGrid();

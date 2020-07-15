@@ -99,3 +99,19 @@ $(window).resize(function() {
         loadTask(TASK_ID);
     }, 500);
 });
+
+function update_progress_bar(increment=true) {
+    var stage_num = sessionStorage.getItem('items_complete');
+
+    if (increment) {
+        stage_num++;
+        sessionStorage.setItem('items_complete', stage_num);
+    }
+
+    const tot_tasks = 11;
+    const percent_complete = stage_num / tot_tasks * 100;
+
+    $(".progress-bar").animate({
+        width: `${percent_complete}%`
+    }, 1000);
+}

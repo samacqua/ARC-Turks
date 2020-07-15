@@ -308,6 +308,12 @@ function init_tasks_collection() {
      * Be careful! It will overwrite everything.
      */
     for (i=0; i<400; i++) {
+
+        const exclude = [109];
+        if (exclude.includes(i)) {
+            continue;
+        }
+        
         db.collection("tasks").doc(i.toString()).set({
             'num_descriptions' : 0,
             'ver_gave_up_count' : 0,

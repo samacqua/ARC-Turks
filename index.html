@@ -22,6 +22,7 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
   <!-- CSS files -->
+  <link rel="stylesheet" type="text/css" href="css/index.css">
   <link rel="stylesheet" type="text/css" href="css/common.css">
   <link rel="stylesheet" type="text/css" href="css/grids.css">
   <link rel="stylesheet" type="text/css" href="css/testing_interface.css">
@@ -39,10 +40,25 @@
 
 <body>
 
-    <div class="alert alert-success" id="info_display"></div>
-    <div class="alert alert-danger" id="error_display"></div>
+    <h3 class="task_label">You are the Describer</h3>
 
+    <!-- Progress Bar -->
+    <div class="progress md-progress">
+        <div class="progress-bar" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="11"></div>
+    </div>
+
+    <div class="progress-meter">
+        <div class="meter meter-right" style="width: 54.55%;"><span class="meter-text">All Done!</span></div>
+        <div class="meter meter-right" style="width: 36.36%;"><span class="meter-text">Finished Tutorial</span></div>
+        <div class="meter meter-right" style="width: 9.09%;"><span class="meter-text">Finished Instructions</span></div>
+    </div>
+
+    <!-- Actual Body -->
     <div id="container-fluid">
+
+        <div class="alert alert-success" id="info_display"></div>
+        <div class="alert alert-danger" id="error_display"></div>
+
         <div class="row">
             <div class="col-md-2"></div>
             <div class="col-md-4" id="io_ex_col">
@@ -148,39 +164,37 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title" id="gen-modal-title">Solving Patterns</h3>
+                    <h3 class="modal-title" id="gen-modal-title">Overview of Your Role</h3>
                 </div>
                     <div class="modal-body" id="gen-modal-body">
-    
-                        <h4>Overview</h4>
-                        <p>If I gave you this problem:
-                            <br><br>
-                            <strong>7 --> 14</br>3 --> 6</br>5 --> ? </strong>
-                            </br></br>
-                            You would determine that the answer is <strong>10</strong> because you recognized the pattern: multiply the input number by 2 to get the output number.
-                        </p>
 
-                        <p>Similarly, if I told you the pattern was to multiply the input number by 2 and gave you this problem:
-                            <br><br>
-                            <strong>12 --> ?</strong>
-                            </br></br>
-                            You would determine the answer is 24 because you could apply my description to the test input (12).
-                        </p>
+                        <p>In year 3030, robots rule the world. Luckily, we managed to infiltrate the robot's factory, where robots process abstract grids.</p>
+                        <p>There are two kinds of robots: <strong>describers</strong> and <strong>builders</strong> . In order to blend into the factory, we must imitate these robots.</p>
 
-                        <p>However, describing patterns can be more difficult. For example, if the pattern involved grids instead of numbers, it would be more difficult. Here is an example: </p>
+                        <p>If you are a <strong>describer</strong>, your job is look at several example patterns, and describe the process that makes the output grid from the input grid.</p>
+                        <p>For instance, given the following example patterns:</p>
                         <img class="img-responsive" src="img/pattern_test_ex.png">
+                        <p>A describer would write something like: </p>
+                        <p id="description"><strong>
+                            In the input grid, you should see a few 2x2 squares with one corner missing. Fill in each square's missing corner with dark blue.
+                        </strong></p>
 
-                        <p>Okay, this is more difficult to solve, but after a bit of thinking, you might see the pattern. Is this the output you were expecting?:</p>
+                        <hr>
+
+                        <p>Once the description is written, it is given to the builder at the other side of the factory.</p>
+                        <p>If you are a <strong>builder</strong>, your job is to follow the description given to you and apply it on a new input grid.</p>
+                        <p>For instance, the builder who recieved the earlier example's description would see the same description:</p>
+                        <p id="description"><strong>
+                            In the input grid, you should see a few 2x2 squares with one corner missing. Fill in each square's missing corner with dark blue.
+                        </strong></p>
+                        <p>and a new input grid: </p>
+                        <img class="img-responsive" src="img/pattern_test_ex 2.png">
+
+                        <p>The builder would produce the correct output grid based on the description and input grid:</p>
                         <img class="img-responsive" src="img/pattern_test_ans.png">
 
-                        <p>You can solve this problem, but what if I <i>described</i> the pattern instead of showing you examples, and then gave you the last grid? Here is the same problem with that format:</p>
-
-                        </br>
-                        <p><strong>In the input grid, you should see a few 2x2 squares with one corner missing. Fill in each square's missing corner with dark blue.</strong></p>
-                        <img class="img-responsive" src="img/pattern_test_ex 2.png">
-                        </br>
-
-                        <p>This second formulation was likely more difficult. And that is what this study is about. You will write these descriptions given only the examples (not the final test grid) for someone else to solve. Likewise, you will use descriptions that other people have made to solve the pattern.</p>
+                        <hr>
+                        <p>The describer and builder are (together) successful if the builder can build the right output grid from the describer's description.</p>
                     </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" onclick="$('#introModal').one('hidden.bs.modal', function() { $('#examples_modal').modal('show'); }).modal('hide'); START_TIME = new Date()">Continue to Examples</button>
@@ -198,21 +212,44 @@
                 </div>
                     <div class="modal-body" id="gen-modal-body">
     
-                        Watch this video to see a few examples of the layout and the task.
+                        Watch this short video to understand the layout of the <strong>describer</strong> and <strong>builder</strong>.
 
                         <video id="examples_video" width="320" height="240" controls>
-                            <source src="img/desc_examples.mp4" type="video/mp4" autoplay>
+                            <source src="img/Instructions.mp4" type="video/mp4" autoplay>
                         </video>
 
                     </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="exit_examples_modal()">Okay!</button>
+                    <button type="button" class="btn btn-primary" onclick="$('#examples_modal').one('hidden.bs.modal', function() { $('#quiz_modal').modal('show'); }).modal('hide');">Okay!</button>
                 </div>
             </div>
         </div>
     </div>
 
-        <!-- Instructions Modal -->
+    <!-- Test Modal -->
+    <div class="modal fade" id="quiz_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Testing Understanding</h3>
+                </div>
+                    <div class="modal-body" id="gen-modal-body">
+    
+                        <p>Answer these questions to ensure that you understand the instructions.</p>
+
+                        <div id="quiz"></div>
+                        <div id="results"></div>
+
+                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="check_quiz()">Submit Quiz</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Instructions Modal -->
     <div class="modal fade" id="instructionsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -220,10 +257,11 @@
                     <h3 class="modal-title" id="gen-modal-title">Practice</h3>
                 </div>
                 <div class="modal-body" id="gen-modal-body">
-                    <p>Now, as practice, you will describe a pattern. Make sure to include enough detail in the description so that, given a new input grid, you can create the correct output.</p>
+                    <p>Great job! You successfully completed the quiz.</p>
+                    <p>Now, as practice before you go into the robot factory, you practice playing the part of the <strong>describer</strong>. </p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Okay!</button>
+                    <button type="button" class="btn btn-primary" onclick="update_progress_bar()" data-dismiss="modal">Okay!</button>
                 </div>
             </div>
         </div>

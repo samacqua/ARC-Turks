@@ -45,6 +45,20 @@
 </head>
 
 <body>
+
+    <h3 class="task_label">You are the Describer</h3>
+
+    <!-- Progress Bar -->
+    <div class="progress md-progress">
+        <div class="progress-bar" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="11"></div>
+    </div>
+
+    <div class="progress-meter">
+        <div class="meter meter-right" style="width: 54.55%;"><span class="meter-text">All Done!</span></div>
+        <div class="meter meter-right" style="width: 36.36%;"><span class="meter-text">Finished Tutorial</span></div>
+        <div class="meter meter-right" style="width: 9.09%;"><span class="meter-text">Finished Instructions</span></div>
+    </div>
+
     <div id="container-fluid">
 
         <div class="alert alert-success" id="info_display"></div>
@@ -184,26 +198,7 @@
                     <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
                 </div>
                     <div class="modal-body" id="gen-modal-body">
-                        <p>You are now playing the part of describing the pattern. However, these descriptions will be going to another person. So, you have to make sure they are descriptive enough so that they can solve the problem even though <strong>they have never seen the pattern examples that you will see.</strong></p>
-                        <p>Because your description is going to another person, we need to make sure you understand the pattern as well. So, after you submit your description, you will be asked to solve the problem.</p>
-                        <p>If, after some time, you do not understand the pattern, you can give up and we will give you a new problem to describe.</p>
-                    </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Continue</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Instructions Modal -->
-    <div class="modal fade" id="quickInstructionsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title" id="gen-modal-title">You are Describing</h3>
-                </div>
-                    <div class="modal-body" id="gen-modal-body">
-                        <p>You are now playing the part of describing the pattern.</p>
+                        <p>You are now playing the part of describing the <strong>describer</strong>. To ensure that you understand the pattern, after you submit, you will have to create the correct output for a new input grid.</p>
                     </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-dismiss="modal">Continue</button>

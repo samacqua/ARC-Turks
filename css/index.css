@@ -1,0 +1,12 @@
+.question{
+	font-weight: 600;
+}
+.answers {
+    margin-bottom: 20px;
+}
+
+#description {
+    margin: 20px;
+    padding: 2px;
+    font-size: 18px;
+}

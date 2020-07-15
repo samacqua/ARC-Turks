@@ -10,8 +10,8 @@ const speaker_tasks_done = parseInt(sessionStorage.getItem('s'));
 $(window).on('load',function(){
     START_DATE = new Date();
 
-    $('#error_display').hide();
-    $('#info_display').hide();
+    update_progress_bar(increment=false);
+
     $("#grid_size_form").css("visibility", "hidden")
 
     $("#what_you_see").val("You should see...");
@@ -21,8 +21,6 @@ $(window).on('load',function(){
     // only give full instructions if first time through
     if (speaker_tasks_done == 1) {
         $('#instructionsModal').modal('show');
-    } else {
-        $('#quickInstructionsModal').modal('show');
     }
 
     random_speaker_retrieve(TOTAL_TASKS_TO_COMPLETE);
@@ -127,6 +125,8 @@ function exit_task_qs() {
         sessionStorage.setItem('val_do', do_desc);
         sessionStorage.setItem('val_grid', grid_size_desc);
     }
+
+    update_progress_bar();
     
     store_response_speaker(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, age, gender, conf, gave_up_verification=GAVE_UP)
         .then(function() { next_task(); })

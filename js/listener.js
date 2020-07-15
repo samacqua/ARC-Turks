@@ -11,9 +11,7 @@ const speaker_tasks_done = parseInt(sessionStorage.getItem('s'));
 $(window).on('load',function(){
     START_DATE = new Date();
 
-    $('#error_display').hide();
-    $('#info_display').hide();
-    $('#instructionsModal').modal('show');
+    update_progress_bar(increment=false);
 
     if (listener_tasks_done + speaker_tasks_done == TOTAL_TASKS_TO_COMPLETE) {
         retrieve_own_description();
@@ -59,6 +57,8 @@ function check() {
             }
         }
     }
+
+    update_progress_bar();
 
     // if last task, show final message
     if (listener_tasks_done + speaker_tasks_done == TOTAL_TASKS_TO_COMPLETE) {

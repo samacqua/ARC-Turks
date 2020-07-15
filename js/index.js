@@ -1,5 +1,5 @@
 // easy tasks for demonstration purposes
-// const TASKS = [54, 52, 345]; for video demonstration
+// const TASKS = [78]; // for video demonstration
 const TASKS = [370, 258];
 const URL_TASKS = TASKS.join('.');
 
@@ -9,11 +9,48 @@ var DESC_GRIDS = [];
 
 var START_TIME;
 
+sessionStorage.setItem("items_complete", "0");
+
+const quiz_questions = [
+	{
+		question: "The goal of the describer is to...",
+		answers: {
+			a: 'create the correct output grid based on grid examples of the pattern',
+			b: 'describe the pattern based on grid examples so that another person can create the correct output grid',
+			c: 'use a description of the pattern to create the correct output grid'
+		},
+		correctAnswer: 'b'
+	},
+	{
+		question: "The goal of the builder is to...",
+		answers: {
+			a: 'create the correct output grid based on grid examples of the pattern',
+			b: 'describe the pattern based on grid examples so that another person can create the correct output grid',
+			c: 'use a description of the pattern to create the correct output grid'
+		},
+		correctAnswer: 'c'
+    },
+    {
+		question: "You should break up your description into...",
+		answers: {
+			a: '3 sections: what you should see in the input grid, what you should do to make the output grid, and how the grid size changes (if at all).',
+			b: '1 section: what is the pattern.',
+			c: 'as many sections as there are examples so that you can describe each example.'
+		},
+		correctAnswer: 'a'
+    },
+    {
+		question: "Which choice best describes the functions of Draw, Flood fill, and Copy-Paste?",
+		answers: {
+			a: 'Draw lets you color individual boxes in the grid, flood fill lets you fill in entire areas, and copy paste lets you copy and paste parts of the grids',
+			b: 'Draw lets you color the output grid, flood fill lets you change the input grid, and copy-paste copies the entire input grid.',
+			c: 'Draw lets you draw lines, flood-fill lets you color individual boxes, and copy-paste lets you copy from the output box to other websites.'
+		},
+		correctAnswer: 'a'
+    },
+];
+
 $(window).on('load',function(){
-
-    $('#error_display').hide();
-    $('#info_display').hide();
-
     $("#grid_size_form").css("visibility", "hidden");
 
     // fill forms with actual text
@@ -22,12 +59,15 @@ $(window).on('load',function(){
     $("#grid_size_desc").val("The grid size...");
 
     // get consent, then demographic, then present study, then begin solving patterns
-    $('#consentModal').modal('show');
+    $('#quiz_modal').modal('show');
 
     // assign a random id
     const user_id = Math.floor(Math.random()*1e10);
     sessionStorage.setItem("uid", user_id);
     loadTask(TASKS.shift());
+
+    var quizContainer = document.getElementById('quiz');
+    showQuestions(quiz_questions, quizContainer);
 });
 
 $(document).ready(function(){
@@ -99,15 +139,6 @@ function submit() {
         DESC_GRIDS.push($("#grid_size_desc").val().trim());
     }
 
-     if (TASKS.length != 0) {
-        $("#what_you_see").val("You should see...");
-        $("#what_you_do").val("You have to...");
-        $("#grid_size_desc").val("The grid size...");
-
-        loadTask(TASKS.shift());
-        return;
-     }
-
     if ($("#what_you_see").val().trim().length < 20) {
         errorMsg("Please enter a description of what you see.");
         return
@@ -134,6 +165,18 @@ function submit() {
         return
     }
 
+    update_progress_bar();
+
+    if (TASKS.length != 0) {
+        infoMsg("Correct! Describe " + TASKS.length.toString() + " more pattern.")
+        $("#what_you_see").val("You should see...");
+        $("#what_you_do").val("You have to...");
+        $("#grid_size_desc").val("The grid size...");
+
+        loadTask(TASKS.shift());
+        return;
+     }
+
     DESC_SEES = DESC_SEES.join('~');
     DESC_DOS = DESC_DOS.join('~');
     DESC_GRIDS = DESC_GRIDS.join('~');
@@ -141,13 +184,56 @@ function submit() {
     window.location.href = `self_play_test.html?tasks=${URL_TASKS}&see=${DESC_SEES}&do=${DESC_DOS}&grid=${DESC_GRIDS}`;
 }
 
-function exit_examples_modal() {
-    const cur_time = new Date();
-    const min_watch_time = 120;
-    const time_watched = Math.round((cur_time - START_TIME) / 1000);
-    if (time_watched < min_watch_time) {
-        errorMsg(`Please watch at least ${min_watch_time - time_watched} more seconds of the video`);
-        return;
+function showQuestions(questions, quizContainer){
+    // we'll need a place to store the output and the answer choices
+    var output = [];
+    var answers;
+
+    // for each question...
+    for(var i=0; i<questions.length; i++){
+        
+        // first reset the list of answers
+        answers = [];
+
+        // for each available answer to this question...
+        for(letter in questions[i].answers){
+
+            // ...add an html radio button
+            answers.push(
+                '<label>'
+                    + '<input type="radio" name="question'+i+'" value="'+letter+'">'
+                    + letter + ': '
+                    + questions[i].answers[letter]
+                + '</label>'
+            );
+        }
+
+        // add this question and its answers to the output
+        output.push(
+            '<div class="question">' + questions[i].question + '</div>'
+            + '<div class="answers">' + answers.join('') + '</div>' 
+            + '<hr>'
+        );
     }
-    $('#examples_modal').one('hidden.bs.modal', function() { $('#instructionsModal').modal('show'); }).modal('hide');
+
+    // finally combine our output list into one string of html and put it on the page
+    quizContainer.innerHTML = output.join('');
+}
+
+function check_quiz() {
+    // gather answer containers from our quiz
+    var quizContainer = document.getElementById('quiz');
+    var answerContainers = quizContainer.querySelectorAll('.answers');
+    
+    for(var i=0; i<quiz_questions.length; i++){
+        userAnswer = (answerContainers[i].querySelector('input[name=question'+i+']:checked')||{}).value;
+        if(userAnswer != quiz_questions[i].correctAnswer){
+            $('#quiz_modal').one('hidden.bs.modal', function() { $('#introModal').modal('show'); }).modal('hide');
+            errorMsg("You did not correctly complete the quiz. Please reread the instructions and retry the quiz.");
+            return;
+        }
+    }
+
+    $('#quiz_modal').one('hidden.bs.modal', function() { $('#instructionsModal').modal('show'); }).modal('hide');
+
 }

@@ -39,6 +39,21 @@
 
 <body>
 
+    <h3 class="task_label">You are the Builder</h3>
+
+    <!-- Progress Bar -->
+    <div class="progress md-progress">
+        <div class="progress-bar" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="11"></div>
+    </div>
+
+    <div class="progress-meter">
+        <div class="meter meter-right" style="width: 54.55%;"><span class="meter-text">All Done!</span></div>
+        <div class="meter meter-right" style="width: 36.36%;"><span class="meter-text">Finished Tutorial</span></div>
+        <div class="meter meter-right" style="width: 9.09%;"><span class="meter-text">Finished Instructions</span></div>
+    </div>
+
+    <!-- Actual Body -->
+
     <div id="container-fluid">
 
         <div class="alert alert-success" id="info_display"></div>
@@ -153,35 +168,14 @@
                 <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
             </div>
             <div class="modal-body" id="gen-modal-body">
-                <p>Now, you will try to create the correct grid for the pattern you just described, given only your description and a <i>different</i> input grid than you have seen before.</p>
+                <p>Now, you will play the part of the <strong>builder</strong>, given your description for the pattern you just described.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="$('#instructionsModal').one('hidden.bs.modal', function() { $('#instructions2Modal').modal('show'); }).modal('hide'); START_TIME = new Date();">Okay</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
             </div>
         </div>
     </div>
   </div>
-
-    <!-- Examples Modal -->
-    <div class="modal fade" id="examples_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
-            </div>
-            <div class="modal-body" id="gen-modal-body">
-                <p>Watch this video to see a few examples of the layout and the task.</p>
-
-                <video width="320" height="240" controls>
-                    <source src="img/listen_examples.mp4" type="video/mp4" autoplay>
-                </video>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="exit_examples_modal()">Okay</button>
-            </div>
-        </div>
-    </div>
-    </div>
 
     <!-- Exit Modal -->
     <div class="modal fade" id="exitModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
@@ -191,10 +185,9 @@
                     <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
                 </div>
                 <div class="modal-body" id="gen-modal-body">
-                    <p>Great job! You have finished the tutorial. Now, you will do each role seperately. You will create descriptions for someone else to use, and you will use descriptions made by someone else to create an answer.</p>
-                    <p>Remember that when you are describing a pattern, the person who will use your description <strong>has not seen</strong> the examples you are seeing, so you have to be very clear. They will only see one input grid and your description.</p>
-                    <p>You will do a total of 6 "tasks", which will be a random combination of describing patterns and creating grids based on descriptions.</p>
-                    <p></p>
+                    <p>Great job! You have finished the tutorial. Now, you are ready to enter the robot factory and complete actual <strong>builder</strong> and <strong>describer</strong> tasks.</p>
+                    <p>Because the robots are very good at their jobs, they will know quickly that you are a human if you give bad descriptions and do not interpret their descriptions well.</p>
+                    <p>You will complete a total of 6 tasks. You will recieve <strong>AMOUNT</strong> for completing the study, and a bonus of <strong>AMOUNT</strong> for each successful communication (either you correctly interpret a description, or you write a description that is correctly interpreted).</p>
                 </div>
                 <div class="modal-footer">
                     <button onclick="finish_self_play()" type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>

@@ -9,10 +9,9 @@ var grid_descs = urlParams.get('grid').split('~');
 var START_TIME;
 
 $(window).on('load',function(){
-    $('#error_display').hide();
-    $('#info_display').hide();
-
     $('#instructionsModal').modal('show');
+
+    update_progress_bar(increment=false);
 
     // load task and descriptions
     const f_task = tasks.shift();
@@ -59,8 +58,11 @@ function check_grid() {
             }
         }
     }
+
+    update_progress_bar();
+
     if (tasks.length != 0) {
-        infoMsg("Correct! Solve " + (tasks.length).toString() + " more problems.");
+        infoMsg("Correct! Solve " + (tasks.length).toString() + " more problem.");
 
         // reset values
         resetOutputGrid();
@@ -86,15 +88,4 @@ function finish_self_play() {
     sessionStorage.setItem('l', 0);
 
     next_task();
-}
-
-function exit_examples_modal() {
-    const cur_time = new Date();
-    const min_watch_time = 120;
-    const time_watched = Math.round((cur_time - START_TIME) / 1000);
-    if (time_watched < min_watch_time) {
-        errorMsg(`Please watch at least ${min_watch_time - time_watched} more seconds of the video`);
-        return;
-    }
-    $('#examples_modal').modal('hide');
 }
