@@ -1,15 +1,15 @@
 var DESC_ID;
 
 var firebaseConfig = {
-    apiKey: "AIzaSyBv4KeycMnYznBxZ0D6IfLifZuivGG0PjQ",
-    authDomain: "arc-turk.firebaseapp.com",
-    databaseURL: "https://arc-turk.firebaseio.com",
-    projectId: "arc-turk",
-    storageBucket: "arc-turk.appspot.com",
-    messagingSenderId: "60760627786",
-    appId: "1:60760627786:web:00bc4b63e339bf0600e4b3",
-    measurementId: "G-YN4FSWEZPE"
-};
+    apiKey: "AIzaSyBdfMmpKXXHuWU3769Y8Uem89ti78YQf-M",
+    authDomain: "arc-language-pilot.firebaseapp.com",
+    databaseURL: "https://arc-language-pilot.firebaseio.com",
+    projectId: "arc-language-pilot",
+    storageBucket: "arc-language-pilot.appspot.com",
+    messagingSenderId: "429799263295",
+    appId: "1:429799263295:web:993ba49e3d3b2761e47c8a",
+    measurementId: "G-7VPWXQHJ14"
+  };
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
@@ -43,21 +43,6 @@ Purpose of each Collection:
         Bc of Firestore Collection-Document Structure, the ver_gave_up_count and desc_gave_up_count for each task collection is not stored here.
         They are stored in the 'tasks' collection, but could also quickly compute it from the data in each task's collection.
 */
-
-/**
- * Shuffles array in place. from https://stackoverflow.com/a/6274381/5416200
- * @param {Array} a items An array containing the items.
- */
-function shuffle(a) {
-    var j, x, i;
-    for (i = a.length - 1; i > 0; i--) {
-        j = Math.floor(Math.random() * (i + 1));
-        x = a[i];
-        a[i] = a[j];
-        a[j] = x;
-    }
-    return a;
-}
 
 function random_speaker_retrieve(limit_size) {
     /**
@@ -302,6 +287,13 @@ function give_up_description(task_id) {
     });
 }
 
+function send_user_info(user_id, time_to_complete) {
+    db.collection("users").doc(user_id.toString()).set({
+        'user_id': user_id,
+        'time_to_complete': time_to_complete
+    });
+}
+
 function init_tasks_collection() {
     /**
      * Just sets 0 value to all tasks in db. 
@@ -311,6 +303,7 @@ function init_tasks_collection() {
 
         const exclude = [109];
         if (exclude.includes(i)) {
+            console.log("excluding");
             continue;
         }
 

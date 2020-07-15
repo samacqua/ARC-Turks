@@ -13,7 +13,7 @@ $(window).on('load',function(){
 
     update_progress_bar(increment=false);
 
-    random_listen_retrieve(TOTAL_TASKS_TO_COMPLETE);
+    random_listen_retrieve(TOTAL_TASKS_TO_COMPLETE/2);
 });
 
 
@@ -49,6 +49,10 @@ function check() {
     if (listener_tasks_done + speaker_tasks_done == TOTAL_TASKS_TO_COMPLETE) {
         $("#finish_modal_uid").text(uid.toString());
         $("#finished_modal").modal('show');
+
+        const end_time = new Date();
+        const delta_time = parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time'));
+        send_user_info(uid, delta_time/100);
         return;
     }
 

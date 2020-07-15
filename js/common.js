@@ -38,19 +38,38 @@ $(window).on('load',function(){
     });
 });
 
+/**
+ * Shuffles array in place. from https://stackoverflow.com/a/6274381/5416200
+ * @param {Array} a items An array containing the items.
+ */
+function shuffle(a) {
+    var j, x, i;
+    for (i = a.length - 1; i > 0; i--) {
+        j = Math.floor(Math.random() * (i + 1));
+        x = a[i];
+        a[i] = a[j];
+        a[j] = x;
+    }
+    return a;
+}
+
 function next_task() {
     /**
      * go to next task, randomly choose listener or speaker
      * but make sure listener and speaker in first two tasks
      */
 
-     var speaker_tasks_done = parseInt(sessionStorage.getItem('s'));
-     var listener_tasks_done = parseInt(sessionStorage.getItem('l'));
-     console.log(speaker_tasks_done);
-     console.log(listener_tasks_done);
+    var speaker_tasks_done = parseInt(sessionStorage.getItem('s'));
+    var listener_tasks_done = parseInt(sessionStorage.getItem('l'));
+    console.log(speaker_tasks_done);
+    console.log(listener_tasks_done);
 
-    const rand_num = Math.random();
-    if (rand_num < 0.5) {
+    var task_order = sessionStorage.getItem('task_order').split(',');
+    const next_task = task_order.pop();
+    console.log(next_task);
+    sessionStorage.setItem('task_order', task_order);
+
+    if (next_task == 's') {
         speaker_tasks_done++;
         sessionStorage.setItem('s', speaker_tasks_done);
         window.location.href = 'speaker.html';

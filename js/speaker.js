@@ -15,8 +15,8 @@ $(window).on('load',function(){
 
     $("#grid_size_form").css("visibility", "hidden")
 
-    $("#what_you_see").val("You should see...");
-    $("#what_you_do").val("You have to...");
+    $("#what_you_see").val("In the input, you should see...");
+    $("#what_you_do").val("To make the output, you have to...");
     $("#grid_size_desc").val("The grid size...");
 
     // only give full instructions if first time through
@@ -24,7 +24,7 @@ $(window).on('load',function(){
         $('#instructionsModal').modal('show');
     }
 
-    random_speaker_retrieve(TOTAL_TASKS_TO_COMPLETE);
+    random_speaker_retrieve(TOTAL_TASKS_TO_COMPLETE/2);
 });
 
 $(document).ready(function(){
@@ -55,16 +55,16 @@ function continue_to_verify() {
         return
     }
 
-    if (!$("#what_you_see").val().trim().startsWith("You should see")) {
-        errorMsg("What you see has to start with \"You should see\"");
+    if (!$("#what_you_see").val().trim().startsWith("In the input, you should see...")) {
+        errorMsg("What you see has to start with \"In the input, you should see...\"");
         return
     }
-    if (!$("#what_you_do").val().trim().startsWith("You have to")) {
-        errorMsg("What you do has to start with \"You have to\"");
+    if (!$("#what_you_do").val().trim().startsWith("To make the output, you have to...")) {
+        errorMsg("What you do has to start with \"To make the output, you have to...\"");
         return
     }
-    if (!$("#grid_size_desc").val().trim().startsWith("The grid size")) {
-        errorMsg("The grid size field has to start with \"The grid size\"");
+    if (!$("#grid_size_desc").val().trim().startsWith("The grid size...")) {
+        errorMsg("The grid size field has to start with \"The grid size...\"");
         return
     }
 
@@ -124,6 +124,11 @@ function exit_task_qs() {
     if (listener_tasks_done + speaker_tasks_done == TOTAL_TASKS_TO_COMPLETE) {
         $("#finish_modal_uid").text(uid.toString());
         $("#finished_modal").modal('show');
+
+        const end_time = new Date();
+        const delta_time = parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time'));
+        send_user_info(uid, delta_time/100);
+
         return;
     }
     

@@ -7,8 +7,6 @@ var DESC_SEES = [];
 var DESC_DOS = [];
 var DESC_GRIDS = [];
 
-var START_TIME;
-
 sessionStorage.setItem("items_complete", "0");
 
 const quiz_questions = [
@@ -51,11 +49,17 @@ const quiz_questions = [
 ];
 
 $(window).on('load',function(){
+    // hide grid size description
     $("#grid_size_form").css("visibility", "hidden");
 
+    // create random order of tasks
+    const TASK_ORDER = ['s', 's', 's', 'l', 'l', 'l'];
+    shuffle(TASK_ORDER);
+    sessionStorage.setItem('task_order', TASK_ORDER);
+
     // fill forms with actual text
-    $("#what_you_see").val("You should see...");
-    $("#what_you_do").val("You have to...");
+    $("#what_you_see").val("In the input, you should see...");
+    $("#what_you_do").val("To make the output, you have to...");
     $("#grid_size_desc").val("The grid size...");
 
     // get consent, then demographic, then present study, then begin solving patterns
@@ -68,6 +72,9 @@ $(window).on('load',function(){
 
     var quizContainer = document.getElementById('quiz');
     showQuestions(quiz_questions, quizContainer);
+
+    const start_time = new Date();
+    sessionStorage.setItem('start_time', start_time.getTime());
 });
 
 $(document).ready(function(){
@@ -152,16 +159,16 @@ function submit() {
         return
     }
 
-    if (!$("#what_you_see").val().trim().startsWith("You should see")) {
-        errorMsg("What you see has to start with \"You should see\"");
+    if (!$("#what_you_see").val().trim().startsWith("In the input, you should see...")) {
+        errorMsg("What you see has to start with \"In the input, you should see...\"");
         return
     }
-    if (!$("#what_you_do").val().trim().startsWith("You have to")) {
-        errorMsg("What you do has to start with \"You have to\"");
+    if (!$("#what_you_do").val().trim().startsWith("To make the output, you have to...")) {
+        errorMsg("What you do has to start with \"To make the output, you have to...\"");
         return
     }
-    if (!$("#grid_size_desc").val().trim().startsWith("The grid size")) {
-        errorMsg("The grid size field has to start with \"The grid size\"");
+    if (!$("#grid_size_desc").val().trim().startsWith("The grid size...")) {
+        errorMsg("The grid size field has to start with \"The grid size...\"");
         return
     }
 
@@ -169,8 +176,8 @@ function submit() {
 
     if (TASKS.length != 0) {
         infoMsg("Correct! Describe " + TASKS.length.toString() + " more pattern.")
-        $("#what_you_see").val("You should see...");
-        $("#what_you_do").val("You have to...");
+        $("#what_you_see").val("In the input, you should see...");
+        $("#what_you_do").val("To make the output, you have to...");
         $("#grid_size_desc").val("The grid size...");
 
         loadTask(TASKS.shift());
