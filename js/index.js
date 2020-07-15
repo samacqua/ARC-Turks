@@ -59,7 +59,7 @@ $(window).on('load',function(){
     $("#grid_size_desc").val("The grid size...");
 
     // get consent, then demographic, then present study, then begin solving patterns
-    $('#quiz_modal').modal('show');
+    $('#consentModal').modal('show');
 
     // assign a random id
     const user_id = Math.floor(Math.random()*1e10);
