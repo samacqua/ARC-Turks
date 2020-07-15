@@ -117,7 +117,7 @@ function random_listen_retrieve(limit_size) {
 
                 const data = doc.data();
 
-                const task_desc = [data.task_num, data.do_description, data.see_description, data.grid_description, doc.id];
+                const task_desc = [data.task_num, data.see_description, data.do_description, data.grid_description, doc.id];
                 retrieved_tasks_descs.push(task_desc);
             });
             shuffle(retrieved_tasks_descs);
@@ -313,7 +313,7 @@ function init_tasks_collection() {
         if (exclude.includes(i)) {
             continue;
         }
-        
+
         db.collection("tasks").doc(i.toString()).set({
             'num_descriptions' : 0,
             'ver_gave_up_count' : 0,

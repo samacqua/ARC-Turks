@@ -198,7 +198,7 @@
                     <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
                 </div>
                     <div class="modal-body" id="gen-modal-body">
-                        <p>You are now playing the part of describing the <strong>describer</strong>. To ensure that you understand the pattern, after you submit, you will have to create the correct output for a new input grid.</p>
+                        <p>You are now playing the part of the <strong>describer</strong>. To ensure that you understand the pattern, after you submit your description, you will have to create the correct output for a new input grid.</p>
                     </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-dismiss="modal">Continue</button>
@@ -242,6 +242,21 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">No, I'll try some more</button>
                     <button onclick="give_up()" type="button" class="btn btn-danger" data-dismiss="modal">Give Up</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Finished Modal -->
+    <div class="modal fade" id="finished_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Thank You!</h3>
+                </div>
+                <div class="modal-body" id="final-modal-body">
+                    <p id="final_message">Thank you for participating in this study! Your survey code is: </p>
+                    <h5 id="finish_modal_uid"></h5>
                 </div>
             </div>
         </div>

@@ -49,28 +49,6 @@ function next_task() {
      console.log(speaker_tasks_done);
      console.log(listener_tasks_done);
 
-    // to ensure speaker and listener in first two tasks
-    if (speaker_tasks_done == 0 && listener_tasks_done != 0) {
-        speaker_tasks_done++;
-        sessionStorage.setItem('s', speaker_tasks_done);
-        window.location.href = 'speaker.html';
-        return;
-    }
-    if (listener_tasks_done == 0 && speaker_tasks_done != 0) {
-        listener_tasks_done++;
-        sessionStorage.setItem('l', listener_tasks_done);
-        window.location.href = 'listener.html';
-        return;
-    }
-
-    // last one is self-play to ensure was actually doing tasks
-    if (listener_tasks_done + speaker_tasks_done == TOTAL_TASKS_TO_COMPLETE - 1) {
-        listener_tasks_done++;
-        sessionStorage.setItem('l', listener_tasks_done);
-        window.location.href = 'listener.html';
-        return;
-    }
-
     const rand_num = Math.random();
     if (rand_num < 0.5) {
         speaker_tasks_done++;

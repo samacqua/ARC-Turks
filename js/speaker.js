@@ -6,6 +6,7 @@ const uid = sessionStorage.getItem('uid');
 const age = sessionStorage.getItem('age');
 const gender = sessionStorage.getItem('gender');
 const speaker_tasks_done = parseInt(sessionStorage.getItem('s'));
+const listener_tasks_done = parseInt(sessionStorage.getItem('l'));
 
 $(window).on('load',function(){
     START_DATE = new Date();
@@ -118,15 +119,13 @@ function exit_task_qs() {
         grid_size_desc = "The grid size... does not change."
     }
 
-    // store first task for validation
-    if (parseInt(speaker_tasks_done) == 1) {
-        sessionStorage.setItem('val_task', TASK_ID);
-        sessionStorage.setItem('val_see', see_desc);
-        sessionStorage.setItem('val_do', do_desc);
-        sessionStorage.setItem('val_grid', grid_size_desc);
-    }
-
     update_progress_bar();
+
+    if (listener_tasks_done + speaker_tasks_done == TOTAL_TASKS_TO_COMPLETE) {
+        $("#finish_modal_uid").text(uid.toString());
+        $("#finished_modal").modal('show');
+        return;
+    }
     
     store_response_speaker(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, age, gender, conf, gave_up_verification=GAVE_UP)
         .then(function() { next_task(); })

@@ -13,23 +13,8 @@ $(window).on('load',function(){
 
     update_progress_bar(increment=false);
 
-    if (listener_tasks_done + speaker_tasks_done == TOTAL_TASKS_TO_COMPLETE) {
-        retrieve_own_description();
-        return;
-    }
-
     random_listen_retrieve(TOTAL_TASKS_TO_COMPLETE);
 });
-
-function retrieve_own_description() {
-    TASK_ID = sessionStorage.getItem('val_task');
-
-    $("#see_p").text(sessionStorage.getItem('val_see'));
-    $("#do_p").text(sessionStorage.getItem('val_do'));
-    $("#grid_size_p").text(sessionStorage.getItem('val_grid'));
-
-    loadTask(TASK_ID);
-}
 
 
 function check() {
@@ -62,9 +47,6 @@ function check() {
 
     // if last task, show final message
     if (listener_tasks_done + speaker_tasks_done == TOTAL_TASKS_TO_COMPLETE) {
-        if (ATTEMPT_JSONS.length > 2 || GAVE_UP) {
-            $("#final_message").text("You failed to interpret your own description, showing you did not put enough thought into them. Your user ID is:");
-        }
         $("#finish_modal_uid").text(uid.toString());
         $("#finished_modal").modal('show');
         return;
