@@ -52,7 +52,7 @@ function check() {
 
         const end_time = new Date();
         const delta_time = parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time'));
-        send_user_info(uid, delta_time/100);
+        send_user_info(uid, delta_time/1000);
         return;
     }
 

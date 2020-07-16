@@ -49,7 +49,7 @@ function random_speaker_retrieve(limit_size) {
      * gets the limit_size number of task ids with the least number of descriptions and shuffles em
      */
 
-    if (sessionStorage.getItem('retrieved_speaker_tasks') == null) {    // haven't retrieved any yet
+    if (sessionStorage.getItem('retrieved_speaker_tasks') == null || sessionStorage.getItem('retrieved_speaker_tasks').length < 1) {    // haven't retrieved any yet
         const tasks_ref = db.collection("tasks");
         const tasks_query = tasks_ref.orderBy("num_descriptions").limit(limit_size);
 
@@ -88,7 +88,7 @@ function random_listen_retrieve(limit_size) {
      * retrieve from the tasks that have already been described
      */
 
-    if (sessionStorage.getItem('lis_tasks') == null) {    // haven't retrieved any yet
+    if (sessionStorage.getItem('lis_tasks') == null || sessionStorage.getItem('lis_tasks').length < 1) {    // haven't retrieved any yet
 
         const tasks_ref = db.collection("all_descriptions");
         const tasks_query = tasks_ref.orderBy("num_uses").limit(limit_size);
