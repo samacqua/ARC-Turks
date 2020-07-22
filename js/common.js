@@ -59,6 +59,8 @@ function next_task() {
      * but make sure listener and speaker in first two tasks
      */
 
+    
+
     var speaker_tasks_done = parseInt(sessionStorage.getItem('s'));
     var listener_tasks_done = parseInt(sessionStorage.getItem('l'));
     console.log(speaker_tasks_done);
@@ -68,6 +70,13 @@ function next_task() {
     const next_task = task_order.pop();
     console.log(next_task);
     sessionStorage.setItem('task_order', task_order);
+
+    // if (listener_tasks_done == 0) {
+    //     listener_tasks_done++;
+    //     sessionStorage.setItem('l', listener_tasks_done);
+    //     window.location.href = 'listener.html';
+    //     return;
+    // }
 
     if (next_task == 's') {
         speaker_tasks_done++;
