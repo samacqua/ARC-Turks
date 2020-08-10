@@ -9,11 +9,17 @@ const listener_tasks_done = parseInt(sessionStorage.getItem('l'));
 const speaker_tasks_done = parseInt(sessionStorage.getItem('s'));
 
 $(window).on('load',function(){
+    // get date for making sure they try before giving up
     START_DATE = new Date();
 
-    update_progress_bar(increment=false);
+    // show progress bar completion
+    update_progress_bar();
 
-    random_listen_retrieve(TOTAL_TASKS_TO_COMPLETE/2);
+    // get listening task
+    random_listen_retrieve(TOTAL_TASKS_TO_COMPLETE);
+
+    // show initial instructions
+    $('#instructionsModal').modal('show');
 });
 
 
@@ -42,55 +48,10 @@ function check() {
             }
         }
     }
-
-    update_progress_bar();
-
-    // if last task, show final message
-    if (listener_tasks_done + speaker_tasks_done == TOTAL_TASKS_TO_COMPLETE) {
-        $("#finish_modal_uid").text(uid.toString());
-        $("#finished_modal").modal('show');
-
-        const end_time = new Date();
-        const delta_time = parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time'));
-        send_user_info(uid, delta_time/1000);
-        return;
-    }
-
-    if (ATTEMPT_JSONS.length > 1 || GAVE_UP) {
-        if (GAVE_UP) {
-            $("#description_critique_label").text("You gave up/could not create the correct output. What was wrong about the description?")
-        }
-        $("#task_qs_modal").modal('show');
-        return;
-    }
-
-    const see_desc = $.trim($("#see_p").text());
-    const do_desc = $.trim($("#do_p").text());
-    const grid_desc = $.trim($("#grid_size_p").text());
-
+    
     infoMsg("Correct!");
 
-    // timeout is so they see the message before transitioning
-    setTimeout(function() {
-        store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, age, gender)
-        .then(function() {next_task();})
-        .catch(function(error) {console.log("Error storing response: " + error);});
-    }, 1000);
-}
-
-function exit_task_qs() {
-    /**
-     * If they were presented with this modal, they either gave up or took multiple attempts
-     * So, store why they got it wrong
-     */
-    const see_desc = $.trim($("#see_p").text());
-    const do_desc = $.trim($("#do_p").text());
-    const grid_desc = $.trim($("#grid_size_p").text());
-
-    const desc_critique = $.trim($('#desc_critique').val());
-    console.log(desc_critique);
-
-    store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, age, gender, description_critique=desc_critique, gave_up=GAVE_UP)
+    store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, age, gender, gave_up=GAVE_UP)
         .then(function() {next_task();})
         .catch(function(error) {console.log("Error storing response: " + error);});
 }

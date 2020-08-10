@@ -1,85 +1,40 @@
-// easy tasks for demonstration purposes
-// const TASKS = [78]; // for video demonstration
-const TASKS = [370, 258];
-const URL_TASKS = TASKS.join('.');
-
-var DESC_SEES = [];
-var DESC_DOS = [];
-var DESC_GRIDS = [];
-
-sessionStorage.setItem("items_complete", "0");
-
-const quiz_questions = [
-	{
-		question: "The goal of the describer is to...",
-		answers: {
-			a: 'create the correct output grid based on grid examples of the pattern',
-			b: 'describe the pattern based on grid examples so that another person can create the correct output grid',
-			c: 'use a description of the pattern to create the correct output grid'
-		},
-		correctAnswer: 'b'
-	},
-	{
-		question: "The goal of the builder is to...",
-		answers: {
-			a: 'create the correct output grid based on grid examples of the pattern',
-			b: 'describe the pattern based on grid examples so that another person can create the correct output grid',
-			c: 'use a description of the pattern to create the correct output grid'
-		},
-		correctAnswer: 'c'
-    },
-    {
-		question: "You should break up your description into...",
-		answers: {
-			a: '3 sections: what you should see in the input grid, what you should do to make the output grid, and how the grid size changes (if at all).',
-			b: '1 section: what is the pattern.',
-			c: 'as many sections as there are examples so that you can describe each example.'
-		},
-		correctAnswer: 'a'
-    },
-    {
-		question: "Which choice best describes the functions of Draw, Flood fill, and Copy-Paste?",
-		answers: {
-			a: 'Draw lets you color individual boxes in the grid, flood fill lets you fill in entire areas, and copy paste lets you copy and paste parts of the grids',
-			b: 'Draw lets you color the output grid, flood fill lets you change the input grid, and copy-paste copies the entire input grid.',
-			c: 'Draw lets you draw lines, flood-fill lets you color individual boxes, and copy-paste lets you copy from the output box to other websites.'
-		},
-		correctAnswer: 'a'
-    },
-];
-
 $(window).on('load',function(){
-    // hide grid size description
-    $("#grid_size_form").css("visibility", "hidden");
 
-    // create random order of tasks
-    const TASK_ORDER = ['s', 's', 's', 'l', 'l', 'l'];
-    shuffle(TASK_ORDER);
-    sessionStorage.setItem('task_order', TASK_ORDER);
+    // uncomment to initialize database
+    // init_tasks_collection();
 
-    // fill forms with actual text
-    $("#what_you_see").val("In the input, you should see...");
-    $("#what_you_do").val("To make the output, you have to...");
-    $("#grid_size_desc").val("The grid size...");
+    // start timer to gather data on total time per user
+    const start_time = new Date();
+    sessionStorage.setItem('start_time', start_time.getTime());
+
+    // load first practice task
+    const task = PRAC_TASKS.shift();
+    loadTask(task.task);
+    $("#grid_size_p").text(task.grid_desc);
+    $("#see_p").text(task.see_desc);
+    $("#do_p").text(task.do_desc);
+
+    // initialize the number of items complete, and the number of practice items complete
+    // items_complete is number of actual tasks (for determining when complete with study)
+    // prac_complete is for finishing instructions and practice tasks (for updating progress bar)
+    sessionStorage.setItem("items_complete", "0");
+    sessionStorage.setItem("prac_complete", "0");
 
     // get consent, then demographic, then present study, then begin solving patterns
     $('#consentModal').modal('show');
 
-    // assign a random id
+    // assign a random id to the user
     const user_id = Math.floor(Math.random()*1e10);
     sessionStorage.setItem("uid", user_id);
-    loadTask(TASKS.shift());
 
+    // set up quiz
     var quizContainer = document.getElementById('quiz');
-    showQuestions(quiz_questions, quizContainer);
-
-    const start_time = new Date();
-    sessionStorage.setItem('start_time', start_time.getTime());
+    showQuestions(QUIZ_QUESTIONS, quizContainer);
 });
 
 $(document).ready(function(){
     /**
-     * makes it so slider has a label reflecting its value
+     * makes it so slider has a label reflecting its value for demographics form
      */
     $("#age_result").html($("#age_form").val());
     $("#age_form").change(function(){
@@ -104,21 +59,52 @@ $(function(){
       });
 });
 
-$(function()
-/**
- * listen for change in check box if grid size changes
- */
-{
-    $('#grid_size_changes').on('change', function()
-    {
-        if (this.checked)
-        {
-            $("#grid_size_form").css("visibility", "visible");
-        } else {
-            $("#grid_size_form").css("visibility", "hidden");
+function check_grid() {
+    /**
+     * checks if output is correct. If so and completed enough tasks, move on to actual task
+     */
+    syncFromEditionGridToDataGrid();
+    console.log(TEST_PAIRS);
+    console.log(CURRENT_TEST_PAIR_INDEX);
+    reference_output = TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output'];
+    submitted_output = CURRENT_OUTPUT_GRID.grid;
+
+    if (reference_output.length != submitted_output.length) {
+        errorMsg("Wrong answer. Try again.");
+        return
+    }
+
+    for (var i = 0; i < reference_output.length; i++){
+        ref_row = reference_output[i];
+        for (var j = 0; j < ref_row.length; j++){
+            if (ref_row[j] != submitted_output[i][j]) {
+                errorMsg("Wrong answer. Try again.");
+                return
+            }
         }
-    });
-});
+    }
+
+    update_progress_bar(tasks_inc=false, prac_inc=true);
+
+    // if not last practice task
+    if (PRAC_TASKS.length != 0) {
+        infoMsg("Correct! Solve " + (PRAC_TASKS.length).toString() + " more problem(s).");
+
+        // reset values
+        resetOutputGrid();
+        TEST_PAIRS = new Array();
+        
+        // load task
+        const task = PRAC_TASKS.shift();
+        loadTask(task.task);
+        $("#grid_size_p").text(task.grid_desc);
+        $("#see_p").text(task.see_desc);
+        $("#do_p").text(task.do_desc);
+
+        return;
+    }
+    $("#done_modal").modal("show");
+}
 
 function exit_demographic() {
     /**
@@ -133,65 +119,10 @@ function exit_demographic() {
     $('#demographic_modal').one('hidden.bs.modal', function() { $('#introModal').modal('show'); }).modal('hide');
 }
 
-function submit() {
-    /**
-     * If starting with right phrase and actually entered text, then bring to listening task and pass all info
-     */
-
-     DESC_SEES.push($("#what_you_see").val().trim());
-     DESC_DOS.push($("#what_you_do").val().trim());
-     if ( $('#grid_size_desc').css('display') == 'none' || $('#grid_size_desc').css("visibility") == "hidden"){
-        DESC_GRIDS.push("The grid size... does not change");
-    } else {
-        DESC_GRIDS.push($("#grid_size_desc").val().trim());
-    }
-
-    if ($("#what_you_see").val().trim().length < 20) {
-        errorMsg("Please enter a description of what you see.");
-        return
-    }
-    if ($("#what_you_do").val().trim().length < 20) {
-        errorMsg("Please enter a description of what you change.");
-        return
-    }
-    if ($("#grid_size_desc").val().trim().length < 10) {
-        errorMsg("Please enter a description of the grid size.");
-        return
-    }
-
-    if (!$("#what_you_see").val().trim().startsWith("In the input, you should see...")) {
-        errorMsg("What you see has to start with \"In the input, you should see...\"");
-        return
-    }
-    if (!$("#what_you_do").val().trim().startsWith("To make the output, you have to...")) {
-        errorMsg("What you do has to start with \"To make the output, you have to...\"");
-        return
-    }
-    if (!$("#grid_size_desc").val().trim().startsWith("The grid size...")) {
-        errorMsg("The grid size field has to start with \"The grid size...\"");
-        return
-    }
-
-    update_progress_bar();
-
-    if (TASKS.length != 0) {
-        infoMsg("Correct! Describe " + TASKS.length.toString() + " more pattern.")
-        $("#what_you_see").val("In the input, you should see...");
-        $("#what_you_do").val("To make the output, you have to...");
-        $("#grid_size_desc").val("The grid size...");
-
-        loadTask(TASKS.shift());
-        return;
-     }
-
-    DESC_SEES = DESC_SEES.join('~');
-    DESC_DOS = DESC_DOS.join('~');
-    DESC_GRIDS = DESC_GRIDS.join('~');
-
-    window.location.href = `self_play_test.html?tasks=${URL_TASKS}&see=${DESC_SEES}&do=${DESC_DOS}&grid=${DESC_GRIDS}`;
-}
-
 function showQuestions(questions, quizContainer){
+    /*
+    For quiz
+    */
     // we'll need a place to store the output and the answer choices
     var output = [];
     var answers;
@@ -228,13 +159,13 @@ function showQuestions(questions, quizContainer){
 }
 
 function check_quiz() {
-    // gather answer containers from our quiz
+    // gather answer containers from our quiz and check if correct
     var quizContainer = document.getElementById('quiz');
     var answerContainers = quizContainer.querySelectorAll('.answers');
     
-    for(var i=0; i<quiz_questions.length; i++){
+    for(var i=0; i<QUIZ_QUESTIONS.length; i++){
         userAnswer = (answerContainers[i].querySelector('input[name=question'+i+']:checked')||{}).value;
-        if(userAnswer != quiz_questions[i].correctAnswer){
+        if(userAnswer != QUIZ_QUESTIONS[i].correctAnswer){
             $('#quiz_modal').one('hidden.bs.modal', function() { $('#introModal').modal('show'); }).modal('hide');
             errorMsg("You did not correctly complete the quiz. Please reread the instructions and retry the quiz.");
             return;
@@ -242,5 +173,4 @@ function check_quiz() {
     }
 
     $('#quiz_modal').one('hidden.bs.modal', function() { $('#instructionsModal').modal('show'); }).modal('hide');
-
 }

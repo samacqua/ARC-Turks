@@ -35,6 +35,7 @@
   <!-- JS files -->
   <script src="js/speaker.js"></script>
   <script src="js/common.js"></script>
+  <script src="js/constants.js"></script>
   <script src="js/grids.js"></script>
   <script src="js/more_grids.js"></script>
   <script src="js/fire.js"></script>
@@ -46,17 +47,15 @@
 
 <body>
 
-    <h3 class="task_label">You are the Describer</h3>
-
     <!-- Progress Bar -->
     <div class="progress md-progress">
         <div class="progress-bar" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="11"></div>
     </div>
 
     <div class="progress-meter">
-        <div class="meter meter-right" style="width: 54.55%;"><span class="meter-text">All Done!</span></div>
-        <div class="meter meter-right" style="width: 36.36%;"><span class="meter-text">Finished Tutorial</span></div>
-        <div class="meter meter-right" style="width: 9.09%;"><span class="meter-text">Finished Instructions</span></div>
+        <div class="meter meter-right" style="width: 66.67%;"><span class="meter-text">All Done!</span></div>
+        <div class="meter meter-right" style="width: 22.22%;"><span class="meter-text">Finished Tutorial</span></div>
+        <div class="meter meter-right" style="width: 11.11%;"><span class="meter-text">Finished Instructions</span></div>
     </div>
 
     <div id="container-fluid">
@@ -109,6 +108,9 @@
 
                 <button onclick="continue_to_verify()" type="button" class="btn btn-primary">Submit Description and Continue to Verification</button>
                 <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#giveUpModal">Give up</button>
+                </br>
+                </br>
+                <button onclick="$('#instructionsModal').modal('show')" type="button" class="btn btn-secondary">Show Instructions</button>
             </div>
     
             <div class="col-md-4" id="validation-col">
@@ -198,7 +200,15 @@
                     <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
                 </div>
                     <div class="modal-body" id="gen-modal-body">
-                        <p>You are now playing the part of the <strong>describer</strong>. To ensure that you understand the pattern, after you submit your description, you will have to create the correct output for a new input grid.</p>
+                        <p>For this task, you will not be using a description of a transformation to make the correct grid. Instead, you will be <i>creating the description.</i></p>
+                        <p>You are shown a few examples of the pattern on the left. You have to recognize the pattern, then describe the pattern in the middle so that someone, given a new input grid, can create the correct output grid.</p>
+                        <p>After you submit your description, you will have to use the transformation on a new input grid to make sure that you understand the pattern (this will appear on the right once you submit your description).</p>
+                        <p>You can give up after some time, but you will <b>not recieve a bonus for this task.</b></p>
+
+                        <p>Please watch the video below to understand the layout and task.</p>
+                        <video id="examples_video" width="320" height="240" controls>
+                            <source src="img/Speaker_Instructions.mp4" type="video/mp4">
+                        </video>
                     </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-dismiss="modal">Continue</button>

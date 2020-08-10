@@ -8,6 +8,10 @@
   <!-- Just to silence warning about not having icon -->
   <link rel="shortcut icon" href="#" />
 
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-firestore.js"></script>
+
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
@@ -31,7 +35,9 @@
   <script src="js/index.js"></script>
   <script src="js/grids.js"></script>
   <script src="js/common.js"></script>
+  <script src="js/constants.js"></script>
   <script src="js/more_grids.js"></script>
+  <script src="js/fire.js"></script>
 
   <!-- Font reference -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet" />
@@ -39,18 +45,15 @@
 </head>
 
 <body>
-
-    <h3 class="task_label">You are the Describer</h3>
-
     <!-- Progress Bar -->
     <div class="progress md-progress">
         <div class="progress-bar" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="11"></div>
     </div>
 
     <div class="progress-meter">
-        <div class="meter meter-right" style="width: 54.55%;"><span class="meter-text">All Done!</span></div>
-        <div class="meter meter-right" style="width: 36.36%;"><span class="meter-text">Finished Tutorial</span></div>
-        <div class="meter meter-right" style="width: 9.09%;"><span class="meter-text">Finished Instructions</span></div>
+        <div class="meter meter-right" style="width: 66.67%;"><span class="meter-text">All Done!</span></div>
+        <div class="meter meter-right" style="width: 22.22%;"><span class="meter-text">Finished Tutorial</span></div>
+        <div class="meter meter-right" style="width: 11.11%;"><span class="meter-text">Finished Instructions</span></div>
     </div>
 
     <!-- Actual Body -->
@@ -60,64 +63,116 @@
         <div class="alert alert-danger" id="error_display"></div>
 
         <div class="row">
-            <div class="col-md-2"></div>
-            <div class="col-md-4" id="io_ex_col">
-                <div class="col-header">
-                    <h1 class="col-title" id="pattern-header">Pattern</h1>
-                    <a href="#" class="help-btn" data-toggle="tooltip" title="Describe the pattern that transforms each grid on the left to the grid on its right.">Help</a>
-                </div>
-                <div id="task_preview"></div>
-            </div>
-    
             <div class="col-md-4">
                 <div class="col-header">
                     <h1 class="col-title">Description</h1>
+                    <a href="#" class="help-btn" data-toggle="tooltip" title="This is the description of the transformation. Apply this description to the grid.">Help</a>
                 </div>
 
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="grid_size_changes" data-toggle="toggle">
-                    <label class="form-check-label" for="defaultCheck1">
-                      Grid size changes
-                    </label>
-                  </div>
-                </br>
-
-                <div class="form-group" id="grid_size_form">
-                    <label for="grid_size_desc">How does the grid size change?</label>
-                    <textarea class="form-control" id="grid_size_desc" rows="1" placeholder="The grid size..."></textarea>
-                    <small id="emailHelp" class="form-text text-muted">Start with "The grid size..."</small>
-                  </div>
-                </br>
-
-                <div class="form-group">
-                    <label for="what_you_see">What should you expect to see in the input grid?</label>
-                    <textarea class="form-control" id="what_you_see" rows="2" placeholder="In the input, you should see..."></textarea>
-                    <small id="emailHelp" class="form-text text-muted">Start with "In the input, you should see..."</small>
-                  </div>
-                </br>
-
-                <div class="form-group">
-                    <label for="what_you_do">How do you make the output grid?</label>
-                    <textarea class="form-control" id="what_you_do" rows="2" placeholder="To make the output, you have to..."></textarea>
-                    <small id="emailHelp" class="form-text text-muted">Start with "To make the output, you have to..."</small>
-                  </div>
-                </br>
-
-                <button onclick="submit()" type="button" class="btn btn-primary">Submit Description</button>
+                <p id="grid_size_p">The grid size...</p>
+                <p id="see_p">In the input, you should see...</p>
+                <p id="do_p">To make the output, you have to...</p>
             </div>
-            <div class="col-md-2"></div>
+
+            <div class="col-md-4">
+                <div class="col-header">
+                    <h1 class="col-title">Input</h1>
+                    <a href="#" class="help-btn" data-toggle="tooltip" title="This is the grid before the transformation is applied.">Help</a>
+                </div>
+
+                <div id="evaluation_input" class="selectable_grid"></div>
+                <div id="evaluation_answer" class="selectable_grid"></div>
+            </div>
+    
+            <div class="col-md-4">
+
+                <div class="col-header">
+                    <h1 class="col-title">Output</h1>
+                    <a href="#" data-placement="left" class="help-btn" data-toggle="tooltip" title="<p>This is where you create the output. Here is a list of the tools: </p>
+                        <ul>
+                            <li>Resize: Change the size of the grid</li>
+                            <li>Copy from Input: Copy the grid of the input</li>
+                            <li>Reset Grid: Make the grid entirely empty</li>
+                            <li>Check!: Check if the grid is the correct answer</li>
+                            <li>Draw: In this mode, you color individual blocks</li>
+                            <li>Floodfill: In this mode, you fill in entire areas</li>
+                            <li>Copy-Paste: In this mode, you can copy from the input or output grid, or fill in a selected area with a color.</li>
+                            <li>color bar: Use the color bar to select which color to draw or floodfill with</li>
+                        </ul>">Help</a>
+                </div>
+
+                <div id="output_grid">
+                    <div class="edition_grid selectable_grid">
+                        <div class="row">
+                            <div class="cell" symbol="0" x="0" y="0"></div>
+                            <div class="cell" symbol="0" x="0" y="1"></div>
+                            <div class="cell" symbol="0" x="0" y="2"></div>
+                        </div>
+                        <div class="row">
+                            <div class="cell" symbol="0" x="1" y="0"></div>
+                            <div class="cell" symbol="0" x="1" y="1"></div>
+                            <div class="cell" symbol="0" x="1" y="2"></div>
+                        </div>
+                        <div class="row">
+                            <div class="cell" symbol="0" x="2" y="0"></div>
+                            <div class="cell" symbol="0" x="2" y="1"></div>
+                            <div class="cell" symbol="0" x="2" y="2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="resize_control_btns">
+                    <label for="output_grid_size">Change grid size: </label>
+                    <input type="text" id="output_grid_size" class="grid_size_field" name="size" value="3x3">
+                    <button type="button" class="btn btn-primary" onclick="resizeOutputGrid()" id="resize_btn">Resize</button>
+                </div>
+
+                <button type="button" class="btn btn-secondary" onclick="copyFromInput()">Copy from input</button>
+                <button type="button" class="btn btn-secondary" onclick="resetOutputGrid()">Reset grid</button>
+                <button type="button" class="btn btn-success" onclick="check_grid()">Check!</button>
+
+                <div id="toolbar">
+                    <div>
+                        <input type="radio" id="tool_edit"
+                         name="tool_switching" value="edit" checked>
+                        <label for="tool_edit">Draw</label>
+
+                        <input type="radio" id="tool_floodfill"
+                         name="tool_switching" value="floodfill">
+                        <label for="tool_floodfill">Flood fill</label>
+
+                        <input type="radio" id="tool_select"
+                        name="tool_switching" value="select">
+                       <label for="tool_select">Copy-Paste</label>
+                    </div>
+                </div>
+
+                <div id="symbol_picker">
+                    <div class="symbol_preview symbol_0 selected-symbol-preview" symbol="0"></div>
+                    <div class="symbol_preview symbol_1" symbol="1"></div>
+                    <div class="symbol_preview symbol_2" symbol="2"></div>
+                    <div class="symbol_preview symbol_3" symbol="3"></div>
+                    <div class="symbol_preview symbol_4" symbol="4"></div>
+                    <div class="symbol_preview symbol_5" symbol="5"></div>
+                    <div class="symbol_preview symbol_6" symbol="6"></div>
+                    <div class="symbol_preview symbol_7" symbol="7"></div>
+                    <div class="symbol_preview symbol_8" symbol="8"></div>
+                    <div class="symbol_preview symbol_9" symbol="9"></div>
+                </div>
+            </div>
         </div>
     </div>
 
-  <!-- Consent Modal -->
-  <div class="modal fade" id="consentModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+
+      <!-- Consent Modal -->
+    <div class="modal fade" id="consentModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title" id="gen-modal-title">Informed Consent</h3>
             </div>
             <div class="modal-body" id="gen-modal-body">
-                <p>In this study, you will describe and interpret descriptions of an abstract pattern that you observe in grids.</p>
+                <p>In this study, you will interpret descriptions of an abstract pattern that you observe in grids.</p>
                 </br>
                 <p>By answering the following questions, you are participating in a study performed by cognitive scientists in the MIT Department of Brain and Cognitive Science. If you have questions about this research, please contact Sam Acquaviva at samacqua@mit.edu. Your participation in this research is voluntary. You may decline to answer any or all of the following questions. You may decline further participation, at any time, without adverse consequences. Your anonymity is assured; the researchers who have requested your participation will not receive any personal identifying information about you. By clicking <b>'I AGREE'</b> you indicate your consent to participate in this study.</p>
             </div>
@@ -127,7 +182,7 @@
             </div>
         </div>
     </div>
-  </div>
+    </div>
 
     <!-- Demographic Modal -->
     <div class="modal fade" id="demographic_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
@@ -168,33 +223,28 @@
                 </div>
                     <div class="modal-body" id="gen-modal-body">
 
-                        <p>In year 3030, robots rule the world. Luckily, we managed to infiltrate the robot's factory, where robots process abstract grids.</p>
-                        <p>There are two kinds of robots: <strong>describers</strong> and <strong>builders</strong> . In order to blend into the factory, we must imitate these robots.</p>
+                        <p>If I showed you this grid:</p>
 
-                        <p>If you are a <strong>describer</strong>, your job is look at several example patterns, and describe the process that makes the output grid from the input grid.</p>
-                        <p>For instance, given the following example patterns:</p>
-                        <img class="img-responsive" src="img/pattern_test_ex.png">
-                        <p>A describer would write something like: </p>
-                        <p id="description"><strong>
-                            In the input grid, you should see a few 2x2 squares with one corner missing. Fill in each square's missing corner with dark blue.
-                        </strong></p>
+                        <img src="img/grid_inp_1.png">
 
-                        <hr>
+                        <p>And I told you: </p>
+                        <p><strong>"Make this grid blue"</strong></p>
+                        <p>Would you be able to make this transformation? Would you create the correct output (shown below)?</p>
 
-                        <p>Once the description is written, it is given to the builder at the other side of the factory.</p>
-                        <p>If you are a <strong>builder</strong>, your job is to follow the description given to you and apply it on a new input grid.</p>
-                        <p>For instance, the builder who recieved the earlier example's description would see the same description:</p>
-                        <p id="description"><strong>
-                            In the input grid, you should see a few 2x2 squares with one corner missing. To make the output, you have to fill in each square's missing corner with dark blue.
-                        </strong></p>
-                        <p>and a new input grid: </p>
-                        <img class="img-responsive" src="img/pattern_test_ex 2.png">
+                        <img src="img/grid_out_1.png">
 
-                        <p>The builder would produce the correct output grid based on the description and input grid:</p>
-                        <img class="img-responsive" src="img/pattern_test_ans.png">
+                        <p>Great! If I gave you this grid:</p>
 
-                        <hr>
-                        <p>The describer and builder are (together) successful if the builder can build the right output grid from the describer's description.</p>
+                        <img src="img/grid_inp_2.png">
+
+                        <p>And I told you:</p>
+                            <p><strong>"You should see a 3x3 grid with a colored dot in the middle. Create a 5x5 grid that is filled with the middle color."</strong></p>
+                        <p> Would you be able to make this transformation? Would you create the correct output (shown below)?</p>
+
+                        <img src="img/grid_out_2.png">
+
+                        <p>These are the tasks you will solve in this study. You will be given a description of a transformation, and you will have to use that description to create the correct output.</p>
+                        <p><b>It is important that you use as few attempts as possible. The more tasks you complete, and the fewer attempts you take on each, the bigger reward you will get.</b></p>
                     </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" onclick="$('#introModal').one('hidden.bs.modal', function() { $('#examples_modal').modal('show'); }).modal('hide'); START_TIME = new Date()">Continue to Examples</button>
@@ -212,7 +262,7 @@
                 </div>
                     <div class="modal-body" id="gen-modal-body">
     
-                        Watch this short video to understand the layout of the <strong>describer</strong> and <strong>builder</strong>.
+                        Watch this short video to understand the layout.
 
                         <video id="examples_video" width="320" height="240" controls>
                             <source src="img/Instructions.mp4" type="video/mp4" autoplay>
@@ -248,7 +298,6 @@
         </div>
     </div>
 
-
     <!-- Instructions Modal -->
     <div class="modal fade" id="instructionsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -257,11 +306,11 @@
                     <h3 class="modal-title" id="gen-modal-title">Practice</h3>
                 </div>
                 <div class="modal-body" id="gen-modal-body">
-                    <p>Great job! You successfully completed the quiz.</p>
-                    <p>Now, as practice before you go into the robot factory, you practice playing the part of the <strong>describer</strong>. </p>
+                    <p>Great! You successfully completed the quiz. Now, you will be given two example descriptions as practice.</p>
+                    <p>In order to continue, you must solve them both.</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="update_progress_bar()" data-dismiss="modal">Okay!</button>
+                    <button type="button" class="btn btn-primary" onclick="update_progress_bar(tasks_inc=false, prac_inc=true)" data-dismiss="modal">Okay!</button>
                 </div>
             </div>
         </div>
@@ -276,11 +325,13 @@
                 </div>
                     <div class="modal-body" id="gen-modal-body">
     
-                        <p>Great job! Now you know how to describe these patterns. Now, we will practice using descriptions to create the correct output</p>
+                        <p>Great job! Now, you will continue to using actual descriptions.</p>
+                        <p>You will complete a total of 6 tasks. You will recieve <strong>AMOUNT</strong> for completing the study, and a bonus of <strong>AMOUNT</strong> for each task that you complete correctly.</p>
+                        <p>There is a chance that you will have the opportunity to describe a task on your own, for a bonus amount of <strong>AMOUNT</strong>. If so, you will be given more instructions.</p>
 
                     </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="location.href='self_play_desc.html';">Continue</button>
+                    <button onclick="next_task(first_task=true)" type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
                 </div>
             </div>
         </div>

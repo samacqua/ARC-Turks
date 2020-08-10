@@ -1,8 +1,11 @@
+// makes it so can't exit out modal by pressing outside of it
 $.fn.modal.prototype.constructor.Constructor.Default.backdrop = 'static';
 $.fn.modal.prototype.constructor.Constructor.Default.keyboard =  false;
-const TOTAL_TASKS_TO_COMPLETE = 6;
 
-
+/**
+ * show an error message at the top of the screen.
+ * @param {*} msg the message to display
+ */
 function errorMsg(msg) {
     $('#error_display').stop(true, true);
     $('#info_display').stop(true, true);
@@ -17,6 +20,10 @@ function errorMsg(msg) {
     $('#error_display').delay(6000).fadeOut(300);
 }
 
+/**
+ * show an info message at the top of the screen.
+ * @param {*} msg the message to display
+ */
 function infoMsg(msg) {
     $('#error_display').stop(true, true);
     $('#info_display').stop(true, true);
@@ -30,13 +37,6 @@ function infoMsg(msg) {
     $('#info_display').fadeIn(300);
     $('#info_display').delay(6000).fadeOut(300);
 }
-
-$(window).on('load',function(){
-    $('a[data-toggle="tooltip"]').tooltip({
-        animated: 'fade',
-        html: true
-    });
-});
 
 /**
  * Shuffles array in place. from https://stackoverflow.com/a/6274381/5416200
@@ -53,46 +53,59 @@ function shuffle(a) {
     return a;
 }
 
-function next_task() {
-    /**
-     * go to next task, randomly choose listener or speaker
-     * but make sure listener and speaker in first two tasks
-     */
+/**
+ * go to next task
+ */
+function next_task(first_task=false) {
 
-    
+    var num_tasks_complete = parseInt(sessionStorage.getItem('items_complete'))
 
-    var speaker_tasks_done = parseInt(sessionStorage.getItem('s'));
-    var listener_tasks_done = parseInt(sessionStorage.getItem('l'));
-    console.log(speaker_tasks_done);
-    console.log(listener_tasks_done);
-
-    var task_order = sessionStorage.getItem('task_order').split(',');
-    const next_task = task_order.pop();
-    console.log(next_task);
-    sessionStorage.setItem('task_order', task_order);
-
-    // if (listener_tasks_done == 0) {
-    //     listener_tasks_done++;
-    //     sessionStorage.setItem('l', listener_tasks_done);
-    //     window.location.href = 'listener.html';
-    //     return;
-    // }
-
-    if (next_task == 's') {
-        speaker_tasks_done++;
-        sessionStorage.setItem('s', speaker_tasks_done);
-        window.location.href = 'speaker.html';
-        return;
-    } else {
-        listener_tasks_done++;
-        sessionStorage.setItem('l', listener_tasks_done);
-        window.location.href = 'listener.html';
-        return;
+    if (!first_task) {
+        // increment number of tasks complete if not loading the first task, bc next task is called after completing a task
+        num_tasks_complete++;
+        sessionStorage.setItem('items_complete', num_tasks_complete);
     }
+
+    // if ratio is too big, then give them describer task
+    // if completed enough tasks, finish
+    shouldGiveDescription()
+    .then(function(promiseReturn) { 
+
+        const needsDescription = promiseReturn[0];
+        const tot_descs = promiseReturn[1];
+
+        console.log(needsDescription);
+        console.log(tot_descs);
+        console.log(TOTAL_TASKS_TO_COMPLETE);
+        console.log(num_tasks_complete);
+
+        // if final task, and the database needs a description, OR there aren't enough description tasks in the database (first couple users), then give speaker task
+        if ((needsDescription && (num_tasks_complete) == TOTAL_TASKS_TO_COMPLETE - 1) || tot_descs < (TOTAL_TASKS_TO_COMPLETE - num_tasks_complete)) {
+            window.location.href = 'speaker.html';
+        } else if (num_tasks_complete >= TOTAL_TASKS_TO_COMPLETE) {
+
+            console.log(TOTAL_TASKS_TO_COMPLETE);
+            console.log(num_tasks_complete);
+
+            // all done!
+            $("#finish_modal_uid").text(uid.toString());
+            $("#finished_modal").modal('show');
+
+            const end_time = new Date();
+            const delta_time = parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time'));
+            send_user_info(uid, delta_time/1000);
+        } else {
+            // next speaker task
+            window.location.href = 'listener.html';
+        }
+    })
+    .catch(function(err) { console.log("Error getting attempts/description ratio: " + err); });
 }
 
+/**
+ * resize the grids if the window size changes
+ */
 var globalResizeTimer = null;
-
 $(window).resize(function() {
     if(globalResizeTimer != null) window.clearTimeout(globalResizeTimer);
     globalResizeTimer = window.setTimeout(function() {
@@ -106,18 +119,38 @@ $(window).resize(function() {
     }, 500);
 });
 
-function update_progress_bar(increment=true) {
-    var stage_num = sessionStorage.getItem('items_complete');
+/**
+ * update the progress bar at the top of the screen
+ * @param {*} tasks_inc true if want to increment number of tasks complete
+ * @param {*} prac_inc true if want to increment number of practice tasks complete
+ */
+function update_progress_bar(tasks_inc=false, prac_inc=false) {
+    var tasks_complete = parseInt(sessionStorage.getItem('items_complete'));
+    var prac_complete = parseInt(sessionStorage.getItem('prac_complete'));
 
-    if (increment) {
-        stage_num++;
-        sessionStorage.setItem('items_complete', stage_num);
+    if (tasks_inc) {
+        tasks_complete++;
+        sessionStorage.setItem('items_complete', tasks_complete);
+    }
+    if (prac_inc) {
+        prac_complete++;
+        sessionStorage.setItem('prac_complete', prac_complete);
     }
 
-    const tot_tasks = 11;
-    const percent_complete = stage_num / tot_tasks * 100;
+    const tot_tasks = TOTAL_TASKS_TO_COMPLETE + TOTAL_PRAC_TASKS;
+    const percent_complete = (tasks_complete + prac_complete) / tot_tasks * 100;
 
     $(".progress-bar").animate({
         width: `${percent_complete}%`
     }, 1000);
 }
+
+/**
+ * set up tooltip
+ */
+$(window).on('load',function(){
+    $('a[data-toggle="tooltip"]').tooltip({
+        animated: 'fade',
+        html: true
+    });
+});

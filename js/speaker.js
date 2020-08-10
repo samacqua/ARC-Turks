@@ -5,26 +5,31 @@ var GAVE_UP = false;
 const uid = sessionStorage.getItem('uid');
 const age = sessionStorage.getItem('age');
 const gender = sessionStorage.getItem('gender');
-const speaker_tasks_done = parseInt(sessionStorage.getItem('s'));
-const listener_tasks_done = parseInt(sessionStorage.getItem('l'));
 
 $(window).on('load',function(){
+    // get date to check they are trying before giving up
     START_DATE = new Date();
 
-    update_progress_bar(increment=false);
+    // get progress bar completion
+    update_progress_bar();
 
+    // hide validation form
     $("#grid_size_form").css("visibility", "hidden")
 
+    // fill textbox forms with actual text
     $("#what_you_see").val("In the input, you should see...");
     $("#what_you_do").val("To make the output, you have to...");
     $("#grid_size_desc").val("The grid size...");
 
-    // only give full instructions if first time through
-    if (speaker_tasks_done == 1) {
-        $('#instructionsModal').modal('show');
-    }
+    // show initial instructions
+    $('#instructionsModal').modal('show');
 
-    random_speaker_retrieve(TOTAL_TASKS_TO_COMPLETE/2);
+    // for example video
+    // const exampleTaskId = 78;
+    // loadTask(exampleTaskId);
+
+    // get speaker task
+    random_speaker_retrieve();
 });
 
 $(document).ready(function(){
@@ -119,18 +124,7 @@ function exit_task_qs() {
         grid_size_desc = "The grid size... does not change."
     }
 
-    update_progress_bar();
-
-    if (listener_tasks_done + speaker_tasks_done == TOTAL_TASKS_TO_COMPLETE) {
-        $("#finish_modal_uid").text(uid.toString());
-        $("#finished_modal").modal('show');
-
-        const end_time = new Date();
-        const delta_time = parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time'));
-        send_user_info(uid, delta_time/1000);
-
-        return;
-    }
+    infoMsg("All done! Loading next task...")
     
     store_response_speaker(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, age, gender, conf, gave_up_verification=GAVE_UP)
         .then(function() { next_task(); })
