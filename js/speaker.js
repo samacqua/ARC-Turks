@@ -17,9 +17,9 @@ $(window).on('load',function(){
     $("#grid_size_form").css("visibility", "hidden")
 
     // fill textbox forms with actual text
+    $("#grid_size_desc").val("The grid size...");
     $("#what_you_see").val("In the input, you should see...");
     $("#what_you_do").val("To make the output, you have to...");
-    $("#grid_size_desc").val("The grid size...");
 
     // show initial instructions
     $('#instructionsModal').modal('show');
@@ -30,6 +30,29 @@ $(window).on('load',function(){
 
     // get speaker task
     random_speaker_retrieve();
+});
+
+$(document).ready(function() {
+    /**
+     * Make input form's template text uneditable
+     */
+    const grid_text = "The grid size...";
+    $("#grid_size_desc").on("keyup", function() {
+        var value = $(this).val();
+        $(this).val(grid_text + value.substring(grid_text.length));
+    });
+
+    const see_text = "In the input, you should see...";
+	$("#what_you_see").on("keyup", function() {
+        var value = $(this).val();
+        $(this).val(see_text + value.substring(see_text.length));
+    });
+
+    const do_text = "To make the output, you have to...";
+    $("#what_you_do").on("keyup", function() {
+        var value = $(this).val();
+        $(this).val(do_text + value.substring(do_text.length));
+    });
 });
 
 $(document).ready(function(){
