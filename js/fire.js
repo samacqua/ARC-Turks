@@ -310,7 +310,11 @@ function init_tasks_collection() {
         'goal_ratio': 20
     });
 
-    const tasks_to_include = [1, 7, 9, 28, 31, 33, 39, 46, 51, 58];
+    // 10 tasks that belong to 3 main categories: 
+    // 1. a recoloring task, where the pattern is where something is colored in (1, 39, 181, 293)
+    // 2. a zoom task, where the pattern is to zoom in on a specific object (28, 270, 318)
+    // 3. a beam task, where the pattern involves 'shooting a beam' (12, 33, 46)
+    const tasks_to_include = [1, 39, 181, 293, 28, 270, 318, 12, 33, 46];
     console.log(tasks_to_include.length);
 
     (async function loop() {
