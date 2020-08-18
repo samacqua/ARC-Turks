@@ -71,6 +71,8 @@ function give_up() {
         return;
     }
 
+    infoMsg("You have given up. The output grid now has the correct answer. Press 'check' to submit this correct answer.");
+
     GAVE_UP = true;
     const answer = convertSerializedGridToGridObject(TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output']);
 

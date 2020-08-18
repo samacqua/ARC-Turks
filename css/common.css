@@ -25,7 +25,11 @@ img {
 
 .help-btn {
     float:right;   
-    padding-top: 5px;
+    padding: 3px;
+    margin-top: 5px;
+    background-color: cornflowerblue;
+    border-radius: 3px;
+    color: white;
 }
 
 video {
@@ -40,24 +44,24 @@ video {
 /*Message display*/
 
 #error_display {
-    color: red;
+    color: black;
     width: 80%;
     float: left;
-    font-size: 14px;
+    font-size: 20px;
     margin-left: 10%;
     margin-right: 10%;
-    margin-top: 5px;
+    margin-top: 10px;
     display: none;
 }
 
 #info_display {
-    color: green;
+    color: black;
     width: 80%;
     float: left;
-    font-size: 14px;
+    font-size: 20px;
     margin-left: 10%;
     margin-right: 10%;
-    margin-top: 5px;
+    margin-top: 10px;
     display: none;
 }
 

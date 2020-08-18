@@ -283,11 +283,18 @@ function give_up_description(task_id) {
     /**
      * increment the number of times the user gave up while trying to describe the task
      */
-    const increment = firebase.firestore.FieldValue.increment(1);
 
-    const task_doc_ref = db.collection("tasks").doc(task_id.toString());
-    task_doc_ref.update({
-        desc_gave_up_count : increment
+    return new Promise(function(resolve, reject) {
+        const increment = firebase.firestore.FieldValue.increment(1);
+
+        const task_doc_ref = db.collection("tasks").doc(task_id.toString());
+        task_doc_ref.update({
+            desc_gave_up_count : increment
+        }).then(function () {
+            return resolve();
+        }).catch(function (err) {
+            return reject(err);
+        });
     });
 }
 

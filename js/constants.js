@@ -29,8 +29,8 @@ const QUIZ_QUESTIONS = [
     {
         question: "Your goal is to...",
         answers: {
-            a: 'create the correct output grid based on grid examples of the transformation',
-            b: 'create a description of the transformation based on grid examples so that another person can create the correct output grid',
+            a: 'create grids that look like other grids',
+            b: 'write a description of the transformation based on grid examples so that another person can create the correct output grid',
             c: 'use a description of the pattern to create the correct output grid'
         },
         correctAnswer: 'c'
@@ -38,10 +38,27 @@ const QUIZ_QUESTIONS = [
     {
         question: "It is important to...",
         answers: {
-            a: 'Take as few attempts as possible.',
+            a: 'Use as few attempts as possible.',
             b: 'Complete the tasks as fast as possible.',
             c: 'Use as many colors as possible.'
         },
         correctAnswer: 'a'
     },
+    {
+        question: "To edit the output grid, what are the 3 modes you can use and their correct description?",
+        answers: {
+            a: '1). Draw -- to edit individual pixels. 2). Flood fill -- to fill in entire areas. 3). Copy-paste -- to copy a section of the grid.',
+            b: '1). Draw -- to edit individual pixels. 2). Stamper -- to place down a stamp of a shape. 3). Line -- to make a line between two pixels.',
+            c: 'There is only one mode.'
+        },
+        correctAnswer: 'a'
+    },
+    {
+        question: "If you give up, will you be given a bonus for completing that task?",
+        answers: {
+            a: 'Yes.',
+            b: 'No.',
+        },
+        correctAnswer: 'b'
+    }
 ];

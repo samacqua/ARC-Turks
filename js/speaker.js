@@ -178,12 +178,20 @@ function give_up() {
             // jqArrow.empty();
             jqOutputGrid.empty();
         }
-    
-        give_up_description(TASK_ID);
-        random_speaker_retrieve(5);
-        $('textarea').val("");
+
+        infoMsg("You have given up. You will now be given a new task.");
+
+        // make sure they are next given a listening task, and store that they gave up.
+        give_up_description(TASK_ID)
+        .then(function () {
+            sessionStorage.setItem('force_listener', 'true');
+            next_task();
+        }).catch(function (err) {
+            console.log(err);
+        });
     } else {
         GAVE_UP = true;
+        infoMsg("You have given up. The output grid now has the correct answer. Press 'check' to submit this correct answer.");
         const answer = convertSerializedGridToGridObject(TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output']);    
         showAnswer(answer);
     }

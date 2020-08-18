@@ -79,6 +79,13 @@ function next_task(first_task=false) {
         console.log(TOTAL_TASKS_TO_COMPLETE);
         console.log(num_tasks_complete);
 
+        // if user gave up describing task, do not want to give them describing task again, so force a listener task.
+        const forceListener = sessionStorage.getItem('force_listener');
+        if (forceListener == 'true') {
+            window.location.href = 'listener.html';
+            return;
+        }
+
         // if final task, and the database needs a description, OR there aren't enough description tasks in the database (first couple users), then give speaker task
         if ((needsDescription && (num_tasks_complete) == TOTAL_TASKS_TO_COMPLETE - 1) || tot_descs < (TOTAL_TASKS_TO_COMPLETE - num_tasks_complete)) {
             window.location.href = 'speaker.html';

@@ -32,6 +32,29 @@ $(window).on('load',function(){
     showQuestions(QUIZ_QUESTIONS, quizContainer);
 });
 
+function give_up() {
+    /**
+     * give them the answer
+     */
+
+     infoMsg("You have given up. The output grid now has the correct answer. Press 'check' to submit this correct answer.");
+
+    GAVE_UP = true;
+    const answer = convertSerializedGridToGridObject(TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output']);
+
+    showAnswer(answer);
+    START_DATE = new Date();
+}
+
+function showAnswer(grid) {
+    /**
+     * set output grid to right answer
+     */
+    CURRENT_OUTPUT_GRID = grid;
+    syncFromDataGridToEditionGrid();
+    $('#output_grid_size').val(CURRENT_OUTPUT_GRID.height + 'x' + CURRENT_OUTPUT_GRID.width);
+}
+
 $(document).ready(function(){
     /**
      * makes it so slider has a label reflecting its value for demographics form
