@@ -84,7 +84,7 @@ function next_task(first_task=false) {
             $("#finished_modal").modal('show');
 
             const end_time = new Date();
-            const delta_time = parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time')) / 1000;
+            const delta_time = (parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time'))) / 1000;
 
             set_user_complete_time(uid, delta_time, 'time_to_complete');
 

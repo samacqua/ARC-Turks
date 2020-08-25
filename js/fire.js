@@ -19,7 +19,7 @@ var db = firebase.firestore();
 
 /**
  * if ratio of builder attempts to number of descriptions is higher than the goal ratio (in the database), then should create another description
- * returns a promise of (if should give description task (0) or speaker (1) or speaker with example io (2), total number of descriptions in db)
+ * returns a promise of (if should give builder task (0) or speaker (1) or speaker with example io (2), total number of descriptions in db)
  */
 function shouldGiveDescription() {
 
@@ -41,7 +41,7 @@ function shouldGiveDescription() {
 
             // trying to maintain ratio of attempts to descriptions
             const ratio = tot_attempts/tot_descs;
-            if (ratio > goal_ratio) {
+            if (ratio < goal_ratio) {
                 return resolve([0, tot_descs]);
             } else {
                 console.log("Need description.");

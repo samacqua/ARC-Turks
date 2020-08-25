@@ -246,6 +246,7 @@ function initializeSelectable() {
                 start: function(event, ui) {
                     $('.ui-selected').each(function(i, e) {
                         $(e).removeClass('ui-selected');
+                        console.log("bb");
                     });
                 }
             }
@@ -297,7 +298,7 @@ $(document).ready(function () {
         // Copy and paste functionality.
         if (event.which == 67) {
             // Press C
-
+            
             selected = $('.ui-selected');
             if (selected.length == 0) {
                 return;

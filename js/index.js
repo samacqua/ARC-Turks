@@ -33,9 +33,10 @@ $(window).on('load',function(){
     showQuestions(QUIZ_QUESTIONS, quizContainer);
 });
 
+// tell them to give up after 30 seconds
 window.setInterval(function(){
     const cur_time = (new Date()).getTime()/1000;
-    if (Math.abs(cur_time - TUT_START_TIME / 1000 - 10) < 0.6) {
+    if (Math.abs(cur_time - TUT_START_TIME / 1000 - 30) < 0.6) {
         infoMsg("If you can't get the right answer, press give-up to see how to solve it.");
     }
 }, 1000);
