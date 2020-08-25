@@ -33,6 +33,13 @@ $(window).on('load',function(){
     showQuestions(QUIZ_QUESTIONS, quizContainer);
 });
 
+window.setInterval(function(){
+    const cur_time = (new Date()).getTime()/1000;
+    if (Math.abs(cur_time - TUT_START_TIME / 1000 - 10) < 0.6) {
+        infoMsg("If you can't get the right answer, press give-up to see how to solve it.");
+    }
+}, 1000);
+
 function showAnswer(grid) {
     /**
      * set output grid to right answer
@@ -130,7 +137,7 @@ function check_grid() {
     $("#done_modal").modal("show");
 }
 
-var TUT_START_TIME;
+var TUT_START_TIME = 0;
 
 function send_user_complete_instructions_time() {
     const uid = sessionStorage.getItem('uid');
