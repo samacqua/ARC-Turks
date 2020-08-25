@@ -51,7 +51,9 @@ function check() {
     
     infoMsg("Correct!");
 
-    store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, age, gender, gave_up=GAVE_UP)
+    const newDate = new Date();
+    const totalTime = (newDate - START_DATE) / 1000;
+    store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up=GAVE_UP)
         .then(function() {next_task();})
         .catch(function(error) {console.log("Error storing response: " + error);});
 }

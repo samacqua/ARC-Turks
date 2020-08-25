@@ -33,7 +33,7 @@
   <link rel="stylesheet" type="text/css" href="css/testing_interface.css">
 
   <!-- JS files -->
-  <script src="js/speaker.js"></script>
+  <script src="js/speaker_nl_and_ex.js"></script>
   <script src="js/common.js"></script>
   <script src="js/constants.js"></script>
   <script src="js/grids.js"></script>
@@ -108,6 +108,18 @@
                     <small id="emailHelp" class="form-text text-muted">Start with "To make the output, you have to..."</small>
                   </div>
                 </br>
+
+                <div class="form-group">
+                    <label for="exampleFormControlSelect1">Which input-output grid do you want to pass on as part of your description?</label>
+                    <select class="form-control" id="selectExampleIO">
+                      <option>1</option>
+                      <option>2</option>
+                      <option>3</option>
+                      <option>4</option>
+                      <option>5</option>
+                      <option>6</option>
+                    </select>
+                  </div>
 
                 <button onclick="$('#submitModal').modal('show')" type="button" class="btn btn-primary">Submit Description and Continue to Verification</button>
                 <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#giveUpModal">Give up</button>
@@ -205,6 +217,7 @@
                     <div class="modal-body" id="gen-modal-body">
                         <p>For this task, you will not be using a description of a transformation to make the correct grid. Instead, you will be <i>creating the description.</i></p>
                         <p>You are shown a few examples of the pattern on the left. You have to recognize the pattern, then describe the pattern in the middle so that someone, given a new input grid, can create the correct output grid.</p>
+                        <p>You will also choose 1 example transformation to pass on. The user will be shown your description, and your chosen input-output example, so choose wisely.</p>
                         <p>After you submit your description, you will have to use the transformation on a new input grid to make sure that you understand the pattern (this will appear on the right once you submit your description).</p>
                         <p>You can give up after some time, but you will <b>not be eligible for a bonus for this task.</b></p>
 
@@ -233,7 +246,7 @@
                         <p>How confident are you that someone else, given your description, could create the correct output grid for the input grid you were just shown?</p>
                         <p><b>0</b> means you are certain that they will not create the correct output grid, and <b>10</b> means you are certain that they will create the correct output grid.</p>
                     </label>
-                    <input type="range" class="custom-range" min="0" max="10" step="1" id="conf_form">
+                    <input type="range" class="custom-range" min="1" max="10" step="1" id="conf_form">
                     <label id="conf_result"></label>
 
                     <div class="modal-footer">

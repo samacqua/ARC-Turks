@@ -137,6 +137,8 @@ function exit_task_qs() {
     const see_desc = $.trim($("#what_you_see").val());
     const do_desc = $.trim($("#what_you_do").val());
     var grid_size_desc = $.trim($("#grid_size_desc").val());
+    // -1 bc presenting from 1 instead of starting from 0
+    const selectedExample = parseInt($.trim($("#selectExampleIO").val()) - 1);
 
     if (grid_size_desc == "The grid size...") {
         grid_size_desc = "The grid size... does not change."
@@ -147,7 +149,7 @@ function exit_task_qs() {
     const newTime = new Date();
     const totalTime = (newTime - START_DATE) / 1000;
     
-    store_response_speaker(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, conf, totalTime, null, gave_up_verification=GAVE_UP)
+    store_response_speaker(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, conf, totalTime, selectedExample, gave_up_verification=GAVE_UP)
         .then(function() { next_task(); })
         .catch(function(error) { console.log('Error storing response ' + error); });
 }

@@ -72,9 +72,19 @@ function fillPairPreview(pairId, inputGrid, outputGrid) {
     if (!jqArrow.length) {
         jqArrow = $('<div class="arrow"></div>');
         jqArrow.appendTo(pairSlot);
+
         var elem = document.createElement("img");
         elem.src = 'img/arrow.png';
         elem.setAttribute("id", "arrow");
+
+        const needsExample = window.location.href.includes("speaker_nl_and_ex");
+        if (needsExample) {
+            var text = document.createElement("p");
+            text.innerHTML = pairId+1;
+            text.setAttribute("id", "io_id");
+            jqArrow.append(text);
+        }
+
         jqArrow.append(elem);
     }
 
@@ -95,7 +105,23 @@ function fillPairPreview(pairId, inputGrid, outputGrid) {
 function loadJSONTask(train, test) {
     $('#modal_bg').hide();
 
+    const isListener = window.location.href.includes("listener");
+    const isStart = window.location.href.includes("index");
+
+    $("#task_preview").html("");
+
+    if ((isListener || isStart) && (isNaN(SELECTED_EXAMPLE) || SELECTED_EXAMPLE == null)) {
+        console.log("aa");
+        $("#task_preview").html("There is no input-output example for this description.")
+    }
+
     for (var i = 0; i < train.length; i++) {
+
+        // if loading listener task, thn only load the chosen example, if any
+        if ((isListener || isStart) && i != SELECTED_EXAMPLE) {
+            continue;
+        }
+
         pair = train[i];
         values = pair['input'];
         input_grid = convertSerializedGridToGridObject(values)

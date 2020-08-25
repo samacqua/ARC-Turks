@@ -10,6 +10,18 @@ img {
     height: auto;
 }
 
+#io_id {
+    z-index: 1000;
+    position: absolute;
+    padding-bottom: 80px;
+    font-size: 36px;
+    font-family: "Arial Rounded MT Bold", "Helvetica Rounded", Arial, sans-serif;
+    color: black;
+    font-weight: bold;
+    text-shadow: -1px -1px 0 rgb(255, 255, 255), 1px -1px 0 rgb(255, 255, 255), -1px 1px 0 rgb(255, 255, 255), 1px 1px 0 rgb(255, 255, 255);
+    float: left;
+}
+
 .tooltip.show {
     opacity: 1;
 }

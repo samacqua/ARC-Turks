@@ -15,7 +15,8 @@ const PRAC_TASKS = [
         "task": 370,
         "grid_desc": "The grid size... does not change.",
         "see_desc": "In the input, you should see... two blue dots.",
-        "do_desc": "To make the output, you have to... place a green plus sign exactly half-way between the two blue dots."
+        "do_desc": "To make the output, you have to... place a green plus sign exactly half-way between the two blue dots.",
+        "selected_example": 0
     },
     {
         "task": 258,

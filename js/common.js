@@ -58,7 +58,7 @@ function shuffle(a) {
  */
 function next_task(first_task=false) {
 
-    var num_tasks_complete = parseInt(sessionStorage.getItem('items_complete'))
+    var num_tasks_complete = parseInt(sessionStorage.getItem('items_complete'));
 
     if (!first_task) {
         // increment number of tasks complete if not loading the first task, bc next task is called after completing a task
@@ -71,13 +71,9 @@ function next_task(first_task=false) {
     shouldGiveDescription()
     .then(function(promiseReturn) { 
 
-        const needsDescription = promiseReturn[0];
+        // 0 == listener, 1 = speaker, 2 = speaker w example io
+        const next_task = promiseReturn[0];
         const tot_descs = promiseReturn[1];
-
-        console.log(needsDescription);
-        console.log(tot_descs);
-        console.log(TOTAL_TASKS_TO_COMPLETE);
-        console.log(num_tasks_complete);
 
         // if user gave up describing task, do not want to give them describing task again, so force a listener task.
         const forceListener = sessionStorage.getItem('force_listener');
@@ -86,21 +82,27 @@ function next_task(first_task=false) {
             return;
         }
 
-        // if final task, and the database needs a description, OR there aren't enough description tasks in the database (first couple users), then give speaker task
-        if ((needsDescription && (num_tasks_complete) == TOTAL_TASKS_TO_COMPLETE - 1) || tot_descs < (TOTAL_TASKS_TO_COMPLETE - num_tasks_complete)) {
-            window.location.href = 'speaker.html';
-        } else if (num_tasks_complete >= TOTAL_TASKS_TO_COMPLETE) {
-
-            console.log(TOTAL_TASKS_TO_COMPLETE);
-            console.log(num_tasks_complete);
-
+        if (num_tasks_complete >= TOTAL_TASKS_TO_COMPLETE) {
             // all done!
             $("#finish_modal_uid").text(uid.toString());
             $("#finished_modal").modal('show');
 
             const end_time = new Date();
             const delta_time = parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time'));
-            send_user_info(uid, delta_time/1000);
+            const age = sessionStorage.getItem('age');
+            const gender = sessionStorage.getItem('gender');
+
+            send_user_info(uid, delta_time/1000, age, gender);
+
+
+        // if final task, and the database needs a description, OR there aren't enough description tasks in the database (first couple users), then give speaker task
+        } else if (((next_task != 0) && (num_tasks_complete == TOTAL_TASKS_TO_COMPLETE - 1)) || tot_descs < (TOTAL_TASKS_TO_COMPLETE - num_tasks_complete)) {
+            console.log(next_task);
+            if (next_task == 1) {
+                window.location.href = 'speaker.html';
+            } else {
+                window.location.href = 'speaker_nl_and_ex.html';
+            }
         } else {
             // next speaker task
             window.location.href = 'listener.html';
