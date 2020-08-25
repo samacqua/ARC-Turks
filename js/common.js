@@ -88,12 +88,9 @@ function next_task(first_task=false) {
             $("#finished_modal").modal('show');
 
             const end_time = new Date();
-            const delta_time = parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time'));
-            const age = sessionStorage.getItem('age');
-            const gender = sessionStorage.getItem('gender');
+            const delta_time = parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time')) / 1000;
 
-            send_user_info(uid, delta_time/1000, age, gender);
-
+            set_user_complete_time(uid, delta_time, 'time_to_complete');
 
         // if final task, and the database needs a description, OR there aren't enough description tasks in the database (first couple users), then give speaker task
         } else if (((next_task != 0) && (num_tasks_complete == TOTAL_TASKS_TO_COMPLETE - 1)) || tot_descs < (TOTAL_TASKS_TO_COMPLETE - num_tasks_complete)) {
@@ -146,7 +143,8 @@ function update_progress_bar(tasks_inc=false, prac_inc=false) {
         sessionStorage.setItem('prac_complete', prac_complete);
     }
 
-    const tot_tasks = TOTAL_TASKS_TO_COMPLETE + TOTAL_PRAC_TASKS;
+    // + 1 is for instructions
+    const tot_tasks = TOTAL_TASKS_TO_COMPLETE + TOTAL_PRAC_TASKS + 1;
     const percent_complete = (tasks_complete + prac_complete) / tot_tasks * 100;
 
     $(".progress-bar").animate({

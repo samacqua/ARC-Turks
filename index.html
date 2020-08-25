@@ -51,9 +51,9 @@
     </div>
 
     <div class="progress-meter">
-        <div class="meter meter-right" style="width: 66.67%;"><span class="meter-text">All Done!</span></div>
-        <div class="meter meter-right" style="width: 22.22%;"><span class="meter-text">Finished Tutorial</span></div>
-        <div class="meter meter-right" style="width: 11.11%;"><span class="meter-text">Finished Instructions</span></div>
+        <div class="meter meter-right" style="width: 50.00%;"><span class="meter-text">All Done!</span></div>
+        <div class="meter meter-right" style="width: 33.33%;"><span class="meter-text">Finished Tutorial</span></div>
+        <div class="meter meter-right" style="width: 16.67%;"><span class="meter-text">Finished Instructions</span></div>
     </div>
 
     <!-- Actual Body -->
@@ -323,7 +323,7 @@
                     <p><b>In order to continue, you must solve them both.</b></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="update_progress_bar(tasks_inc=false, prac_inc=true)" data-dismiss="modal">Okay!</button>
+                    <button type="button" class="btn btn-primary" onclick="update_progress_bar(tasks_inc=false, prac_inc=true); send_user_complete_instructions_time()" data-dismiss="modal">Okay!</button>
                 </div>
             </div>
         </div>

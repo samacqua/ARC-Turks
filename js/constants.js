@@ -1,5 +1,5 @@
-const TOTAL_TASKS_TO_COMPLETE = 6;
-const TOTAL_PRAC_TASKS = 3; // 1 for instructions, 2 for practice tasks
+const TOTAL_TASKS_TO_COMPLETE = 3;
+const TOTAL_PRAC_TASKS = 2;
 
 // easy tasks for demonstration purposes
 // 78 for video demonstration

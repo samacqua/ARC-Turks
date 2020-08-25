@@ -38,7 +38,7 @@ function give_up() {
      * give them the answer
      */
 
-     infoMsg("You have given up. The output grid now has the correct answer. Press 'check' to submit this correct answer.");
+    infoMsg("You have given up. The output grid now has the correct answer. Press 'check' to submit this correct answer.");
 
     GAVE_UP = true;
     const answer = convertSerializedGridToGridObject(TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output']);
@@ -109,6 +109,14 @@ function check_grid() {
     }
 
     update_progress_bar(tasks_inc=false, prac_inc=true);
+    
+    const uid = sessionStorage.getItem('uid');
+    const tut_end_time = (new Date()).getTime();
+    const tut_time = (tut_end_time - parseInt(TUT_START_TIME)) / 1000;
+    TUT_START_TIME = (new Date()).getTime();
+
+    const title = `tutorial_ex_${TOTAL_PRAC_TASKS - PRAC_TASKS.length}`;
+    set_user_complete_time(uid, tut_time, title);
 
     // if not last practice task
     if (PRAC_TASKS.length != 0) {
@@ -128,18 +136,32 @@ function check_grid() {
 
         return;
     }
+
     $("#done_modal").modal("show");
+}
+
+var TUT_START_TIME;
+
+function send_user_complete_instructions_time() {
+    const uid = sessionStorage.getItem('uid');
+
+    const instructions_start_time = sessionStorage.getItem('start_time');
+    const end_instructions_time = (new Date()).getTime();
+    const delta = (end_instructions_time - parseInt(instructions_start_time)) / 1000;
+
+    TUT_START_TIME = end_instructions_time;
+
+    set_user_complete_time(uid, delta, 'instructions_time');
 }
 
 function exit_demographic() {
     /**
      * Get info from demographic modal
      */
-    gender = $('#gender_form').find("option:selected").text();
-    sessionStorage.setItem("gender", gender);
-
-    age = $('#age_form').val().trim();
-    sessionStorage.setItem("age", age);
+    const gender = $('#gender_form').find("option:selected").text();
+    const age = $('#age_form').val().trim();
+    const uid = sessionStorage.getItem('uid');
+    set_user_info(uid, age, gender);
 
     $('#demographic_modal').one('hidden.bs.modal', function() { $('#introModal').modal('show'); }).modal('hide');
 }

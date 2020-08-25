@@ -3,8 +3,6 @@ var ATTEMPT_JSONS = [];
 var GAVE_UP = false;
 
 const uid = sessionStorage.getItem('uid');
-const age = sessionStorage.getItem('age');
-const gender = sessionStorage.getItem('gender');
 
 $(window).on('load',function(){
     // get date to check they are trying before giving up

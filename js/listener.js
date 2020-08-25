@@ -3,8 +3,6 @@ var ATTEMPT_JSONS = [];
 var GAVE_UP = false;
 
 const uid = sessionStorage.getItem('uid');
-const age = sessionStorage.getItem('age');
-const gender = sessionStorage.getItem('gender');
 const listener_tasks_done = parseInt(sessionStorage.getItem('l'));
 const speaker_tasks_done = parseInt(sessionStorage.getItem('s'));
 

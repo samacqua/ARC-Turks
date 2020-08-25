@@ -328,12 +328,27 @@ function give_up_description(task_id) {
     });
 }
 
-function send_user_info(user_id, time_to_complete, age, gender) {
+function set_user_info(user_id, age, gender) {
     db.collection("users").doc(user_id.toString()).set({
         'user_id': user_id,
-        'time_to_complete': time_to_complete,
         'age' : age,
         'gender' : gender
+    }).then(function () {
+        console.log("set user info successfully");
+    }).catch(function (err) {
+        console.log(err);
+    });
+}
+
+function set_user_complete_time(user_id, time, task_name) {
+    var data = {};
+    data[task_name] = time;
+
+    db.collection("users").doc(user_id.toString()).update( data )
+    .then(function () {
+        console.log(`set user time: ${task_name} successfully`);
+    }).catch(function (err) {
+        console.log(err);
     });
 }
 
