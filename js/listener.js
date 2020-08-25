@@ -16,8 +16,10 @@ $(window).on('load',function(){
     // get listening task
     random_listen_retrieve(TOTAL_TASKS_TO_COMPLETE);
 
-    // show initial instructions
-    $('#instructionsModal').modal('show');
+    if (parseInt(sessionStorage.getItem('items_complete')) == 0) {
+        // show initial instructions
+        $('#instructionsModal').modal('show');
+    }
 });
 
 

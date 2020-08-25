@@ -33,20 +33,6 @@ $(window).on('load',function(){
     showQuestions(QUIZ_QUESTIONS, quizContainer);
 });
 
-function give_up() {
-    /**
-     * give them the answer
-     */
-
-    infoMsg("You have given up. The output grid now has the correct answer. Press 'check' to submit this correct answer.");
-
-    GAVE_UP = true;
-    const answer = convertSerializedGridToGridObject(TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output']);
-
-    showAnswer(answer);
-    START_DATE = new Date();
-}
-
 function showAnswer(grid) {
     /**
      * set output grid to right answer
@@ -120,6 +106,10 @@ function check_grid() {
 
     // if not last practice task
     if (PRAC_TASKS.length != 0) {
+
+
+        $("#give_up_video").attr('src', `img/give_up_${TOTAL_PRAC_TASKS - PRAC_TASKS.length + 1}.mp4`);
+
         infoMsg("Correct! Solve " + (PRAC_TASKS.length).toString() + " more problem(s).");
 
         // reset values

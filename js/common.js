@@ -77,10 +77,6 @@ function next_task(first_task=false) {
 
         // if user gave up describing task, do not want to give them describing task again, so force a listener task.
         const forceListener = sessionStorage.getItem('force_listener');
-        if (forceListener == 'true') {
-            window.location.href = 'listener.html';
-            return;
-        }
 
         if (num_tasks_complete >= TOTAL_TASKS_TO_COMPLETE) {
             // all done!
@@ -92,8 +88,14 @@ function next_task(first_task=false) {
 
             set_user_complete_time(uid, delta_time, 'time_to_complete');
 
+        } 
+        // if user gave up describing task, do not want to give them describing task again, so force a listener task.
+        else if (forceListener == 'true') {
+            window.location.href = 'listener.html';
+            return;
+        } 
         // if final task, and the database needs a description, OR there aren't enough description tasks in the database (first couple users), then give speaker task
-        } else if (((next_task != 0) && (num_tasks_complete == TOTAL_TASKS_TO_COMPLETE - 1)) || tot_descs < (TOTAL_TASKS_TO_COMPLETE - num_tasks_complete)) {
+        else if (((next_task != 0) && (num_tasks_complete == TOTAL_TASKS_TO_COMPLETE - 1)) || tot_descs < (TOTAL_TASKS_TO_COMPLETE - num_tasks_complete)) {
             console.log(next_task);
             if (next_task == 1) {
                 window.location.href = 'speaker.html';
