@@ -46,14 +46,23 @@
 <body>
 
     <!-- Progress Bar -->
-    <div class="progress md-progress">
-        <div class="progress-bar" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="11"></div>
+    <div class="progress-bar-complete">
+        <div class="progress md-progress">
+            <div class="progress-bar success" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="11"></div>
+        </div>
+    
+        <div class="progress-meter">
+            <div class="meter meter-right" style="width: 50.00%;"><span class="meter-text">All Done!</span></div>
+            <div class="meter meter-right" style="width: 33.33%;"><span class="meter-text">Finished Tutorial</span></div>
+            <div class="meter meter-right" style="width: 16.67%;"><span class="meter-text">Finished Instructions</span></div>
+        </div>
     </div>
 
-    <div class="progress-meter">
-        <div class="meter meter-right" style="width: 50.00%;"><span class="meter-text">All Done!</span></div>
-        <div class="meter meter-right" style="width: 33.33%;"><span class="meter-text">Finished Tutorial</span></div>
-        <div class="meter meter-right" style="width: 16.67%;"><span class="meter-text">Finished Instructions</span></div>
+    <div class="row">
+        <div id="objective-col"class="col-md">
+            <h3 class="objective"><b>Objective:</b></h3>
+            <h5 class="objective" id="objective-text">Create the correct output based on the description, example transformations, and input grid.</h5>
+        </div>
     </div>
 
     <div id="container-fluid">
@@ -180,11 +189,6 @@
                         <p>For this task, you will do exactly what you did in the practice tasks: use a description to create a grid.</p>
                         <p>The layout is the exact same. Remember, <b>use as little attempts as possible, and if you give up, you will not be paid a bonus for this task.</b></p>
                         <p>Keep in mind that some tasks will have an example input-output showing the transformation.</p>
-                        <p>If you need a refresher on the layout, or the general task, watch the video below.</p>
-
-                        <video id="examples_video" width="320" height="240" controls>
-                            <source src="img/Instructions.mp4" type="video/mp4">
-                        </video>
                     </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-dismiss="modal">Okay!</button>

@@ -19,7 +19,7 @@ var db = firebase.firestore();
 
 /**
  * if ratio of builder attempts to number of descriptions is higher than the goal ratio (in the database), then should create another description
- * returns a promise of (if should give builder task (0) or speaker (1) or speaker with example io (2), total number of descriptions in db)
+ * returns a promise of (if should give builder task (0) or speaker (1) or speaker with example io (2), or speaker just choosing example io (3), total number of descriptions in db)
  */
 function shouldGiveDescription() {
 
@@ -28,11 +28,14 @@ function shouldGiveDescription() {
         const summary_ref = db.collection("tasks").doc("summary");
         summary_ref.get().then(function(snapshot) {
             const tot_attempts = snapshot.data().total_attempts;
-            const no_ex_descs = snapshot.data().total_descriptions_no_ex_io;
-            const ex_descs = snapshot.data().total_descriptions_with_ex_io;
+
+            const nl_descs = snapshot.data().total_descriptions_no_ex_io;
+            const nl_ex_descs = snapshot.data().total_descriptions_with_ex_io;
+            const ex_descs = snapshot.data().just_example_description_count;
+
             const goal_ratio = snapshot.data().goal_ratio;
 
-            const tot_descs = no_ex_descs + ex_descs;
+            const tot_descs = nl_descs + nl_ex_descs + ex_descs;
 
             // to avoid division by 0
             if (tot_descs == 0) {
@@ -40,20 +43,21 @@ function shouldGiveDescription() {
             }
 
             // trying to maintain ratio of attempts to descriptions
-            const ratio = tot_attempts/tot_descs;
-            if (ratio < goal_ratio) {
+            const cur_ratio = tot_attempts/tot_descs;
+            if (cur_ratio < goal_ratio) {
                 return resolve([0, tot_descs]);
             } else {
                 console.log("Need description.");
-                console.log(ex_descs);
-                console.log(no_ex_descs);
-                if (ex_descs > no_ex_descs) {
-                    return resolve([1, tot_descs]);
-                } else if (ex_descs < no_ex_descs) {
-                    return resolve([2, tot_descs]);
-                } else {
-                    // if equal, randomly choose 1
-                    return resolve([Math.round(Math.random())+1, tot_descs]);
+                console.log(nl_ex_descs);
+                console.log(nl_descs);
+
+                const desc_screens = [nl_descs, nl_ex_descs, ex_descs];
+                const min = Math.min(desc_screens);
+
+                for (var i=0;i<desc_screens.length;i++) {
+                    if (desc_screens[i] == min){ 
+                        return resolve([i+1, tot_descs]);
+                    }
                 }
             }
         })
@@ -85,7 +89,7 @@ function random_speaker_retrieve() {
     });
 }
 
-function random_listen_retrieve(limit_size) {
+function random_listen_retrieve() {
     /**
      * retrieve from the tasks that have already been described
      */
@@ -128,9 +132,14 @@ function random_listen_retrieve(limit_size) {
                             loadTask(TASK_ID);
 
                             SELECTED_EXAMPLE = selected_examples.pop();
+
+                            const see_description = see_descs.pop();
+
+                            if (see_description == "")
+
                                 
                             $("#grid_size_p").text(grid_descs.pop());
-                            $("#see_p").text(see_descs.pop());
+                            $("#see_p").text(see_description);
                             $("#do_p").text(do_descs.pop());
                 
                             // bc descriptions might have commas, cannot split by comma so can't store as list, must first join with a unique character ('#')
@@ -384,4 +393,33 @@ function init_tasks_collection() {
             });
         }
     })();
+}
+
+function download_file(blob,name) {
+    var url = URL.createObjectURL(blob),
+        div = document.createElement("div"),
+        anch = document.createElement("a");
+    document.body.appendChild(div);
+    div.appendChild(anch);
+    anch.innerHTML = "&nbsp;";
+    div.style.width = "0";
+    div.style.height = "0";
+    anch.href = url;
+    anch.download = name;
+    
+    var ev = new MouseEvent("click",{});
+    anch.dispatchEvent(ev);
+    document.body.removeChild(div);
+}
+
+function download_stamps_JSON() {
+    let ref_loc = '/arc-stamp'
+    fbase.ref(ref_loc).once('value').then(function(snapshot) {
+        console.log(snapshot.val());
+        json_stringed = JSON.stringify(snapshot.val());
+            // create the text file as a Blob:
+        var blob = new Blob([json_stringed],{type: "application/json"});
+        // download the file:
+        download_file(blob,"ARC-Stamps.json"); 
+    });
 }

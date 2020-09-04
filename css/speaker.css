@@ -2,6 +2,10 @@
     visibility: hidden;
 }
 
+#description_col {
+    visibility: hidden;
+}
+
 #finish_modal_uid {
     font-weight: bold;
 }
@@ -15,4 +19,28 @@ h5 {
 h1 {
     margin-bottom: 0px;
     padding-bottom: 0px;
+}
+
+
+.hwt-container {
+    background-color: #f8f9fa;
+    width: 100%;
+}
+
+.hwt-content {
+    width: 100%;
+    /* height: 100px; */
+    padding: 10px;
+    border: 1px solid #adb5bd;
+    color: inherit;
+    font: 18px/25px 'Droid Sans Mono', sans-serif;
+}
+
+.hwt-input:focus {
+    outline-color: #495057;
+}
+
+.hwt-content mark {
+    border-radius: 3px;
+    background-color: #ffc9c9;
 }

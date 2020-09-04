@@ -19,8 +19,12 @@
 
   <!-- JS Libraries -->
   <!-- jQuery library -->
-  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="http://code.jquery.com/jquery-3.1.1.min.js"></script>
+  <script src="http://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+  <!-- highlight-within-textarea CSS/JS -->
+  <link href="css/jquery.highlight-within-textarea.css" rel="stylesheet">
+  <script src="js/jquery.highlight-within-textarea.js"></script>
  
   <!-- Bootstrap JS (must be listed after jQuery) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
@@ -40,6 +44,9 @@
   <script src="js/more_grids.js"></script>
   <script src="js/fire.js"></script>
 
+  <script src="js/word_similarity.js"></script>
+  <script src="js/wordvecs10000.js"></script>
+
   <!-- Font reference -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet" />
 
@@ -48,14 +55,23 @@
 <body>
 
     <!-- Progress Bar -->
-    <div class="progress md-progress">
-        <div class="progress-bar" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="11"></div>
+    <div class="progress-bar-complete">
+        <div class="progress md-progress">
+            <div class="progress-bar success" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="11"></div>
+        </div>
+    
+        <div class="progress-meter">
+            <div class="meter meter-right" style="width: 50.00%;"><span class="meter-text">All Done!</span></div>
+            <div class="meter meter-right" style="width: 33.33%;"><span class="meter-text">Finished Tutorial</span></div>
+            <div class="meter meter-right" style="width: 16.67%;"><span class="meter-text">Finished Instructions</span></div>
+        </div>
     </div>
 
-    <div class="progress-meter">
-        <div class="meter meter-right" style="width: 66.67%;"><span class="meter-text">All Done!</span></div>
-        <div class="meter meter-right" style="width: 22.22%;"><span class="meter-text">Finished Tutorial</span></div>
-        <div class="meter meter-right" style="width: 11.11%;"><span class="meter-text">Finished Instructions</span></div>
+    <div class="row">
+        <div id="objective-col"class="col-md">
+            <h3 class="objective"><b>Objective:</b></h3>
+            <h5 class="objective" id="objective-text">Find the common transformation in the input grids. Once you have found the pattern, click 'continue'. If you cannot find the pattern, click 'Give up'.</h5>
+        </div>
     </div>
 
     <div id="container-fluid">
@@ -73,9 +89,13 @@
                 <div id="task_preview">
                     Loading...
                 </div>
+
+                <button onclick="continue_to_description()" type="button" class="btn btn-primary io-buttons">Continue</button>
+                <button type="button" class="btn btn-danger io-buttons" data-toggle="modal" data-target="#giveUpModal">Give up</button>
+
             </div>
     
-            <div class="col-md-4">
+            <div class="col-md-4" id="description_col">
                 <div class="col-header">
                     <h1>Description</h1>
                 </div>
@@ -93,24 +113,33 @@
                     <textarea class="form-control" id="grid_size_desc" rows="1" placeholder="The grid size..."></textarea>
                     <small id="emailHelp" class="form-text text-muted">Start with "The grid size..."</small>
                   </div>
-                </br>
+
+                  <div>
+                    <ul id="word-warning-size"></ul>
+                </div>
                 
                 <div class="form-group">
                     <label for="what_you_see">What should you expect to see in the input grid?</label>
                     <textarea class="form-control" id="what_you_see" rows="2" placeholder="In the input, you should see..."></textarea>
                     <small id="emailHelp" class="form-text text-muted">Start with "In the input, you should see..."</small>
                   </div>
-                </br>
+                
+                <div>
+                    <ul id="word-warning-see"></ul>
+                </div>
 
                 <div class="form-group">
                     <label for="what_you_do">What do you do to create the output grid?</label>
                     <textarea class="form-control" id="what_you_do" rows="2" placeholder="To make the output, you have to..."></textarea>
                     <small id="emailHelp" class="form-text text-muted">Start with "To make the output, you have to..."</small>
                   </div>
-                </br>
 
-                <button onclick="$('#submitModal').modal('show')" type="button" class="btn btn-primary">Submit Description and Continue to Verification</button>
-                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#giveUpModal">Give up</button>
+                <div>
+                    <ul id="word-warning-do"></ul>
+                </div>
+
+                <button onclick="$('#submitModal').modal('show')" type="button" class="btn btn-primary desc-buttons">Submit Description and Continue to Verification</button>
+                <button type="button" class="btn btn-danger desc-buttons" data-toggle="modal" data-target="#giveUpModal">Give up</button>
                 </br>
                 </br>
                 <button onclick="$('#instructionsModal').modal('show')" type="button" class="btn btn-secondary">Show Instructions</button>
@@ -120,7 +149,6 @@
 
                 <div class="col-header">
                     <h1>Validation</h1>
-                    <p>You have to solve the pattern for this "validation input" to show that you understand the pattern.</p>
                 </div>
                 
                 <h3>Validation Input</h3>
@@ -207,11 +235,6 @@
                         <p>You are shown a few examples of the pattern on the left. You have to recognize the pattern, then describe the pattern in the middle so that someone, given a new input grid, can create the correct output grid.</p>
                         <p>After you submit your description, you will have to use the transformation on a new input grid to make sure that you understand the pattern (this will appear on the right once you submit your description).</p>
                         <p>You can give up after some time, but you will <b>not be eligible for a bonus for this task.</b></p>
-
-                        <p>Please watch the video below to understand the layout and task.</p>
-                        <video id="examples_video" width="320" height="240" controls>
-                            <source src="img/Speaker_Instructions.mp4" type="video/mp4">
-                        </video>
                     </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-dismiss="modal">Continue</button>
@@ -254,7 +277,6 @@
                 </div>
                 <div class="modal-body" id="gen-modal-body">
                     <p>Are you sure that you want to submit and continue to verification? You will be unable to edit your description.</p>
-                    <p>Be sure that you have seen all input-output examples. <b>You may have to scroll down to see them all.</b></p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
