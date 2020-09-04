@@ -46,14 +46,16 @@
 
 <body>
     <!-- Progress Bar -->
-    <div class="progress md-progress">
-        <div class="progress-bar" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="11"></div>
-    </div>
-
-    <div class="progress-meter">
-        <div class="meter meter-right" style="width: 50.00%;"><span class="meter-text">All Done!</span></div>
-        <div class="meter meter-right" style="width: 33.33%;"><span class="meter-text">Finished Tutorial</span></div>
-        <div class="meter meter-right" style="width: 16.67%;"><span class="meter-text">Finished Instructions</span></div>
+    <div id="progress-bar-complete">
+        <div class="progress md-progress">
+            <div class="progress-bar success" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="11"></div>
+        </div>
+    
+        <div class="progress-meter">
+            <div class="meter meter-right" style="width: 50.00%;"><span class="meter-text">All Done!</span></div>
+            <div class="meter meter-right" style="width: 33.33%;"><span class="meter-text">Finished Tutorial</span></div>
+            <div class="meter meter-right" style="width: 16.67%;"><span class="meter-text">Finished Instructions</span></div>
+        </div>
     </div>
 
     <!-- Actual Body -->
@@ -62,16 +64,30 @@
         <div class="alert alert-success" id="info_display"></div>
         <div class="alert alert-danger" id="error_display"></div>
 
+        <div id="tut-layer">
+            <div id="dark-layer"></div>
+            <div id="tut-message"></div>
+            <div id="tut-continue-message">Click to continue</div>
+        </div>
+
         <div class="row">
-            <div class="col-md-4">
+            <div id="objective-col"class="col-md">
+                <h3 class="objective"><b>Objective:</b></h3>
+                <h5 class="objective" id="objective-text">Create the correct output based on the description, example transformations, and input grid.</h5>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4" id="description-col">
                 <div class="col-header">
                     <h1 class="col-title">Description</h1>
-                    <a href="#" class="help-btn" data-toggle="tooltip" title="This is the description of the transformation. Apply this description to the grid.">Help</a>
                 </div>
 
-                <p id="grid_size_p">The grid size...</p>
-                <p id="see_p">In the input, you should see...</p>
-                <p id="do_p">To make the output, you have to...</p>
+                <div id="description-text">
+                    <p id="grid_size_p">The grid size...</p>
+                    <p id="see_p">In the input, you should see...</p>
+                    <p id="do_p">To make the output, you have to...</p>
+                </div>
 
                 <hr>
                 <h3>Example Transformation</h3>
@@ -80,10 +96,9 @@
                 </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-4" id="input-col">
                 <div class="col-header">
                     <h1 class="col-title">Input</h1>
-                    <a href="#" class="help-btn" data-toggle="tooltip" title="This is the grid before the transformation is applied.">Help</a>
                 </div>
 
                 <div id="evaluation_input" class="selectable_grid">
@@ -91,21 +106,10 @@
                 </div>
             </div>
     
-            <div class="col-md-4">
+            <div class="col-md-4" id="output-col">
 
                 <div class="col-header">
                     <h1 class="col-title">Output</h1>
-                    <a href="#" data-placement="left" class="help-btn" data-toggle="tooltip" title="<p>This is where you create the output. Here is a list of the tools: </p>
-                        <ul>
-                            <li>Resize: Change the size of the grid</li>
-                            <li>Copy from Input: Copy the grid of the input</li>
-                            <li>Reset Grid: Make the grid entirely empty</li>
-                            <li>Check!: Check if the grid is the correct answer</li>
-                            <li>Draw: In this mode, you color individual blocks</li>
-                            <li>Floodfill: In this mode, you fill in entire areas</li>
-                            <li>Copy-Paste: In this mode, you can copy from the input or output grid, or fill in a selected area with a color.</li>
-                            <li>color bar: Use the color bar to select which color to draw or floodfill with</li>
-                        </ul>">Help</a>
                 </div>
 
                 <div id="output_grid">
@@ -131,43 +135,53 @@
                 <div id="resize_control_btns">
                     <label for="output_grid_size">Change grid size: </label>
                     <input type="text" id="output_grid_size" class="grid_size_field" name="size" value="3x3">
-                    <button type="button" class="btn btn-primary" onclick="resizeOutputGrid()" id="resize_btn">Resize</button>
+                    <button type="button" class="btn btn-primary" onclick="indexResizeOutputGrid()" id="resize_btn">Resize</button>
                 </div>
 
-                <button type="button" class="btn btn-secondary" onclick="copyFromInput()">Copy from input</button>
-                <button type="button" class="btn btn-secondary" onclick="resetOutputGrid()">Reset grid</button>
-                <button type="button" class="btn btn-success" onclick="check_grid()">Check!</button>
+                <div id="edit_control_btns">
+                    <button type="button" class="btn btn-secondary" onclick="indexCopyFromInput()">Copy from input</button>
+                    <button type="button" class="btn btn-secondary" onclick="indexResetOutputGrid()">Reset grid</button>
+                    <button type="button" class="btn btn-success" onclick="check_grid()">Check!</button>
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#giveUpModal">Give up</button>
+                </div>
 
-                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#giveUpModal">Give up</button>
+                <div id="toolbar_and_symbol_picker">
+                    <div id="toolbar">
+                        <div>
+                            <div id="draw" style="float:left;">
+                                <input type="radio" id="tool_edit"
+                                name="tool_switching" value="edit" checked>
+                               <label for="tool_edit">Draw</label>
+                            </div>
 
-                <div id="toolbar">
-                    <div>
-                        <input type="radio" id="tool_edit"
-                         name="tool_switching" value="edit" checked>
-                        <label for="tool_edit">Draw</label>
-
-                        <input type="radio" id="tool_floodfill"
-                         name="tool_switching" value="floodfill">
-                        <label for="tool_floodfill">Flood fill</label>
-
-                        <input type="radio" id="tool_select"
-                        name="tool_switching" value="select">
-                       <label for="tool_select">Copy-Paste</label>
+                            <div id="floodfill" style="float:left;">
+                                <input type="radio" id="tool_floodfill"
+                                name="tool_switching" value="floodfill">
+                               <label for="tool_floodfill">Flood fill</label>
+                            </div>
+    
+                            <div id="copypaste" style="float:left;">
+                                <input type="radio" id="tool_select"
+                                name="tool_switching" value="select">
+                               <label for="tool_select">Copy-Paste</label>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div id="symbol_picker">
+                        <div class="symbol_preview symbol_0 selected-symbol-preview" symbol="0"></div>
+                        <div class="symbol_preview symbol_1" symbol="1"></div>
+                        <div class="symbol_preview symbol_2" symbol="2"></div>
+                        <div class="symbol_preview symbol_3" symbol="3"></div>
+                        <div class="symbol_preview symbol_4" symbol="4"></div>
+                        <div class="symbol_preview symbol_5" symbol="5"></div>
+                        <div class="symbol_preview symbol_6" symbol="6"></div>
+                        <div class="symbol_preview symbol_7" symbol="7"></div>
+                        <div class="symbol_preview symbol_8" symbol="8"></div>
+                        <div class="symbol_preview symbol_9" symbol="9"></div>
                     </div>
                 </div>
-
-                <div id="symbol_picker">
-                    <div class="symbol_preview symbol_0 selected-symbol-preview" symbol="0"></div>
-                    <div class="symbol_preview symbol_1" symbol="1"></div>
-                    <div class="symbol_preview symbol_2" symbol="2"></div>
-                    <div class="symbol_preview symbol_3" symbol="3"></div>
-                    <div class="symbol_preview symbol_4" symbol="4"></div>
-                    <div class="symbol_preview symbol_5" symbol="5"></div>
-                    <div class="symbol_preview symbol_6" symbol="6"></div>
-                    <div class="symbol_preview symbol_7" symbol="7"></div>
-                    <div class="symbol_preview symbol_8" symbol="8"></div>
-                    <div class="symbol_preview symbol_9" symbol="9"></div>
-                </div>
+                
             </div>
         </div>
     </div>
@@ -261,30 +275,7 @@
                         <p>You can always give up on a task, but you will not be given a bonus for that task.</p>
                     </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="$('#introModal').one('hidden.bs.modal', function() { $('#examples_modal').modal('show'); }).modal('hide'); START_TIME = new Date()">Continue to Examples</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Examples -->
-    <div class="modal fade" id="examples_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title" id="gen-modal-title">Solving Patterns</h3>
-                </div>
-                    <div class="modal-body" id="gen-modal-body">
-    
-                        Watch this short video to understand the layout.
-
-                        <video id="examples_video" width="320" height="240" controls>
-                            <source src="img/Instructions.mp4" type="video/mp4" autoplay>
-                        </video>
-
-                    </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="$('#examples_modal').one('hidden.bs.modal', function() { $('#quiz_modal').modal('show'); }).modal('hide');">Okay!</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="START_TIME = new Date(); continue_tutorial()">Continue to Examples</button>
                 </div>
             </div>
         </div>

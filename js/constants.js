@@ -9,15 +9,23 @@ const PRAC_TASKS = [
     //     "grid_desc": "The grid size... changes to 3x3.",
     //     "see_desc": "In the input, you should see... a large grid with multiple copies of a few 3x3 shapes.",
     //     "do_desc": "To make the output, you have to... zoom in on the shape that appears the most in the input."
-    // },    
-        
+    // },
+    
     {
-        "task": 370,
+        "task": 341,
         "grid_desc": "The grid size... does not change.",
-        "see_desc": "In the input, you should see... two blue dots.",
-        "do_desc": "To make the output, you have to... place a green plus sign exactly half-way between the two blue dots.",
+        "see_desc": "In the input, you should see... a light blue 2x2 square with 4 colored cells around it.",
+        "do_desc": "To make the output, you have to... move each colored cell on top of the corner of the light blue square that it is closest to.",
         "selected_example": 0
     },
+        
+    // ,{
+    //     "task": 370,
+    //     "grid_desc": "The grid size... does not change.",
+    //     "see_desc": "In the input, you should see... two blue dots.",
+    //     "do_desc": "To make the output, you have to... place a green plus sign exactly half-way between the two blue dots.",
+    //     "selected_example": 0
+    // },
     {
         "task": 258,
         "grid_desc": "The grid size... changes to the size of the colored object.",
@@ -63,3 +71,7 @@ const QUIZ_QUESTIONS = [
         correctAnswer: 'b'
     }
 ];
+
+const GRID_SIZE_PREFIX = "The grid size...";
+const SHOULD_SEE_PREFIX = "In the input, you should see...";
+const HAVE_TO_PREFIX = "To make the output, you have to...";

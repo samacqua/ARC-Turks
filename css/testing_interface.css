@@ -16,26 +16,39 @@ body {
 .col-md-4 {
     background-color: gainsboro;
     background-clip: padding-box;
+    border-radius: 15px;
     border: 5px solid transparent;
 }
 
 #resize_control_btns {
+    background-color: gainsboro;
     width: 100%;
     float:left;
     margin-top: 20px;
     margin-bottom: 5px;
 }
 
+#edit_control_btns {
+    background-color: gainsboro;
+    width: 100%;
+    float:left;
+    padding-top: 5px;
+    margin-bottom: 5px;
+}
+
 #output_grid {
+    /* padding: 5%; */
     padding-left: 5px;
     padding-bottom: 5px;
 }
 
 #evaluation_input {
-    padding-left: 5px;
+    padding: 2%;
+    /* padding-bottom: 5px; */
 }
 
 #toolbar {
+    background-color: gainsboro;
     float: left;
     margin-left: 10px;
     width: 100%;

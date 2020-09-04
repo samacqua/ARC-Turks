@@ -71,12 +71,9 @@ function next_task(first_task=false) {
     shouldGiveDescription()
     .then(function(promiseReturn) { 
 
-        // 0 == listener, 1 = speaker, 2 = speaker w example io
+        // 0 == listener, 1 = speaker, 2 = speaker w example io, 3 = speaker just choose io
         const next_task = promiseReturn[0];
         const tot_descs = promiseReturn[1];
-
-        // if user gave up describing task, do not want to give them describing task again, so force a listener task.
-        const forceListener = sessionStorage.getItem('force_listener');
 
         if (num_tasks_complete >= TOTAL_TASKS_TO_COMPLETE) {
             // all done!
@@ -90,18 +87,15 @@ function next_task(first_task=false) {
 
         } 
         // if user gave up describing task, do not want to give them describing task again, so force a listener task.
-        else if (forceListener == 'true') {
+        else if (sessionStorage.getItem('force_listener') == 'true') {
             window.location.href = 'listener.html';
             return;
         } 
         // if final task, and the database needs a description, OR there aren't enough description tasks in the database (first couple users), then give speaker task
         else if (((next_task != 0) && (num_tasks_complete == TOTAL_TASKS_TO_COMPLETE - 1)) || tot_descs < (TOTAL_TASKS_TO_COMPLETE - num_tasks_complete)) {
             console.log(next_task);
-            if (next_task == 1) {
-                window.location.href = 'speaker.html';
-            } else {
-                window.location.href = 'speaker_nl_and_ex.html';
-            }
+            const speaker_urls = ['speaker.html', 'speaker_nl_and_ex.html', 'speaker_ex.html'];
+            window.location.href = speaker_urls[next_task+1];
         } else {
             // next speaker task
             window.location.href = 'listener.html';
