@@ -15,9 +15,9 @@ $(window).on('load',function(){
     $("#grid_size_form").css("visibility", "hidden")
 
     // fill textbox forms with actual text
-    $("#grid_size_desc").val("The grid size...");
-    $("#what_you_see").val("In the input, you should see...");
-    $("#what_you_do").val("To make the output, you have to...");
+    $("#grid_size_desc").val(GRID_SIZE_PREFIX);
+    $("#what_you_see").val(SHOULD_SEE_PREFIX);
+    $("#what_you_do").val(HAVE_TO_PREFIX);
 
     // show initial instructions
     $('#instructionsModal').modal('show');
@@ -34,22 +34,19 @@ $(document).ready(function() {
     /**
      * Make input form's template text uneditable
      */
-    const grid_text = "The grid size...";
     $("#grid_size_desc").on("keyup", function() {
         var value = $(this).val();
-        $(this).val(grid_text + value.substring(grid_text.length));
+        $(this).val(GRID_SIZE_PREFIX + value.substring(GRID_SIZE_PREFIX.length));
     });
 
-    const see_text = "In the input, you should see...";
 	$("#what_you_see").on("keyup", function() {
         var value = $(this).val();
-        $(this).val(see_text + value.substring(see_text.length));
+        $(this).val(SHOULD_SEE_PREFIX + value.substring(SHOULD_SEE_PREFIX.length));
     });
 
-    const do_text = "To make the output, you have to...";
     $("#what_you_do").on("keyup", function() {
         var value = $(this).val();
-        $(this).val(do_text + value.substring(do_text.length));
+        $(this).val(HAVE_TO_PREFIX + value.substring(HAVE_TO_PREFIX.length));
     });
 });
 
@@ -76,24 +73,41 @@ function continue_to_verify() {
         errorMsg("Please enter a description of what you change.");
         return
     }
-    if (!$("#what_you_see").val().trim().startsWith("In the input, you should see...")) {
-        errorMsg("What you see has to start with \"In the input, you should see...\"");
+    if (!$("#what_you_see").val().trim().startsWith(SHOULD_SEE_PREFIX)) {
+        errorMsg(`What you see has to start with "${SHOULD_SEE_PREFIX}"`);
         return
     }
-    if (!$("#what_you_do").val().trim().startsWith("To make the output, you have to...")) {
-        errorMsg("What you do has to start with \"To make the output, you have to...\"");
+    if (!$("#what_you_do").val().trim().startsWith(HAVE_TO_PREFIX)) {
+        errorMsg(`What you do has to start with "${HAVE_TO_PREFIX}"`);
         return
     }
-    if (!$("#grid_size_desc").val().trim().startsWith("The grid size...")) {
-        errorMsg("The grid size field has to start with \"The grid size...\"");
+    if (!$("#grid_size_desc").val().trim().startsWith(GRID_SIZE_PREFIX)) {
+        errorMsg(`The grid size field has to start with "${GRID_SIZE_PREFIX}"`);
         return
     }
 
-    document.getElementById("validation-col").style.visibility = "visible";
+    $("#description_col").css("opacity", "0.6");
+
+    $("#validation-col").css("visibility", "visible");
+    $(".desc-buttons").css("visibility", "hidden");
+
+    $("#objective-text").text("Apply the same pattern that you described to the new input grid.");
+
     $("#what_you_see").attr("readonly", true);
     $("#what_you_do").attr("readonly", true);
     $("#grid_size_changes").click(function () { return false; });
     $("#grid_size_desc").attr("readonly", true);
+    $("#selectExampleIO").attr('disabled', true);
+
+}
+
+function continue_to_description() {
+
+    $(".io-buttons").css("visibility", "hidden");
+    $("#io_ex_col").css("opacity", "0.6");
+
+    $("#objective-text").text("Choose an input-output example to pass on, and describe the common transformation in the examples so that someone, given a new input grid, could create the correct output. Break up your description into the 3 sections provided by continuing the sentences. If you realize you do not know the pattern, you can still press 'Give up.'");
+    $("#description_col").css("visibility", "visible");
 }
 
 function check() {
@@ -138,8 +152,8 @@ function exit_task_qs() {
     // -1 bc presenting from 1 instead of starting from 0
     const selectedExample = parseInt($.trim($("#selectExampleIO").val()) - 1);
 
-    if (grid_size_desc == "The grid size...") {
-        grid_size_desc = "The grid size... does not change."
+    if (grid_size_desc == GRID_SIZE_PREFIX) {
+        grid_size_desc = `${GRID_SIZE_PREFIX} does not change.`
     }
 
     infoMsg("All done! Loading next task...")

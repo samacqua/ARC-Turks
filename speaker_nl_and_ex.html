@@ -48,14 +48,23 @@
 <body>
 
     <!-- Progress Bar -->
-    <div class="progress md-progress">
-        <div class="progress-bar" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="11"></div>
+    <div class="progress-bar-complete">
+        <div class="progress md-progress">
+            <div class="progress-bar success" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="11"></div>
+        </div>
+    
+        <div class="progress-meter">
+            <div class="meter meter-right" style="width: 50.00%;"><span class="meter-text">All Done!</span></div>
+            <div class="meter meter-right" style="width: 33.33%;"><span class="meter-text">Finished Tutorial</span></div>
+            <div class="meter meter-right" style="width: 16.67%;"><span class="meter-text">Finished Instructions</span></div>
+        </div>
     </div>
 
-    <div class="progress-meter">
-        <div class="meter meter-right" style="width: 50.00%;"><span class="meter-text">All Done!</span></div>
-        <div class="meter meter-right" style="width: 33.33%;"><span class="meter-text">Finished Tutorial</span></div>
-        <div class="meter meter-right" style="width: 16.67%;"><span class="meter-text">Finished Instructions</span></div>
+    <div class="row">
+        <div id="objective-col"class="col-md">
+            <h3 class="objective"><b>Objective:</b></h3>
+            <h5 class="objective" id="objective-text">Find the common transformation in the input grids. Once you have found the pattern, click 'continue'. If you cannot find the pattern, click 'Give up'.</h5>
+        </div>
     </div>
 
     <div id="container-fluid">
@@ -73,9 +82,13 @@
                 <div id="task_preview">
                     Loading...
                 </div>
+
+                <button onclick="continue_to_description()" type="button" class="btn btn-primary io-buttons">Continue</button>
+                <button type="button" class="btn btn-danger io-buttons" data-toggle="modal" data-target="#giveUpModal">Give up</button>
+
             </div>
     
-            <div class="col-md-4">
+            <div class="col-md-4" id="description_col">
                 <div class="col-header">
                     <h1>Description</h1>
                 </div>
@@ -110,19 +123,12 @@
                 </br>
 
                 <div class="form-group">
-                    <label for="exampleFormControlSelect1">Which input-output grid do you want to pass on as part of your description?</label>
-                    <select class="form-control" id="selectExampleIO">
-                      <option>1</option>
-                      <option>2</option>
-                      <option>3</option>
-                      <option>4</option>
-                      <option>5</option>
-                      <option>6</option>
-                    </select>
+                    <label for="exampleFormControlSelect1">Which input-output grid example do you want to pass on as part of your description?</label>
+                    <select class="form-control" id="selectExampleIO"></select>
                   </div>
 
-                <button onclick="$('#submitModal').modal('show')" type="button" class="btn btn-primary">Submit Description and Continue to Verification</button>
-                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#giveUpModal">Give up</button>
+                <button onclick="$('#submitModal').modal('show')" type="button" class="btn btn-primary desc-buttons">Submit Description and Continue to Verification</button>
+                <button type="button" class="btn btn-danger desc-buttons" data-toggle="modal" data-target="#giveUpModal">Give up</button>
                 </br>
                 </br>
                 <button onclick="$('#instructionsModal').modal('show')" type="button" class="btn btn-secondary">Show Instructions</button>
@@ -132,7 +138,6 @@
 
                 <div class="col-header">
                     <h1>Validation</h1>
-                    <p>You have to solve the pattern for this "validation input" to show that you understand the pattern.</p>
                 </div>
                 
                 <h3>Validation Input</h3>
@@ -219,12 +224,6 @@
                         <p>You are shown a few examples of the pattern on the left. You have to recognize the pattern, then describe the pattern in the middle so that someone, given a new input grid, can create the correct output grid.</p>
                         <p>You will also choose 1 example transformation to pass on. The user will be shown your description, and your chosen input-output example, so choose wisely.</p>
                         <p>After you submit your description, you will have to use the transformation on a new input grid to make sure that you understand the pattern (this will appear on the right once you submit your description).</p>
-                        <p>You can give up after some time, but you will <b>not be eligible for a bonus for this task.</b></p>
-
-                        <p>Please watch the video below to understand the layout and task.</p>
-                        <video id="examples_video" width="320" height="240" controls>
-                            <source src="img/Speaker_Instructions.mp4" type="video/mp4">
-                        </video>
                     </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-dismiss="modal">Continue</button>

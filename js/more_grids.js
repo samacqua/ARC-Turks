@@ -47,10 +47,23 @@ function setUpEditionGridListeners(jqGrid) {
             grid = CURRENT_OUTPUT_GRID.grid;
             floodfillFromLocation(grid, cell.attr('x'), cell.attr('y'), symbol);
             syncFromDataGridToEditionGrid();
+
+
+            if (window.location.href.includes("index")) {
+                if ($("#objective-text").text().includes("yellow")) {
+                    pre_continue();
+                }
+            }
+
         }
         else if (mode == 'edit') {
             // Else: fill just this cell.
             setCellSymbol(cell, symbol);
+            if (window.location.href.includes("index")) {
+                if ($("#objective-text").text().includes("green")) {
+                    pre_continue();
+                }
+            }
         }
     });
 }
@@ -77,7 +90,7 @@ function fillPairPreview(pairId, inputGrid, outputGrid) {
         elem.src = 'img/arrow.png';
         elem.setAttribute("id", "arrow");
 
-        const needsExample = window.location.href.includes("speaker_nl_and_ex");
+        const needsExample = window.location.href.includes("speaker") && window.location.href.includes("nl");
         if (needsExample) {
             var text = document.createElement("p");
             text.innerHTML = pairId+1;
@@ -102,8 +115,24 @@ function fillPairPreview(pairId, inputGrid, outputGrid) {
     fitCellsToContainer(jqOutputGrid, outputGrid.height, outputGrid.width, col_width, col_width);
 }
 
+// const LISTENER_TYPES = 
+
+// // if 0, then NL and io example, if 1, then just NL, if 2, then just io example
+// var LISTENER_TYPE = 0;
+
 function loadJSONTask(train, test) {
     $('#modal_bg').hide();
+
+    const isSpeakerEx = window.location.href.includes("speaker") && window.location.href.includes("ex");
+    if (isSpeakerEx) {
+        for (var i = 0; i < train.length; i++) {
+
+            var option = $("<option></option>").val(i+1);
+            option.html(i+1);
+
+            $("#selectExampleIO").append(option);
+        }
+    }
 
     const isListener = window.location.href.includes("listener");
     const isStart = window.location.href.includes("index");
@@ -111,7 +140,6 @@ function loadJSONTask(train, test) {
     $("#task_preview").html("");
 
     if ((isListener || isStart) && (isNaN(SELECTED_EXAMPLE) || SELECTED_EXAMPLE == null)) {
-        console.log("aa");
         $("#task_preview").html("There is no input-output example for this description.")
     }
 
@@ -315,7 +343,7 @@ $(document).ready(function () {
 
         }
         if (event.which == 86) {
-            // Press P
+            // Press V
             if (COPY_PASTE_DATA.length == 0) {
                 errorMsg('No data to paste.');
                 return;
@@ -356,6 +384,14 @@ $(document).ready(function () {
                         setCellSymbol(cell, symbol);
                     }
                 }
+
+
+                if (window.location.href.includes("index")) {
+                    if ($("#objective-text").text().includes("copy")) {
+                        pre_continue();
+                    }
+                }
+
             } else {
                 errorMsg('Can only paste at a specific location; only select *one* cell as paste destination.');
             }
@@ -385,8 +421,8 @@ function parseSizeTuple(size) {
 function resizeOutputGrid() {
     size = $('#output_grid_size').val();
     size = parseSizeTuple(size);
-    height = size[1];
-    width = size[0];
+    height = parseInt(size[1]);
+    width = parseInt(size[0]);
 
     jqGrid = $('#output_grid .edition_grid');
     syncFromEditionGridToDataGrid();

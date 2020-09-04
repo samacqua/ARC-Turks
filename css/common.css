@@ -4,14 +4,24 @@ img {
     height: auto;
 }
 
+.objective {
+    text-align: center;
+}
+
+#objective-col {
+    background-color: rgb(231, 180, 231);
+    margin-top: 20px;
+    padding-top: 8px;
+}
+
 #arrow {
     width: 90%;
-    z-index: 999;
+    z-index: 100;
     height: auto;
 }
 
 #io_id {
-    z-index: 1000;
+    z-index: 110;
     position: absolute;
     padding-bottom: 80px;
     font-size: 36px;
@@ -56,6 +66,7 @@ video {
 /*Message display*/
 
 #error_display {
+    background-color: rgb(255, 100, 100);
     color: black;
     width: 80%;
     float: left;
@@ -64,6 +75,59 @@ video {
     margin-right: 10%;
     margin-top: 10px;
     display: none;
+}
+
+#dark-layer {
+    position: fixed;
+    padding:0;
+    margin:0;
+
+    top:0;
+    left:0;
+
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+#tut-message {
+    position:fixed;
+    margin:0;
+    padding: 0;
+
+    top:50%;
+    left: 20%;
+    right: 20%;
+
+    color: white;
+    background:rgba(0,0,0,0.7);
+    border-radius: 10px;
+    z-index: -1;
+
+    font-size: 30px;
+    text-align: center;
+}
+
+#tut-continue-message {
+    position:fixed;
+    margin:0;
+    padding: 0;
+
+    bottom:5%;
+    left: 5%;
+    right: 40%;
+
+    color: white;
+    background:rgba(0,0,0,0.0);
+    border-radius: 10px;
+    z-index: -1;
+
+    font-size: 30px;
+}
+
+#objective-text {
+    margin-left: 5px;
+    margin-right: 5px;
 }
 
 #info_display {
@@ -89,6 +153,10 @@ video {
 .progress-bar {
     width: 0%;
     height: 25px;
+}
+
+#progress-bar-complete {
+    background-color: white;
 }
 
 /* So that we can animate the progress: https://stackoverflow.com/questions/23575095/animating-bootstrap-progress-bar-width-with-jquery */
