@@ -90,7 +90,7 @@ function fillPairPreview(pairId, inputGrid, outputGrid) {
         elem.src = 'img/arrow.png';
         elem.setAttribute("id", "arrow");
 
-        const needsExample = window.location.href.includes("speaker") && window.location.href.includes("nl");
+        const needsExample = window.location.href.includes("speaker") && window.location.href.includes("ex");
         if (needsExample) {
             var text = document.createElement("p");
             text.innerHTML = pairId+1;

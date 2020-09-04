@@ -42,7 +42,7 @@ function continue_to_verify() {
     $("#validation-col").css("visibility", "visible");
     $(".desc-buttons").css("visibility", "hidden");
 
-    $("#objective-text").text("Apply the same pattern that you described to the new input grid.");
+    $("#objective-text").text("Apply the same pattern that you recognized to the new input grid.");
 
     $("#selectExampleIO").attr('disabled', true);
 }
@@ -52,7 +52,7 @@ function continue_to_description() {
     $(".io-buttons").css("visibility", "hidden");
     $("#io_ex_col").css("opacity", "0.6");
 
-    $("#objective-text").text("Choose an input-output example to pass on, and describe the common transformation in the examples so that someone, given a new input grid, could create the correct output. Break up your description into the 3 sections provided by continuing the sentences. If you realize you do not know the pattern, you can still press 'Give up.'");
+    $("#objective-text").text("Choose the best input-output example to pass on so that someone, given a new input grid, could create the correct output. If you realize you do not know the pattern, you can still press 'Give up.'");
     $("#description_col").css("visibility", "visible");
 }
 
@@ -164,19 +164,3 @@ function showAnswer(grid) {
     syncFromDataGridToEditionGrid();
     $('#output_grid_size').val(CURRENT_OUTPUT_GRID.height + 'x' + CURRENT_OUTPUT_GRID.width);
 }
-
-$(function()
-/**
- * listen for change in check box about if grid size changes
- */
-{
-    $('#grid_size_changes').on('change', function()
-    {
-        if (this.checked)
-        {
-            $("#grid_size_form").css("visibility", "visible");
-        } else {
-            $("#grid_size_form").css("visibility", "hidden");
-        }
-    });
-});

@@ -26,6 +26,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
+    <!-- highlight-within-textarea CSS/JS -->
+    <link href="css/jquery.highlight-within-textarea.css" rel="stylesheet">
+    <script src="js/jquery.highlight-within-textarea.js"></script>
+    
   <!-- CSS files -->
   <link rel="stylesheet" type="text/css" href="css/common.css">
   <link rel="stylesheet" type="text/css" href="css/speaker.css">
@@ -39,6 +43,9 @@
   <script src="js/grids.js"></script>
   <script src="js/more_grids.js"></script>
   <script src="js/fire.js"></script>
+
+  <script src="js/word_similarity.js"></script>
+  <script src="js/wordvecs10000.js"></script>
 
   <!-- Font reference -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet" />
@@ -106,21 +113,30 @@
                     <textarea class="form-control" id="grid_size_desc" rows="1" placeholder="The grid size..."></textarea>
                     <small id="emailHelp" class="form-text text-muted">Start with "The grid size..."</small>
                   </div>
-                </br>
+                
+                  <div>
+                    <ul id="word-warning-size"></ul>
+                </div>
                 
                 <div class="form-group">
                     <label for="what_you_see">What should you expect to see in the input grid?</label>
                     <textarea class="form-control" id="what_you_see" rows="2" placeholder="In the input, you should see..."></textarea>
                     <small id="emailHelp" class="form-text text-muted">Start with "In the input, you should see..."</small>
                   </div>
-                </br>
+                
+                  <div>
+                    <ul id="word-warning-see"></ul>
+                </div>
 
                 <div class="form-group">
                     <label for="what_you_do">What do you do to create the output grid?</label>
                     <textarea class="form-control" id="what_you_do" rows="2" placeholder="To make the output, you have to..."></textarea>
                     <small id="emailHelp" class="form-text text-muted">Start with "To make the output, you have to..."</small>
                   </div>
-                </br>
+                
+                  <div>
+                    <ul id="word-warning-do"></ul>
+                </div>
 
                 <div class="form-group">
                     <label for="exampleFormControlSelect1">Which input-output grid example do you want to pass on as part of your description?</label>

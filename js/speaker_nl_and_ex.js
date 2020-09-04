@@ -30,27 +30,153 @@ $(window).on('load',function(){
     random_speaker_retrieve();
 });
 
+var GOOD_WORDS = ['size', 'up', 'colors', 'entire', 'example', 'blue', 'which', 'except', 'and', 'make', 'input', '9', 'a', 'In', 'you', 'not', 'would', 'if', 'So', 'into', 'like', 'necessary', 'To', 'is', '5', 'black', 'corresponds', 'there', 'once', 'only', '1', 'color', 'should', 'fill', 'copy-paste', 'where', 'each', 'holes', 'have', 'are', 'Paste', '3x3', 'green', 'as', 'red', 'grid', 'shapes', 'some', 'broken', 'at', 'shape', 'paste', 'pixels', 'all', 'copy', 'pattern', 'squares', 'perfect', 'times', 'scaling', 'treat', 'output', 'it', 'fit', 'that', 'onto', 'filling', 'Where', 'colored', 'symmetrical', 'with', 'the', 'rectangular', 'hole', 'Determine', 'so', 'in', 'for', '4', 'patterns', 'square', 'see', 'sections', 'corresponding', 'has', 'pixel', 'gray', 'to', 'of', 'also', 'Looking', 'orange', 'yellow', 'duplicating', 'section'].map(function(value) {
+    return value.toLowerCase();
+});
+
+function get_bad_words(input) {
+    return new RegExp('\\b(?!(' + GOOD_WORDS.join("|") + ')\\b)[a-zA-Z]+', 'gmi')
+}
+
+function get_replacement_words(words) {
+
+    if (words == null) {
+        return []
+    }
+    
+    const replace_words = [];
+    for (i=0; i<words.length;i++) {
+        const word = words[i].toLowerCase();
+        const dists = GOOD_WORDS.map(function(x){return get_dist(word, x)});
+
+        var closest = dists.sort().slice(0,2);
+
+        // if written word, make them replace with num
+        // better way than writing out mappings? must be.
+        const str_num_mapping = {'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10};
+        if (str_num_mapping[word] !== undefined) {
+            closest[0][1] = str_num_mapping[word];
+        }
+
+        replace_words.push([words[i], closest[0][1], closest[1][1]]);
+    }
+
+    return replace_words;
+}
+
+function replace_word(word, replacement, text_area_id) {
+    console.log("replacing " + word + " with " + replacement);
+
+    const cur_text = $(text_area_id).val();
+    const replaced_text = cur_text.replace(word, replacement);
+    $(text_area_id).val(replaced_text);
+
+    $(text_area_id).trigger('keyup');
+    $(text_area_id).highlightWithinTextarea('update');
+}
+
+function add_word(word) {
+    console.log("adding word " + word);
+
+    GOOD_WORDS.push(word);
+    $("textarea").trigger('keyup');
+    $("textarea").highlightWithinTextarea('update');
+}
+
+
 $(document).ready(function() {
-    /**
-     * Make input form's template text uneditable
-     */
+
     $("#grid_size_desc").on("keyup", function() {
+
+        // so they can't delete prefix
         var value = $(this).val();
         $(this).val(GRID_SIZE_PREFIX + value.substring(GRID_SIZE_PREFIX.length));
+
+        const matches = get_replacement_words(value.match(get_bad_words()));
+
+        // for each novel word, add a row with buttons to replace word with similar words in database, or add the word
+        $('#word-warning-size').empty();
+        if (matches.length != 0) {
+            var items = [];
+            $.each(matches, function(i, item) {
+    
+                items.push('<li><b>' + item[0] + '</b>' 
+                + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[1]}\', '#grid_size_desc')" class="btn btn-primary word-replace" id=replace_${item[0]}_0>${item[1]}</button>`
+                + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[2]}\', '#grid_size_desc')" class="btn btn-primary word-replace" id=replace_${item[0]}_1>${item[2]}</button>`
+                + `<button type="button" onclick="add_word(\'${item[0]}\')" id="add_word_${item[0]}" class="btn btn-danger add-word">add word</button></li>`);
+    
+            });
+    
+            $('#word-warning-size').append(items.join(''));
+        }
     });
 
 	$("#what_you_see").on("keyup", function() {
+
+        // so they can't delete prefix
         var value = $(this).val();
         $(this).val(SHOULD_SEE_PREFIX + value.substring(SHOULD_SEE_PREFIX.length));
+        
+        const matches = get_replacement_words(value.match(get_bad_words()));
+
+        // for each novel word, add a row with buttons to replace word with similar words in database, or add the word
+        $('#word-warning-see').empty();
+        if (matches.length != 0) {
+            var items = [];
+            $.each(matches, function(i, item) {
+    
+                items.push('<li><b>' + item[0] + '</b>' 
+                + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[1]}\', '#what_you_see')" class="btn btn-primary word-replace" id=replace_${item[0]}_0>${item[1]}</button>`
+                + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[2]}\', '#what_you_see')" class="btn btn-primary word-replace" id=replace_${item[0]}_1>${item[2]}</button>`
+                + `<button type="button" onclick="add_word(\'${item[0]}\')" id="add_word_${item[0]}" class="btn btn-danger add-word">add word</button></li>`);
+    
+            });
+    
+            $('#word-warning-see').append(items.join(''));
+        }
     });
 
     $("#what_you_do").on("keyup", function() {
+
+        // so they can't delete prefix
         var value = $(this).val();
         $(this).val(HAVE_TO_PREFIX + value.substring(HAVE_TO_PREFIX.length));
-    });
-});
 
-$(document).ready(function(){
+        const matches = get_replacement_words(value.match(get_bad_words()));
+
+        // for each novel word, add a row with buttons to replace word with similar words in database, or add the word
+        $('#word-warning-do').empty();
+        if (matches.length != 0) {
+            var items = [];
+            $.each(matches, function(i, item) {
+    
+                items.push('<li><b>' + item[0] + '</b>' 
+                + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[1]}\', '#what_you_do')" class="btn btn-primary word-replace" id=replace_${item[0]}_0>${item[1]}</button>`
+                + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[2]}\', '#what_you_do')" class="btn btn-primary word-replace" id=replace_${item[0]}_1>${item[2]}</button>`
+                + `<button type="button" onclick="add_word(\'${item[0]}\')" id="add_word_${item[0]}" class="btn btn-danger add-word">add word</button></li>`);
+    
+            });
+    
+            $('#word-warning-do').append(items.join(''));
+        }
+    });
+
+    // highlight the textareas for words that have not been used yet
+    $('textarea').highlightWithinTextarea({
+        highlight: [
+            {
+                highlight: get_bad_words
+            }
+        ]
+    });
+
+    //  Make it so modal with sliders has labels of slider values
+    $("#conf_result").html($("#conf_form").val());
+    $("#conf_form").change(function(){
+        $("#conf_result").html($(this).val());
+    });
+
+
     /**
      * Make it so modal with sliders has labels of slider values
      */
@@ -58,7 +184,7 @@ $(document).ready(function(){
     $("#conf_form").change(function(){
         $("#conf_result").html($(this).val());
     });
-});  
+});
 
 function continue_to_verify() {
     /**
@@ -83,6 +209,11 @@ function continue_to_verify() {
     }
     if (!$("#grid_size_desc").val().trim().startsWith(GRID_SIZE_PREFIX)) {
         errorMsg(`The grid size field has to start with "${GRID_SIZE_PREFIX}"`);
+        return
+    }
+
+    if ($('#word-warning-size').children().length +  $('#word-warning-see').children().length +  $('#word-warning-do').children().length != 0) {
+        errorMsg("You must get rid of all red-highlighted words. If they are absolutely necessary for your description, add that word.");
         return
     }
 
@@ -230,6 +361,9 @@ $(function()
         {
             $("#grid_size_form").css("visibility", "visible");
         } else {
+            $("#grid_size_desc").val(GRID_SIZE_PREFIX);
+            $("textarea").trigger('keyup');
+            $("textarea").highlightWithinTextarea('update');
             $("#grid_size_form").css("visibility", "hidden");
         }
     });

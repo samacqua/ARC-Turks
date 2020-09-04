@@ -207,6 +207,10 @@ function random_listen_retrieve() {
     }
 }
 
+function store_response_speaker_ex_only(selected_ex, task_id, user_id, attempts, attemp_jsons, total_time, gave_up_verification) {
+    
+}
+
 function store_response_speaker(see_desc, do_desc, grid_desc, task_id, user_id, attempts, attemp_jsons, conf, total_time, selectedExample, gave_up_verification=false) {
     /**
      * store descriptions, task info and user info and user answers in firebase
