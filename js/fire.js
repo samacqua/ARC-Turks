@@ -111,6 +111,12 @@ function random_listen_retrieve() {
             // get a random selection of the tasks that have at least 1 description
             shuffle(retrieved_tasks);
             var num_tasks_complete = parseInt(sessionStorage.getItem('items_complete'));
+
+            // so if testing, don't need to have sessionStorage value
+            if (isNaN(num_tasks_complete)) {
+                num_tasks_complete = 0;
+            }
+
             retrieved_tasks = retrieved_tasks.slice(0, TOTAL_TASKS_TO_COMPLETE - num_tasks_complete);
             
             // have to be super broken up like this for ease of use with sessionStorage
@@ -134,13 +140,15 @@ function random_listen_retrieve() {
                             SELECTED_EXAMPLE = selected_examples.pop();
 
                             const see_description = see_descs.pop();
-
-                            if (see_description == "")
-
-                                
-                            $("#grid_size_p").text(grid_descs.pop());
-                            $("#see_p").text(see_description);
-                            $("#do_p").text(do_descs.pop());
+                            if (see_description == "") {
+                                $("#grid_size_p").text("This description has no language. Use just the shown example to guess the output.");
+                                $("#see_p").text("");
+                                $("#do_p").text("");
+                            } else {
+                                $("#grid_size_p").text(grid_descs.pop());
+                                $("#see_p").text(see_description);
+                                $("#do_p").text(do_descs.pop());
+                            }
                 
                             // bc descriptions might have commas, cannot split by comma so can't store as list, must first join with a unique character ('#')
                             sessionStorage.setItem('lis_tasks', retrieved_tasks);
@@ -194,9 +202,16 @@ function random_listen_retrieve() {
         TASK_ID = tasks.pop();
         loadTask(TASK_ID);
 
-        $("#see_p").text(see_descs.pop());
-        $("#do_p").text(do_descs.pop());
-        $("#grid_size_p").text(grid_descs.pop());
+        const see_description = see_descs.pop();
+        if (see_description == "") {
+            $("#grid_size_p").text("This description has no language. Use just the shown example to guess the output.");
+            $("#see_p").text("");
+            $("#do_p").text("");
+        } else {
+            $("#grid_size_p").text(grid_descs.pop());
+            $("#see_p").text(see_description);
+            $("#do_p").text(do_descs.pop());
+        }
 
         sessionStorage.setItem('lis_tasks', tasks);
         sessionStorage.setItem('lis_see_desc', see_descs.join('#'));
@@ -207,19 +222,26 @@ function random_listen_retrieve() {
     }
 }
 
-function store_response_speaker_ex_only(selected_ex, task_id, user_id, attempts, attemp_jsons, total_time, gave_up_verification) {
-    
-}
-
-function store_response_speaker(see_desc, do_desc, grid_desc, task_id, user_id, attempts, attemp_jsons, conf, total_time, selectedExample, gave_up_verification=false) {
+function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attempts, attemp_jsons, conf, total_time, selectedExample, gave_up_verification=false) {
     /**
+     * 
      * store descriptions, task info and user info and user answers in firebase
      * returns promise so that can transition to next task after storing
      */
     return new Promise(function(resolve, reject) {
 
-        var batch = db.batch();
+        // determine the type of description  
         var didSelectExample = (selectedExample != null);
+        var desc_type = "language";
+        if (didSelectExample) {
+            if (do_desc == see_desc == grid_desc == "") {
+                desc_type = "example";
+            } else {
+                desc_type = "language_and_example"
+            }
+        }
+
+        var batch = db.batch();
 
         // set actual info for description in the specific task's collection
         const desc_doc_ref = db.collection("tasks").doc(task_id.toString()).collection("descriptions").doc();
@@ -235,8 +257,8 @@ function store_response_speaker(see_desc, do_desc, grid_desc, task_id, user_id, 
             'num_attempts' : 0,
             'listener_gave_up_count' : 0,
             'time': total_time,
-            'didSelectExample': didSelectExample,
-            'selectedExample': selectedExample
+            'selectedExample': selectedExample,
+            'description_type' : desc_type
         });
 
         // increment num_descriptions and ver_gave_up_count for task in tasks collection (not desc_gave_up_count bc they would not be submitting description, handled seperately)

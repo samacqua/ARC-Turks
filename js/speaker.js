@@ -293,7 +293,7 @@ function exit_task_qs() {
     const totalTime = (newTime - START_DATE) / 1000;
     
     // store the description in the database
-    store_response_speaker(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, conf, totalTime, null, gave_up_verification=GAVE_UP)
+    store_description(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, conf, totalTime, null, gave_up_verification=GAVE_UP)
         .then(function() { next_task(); })
         .catch(function(error) { console.log('Error storing response ' + error); });
 }
@@ -328,7 +328,6 @@ function give_up() {
         // make sure they are next given a listening task, and store that they gave up.
         give_up_description(TASK_ID)
         .then(function () {
-            sessionStorage.setItem('force_listener', 'true');
             next_task();
         }).catch(function (err) {
             console.log(err);
