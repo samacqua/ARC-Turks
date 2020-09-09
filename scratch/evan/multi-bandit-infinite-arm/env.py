@@ -3,7 +3,7 @@ import numpy as np
 from scipy.stats import beta
 from memoization import cached
 
-# there are 10 casinos
+# there are N casinos
 # each casino_i initially has 0 arms, however
 # each casino_i is equipted with a slot-machine maker 
 # assume the slot machine maker is Unif(a_i, opt_i)
@@ -27,18 +27,28 @@ from memoization import cached
 
 # ======== THE ENVIRONMENT MODEL =========
 
-N = 10
+N = 3
 Budget = 25 * N
 
 # make N casinos, each casino_i paramterized by (a_i, opt_i)
 def make_casino_params():
-    OPT = [random.random() for _ in range(N)]
-    return [(random.random()*o,o) for o in OPT]
+    def make_pair():
+        a_i = random.random()
+        opt_i = random.random()
+        if a_i < opt_i:
+            return a_i, opt_i
+        else:
+            return make_pair()
+    return [make_pair() for _ in range(N)]
 
 class CasEnv:
     def __init__(self, casino_params):
         self.casino_params = casino_params
         self.casinos = None
+
+        # cache the result of sampling new arms to casinos
+        self.casino_cache = dict()
+        self.arm_cache = dict()
 
     def reset(self):
         # N empty casinos
@@ -52,9 +62,19 @@ class CasEnv:
         assert arm_id in range(-1, len(self.casinos[cas_id])), "ARM NO EXIST CYKA"
         # -1 means sample new arm, so we sample one
         if arm_id == -1:
-            new_arm_mu = random.uniform(*self.casino_params[cas_id])
+
+            # we use cache so the arms of the casino are consistent across different runs of the env as the first time
+            # the casino cache id is the casino id, and the number of arm being tried out
+            casino_cache_key = (cas_id, len(self.casinos[cas_id]))
+
+            if casino_cache_key not in self.casino_cache:
+                to_add = random.uniform(*self.casino_params[cas_id])
+                self.casino_cache[casino_cache_key] = to_add
+
+            new_arm_mu = self.casino_cache[casino_cache_key]
             self.ob[cas_id].append([])
             self.casinos[cas_id].append(new_arm_mu)
+
         # pull from the selected arm (-1 works nicely here lol)
         arm_result = 1 if random.random() < self.casinos[cas_id][arm_id] else 0
         self.ob[cas_id][arm_id].append(arm_result)

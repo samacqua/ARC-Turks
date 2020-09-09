@@ -9,7 +9,7 @@ def exp_normalize(x):
     y = np.exp(x - b)
     return y / y.sum()
 
-K_DIS = 10
+K_DIS = 5
         
 # this is just the hypothesis space, which is same for every casino
 H_SPACE = []
@@ -103,21 +103,23 @@ class EntPolicy(NaivePolicy):
         def T_likelihood(theta):
             return V2(theta) * (1-theta)
 
-        if abs(integrate.quad(V2, 0, 1)[0] - 1.0) > 0.1:
-            print (integrate.quad(V2, 0, 1))
-            print (cas_obs)
-            print (arm_id)
-            assert 0, "something wrong with my posterior . . ."
+        # quiote useful debugging, do not remove 
+        # if abs(integrate.quad(V2, 0, 1)[0] - 1.0) > 0.1:
+        #     print (integrate.quad(V2, 0, 1))
+        #     print (cas_obs)
+        #     print (arm_id)
+        #     assert 0, "something wrong with my posterior . . ."
 
         H_prob = integrate.quad(H_likelihood, 0, 1)[0]
-        T_prob = integrate.quad(T_likelihood, 0, 1)[0]
+        # T_prob = integrate.quad(T_likelihood, 0, 1)[0]
+        T_prob = 1.0 - H_prob
         return H_prob, T_prob
         
 
     def act(self, observations):
-        print ("acting ")
-        print ("observations")
-        print (observations)
+        # print ("acting ")
+        # print ("observations")
+        # print (observations)
         # ret = super().act(observations)
         
         actions = []
@@ -157,21 +159,33 @@ class EntPolicy(NaivePolicy):
 
         # return the action with the least conditional entropy of opt
         chosen_action = actions[np.argmax(entropy_reductions)]
-        print ("chosen action ", chosen_action)
+        # print ("chosen action ", chosen_action)
         return chosen_action
+
+    def guess(self, observations):
+
+        ret = []
+        for cas_ids, cas_obs in enumerate(observations):
+            arm_probs = [self.get_arm_pred(arm_id, cas_obs)[0] for arm_id in range(len(cas_obs))]
+            #print (arm_probs)
+            #assert 0
+            ret.append(np.argmax(arm_probs))
+        return ret
 
 if __name__ == '__main__':
 
-    policies = [EntPolicy()]
-    cums = [0 for _ in policies]
+    policies = [NaivePolicy(), TilePolicy(), JankPolicy(), EntPolicy()]
 
-    # do a roll out
-    cas_par = make_casino_params()
-    env = CasEnv(cas_par)
-    for j in range(len(cums)):
-        policy = policies[j]
-        regret = roll_out(env, policy)
-        cums[j] += regret
+    cums = [[] for _ in policies]
 
-    print (f"regret {cums}")
-    print (cas_par)
+    for jj in range(1000):
+        # do a roll out
+        cas_par = make_casino_params()
+        env = CasEnv(cas_par)
+        for j in range(len(cums)):
+            policy = policies[j]
+            regret = roll_out(env, policy)
+            cums[j].append(regret)
+
+        stats = [(np.mean(x), np.std(x)) for x in cums]
+        print (f"iteration {jj} regret_stats {stats}")
