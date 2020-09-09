@@ -98,11 +98,6 @@ var TUT_LIST = [
     ["Try to copy the light-blue square into the top left corner of the input.", ["input-col", "output_grid", "toolbar_and_symbol_picker", "objective-col"], 500, 100, 100]
 ];
 
-function arraysEqual(a1,a2) {
-    /* WARNING: arrays must not contain {objects} or behavior may be undefined */
-    return JSON.stringify(a1)==JSON.stringify(a2);
-}
-
 function indexResizeOutputGrid() {
     resizeOutputGrid();
 

@@ -2,6 +2,8 @@ var START_DATE;
 var ATTEMPT_JSONS = [];
 var GAVE_UP = false;
 
+var DESC_ID;
+
 const uid = sessionStorage.getItem('uid');
 const listener_tasks_done = parseInt(sessionStorage.getItem('l'));
 const speaker_tasks_done = parseInt(sessionStorage.getItem('s'));
@@ -14,7 +16,31 @@ $(window).on('load',function(){
     update_progress_bar();
 
     // get listening task
-    random_listen_retrieve(TOTAL_TASKS_TO_COMPLETE);
+    random_listen_retrieve(TOTAL_TASKS_TO_COMPLETE).then((data) => {
+
+        [desc_id, task_id, selected_example, grid_description, see_description, do_description] = data;
+        console.log(task_id);
+
+        console.log(desc_id, task_id, selected_example, grid_description, see_description, do_description);
+
+        DESC_ID = desc_id;
+        TASK_ID = task_id;
+        SELECTED_EXAMPLE = selected_example;
+
+        loadTask(TASK_ID);
+
+        if (see_description == "") {
+            $("#grid_size_p").text("This description has no language. Use just the shown example to guess the output.");
+            $("#see_p").text("");
+            $("#do_p").text("");
+        } else {
+            $("#grid_size_p").text(grid_description);
+            $("#see_p").text(see_description);
+            $("#do_p").text(do_description);
+        }
+    }).catch(error => {
+        errorMsg("Failed to load the task. Please ensure your internet connection and try again.");
+    });
 
     if (parseInt(sessionStorage.getItem('items_complete')) == 0) {
         // show initial instructions

@@ -1,10 +1,12 @@
 var START_DATE;
 var ATTEMPT_JSONS = [];
 var GAVE_UP = false;
+var GOOD_WORDS = [];
+var PAST_DESCS = [];
 
 const uid = sessionStorage.getItem('uid');
 
-$(window).on('load',function(){
+$(window).on('load', function () {
     // get date to check they are trying before giving up
     START_DATE = new Date();
 
@@ -22,19 +24,151 @@ $(window).on('load',function(){
     // show initial instructions
     $('#instructionsModal').modal('show');
 
-    // for example video
-    // const exampleTaskId = 78;
-    // loadTask(exampleTaskId);
+    // get words that have already been used
+    get_words().then(words => {
+        GOOD_WORDS = words.map(function (value) {
+            return value.toLowerCase();
+        });
+        console.log(GOOD_WORDS);
+    }).catch(error => {
+        infoMsg("Could not load words that can been used. Please check your internet connection and reload the page.");
+    });
 
     // get speaker task
-    random_speaker_retrieve();
+    random_speaker_retrieve().then((id) => {
+        loadTask(id);
+        get_task_descriptions(id, "language").then(function (descriptions) {
+            PAST_DESCS = descriptions;
+            createExampleDescsPager(descriptions);
+            showDescEx(0);
+        }).catch(error => {
+            errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
+        });
+    }).catch(error => {
+        errorMsg("Failed to load the task. Please ensure your internet connection, and retry.");
+    });
 });
 
-// list of used words
-// TODO: retrieve from db
-var GOOD_WORDS = ['size', 'up', 'colors', 'entire', 'example', 'blue', 'which', 'except', 'and', 'make', 'input', '9', 'a', 'In', 'you', 'not', 'would', 'if', 'So', 'into', 'like', 'necessary', 'To', 'is', '5', 'black', 'corresponds', 'there', 'once', 'only', '1', 'color', 'should', 'fill', 'copy-paste', 'where', 'each', 'holes', 'have', 'are', 'Paste', '3x3', 'green', 'as', 'red', 'grid', 'shapes', 'some', 'broken', 'at', 'shape', 'paste', 'pixels', 'all', 'copy', 'pattern', 'squares', 'perfect', 'times', 'scaling', 'treat', 'output', 'it', 'fit', 'that', 'onto', 'filling', 'Where', 'colored', 'symmetrical', 'with', 'the', 'rectangular', 'hole', 'Determine', 'so', 'in', 'for', '4', 'patterns', 'square', 'see', 'sections', 'corresponding', 'has', 'pixel', 'gray', 'to', 'of', 'also', 'Looking', 'orange', 'yellow', 'duplicating', 'section'].map(function(value) {
-    return value.toLowerCase();
+
+// ===========
+// Tutorial
+// ===========
+
+var TUT_LIST = [
+    ["You will now be walked through the layout. Click any of the un-highlighted area to continue.", [], 200, 20, 20],
+    ["This is the examples area. As you can see, there are multiple input-output examples. There is a common pattern that changes each input grid to its respective output grid.", ["io_ex_col"], 30, 30, 10],
+    ["This is the old descriptions area. Any past attempts to describe the pattern will be shown here.", ["description_ex_col"], 40, 20, 20],
+    ["At the bottom of each description, you will see how well people did using the description. So, if the description did pretty well, you may want to slightly change it. But, if it did badly, you should rewrite the entire description.", ["description_ex_col"], 40, 20, 20],
+    ["This is the description area. This is where you will describe the pattern you recognized in the examples area. You will break your description into 3 sections:", ["description_col"], 40, 20, 20],
+    ["First, if the grid size changes, check this box.", ["grid_size_change_box"], 180, 10, 30],
+    ["If the grid size does change, then describe how it changed.", ["grid_size_form"], 180, 10, 30],
+    ["Then describe what you should expect to see in the input.", ["see_desc_form"], 400, 5, 35],
+    ["Then, describe what you need to do to create the correct output. Keep in mind that the person using your description will see a different input grid than you are seeing.", ["do_desc_form"], 400, 5, 35],
+    ["If you use a word in your description that has not been used, it will be highlighted red. To submit your description, you must replace every red word, or manually add it.", ["description_col"], 400, 5, 35],
+    ["Once you are happy with your description, press the Submit button. If you cannot describe the pattern, or realize you do not know the pattern, you can give up (but you will not be eligible for a bonus).", ["desc_col_buttons"], 500, 5, 35],
+];
+
+var CUR_HIGHLIGHT = null;
+
+$(function () {
+    $("#dark-layer").click(function () {
+        continue_tutorial();
+    });
+    $("#tut-message").click(function () {
+        continue_tutorial();
+    });
+    $("#tut-continue-message").click(function () {
+        continue_tutorial();
+    });
 });
+
+function continue_tutorial() {
+
+    // if last one, then get rid of dark layer
+    if (TUT_LIST.length == 0) {
+        $("#dark-layer").css('z-index', -1);
+        $("#dark-layer").css('background-color', 'white');
+        $("#tut-message").css('z-index', -2);
+        $("#tut-continue-message").css('z-index', -2);
+
+        $("#grid_size_form").css("visibility", "hidden");
+
+        return;
+    }
+
+    const next_item = TUT_LIST.shift();
+
+    if (arraysEqual(next_item[1], ["grid_size_form"])) {
+        $("#grid_size_form").css("visibility", "visible");
+    }
+
+
+    // set last item to be behind dark layer
+    if (CUR_HIGHLIGHT != null) {
+        for (i = 0; i < CUR_HIGHLIGHT.length; i++) {
+            $(`#${CUR_HIGHLIGHT[i]}`).css('position', 'static');
+            $(`#${CUR_HIGHLIGHT[i]}`).css('z-index', 'auto');
+        }
+    }
+
+    // set dark layer and message
+    $("#dark-layer").css('z-index', 500);
+    $("#dark-layer").css('background-color', 'rgba(0,0,0,0.7)');
+    $("#tut-message").css('z-index', 502);
+    $("#tut-message").css('top', `${next_item[2]}px`);
+    $("#tut-message").css('left', `${next_item[3]}%`);
+    $("#tut-message").css('right', `${next_item[4]}%`);
+    $("#tut-message").html(next_item[0]);
+    $("#tut-continue-message").css('z-index', 502);
+
+    if (next_item[1].length > 1) {
+        $("#objective-text").html(next_item[0]);
+    }
+
+    // set highlight div to be above layer
+    for (i = 0; i < next_item[1].length; i++) {
+        const id = next_item[1][i];
+        $(`#${id}`).css('position', 'relative');
+        $(`#${id}`).css('z-index', '501');
+        if (id != "objective-col") {
+            $(`#${id}`).css('background-color', 'gainsboro');
+        }
+    }
+
+    CUR_HIGHLIGHT = next_item[1];
+}
+
+// ===========
+// Past Descriptions
+// ===========
+
+var CURRENT_DESC = 0;
+
+function createExampleDescsPager() {
+
+    if (PAST_DESCS.length > 1) {
+        $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${Math.max(CURRENT_DESC - 1, 0)})">Previous</a></li>`);
+        for (i = 0; i < PAST_DESCS.length; i++) {
+            $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${i});">${i + 1}</a></li>`);
+        }
+        $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${Math.min(CURRENT_DESC + 1, PAST_DESCS.length - 1)})">Next</a></li>`);
+    }
+}
+
+function showDescEx(i) {
+    if (PAST_DESCS.length == 0) {
+        $("#ex_size_desc").text("There are no descriptions for this task yet.");
+        return;
+    }
+    $("#ex_size_desc").text(PAST_DESCS[i][0]);
+    $("#ex_see_desc").text(PAST_DESCS[i][1]);
+    $("#ex_do_desc").text(PAST_DESCS[i][2]);
+    $("#desc_success").text(`${PAST_DESCS[i][3]} of ${PAST_DESCS[i][4]} people succeeded using this description.`);
+}
+
+// ===========
+// Highlight unused words
+// ===========
 
 // returns the regex for words that have not been used yet
 function get_bad_words(input) {
@@ -47,18 +181,18 @@ function get_replacement_words(words) {
     if (words == null) {
         return []
     }
-    
+
     const replace_words = [];
-    for (i=0; i<words.length;i++) {
+    for (i = 0; i < words.length; i++) {
 
         // gets 2 closest words according to word2vec
         const word = words[i].toLowerCase();
-        const dists_to_other_words = GOOD_WORDS.map(function(x){return get_dist(word, x)});
-        var closest = dists_to_other_words.sort().slice(0,2);
+        const dists_to_other_words = GOOD_WORDS.map(function (x) { return get_dist(word, x) });
+        var closest = dists_to_other_words.sort().slice(0, 2);
 
         // if written word, make them replace with num
         // better way than writing out mappings? must be.
-        const str_num_mapping = {'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10};
+        const str_num_mapping = { 'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10 };
         if (str_num_mapping[word] !== undefined) {
             closest[0][1] = str_num_mapping[word];
         }
@@ -79,20 +213,31 @@ function replace_word(word, replacement, text_area_id) {
     $(text_area_id).highlightWithinTextarea('update');
 }
 
-// makes the word okay to use
-function add_word(word) {
+var CUR_WORD_CANDIDATE;
 
-    GOOD_WORDS.push(word);
+// makes the word okay to use
+function confirm_add_word(word) {
+
+    CUR_WORD_CANDIDATE = word;
+
+    $("#word_modal_text").text(word);
+    $("#addWordModal").modal('show');
+}
+
+// makes the word okay to use
+function add_current_candidate_word() {
+
+    GOOD_WORDS.push(CUR_WORD_CANDIDATE);
 
     // so that functions called on textarea changes are called, and so highlights resize
     $("textarea").trigger('keyup');
     $("textarea").highlightWithinTextarea('update');
 }
 
-$(document).ready(function() {
+$(document).ready(function () {
 
     // when the grid size textarea changes
-    $("#grid_size_desc").on("keyup", function() {
+    $("#grid_size_desc").on("keyup", function () {
 
         // so they can't delete prefix
         var value = $(this).val();
@@ -104,47 +249,46 @@ $(document).ready(function() {
         $('#word-warning-size').empty();
         if (matches.length != 0) {
             var items = [];
-            $.each(matches, function(i, item) {
-    
-                items.push('<li><b>' + item[0] + '</b>' 
-                + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[1]}\', '#grid_size_desc')" class="btn btn-primary word-replace" id=replace_${item[0]}_0>${item[1]}</button>`
-                + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[2]}\', '#grid_size_desc')" class="btn btn-primary word-replace" id=replace_${item[0]}_1>${item[2]}</button>`
-                + `<button type="button" onclick="add_word(\'${item[0]}\')" id="add_word_${item[0]}" class="btn btn-danger add-word">add word</button></li>`);
-    
+            $.each(matches, function (i, item) {
+
+                items.push('<li><b>' + item[0] + '</b>'
+                    + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[1]}\', '#grid_size_desc')" class="btn btn-primary word-replace" id=replace_${item[0]}_0>${item[1]}</button>`
+                    + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[2]}\', '#grid_size_desc')" class="btn btn-primary word-replace" id=replace_${item[0]}_1>${item[2]}</button>`
+                    + `<button type="button" onclick="confirm_add_word(\'${item[0]}\')" id="add_word_${item[0]}" class="btn btn-danger add-word">add word</button></li>`);
             });
-    
+
             $('#word-warning-size').append(items.join(''));
         }
     });
 
     // when the see description texarea changes
-	$("#what_you_see").on("keyup", function() {
+    $("#what_you_see").on("keyup", function () {
 
         // so they can't delete prefix
         var value = $(this).val();
         $(this).val(SHOULD_SEE_PREFIX + value.substring(SHOULD_SEE_PREFIX.length));
-        
+
         const matches = get_replacement_words(value.match(get_bad_words()));
 
         // for each novel word, add a row with buttons to replace word with similar words in database, or add the word
         $('#word-warning-see').empty();
         if (matches.length != 0) {
             var items = [];
-            $.each(matches, function(i, item) {
-    
-                items.push('<li><b>' + item[0] + '</b>' 
-                + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[1]}\', '#what_you_see')" class="btn btn-primary word-replace" id=replace_${item[0]}_0>${item[1]}</button>`
-                + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[2]}\', '#what_you_see')" class="btn btn-primary word-replace" id=replace_${item[0]}_1>${item[2]}</button>`
-                + `<button type="button" onclick="add_word(\'${item[0]}\')" id="add_word_${item[0]}" class="btn btn-danger add-word">add word</button></li>`);
-    
+            $.each(matches, function (i, item) {
+
+                items.push('<li><b>' + item[0] + '</b>'
+                    + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[1]}\', '#what_you_see')" class="btn btn-primary word-replace" id=replace_${item[0]}_0>${item[1]}</button>`
+                    + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[2]}\', '#what_you_see')" class="btn btn-primary word-replace" id=replace_${item[0]}_1>${item[2]}</button>`
+                    + `<button type="button" onclick="confirm_add_word(\'${item[0]}\')" id="add_word_${item[0]}" class="btn btn-danger add-word">add word</button></li>`);
+
             });
-    
+
             $('#word-warning-see').append(items.join(''));
         }
     });
 
     // when the do description textarea changes
-    $("#what_you_do").on("keyup", function() {
+    $("#what_you_do").on("keyup", function () {
 
         // so they can't delete prefix
         var value = $(this).val();
@@ -156,15 +300,15 @@ $(document).ready(function() {
         $('#word-warning-do').empty();
         if (matches.length != 0) {
             var items = [];
-            $.each(matches, function(i, item) {
-    
-                items.push('<li><b>' + item[0] + '</b>' 
-                + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[1]}\', '#what_you_do')" class="btn btn-primary word-replace" id=replace_${item[0]}_0>${item[1]}</button>`
-                + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[2]}\', '#what_you_do')" class="btn btn-primary word-replace" id=replace_${item[0]}_1>${item[2]}</button>`
-                + `<button type="button" onclick="add_word(\'${item[0]}\')" id="add_word_${item[0]}" class="btn btn-danger add-word">add word</button></li>`);
-    
+            $.each(matches, function (i, item) {
+
+                items.push('<li><b>' + item[0] + '</b>'
+                    + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[1]}\', '#what_you_do')" class="btn btn-primary word-replace" id=replace_${item[0]}_0>${item[1]}</button>`
+                    + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[2]}\', '#what_you_do')" class="btn btn-primary word-replace" id=replace_${item[0]}_1>${item[2]}</button>`
+                    + `<button type="button" onclick="confirm_add_word(\'${item[0]}\')" id="add_word_${item[0]}" class="btn btn-danger add-word">add word</button></li>`);
+
             });
-    
+
             $('#word-warning-do').append(items.join(''));
         }
     });
@@ -180,13 +324,13 @@ $(document).ready(function() {
 
     //  Make it so modal with sliders has labels of slider values
     $("#conf_result").html($("#conf_form").val());
-    $("#conf_form").change(function(){
+    $("#conf_form").change(function () {
         $("#conf_result").html($(this).val());
     });
 });
 
 
-function continue_to_verify() {
+function submit() {
     /**
      * If starting with right phrase, actually entered text, and has used all known words or added the unknown words, then unhide validation
      */
@@ -211,64 +355,14 @@ function continue_to_verify() {
         errorMsg(`The grid size field has to start with "${GRID_SIZE_PREFIX}"`);
         return
     }
-    
-    if ($('#word-warning-size').children().length +  $('#word-warning-see').children().length +  $('#word-warning-do').children().length != 0) {
+
+    if ($('#word-warning-size').children().length + $('#word-warning-see').children().length + $('#word-warning-do').children().length != 0) {
         errorMsg("You must get rid of all red-highlighted words. If they are absolutely necessary for your description, add that word.");
         return
     }
 
-    // gray out description so they know it is uneditable and so they focus on validation
-    $("#description_col").css("opacity", "0.6");
-    $(".desc-buttons").css("visibility", "hidden");
+    $("#task_qs_modal").modal("show");
 
-    $("#what_you_see").attr("readonly", true);
-    $("#what_you_do").attr("readonly", true);
-    $("#grid_size_changes").click(function () { return false; });
-    $("#grid_size_desc").attr("readonly", true);
-
-    // show validation and update objective
-    $("#validation-col").css("visibility", "visible");
-    $("#objective-text").text("Apply the same pattern that you described to the new input grid.");
-}
-
-function continue_to_description() {
-
-    // gray out so they know to focus on middle column
-    $("#io_ex_col").css("opacity", "0.6");
-
-    $("#objective-text").text("Describe the common transformation in the examples so that someone, given a new input grid, could create the correct output. Break up your description into the 3 sections provided by continuing the sentences. If you realize you do not know the pattern, you can still press 'Give up.'");
-    $(".io-buttons").css("visibility", "hidden");
-    $("#description_col").css("visibility", "visible");
-}
-
-function check() {
-    /**
-     * check if output grid same as correct answer. if so, ask more questions about task
-     */
-    syncFromEditionGridToDataGrid();
-    reference_output = TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output'];
-    submitted_output = CURRENT_OUTPUT_GRID.grid;
-
-    // have to store as json string bc firebase cannot store nested arrays
-    ATTEMPT_JSONS.push(JSON.stringify(submitted_output));
-
-    if (reference_output.length != submitted_output.length) {
-        errorMsg("Wrong answer. Try again.");
-        return
-    }
-
-    // checking cell by cell
-    for (var i = 0; i < reference_output.length; i++){
-        ref_row = reference_output[i];
-        for (var j = 0; j < ref_row.length; j++){
-            if (ref_row[j] != submitted_output[i][j]) {
-                errorMsg("Wrong answer. Try again.");
-                return
-            }
-        }
-    }
-
-    $("#task_qs_modal").modal('show');
 }
 
 function exit_task_qs() {
@@ -291,11 +385,21 @@ function exit_task_qs() {
 
     const newTime = new Date();
     const totalTime = (newTime - START_DATE) / 1000;
-    
+
     // store the description in the database
-    store_description(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, conf, totalTime, null, gave_up_verification=GAVE_UP)
-        .then(function() { next_task(); })
-        .catch(function(error) { console.log('Error storing response ' + error); });
+    store_description(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, conf, totalTime, null, gave_up_verification = GAVE_UP)
+        .then(function () { finish(); })
+        .catch(function (error) { console.log('Error storing response ' + error); });
+}
+
+function finish() {
+    $("#finish_modal_uid").text(uid.toString());
+    $("#finished_modal").modal('show');
+
+    const end_time = new Date();
+    const delta_time = (parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time'))) / 1000;
+
+    set_user_complete_time(uid, delta_time, 'time_to_complete');
 }
 
 function give_up() {
@@ -304,61 +408,23 @@ function give_up() {
      */
 
     const newTime = new Date();
-    console.log((newTime - START_DATE)/1000);
-    if ((newTime - START_DATE)/1000 < 30) {
+    console.log((newTime - START_DATE) / 1000);
+    if ((newTime - START_DATE) / 1000 < 30) {
         errorMsg("Please try to figure out the pattern for at least thirty seconds before you give up.");
         return;
     }
 
-    // different if gives up writing description vs solving task
-    if ( $('#validation-col').css('display') == 'none' || $('#validation-col').css("visibility") == "hidden"){
-        for (var i = 0; i < 8; i++) {
-            var pairSlot = $('#pair_preview_' + i);
-            var jqInputGrid = pairSlot.find('.input_preview');
-            var jqArrow = pairSlot.find('.arrow');
-            var jqOutputGrid = pairSlot.find('.output_preview');
-            jqInputGrid.empty();
-            // TODO: fix arrows and put when submitting
-            // jqArrow.empty();
-            jqOutputGrid.empty();
-        }
-
-        infoMsg("You have given up. You will now be given a new task.");
-
-        // make sure they are next given a listening task, and store that they gave up.
-        give_up_description(TASK_ID)
-        .then(function () {
-            next_task();
-        }).catch(function (err) {
-            console.log(err);
-        });
-    } else {
-        GAVE_UP = true;
-        infoMsg("You have given up. The output grid now has the correct answer. Press 'check' to submit this correct answer.");
-        const answer = convertSerializedGridToGridObject(TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output']);    
-        showAnswer(answer);
-    }
-    START_DATE = new Date();
+    give_up_description(TASK_ID).then(function () {
+        finish();
+    });
 }
 
-function showAnswer(grid) {
-    /**
-     * set output grid to right answer
-     */
-    CURRENT_OUTPUT_GRID = grid;
-    syncFromDataGridToEditionGrid();
-    $('#output_grid_size').val(CURRENT_OUTPUT_GRID.height + 'x' + CURRENT_OUTPUT_GRID.width);
-}
-
-$(function()
+$(function ()
 /**
  * listen for change in check box about if grid size changes
- */
-{
-    $('#grid_size_changes').on('change', function()
-    {
-        if (this.checked)
-        {
+ */ {
+    $('#grid_size_changes').on('change', function () {
+        if (this.checked) {
             $("#grid_size_form").css("visibility", "visible");
         } else {
             $("#grid_size_desc").val(GRID_SIZE_PREFIX);

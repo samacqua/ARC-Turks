@@ -14,12 +14,16 @@ $(window).on('load',function(){
     // show initial instructions
     $('#instructionsModal').modal('show');
 
-    // for example video
-    // const exampleTaskId = 78;
-    // loadTask(exampleTaskId);
+    // hide description column and validation column
+    $("#description_col").css("visibility", "hidden");
+    $("#validation-col").css("visibility", "hidden");
 
     // get speaker task
-    random_speaker_retrieve();
+    random_speaker_retrieve().then(function(task_id) {
+        loadTask(task_id);
+    }).catch(error => {
+        errorMsg("Failed to load task. Please ensure your internet connection and try again.");
+    });
 });
 
 $(document).ready(function(){
@@ -95,7 +99,7 @@ function exit_task_qs() {
     const newTime = new Date();
     const totalTime = (newTime - START_DATE) / 1000;
 
-    store_description("", "", "", TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, conf, totalTime, selectedExample, gave_up_verification=GAVE_UP)
+    store_description("", "", "", TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, conf, totalTime, selected_example, gave_up_verification=GAVE_UP)
         .then(function() { next_task(); })
         .catch(function(error) { console.log('Error storing response ' + error); });
 }

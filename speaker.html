@@ -70,7 +70,7 @@
     <div class="row">
         <div id="objective-col"class="col-md">
             <h3 class="objective"><b>Objective:</b></h3>
-            <h5 class="objective" id="objective-text">Find the common transformation in the input grids. Once you have found the pattern, click 'continue'. If you cannot find the pattern, click 'Give up'.</h5>
+            <h5 class="objective" id="objective-text">Using the previous descriptions as reference, describe the common pattern in the input-output grids.</h5>
         </div>
     </div>
 
@@ -78,6 +78,12 @@
 
         <div class="alert alert-success" id="info_display"></div>
         <div class="alert alert-danger" id="error_display"></div>
+
+        <div id="tut-layer">
+            <div id="dark-layer"></div>
+            <div id="tut-message"></div>
+            <div id="tut-continue-message">Click to continue</div>
+        </div>
 
         <div class="row">
             <div class="col-md-4" id="io_ex_col">
@@ -90,17 +96,32 @@
                     Loading...
                 </div>
 
-                <button onclick="continue_to_description()" type="button" class="btn btn-primary io-buttons">Continue</button>
-                <button type="button" class="btn btn-danger io-buttons" data-toggle="modal" data-target="#giveUpModal">Give up</button>
+            </div>
+    
+            <div class="col-md-4" id="description_ex_col">
+                <div class="col-header">
+                    <h1 class="col-title">Old Descriptions</h1>
+                </div>
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-center" id="paginator"></ul>
+                  </nav>
+
+                  <div id="ex_descriptions">
+                      <p id="ex_size_desc" class="unselectable"></p>
+                      <p id="ex_see_desc" class="unselectable"></p>
+                      <p id="ex_do_desc" class="unselectable"></p>
+                      <p id="desc_success" class="unselectable"></p>
+                  </div>
 
             </div>
     
             <div class="col-md-4" id="description_col">
+
                 <div class="col-header">
                     <h1>Description</h1>
                 </div>
 
-                <div class="form-check">
+                <div class="form-check" id="grid_size_change_box">
                     <input class="form-check-input" type="checkbox" value="" id="grid_size_changes" data-toggle="toggle">
                     <label class="form-check-label" for="defaultCheck1">
                       Grid size changes
@@ -118,7 +139,7 @@
                     <ul id="word-warning-size"></ul>
                 </div>
                 
-                <div class="form-group">
+                <div class="form-group" id="see_desc_form">
                     <label for="what_you_see">What should you expect to see in the input grid?</label>
                     <textarea class="form-control" id="what_you_see" rows="2" placeholder="In the input, you should see..."></textarea>
                     <small id="emailHelp" class="form-text text-muted">Start with "In the input, you should see..."</small>
@@ -128,7 +149,7 @@
                     <ul id="word-warning-see"></ul>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" id="do_desc_form">
                     <label for="what_you_do">What do you do to create the output grid?</label>
                     <textarea class="form-control" id="what_you_do" rows="2" placeholder="To make the output, you have to..."></textarea>
                     <small id="emailHelp" class="form-text text-muted">Start with "To make the output, you have to..."</small>
@@ -138,87 +159,12 @@
                     <ul id="word-warning-do"></ul>
                 </div>
 
-                <button onclick="$('#submitModal').modal('show')" type="button" class="btn btn-primary desc-buttons">Submit Description and Continue to Verification</button>
-                <button type="button" class="btn btn-danger desc-buttons" data-toggle="modal" data-target="#giveUpModal">Give up</button>
-                </br>
+                <div id="desc_col_buttons">
+                    <button onclick="$('#submitModal').modal('show')" type="button" class="btn btn-primary desc-buttons">Submit</button>
+                    <button type="button" class="btn btn-danger desc-buttons" data-toggle="modal" data-target="#giveUpModal">Give up</button>
+                </div>
                 </br>
                 <button onclick="$('#instructionsModal').modal('show')" type="button" class="btn btn-secondary">Show Instructions</button>
-            </div>
-    
-            <div class="col-md-4" id="validation-col">
-
-                <div class="col-header">
-                    <h1>Validation</h1>
-                </div>
-                
-                <h3>Validation Input</h3>
-                <div id="evaluation_input" class="selectable_grid"></div>
-
-                <hr/>
-
-                <h3>Validation Output</h3>
-
-                <div id="output_grid">
-                    <div class="edition_grid selectable_grid">
-                        <div class="row">
-                            <div class="cell" symbol="0" x="0" y="0"></div>
-                            <div class="cell" symbol="0" x="0" y="1"></div>
-                            <div class="cell" symbol="0" x="0" y="2"></div>
-                        </div>
-                        <div class="row">
-                            <div class="cell" symbol="0" x="1" y="0"></div>
-                            <div class="cell" symbol="0" x="1" y="1"></div>
-                            <div class="cell" symbol="0" x="1" y="2"></div>
-                        </div>
-                        <div class="row">
-                            <div class="cell" symbol="0" x="2" y="0"></div>
-                            <div class="cell" symbol="0" x="2" y="1"></div>
-                            <div class="cell" symbol="0" x="2" y="2"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="resize_control_btns">
-                    <label for="output_grid_size">Change grid size: </label>
-                    <input type="text" id="output_grid_size" class="grid_size_field" name="size" value="3x3">
-                    <button type="button" class="btn btn-primary" onclick="resizeOutputGrid()" id="resize_btn">Resize</button>
-                </div>
-
-                <button type="button" class="btn btn-primary" onclick="copyFromInput()">Copy from input</button>
-                <button type="button" class="btn btn-primary" onclick="resetOutputGrid()">Reset grid</button>
-                <button type="button" class="btn btn-success" onclick="check()">Check!</button>
-
-                <div id="toolbar">
-                    <div>
-                        <input type="radio" id="tool_edit"
-                         name="tool_switching" value="edit" checked>
-                        <label for="tool_edit">Draw</label>
-
-                        <input type="radio" id="tool_floodfill"
-                         name="tool_switching" value="floodfill">
-                        <label for="tool_floodfill">Flood fill</label>
-
-                        <input type="radio" id="tool_select"
-                        name="tool_switching" value="select">
-                       <label for="tool_select">Copy-Paste</label>
-                    </div>
-                </div>
-
-                <div id="symbol_picker">
-                    <div class="symbol_preview symbol_0 selected-symbol-preview" symbol="0"></div>
-                    <div class="symbol_preview symbol_1" symbol="1"></div>
-                    <div class="symbol_preview symbol_2" symbol="2"></div>
-                    <div class="symbol_preview symbol_3" symbol="3"></div>
-                    <div class="symbol_preview symbol_4" symbol="4"></div>
-                    <div class="symbol_preview symbol_5" symbol="5"></div>
-                    <div class="symbol_preview symbol_6" symbol="6"></div>
-                    <div class="symbol_preview symbol_7" symbol="7"></div>
-                    <div class="symbol_preview symbol_8" symbol="8"></div>
-                    <div class="symbol_preview symbol_9" symbol="9"></div>
-                </div>
-
-                </br>
-                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#giveUpModal">Give up</button>
             </div>
         </div>
     </div>
@@ -233,11 +179,10 @@
                     <div class="modal-body" id="gen-modal-body">
                         <p>For this task, you will not be using a description of a transformation to make the correct grid. Instead, you will be <i>creating the description.</i></p>
                         <p>You are shown a few examples of the pattern on the left. You have to recognize the pattern, then describe the pattern in the middle so that someone, given a new input grid, can create the correct output grid.</p>
-                        <p>After you submit your description, you will have to use the transformation on a new input grid to make sure that you understand the pattern (this will appear on the right once you submit your description).</p>
                         <p>You can give up after some time, but you will <b>not be eligible for a bonus for this task.</b></p>
                     </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Continue</button>
+                    <button onclick="continue_tutorial()" type="button" class="btn btn-primary" data-dismiss="modal">Continue</button>
                 </div>
             </div>
         </div>
@@ -276,11 +221,30 @@
                     <h3 class="modal-title" id="gen-modal-title">Confirm submission</h3>
                 </div>
                 <div class="modal-body" id="gen-modal-body">
-                    <p>Are you sure that you want to submit and continue to verification? You will be unable to edit your description.</p>
+                    <p>Are you sure that your description is ready to submit?</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button onclick="continue_to_verify()" type="button" class="btn btn-primary" data-dismiss="modal">Submit</button>
+                    <button onclick="submit()" type="button" class="btn btn-primary" data-dismiss="modal">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Add Word Modal -->
+    <div class="modal fade" id="addWordModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Confirm adding word</h3>
+                </div>
+                <div class="modal-body" id="gen-modal-body">
+                    <p>Are you sure that you want to add the word:<p>
+                    <p id="word_modal_text"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button onclick="add_current_candidate_word()" type="button" class="btn btn-primary" data-dismiss="modal">Add</button>
                 </div>
             </div>
         </div>

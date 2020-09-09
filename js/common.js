@@ -39,6 +39,14 @@ function infoMsg(msg) {
 }
 
 /**
+ * Checks equality of two arrays
+ */
+function arraysEqual(a1,a2) {
+    /* WARNING: arrays must not contain {objects} or behavior may be undefined */
+    return JSON.stringify(a1)==JSON.stringify(a2);
+}
+
+/**
  * Shuffles array in place. from https://stackoverflow.com/a/6274381/5416200
  * @param {Array} a items An array containing the items.
  */

@@ -1,6 +1,7 @@
 var START_DATE;
 var ATTEMPT_JSONS = [];
 var GAVE_UP = false;
+var GOOD_WORDS = [];
 
 const uid = sessionStorage.getItem('uid');
 
@@ -22,17 +23,145 @@ $(window).on('load',function(){
     // show initial instructions
     $('#instructionsModal').modal('show');
 
-    // for example video
-    // const exampleTaskId = 78;
-    // loadTask(exampleTaskId);
+    // get words that have already been used
+    get_words().then(words => {
+        GOOD_WORDS = words.map(function(value) {
+            return value.toLowerCase();
+        });
+        console.log(GOOD_WORDS);
+    }).catch(error => {
+        infoMsg("Could not load words that can been used. Please check your internet connection and reload the page.");
+    });
 
     // get speaker task
-    random_speaker_retrieve();
+    // random_speaker_retrieve().then((id) => {
+        const id = 0;
+        TASK_ID = id;
+        loadTask(id);
+        get_task_descriptions(id, "language_and_example").then(function(descriptions) {
+            PAST_DESCS = descriptions;
+            createExampleDescsPager(descriptions);
+            showDescEx(0);
+        }).catch(error => {
+            errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
+        });
+    // }).catch(error => {
+    //     errorMsg("Failed to load the task. Please ensure your internet connection, and retry.");
+    // });
 });
 
-var GOOD_WORDS = ['size', 'up', 'colors', 'entire', 'example', 'blue', 'which', 'except', 'and', 'make', 'input', '9', 'a', 'In', 'you', 'not', 'would', 'if', 'So', 'into', 'like', 'necessary', 'To', 'is', '5', 'black', 'corresponds', 'there', 'once', 'only', '1', 'color', 'should', 'fill', 'copy-paste', 'where', 'each', 'holes', 'have', 'are', 'Paste', '3x3', 'green', 'as', 'red', 'grid', 'shapes', 'some', 'broken', 'at', 'shape', 'paste', 'pixels', 'all', 'copy', 'pattern', 'squares', 'perfect', 'times', 'scaling', 'treat', 'output', 'it', 'fit', 'that', 'onto', 'filling', 'Where', 'colored', 'symmetrical', 'with', 'the', 'rectangular', 'hole', 'Determine', 'so', 'in', 'for', '4', 'patterns', 'square', 'see', 'sections', 'corresponding', 'has', 'pixel', 'gray', 'to', 'of', 'also', 'Looking', 'orange', 'yellow', 'duplicating', 'section'].map(function(value) {
-    return value.toLowerCase();
+var TUT_LIST = [
+    ["You will now be walked through the layout. Click any of the un-highlighted area to continue.", [], 200, 20, 20],
+    ["This is the examples area. As you can see, there are multiple input-output examples. There is a common pattern that changes each input grid to its respective output grid.", ["io_ex_col"], 30, 30, 10],
+    ["This is the old descriptions area. Any past attempts to describe the pattern will be shown here.", ["description_ex_col"], 40, 20, 20],
+    ["At the bottom of each description, you will see how well people did using the description. So, if the description did pretty well, you may want to slightly change it. But, if it did badly, you should rewrite the entire description.", ["description_ex_col"], 40, 20, 20],
+    ["This is the description area. This is where you will describe the pattern you recognized in the examples area. You will break your description into 3 sections:", ["description_col"], 40, 20, 20],
+    ["First, if the grid size changes, check this box.", ["grid_size_change_box"], 180, 10, 30],
+    ["If the grid size does change, then describe how it changed.", ["grid_size_form"], 180, 10, 30],
+    ["Then describe what you should expect to see in the input.", ["see_desc_form"], 400, 5, 35],
+    ["Then, describe what you need to do to create the correct output. Keep in mind that the person using your description will see a different input grid than you are seeing.", ["do_desc_form"], 400, 5, 35],
+    ["You can pass on one input-out example with your description. Choose the example that will best enable someone else to correctly understand the pattern.", ['select_ex_io'], 400, 5, 35],
+    ["If you use a word in your description that has not been used, it will be highlighted red. To submit your description, you must replace every red word, or manually add it.", ["description_col"], 400, 5, 35],
+    ["Once you are happy with your description, press the Submit button. If you cannot describe the pattern, or realize you do not know the pattern, you can give up (but you will not be eligible for a bonus).", ["desc_col_buttons"], 500, 5, 35],
+];
+
+var CUR_HIGHLIGHT = null;
+
+$(function(){
+    $( "#dark-layer" ).click(function() {
+        continue_tutorial();
+    });
+    $("#tut-message").click(function() {
+        continue_tutorial();
+    });
+    $("#tut-continue-message").click(function() {
+        continue_tutorial();
+    });
 });
+
+function continue_tutorial() {
+
+    // if last one, then get rid of dark layer
+    if (TUT_LIST.length == 0) {
+        $("#dark-layer").css('z-index', -1);
+        $("#dark-layer").css('background-color', 'white');
+        $("#tut-message").css('z-index', -2);
+        $("#tut-continue-message").css('z-index', -2);
+
+        $("#grid_size_form").css("visibility", "hidden");
+
+        return;
+    }
+
+    const next_item = TUT_LIST.shift();
+
+    if (arraysEqual(next_item[1], ["grid_size_form"])) {
+        $("#grid_size_form").css("visibility", "visible");
+    }
+
+
+    // set last item to be behind dark layer
+    if (CUR_HIGHLIGHT != null) {
+        for(i=0;i<CUR_HIGHLIGHT.length;i++) {
+            $(`#${CUR_HIGHLIGHT[i]}`).css('position', 'static');
+            $(`#${CUR_HIGHLIGHT[i]}`).css('z-index', 'auto');
+        }
+    }
+
+    // set dark layer and message
+    $("#dark-layer").css('z-index', 500);
+    $("#dark-layer").css('background-color', 'rgba(0,0,0,0.7)');
+    $("#tut-message").css('z-index', 502);
+    $("#tut-message").css('top', `${next_item[2]}px`);
+    $("#tut-message").css('left', `${next_item[3]}%`);
+    $("#tut-message").css('right', `${next_item[4]}%`);
+    $("#tut-message").html(next_item[0]);
+    $("#tut-continue-message").css('z-index', 502);
+
+    if (next_item[1].length > 1) {
+        $("#objective-text").html(next_item[0]);
+    }
+
+    // set highlight div to be above layer
+    for(i=0;i<next_item[1].length;i++) {
+        const id = next_item[1][i];
+        $(`#${id}`).css('position', 'relative');
+        $(`#${id}`).css('z-index', '501');
+        if (id != "objective-col") {
+            $(`#${id}`).css('background-color', 'gainsboro');
+        }
+    }
+
+    CUR_HIGHLIGHT = next_item[1];
+}
+
+var PAST_DESCS = [];
+
+var CURRENT_DESC = 0;
+
+
+function createExampleDescsPager() {
+
+    if (PAST_DESCS.length > 1) {
+        $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${Math.max(CURRENT_DESC-1, 0)})">Previous</a></li>`);
+        for (i=0;i<PAST_DESCS.length;i++) {
+            $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${i});">${i+1}</a></li>`);
+        }
+        $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${Math.min(CURRENT_DESC+1, PAST_DESCS.length-1)})">Next</a></li>`);
+    }
+}
+
+function showDescEx(i) {
+    if (PAST_DESCS.length == 0) {
+        $("#ex_size_desc").text("There are no descriptions for this task yet.");
+        return;
+    }
+    $("#ex_size_desc").text(PAST_DESCS[i][0]);
+    $("#ex_see_desc").text(PAST_DESCS[i][1]);
+    $("#ex_do_desc").text(PAST_DESCS[i][2]);
+    $("#ex_ex_io").text(`Chosen example: ${PAST_DESCS[i][5]+1}`);  // TODO: Load task
+    $("#desc_success").text(`${PAST_DESCS[i][3]} of ${PAST_DESCS[i][4]} people succeeded using this description.`);
+}
 
 function get_bad_words(input) {
     return new RegExp('\\b(?!(' + GOOD_WORDS.join("|") + ')\\b)[a-zA-Z]+', 'gmi')
@@ -75,10 +204,23 @@ function replace_word(word, replacement, text_area_id) {
     $(text_area_id).highlightWithinTextarea('update');
 }
 
-function add_word(word) {
-    console.log("adding word " + word);
+var CUR_WORD_CANDIDATE;
 
-    GOOD_WORDS.push(word);
+// makes the word okay to use
+function confirm_add_word(word) {
+
+    CUR_WORD_CANDIDATE = word;
+
+    $("#word_modal_text").text(word);
+    $("#addWordModal").modal('show');
+}
+
+// makes the word okay to use
+function add_current_candidate_word() {
+
+    GOOD_WORDS.push(CUR_WORD_CANDIDATE);
+
+    // so that functions called on textarea changes are called, and so highlights resize
     $("textarea").trigger('keyup');
     $("textarea").highlightWithinTextarea('update');
 }
@@ -103,7 +245,7 @@ $(document).ready(function() {
                 items.push('<li><b>' + item[0] + '</b>' 
                 + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[1]}\', '#grid_size_desc')" class="btn btn-primary word-replace" id=replace_${item[0]}_0>${item[1]}</button>`
                 + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[2]}\', '#grid_size_desc')" class="btn btn-primary word-replace" id=replace_${item[0]}_1>${item[2]}</button>`
-                + `<button type="button" onclick="add_word(\'${item[0]}\')" id="add_word_${item[0]}" class="btn btn-danger add-word">add word</button></li>`);
+                + `<button type="button" onclick="confirm_add_word(\'${item[0]}\')" id="add_word_${item[0]}" class="btn btn-danger add-word">add word</button></li>`);
     
             });
     
@@ -128,7 +270,7 @@ $(document).ready(function() {
                 items.push('<li><b>' + item[0] + '</b>' 
                 + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[1]}\', '#what_you_see')" class="btn btn-primary word-replace" id=replace_${item[0]}_0>${item[1]}</button>`
                 + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[2]}\', '#what_you_see')" class="btn btn-primary word-replace" id=replace_${item[0]}_1>${item[2]}</button>`
-                + `<button type="button" onclick="add_word(\'${item[0]}\')" id="add_word_${item[0]}" class="btn btn-danger add-word">add word</button></li>`);
+                + `<button type="button" onclick="confirm_add_word(\'${item[0]}\')" id="add_word_${item[0]}" class="btn btn-danger add-word">add word</button></li>`);
     
             });
     
@@ -153,7 +295,7 @@ $(document).ready(function() {
                 items.push('<li><b>' + item[0] + '</b>' 
                 + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[1]}\', '#what_you_do')" class="btn btn-primary word-replace" id=replace_${item[0]}_0>${item[1]}</button>`
                 + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[2]}\', '#what_you_do')" class="btn btn-primary word-replace" id=replace_${item[0]}_1>${item[2]}</button>`
-                + `<button type="button" onclick="add_word(\'${item[0]}\')" id="add_word_${item[0]}" class="btn btn-danger add-word">add word</button></li>`);
+                + `<button type="button" onclick="confirm_add_word(\'${item[0]}\')" id="add_word_${item[0]}" class="btn btn-danger add-word">add word</button></li>`);
     
             });
     
@@ -186,7 +328,7 @@ $(document).ready(function() {
     });
 });
 
-function continue_to_verify() {
+function submit() {
     /**
      * If starting with right phrase and actually entered text, then unhide validation
      */
@@ -217,57 +359,8 @@ function continue_to_verify() {
         return
     }
 
-    $("#description_col").css("opacity", "0.6");
+    $("#task_qs_modal").modal("show");
 
-    $("#validation-col").css("visibility", "visible");
-    $(".desc-buttons").css("visibility", "hidden");
-
-    $("#objective-text").text("Apply the same pattern that you described to the new input grid.");
-
-    $("#what_you_see").attr("readonly", true);
-    $("#what_you_do").attr("readonly", true);
-    $("#grid_size_changes").click(function () { return false; });
-    $("#grid_size_desc").attr("readonly", true);
-    $("#selectExampleIO").attr('disabled', true);
-
-}
-
-function continue_to_description() {
-
-    $(".io-buttons").css("visibility", "hidden");
-    $("#io_ex_col").css("opacity", "0.6");
-
-    $("#objective-text").text("Choose an input-output example to pass on, and describe the common transformation in the examples so that someone, given a new input grid, could create the correct output. Break up your description into the 3 sections provided by continuing the sentences. If you realize you do not know the pattern, you can still press 'Give up.'");
-    $("#description_col").css("visibility", "visible");
-}
-
-function check() {
-    /**
-     * check if output grid same as correct answer. if so, ask more questions about task
-     */
-    syncFromEditionGridToDataGrid();
-    reference_output = TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output'];
-    submitted_output = CURRENT_OUTPUT_GRID.grid;
-
-    // have to store as json string bc firebase cannot store nested arrays
-    ATTEMPT_JSONS.push(JSON.stringify(submitted_output));
-
-    if (reference_output.length != submitted_output.length) {
-        errorMsg("Wrong answer. Try again.");
-        return
-    }
-
-    for (var i = 0; i < reference_output.length; i++){
-        ref_row = reference_output[i];
-        for (var j = 0; j < ref_row.length; j++){
-            if (ref_row[j] != submitted_output[i][j]) {
-                errorMsg("Wrong answer. Try again.");
-                return
-            }
-        }
-    }
-
-    $("#task_qs_modal").modal('show');
 }
 
 function exit_task_qs() {
@@ -281,7 +374,7 @@ function exit_task_qs() {
     const do_desc = $.trim($("#what_you_do").val());
     var grid_size_desc = $.trim($("#grid_size_desc").val());
     // -1 bc presenting from 1 instead of starting from 0
-    const selectedExample = parseInt($.trim($("#selectExampleIO").val()) - 1);
+    const selected_example = parseInt($.trim($("#selectExampleIO").val()) - 1);
 
     if (grid_size_desc == GRID_SIZE_PREFIX) {
         grid_size_desc = `${GRID_SIZE_PREFIX} does not change.`
@@ -292,9 +385,19 @@ function exit_task_qs() {
     const newTime = new Date();
     const totalTime = (newTime - START_DATE) / 1000;
     
-    store_description(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, conf, totalTime, selectedExample, gave_up_verification=GAVE_UP)
-        .then(function() { next_task(); })
+    store_description(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, conf, totalTime, selected_example, gave_up_verification=GAVE_UP)
+        .then(function() { finish(); })
         .catch(function(error) { console.log('Error storing response ' + error); });
+}
+
+function finish() {
+    $("#finish_modal_uid").text(uid.toString());
+    $("#finished_modal").modal('show');
+
+    const end_time = new Date();
+    const delta_time = (parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time'))) / 1000;
+
+    set_user_complete_time(uid, delta_time, 'time_to_complete');
 }
 
 function give_up() {
@@ -309,35 +412,9 @@ function give_up() {
         return;
     }
 
-    // different if gives up writing description vs solving task
-    if ( $('#validation-col').css('display') == 'none' || $('#validation-col').css("visibility") == "hidden"){
-        for (var i = 0; i < 8; i++) {
-            var pairSlot = $('#pair_preview_' + i);
-            var jqInputGrid = pairSlot.find('.input_preview');
-            var jqArrow = pairSlot.find('.arrow');
-            var jqOutputGrid = pairSlot.find('.output_preview');
-            jqInputGrid.empty();
-            // TODO: fix arrows and put when submitting
-            // jqArrow.empty();
-            jqOutputGrid.empty();
-        }
-
-        infoMsg("You have given up. You will now be given a new task.");
-
-        // make sure they are next given a listening task, and store that they gave up.
-        give_up_description(TASK_ID)
-        .then(function () {
-            next_task();
-        }).catch(function (err) {
-            console.log(err);
-        });
-    } else {
-        GAVE_UP = true;
-        infoMsg("You have given up. The output grid now has the correct answer. Press 'check' to submit this correct answer.");
-        const answer = convertSerializedGridToGridObject(TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output']);    
-        showAnswer(answer);
-    }
-    START_DATE = new Date();
+    give_up_description(TASK_ID).then(function() {
+        finish();
+    });
 }
 
 function showAnswer(grid) {
