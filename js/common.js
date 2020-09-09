@@ -39,6 +39,14 @@ function infoMsg(msg) {
 }
 
 /**
+ * Checks equality of two arrays
+ */
+function arraysEqual(a1,a2) {
+    /* WARNING: arrays must not contain {objects} or behavior may be undefined */
+    return JSON.stringify(a1)==JSON.stringify(a2);
+}
+
+/**
  * Shuffles array in place. from https://stackoverflow.com/a/6274381/5416200
  * @param {Array} a items An array containing the items.
  */
@@ -84,12 +92,6 @@ function next_task(first_task=false) {
             const delta_time = (parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time'))) / 1000;
 
             set_user_complete_time(uid, delta_time, 'time_to_complete');
-
-        } 
-        // if user gave up describing task, do not want to give them describing task again, so force a listener task.
-        else if (sessionStorage.getItem('force_listener') == 'true') {
-            window.location.href = 'listener.html';
-            return;
         } 
         // if final task, and the database needs a description, OR there aren't enough description tasks in the database (first couple users), then give speaker task
         else if (((next_task != 0) && (num_tasks_complete == TOTAL_TASKS_TO_COMPLETE - 1)) || tot_descs < (TOTAL_TASKS_TO_COMPLETE - num_tasks_complete)) {
@@ -97,7 +99,7 @@ function next_task(first_task=false) {
             const speaker_urls = ['speaker.html', 'speaker_nl_and_ex.html', 'speaker_ex.html'];
             window.location.href = speaker_urls[next_task+1];
         } else {
-            // next speaker task
+            // next builder task
             window.location.href = 'listener.html';
         }
     })

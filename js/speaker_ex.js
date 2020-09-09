@@ -14,12 +14,16 @@ $(window).on('load',function(){
     // show initial instructions
     $('#instructionsModal').modal('show');
 
-    // for example video
-    // const exampleTaskId = 78;
-    // loadTask(exampleTaskId);
+    // hide description column and validation column
+    $("#description_col").css("visibility", "hidden");
+    $("#validation-col").css("visibility", "hidden");
 
     // get speaker task
-    random_speaker_retrieve();
+    random_speaker_retrieve().then(function(task_id) {
+        loadTask(task_id);
+    }).catch(error => {
+        errorMsg("Failed to load task. Please ensure your internet connection and try again.");
+    });
 });
 
 $(document).ready(function(){
@@ -90,24 +94,12 @@ function exit_task_qs() {
      * store submitted values and go to next task
      */
 
-    // get entered values
-    var conf = $('#conf_form').val().trim();
-    const see_desc = $.trim($("#what_you_see").val());
-    const do_desc = $.trim($("#what_you_do").val());
-    var grid_size_desc = $.trim($("#grid_size_desc").val());
-    // -1 bc presenting from 1 instead of starting from 0
-    const selectedExample = parseInt($.trim($("#selectExampleIO").val()) - 1);
-
-    if (grid_size_desc == GRID_SIZE_PREFIX) {
-        grid_size_desc = `${GRID_SIZE_PREFIX} does not change.`
-    }
-
     infoMsg("All done! Loading next task...")
 
     const newTime = new Date();
     const totalTime = (newTime - START_DATE) / 1000;
-    
-    store_response_speaker(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, conf, totalTime, selectedExample, gave_up_verification=GAVE_UP)
+
+    store_description("", "", "", TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, conf, totalTime, selected_example, gave_up_verification=GAVE_UP)
         .then(function() { next_task(); })
         .catch(function(error) { console.log('Error storing response ' + error); });
 }
@@ -142,7 +134,6 @@ function give_up() {
         // make sure they are next given a listening task, and store that they gave up.
         give_up_description(TASK_ID)
         .then(function () {
-            sessionStorage.setItem('force_listener', 'true');
             next_task();
         }).catch(function (err) {
             console.log(err);

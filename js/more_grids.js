@@ -12,6 +12,7 @@ var EDITION_GRID_WIDTH = 500;
 var MAX_CELL_SIZE = 100;
 
 var TASK_ID;
+var SELECTED_EXAMPLE = null;
 
 function refreshEditionGrid(jqGrid, dataGrid) {
     fillJqGridWithData(jqGrid, dataGrid);
