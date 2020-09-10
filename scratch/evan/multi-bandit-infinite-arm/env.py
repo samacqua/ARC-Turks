@@ -28,7 +28,7 @@ from memoization import cached
 # ======== THE ENVIRONMENT MODEL =========
 
 N = 3
-Budget = 25 * N
+Budget = 16 * N
 
 # make N casinos, each casino_i paramterized by (a_i, opt_i)
 def make_casino_params():
