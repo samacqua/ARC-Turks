@@ -77,7 +77,7 @@ video {
     display: none;
 }
 
-#dark-layer {
+#dark-layer, #trans-layer {
     position: fixed;
     padding:0;
     margin:0;

@@ -50,7 +50,8 @@ function setUpEditionGridListeners(jqGrid) {
             syncFromDataGridToEditionGrid();
 
 
-            if (window.location.href.includes("index")) {
+            const isStart = !(window.location.href.includes("listener") || window.location.href.includes("speaker"));
+            if (isStart) {
                 if ($("#objective-text").text().includes("yellow")) {
                     pre_continue();
                 }
@@ -60,7 +61,9 @@ function setUpEditionGridListeners(jqGrid) {
         else if (mode == 'edit') {
             // Else: fill just this cell.
             setCellSymbol(cell, symbol);
-            if (window.location.href.includes("index")) {
+
+            const isStart = !(window.location.href.includes("listener") || window.location.href.includes("speaker"));
+            if (isStart) {
                 if ($("#objective-text").text().includes("green")) {
                     pre_continue();
                 }
@@ -136,7 +139,7 @@ function loadJSONTask(train, test) {
     }
 
     const isListener = window.location.href.includes("listener");
-    const isStart = window.location.href.includes("index");
+    const isStart = !(isListner || window.location.href.includes("speaker"));
 
     $("#task_preview").html("");
 
@@ -267,7 +270,7 @@ function initializeSelectable() {
     }
     toolMode = $('input[name=tool_switching]:checked').val();
     if (toolMode == 'select') {
-        infoMsg('Select some cells and click on a color to fill in, or press C to copy');
+        infoMsg('Drag over an area to select, and press "C" to copy');
         $('.selectable_grid').selectable(
             {
                 autoRefresh: false,
@@ -340,7 +343,7 @@ $(document).ready(function () {
                 symbol = parseInt($(selected[i]).attr('symbol'));
                 COPY_PASTE_DATA.push([x, y, symbol]);
             }
-            infoMsg('Cells copied! Select a target cell and press V to paste at location.');
+            infoMsg('Cells copied! Select a target cell and press "V" to paste at location.');
 
         }
         if (event.which == 86) {
@@ -387,7 +390,8 @@ $(document).ready(function () {
                 }
 
 
-                if (window.location.href.includes("index")) {
+                const isStart = !(window.location.href.includes("listener") || window.location.href.includes("speaker"));
+                if (isStart) {
                     if ($("#objective-text").text().includes("copy")) {
                         pre_continue();
                     }
