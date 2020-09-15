@@ -34,20 +34,16 @@ $(window).on('load',function(){
     });
 
     // get speaker task
-    // random_speaker_retrieve().then((id) => {
-        const id = 0;
-        TASK_ID = id;
-        loadTask(id);
-        get_task_descriptions(id, "language_and_example").then(function(descriptions) {
-            PAST_DESCS = descriptions;
-            createExampleDescsPager(descriptions);
-            showDescEx(0);
-        }).catch(error => {
-            errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
-        });
-    // }).catch(error => {
-    //     errorMsg("Failed to load the task. Please ensure your internet connection, and retry.");
-    // });
+    const id = 0;
+    TASK_ID = id;
+    loadTask(id);
+    get_task_descriptions(id, "language_and_example").then(function(descriptions) {
+        PAST_DESCS = descriptions;
+        createExampleDescsPager(descriptions);
+        showDescEx(0);
+    }).catch(error => {
+        errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
+    });
 });
 
 var TUT_LIST = [
@@ -156,11 +152,11 @@ function showDescEx(i) {
         $("#ex_size_desc").text("There are no descriptions for this task yet.");
         return;
     }
-    $("#ex_size_desc").text(PAST_DESCS[i][0]);
-    $("#ex_see_desc").text(PAST_DESCS[i][1]);
-    $("#ex_do_desc").text(PAST_DESCS[i][2]);
-    $("#ex_ex_io").text(`Chosen example: ${PAST_DESCS[i][5]+1}`);  // TODO: Load task
-    $("#desc_success").text(`${PAST_DESCS[i][3]} of ${PAST_DESCS[i][4]} people succeeded using this description.`);
+    $("#ex_size_desc").text(PAST_DESCS[i]['grid_desc']);
+    $("#ex_see_desc").text(PAST_DESCS[i]['see_desc']);
+    $("#ex_do_desc").text(PAST_DESCS[i]['do_desc']);
+    $("#ex_ex_io").text(`Chosen example: ${PAST_DESCS[i]['selected_ex']+1}`);  // TODO: Load task
+    $("#desc_success").text(`${PAST_DESCS[i]['num_success']} of ${PAST_DESCS[i]['num_attempts']} people succeeded using this description.`);
 }
 
 function get_bad_words(input) {

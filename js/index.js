@@ -63,18 +63,6 @@ $(document).ready(function(){
     $("#dif_patt_form").change(function(){
         $("#dif_patt_result").html($(this).val());
     });
-});  
-
-$(function(){
-    /**
-     * auto play and auto pause modal videos
-     */
-    $('#examples_modal').on('hidden.bs.modal', function(){
-        $(this).find('video')[0].pause();
-    });
-    $('#examples_modal').on('shown.bs.modal', function () {
-         $(this).find('video')[0].play();
-      });
 });
 
 var TUT_LIST = [
@@ -354,7 +342,7 @@ function check_grid() {
     if (PRAC_TASKS.length != 0) {
 
 
-        $("#give_up_video").attr('src', `img/give_up_${TOTAL_PRAC_TASKS - PRAC_TASKS.length + 1}.mp4`);
+        $("#give_up_gif").attr('src', `img/give_up_${TOTAL_PRAC_TASKS - PRAC_TASKS.length + 1}.gif`);
 
         infoMsg("Correct! Solve " + (PRAC_TASKS.length).toString() + " more problem(s).");
 

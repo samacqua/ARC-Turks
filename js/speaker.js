@@ -35,17 +35,18 @@ $(window).on('load', function () {
     });
 
     // get speaker task
-    random_speaker_retrieve().then((id) => {
-        loadTask(id);
-        get_task_descriptions(id, "language").then(function (descriptions) {
-            PAST_DESCS = descriptions;
-            createExampleDescsPager(descriptions);
-            showDescEx(0);
-        }).catch(error => {
-            errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
-        });
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const task = urlParams.get('task');
+    console.log(task);
+
+    loadTask(task);
+    get_task_descriptions(task, "language").then(function (descriptions) {
+        PAST_DESCS = descriptions;
+        createExampleDescsPager(descriptions);
+        showDescEx(0);
     }).catch(error => {
-        errorMsg("Failed to load the task. Please ensure your internet connection, and retry.");
+        errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
     });
 });
 
@@ -172,10 +173,10 @@ function showDescEx(i) {
         $("#ex_size_desc").text("There are no descriptions for this task yet.");
         return;
     }
-    $("#ex_size_desc").text(PAST_DESCS[i][0]);
-    $("#ex_see_desc").text(PAST_DESCS[i][1]);
-    $("#ex_do_desc").text(PAST_DESCS[i][2]);
-    $("#desc_success").text(`${PAST_DESCS[i][3]} of ${PAST_DESCS[i][4]} people succeeded using this description.`);
+    $("#ex_size_desc").text(PAST_DESCS[i]['grid_desc']);
+    $("#ex_see_desc").text(PAST_DESCS[i]['see_desc']);
+    $("#ex_do_desc").text(PAST_DESCS[i]['do_desc']);
+    $("#desc_success").text(`${PAST_DESCS[i]['num_success']} of ${PAST_DESCS[i]['num_attempts']} people succeeded using this description.`);
 }
 
 // ===========
@@ -399,7 +400,7 @@ function exit_task_qs() {
     const totalTime = (newTime - START_DATE) / 1000;
 
     // store the description in the database
-    store_description(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, conf, totalTime, null, gave_up_verification = GAVE_UP)
+    store_description(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, conf, totalTime, -1, gave_up_verification = GAVE_UP)
         .then(function () { finish(); })
         .catch(function (error) { console.log('Error storing response ' + error); });
 }

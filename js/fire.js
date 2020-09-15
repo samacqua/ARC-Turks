@@ -1,14 +1,14 @@
 // Your web app's Firebase configuration
 var firebaseConfig = {
-    apiKey: "AIzaSyBv4KeycMnYznBxZ0D6IfLifZuivGG0PjQ",
-    authDomain: "arc-turk.firebaseapp.com",
-    databaseURL: "https://arc-turk.firebaseio.com",
-    projectId: "arc-turk",
-    storageBucket: "arc-turk.appspot.com",
-    messagingSenderId: "60760627786",
-    appId: "1:60760627786:web:00bc4b63e339bf0600e4b3",
-    measurementId: "G-YN4FSWEZPE"
-};
+    apiKey: "AIzaSyB8bM1G_TiLEdRzB5DLU5GIB2Y6iDc1c4Y",
+    authDomain: "arc-turk-v4.firebaseapp.com",
+    databaseURL: "https://arc-turk-v4.firebaseio.com",
+    projectId: "arc-turk-v4",
+    storageBucket: "arc-turk-v4.appspot.com",
+    messagingSenderId: "792255109158",
+    appId: "1:792255109158:web:97a345c5aba9b06fd32ee7",
+    measurementId: "G-9LHZQKGDNH"
+  };
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
@@ -20,9 +20,50 @@ var db = firebase.firestore();
 // ===================================
 
 /**
+ * Get count of interactions for all tasks.
+ */
+function get_all_interactions_count() {
+    return new Promise(function (resolve, reject) {
+        const summary_ref = db.collection("tasks").doc("summary");
+        summary_ref.get().then(function (snapshot) {
+
+            const data = snapshot.data()
+            var interactions_count = [];
+
+            for (i=0;i<400;i++) {
+                interactions_count.push(data[`${i}_interactions_count`]);
+            }
+
+            return resolve(interactions_count);
+        })
+        .catch(function (err) {
+            return reject(err);
+        });
+    });
+}
+
+/**
+ * Get the number of descriptions and total number of interactions for a task
+ */
+function get_task_descs_interactions_count(task) {
+    return new Promise(function (resolve, reject) {
+        const task_ref = db.collection("tasks").doc(`${task}`);
+        task_ref.get().then(function (snapshot) {
+
+            const data = snapshot.data()
+            return resolve([data.num_descriptions, data.num_interactions]);
+        })
+        .catch(function (err) {
+            return reject(err);
+        });
+    });
+}
+
+
+/**
  * Get all the descriptions for a task
  */
-function get_task_descriptions(task_id, description_type) {
+function get_task_descriptions(task_id, description_type="") {
 
     return new Promise(function (resolve, reject) {
         const task_descs_ref = db.collection("tasks").doc(`${task_id}`).collection("descriptions");
@@ -39,12 +80,15 @@ function get_task_descriptions(task_id, description_type) {
 
                 const data = doc.data();
                 const num_success = data.num_attempts - data.listener_gave_up_count;
-                var description = [data.grid_description, data.see_description, data.do_description, num_success, data.num_attempts];
-
-                if (description_type == 'language_and_example') {
-                    description.push(data.selected_example)  
-                }
-
+                const description = {
+                    'grid_desc': data.grid_description,
+                    'see_desc': data.see_description,
+                    'do_desc': data.do_description,
+                    'selected_ex': data.selected_example,
+                    'num_success': num_success,
+                    'num_attempts': data.num_attempts,
+                    'id': doc.id
+                };
                 descriptions.push(description);
             });
             return resolve(descriptions);
@@ -61,17 +105,21 @@ function get_description_by_id(task_id, desc_id) {
     return new Promise(function (resolve, reject) {
         const desc_ref = db.collection("tasks").doc(`${task_id}`).collection("descriptions").doc(desc_id);
 
+        console.log(desc_ref);
+
         desc_ref.get().then(function (snapshot) {
             console.log(`read ${snapshot.size} documents`);
 
-            const data = doc.data();
-            var description = [data.grid_description, data.see_description, data.do_description];
-
-            if (data.description_type == "language_and_example") {
-                description.push(data.selected_example);
-            } else if (data.description_type == "example") {
-                desciption = data.selected_example;
-            }
+            const data = snapshot.data();
+            var description = {
+                'grid_desc': data.grid_description, 
+                'see_desc': data.see_description, 
+                'do_desc': data.do_description,
+                'selected_example': data.selected_example,
+                'num_success': num_success,
+                'num_attempts': data.num_attempts,
+                'id': doc.id
+            };
 
             return resolve(description);
         }).catch(error => {
@@ -81,163 +129,8 @@ function get_description_by_id(task_id, desc_id) {
 }
 
 /**
- * gets the task with the least number of descriptions
+ * Get all words that have been used in previous descriptions.
  */
-function random_speaker_retrieve() {
-
-    return new Promise(function (resolve, reject) {
-
-        const tasks_ref = db.collection("tasks");
-        const tasks_query = tasks_ref.orderBy("num_descriptions").limit(1);
-
-        tasks_query.get().then(function (querySnapshot) {
-            console.log(`read ${querySnapshot.size} documents`);
-
-            querySnapshot.forEach(function (doc) {
-                // doc.data() is never undefined for query doc snapshots
-                // loop will only run once, just indexing querySnapshot giving issues
-                console.log(doc.id, " => ", doc.data());
-                return resolve(doc.id);
-            });
-        }).catch(function (error) {
-            console.log("Error retrieving task: " + error);
-            return reject(error);
-        });
-    });
-}
-
-/**
- * retrieve from the tasks that have already been described
- * gets multiple from database, then stores locally
- */
-function random_listen_retrieve() {
-
-    return new Promise(function (resolve, reject) {
-
-
-        if (sessionStorage.getItem('lis_tasks') == null || sessionStorage.getItem('lis_tasks').length < 1) { // haven't retrieved any yet
-
-            const tasks_ref = db.collection("tasks");
-            const tasks_query = tasks_ref.orderBy("num_descriptions").startAt(1); // start at 1 to make sure getting task with at least 1 description
-
-            tasks_query.get().then(function (querySnapshot) {
-                console.log(`read ${querySnapshot.size} documents`);
-
-                var retrieved_tasks = [];
-
-                querySnapshot.forEach(function (doc) {
-                    retrieved_tasks.push(doc.id);
-                });
-
-                // get a random selection of the tasks that have at least 1 description
-                shuffle(retrieved_tasks);
-                var num_tasks_complete = parseInt(sessionStorage.getItem('items_complete'));
-
-                // so if testing, don't need to have sessionStorage value
-                if (isNaN(num_tasks_complete)) {
-                    num_tasks_complete = 0;
-                }
-
-                retrieved_tasks = retrieved_tasks.slice(0, TOTAL_TASKS_TO_COMPLETE - num_tasks_complete);
-
-                // have to be super broken up like this for ease of use with sessionStorage
-                var see_descs = [];
-                var do_descs = [];
-                var grid_descs = [];
-                var desc_ids = [];
-                var selected_examples = [];
-
-                (async function loop() {
-                    for (let i = 0; i <= retrieved_tasks.length; i++) {
-                        await new Promise(function (resolve_loop, reject_loop) {
-
-                            // after looping through all tasks, load the final one
-                            // no for, finally in javascript
-                            if (i == retrieved_tasks.length) {
-
-                                const desc_id = desc_ids.pop();
-                                const task_id = retrieved_tasks.pop();
-                                const selected_example = parseInt(selected_examples.pop());
-
-                                const grid_description = grid_descs.pop();
-                                const see_description = see_descs.pop();
-                                const do_description = do_descs.pop();
-
-                                sessionStorage.setItem('lis_desc_ids', desc_ids);
-                                sessionStorage.setItem('lis_tasks', retrieved_tasks);
-                                sessionStorage.setItem('lis_selected_examples', selected_examples);
-
-                                // bc descriptions might have commas, cannot split by comma so can't store as list, must first join with a unique character ('#')
-                                sessionStorage.setItem('lis_see_desc', see_descs.join('#'));
-                                sessionStorage.setItem('lis_do_desc', do_descs.join('#'));
-                                sessionStorage.setItem('lis_grid_desc', grid_descs.join('#'));
-
-                                return resolve([desc_id, task_id, selected_example, grid_description, see_description, do_description]);
-                            }
-
-                            const task = retrieved_tasks[i];
-                            const descs_ref = tasks_ref.doc(task.toString()).collection("descriptions");
-                            // get the description with the least number of attempts
-                            const descs_query = descs_ref.orderBy("num_attempts").limit(1)
-
-                            descs_query.get().then(function (descSnapshot) {
-
-                                descSnapshot.forEach(function (doc) {
-                                    const data = doc.data();
-
-                                    console.log(data);
-
-                                    grid_descs.push(data.grid_description);
-                                    see_descs.push(data.see_description);
-                                    do_descs.push(data.do_description);
-                                    desc_ids.push(doc.id);
-                                    selected_examples.push(data.selectedExample); // will be updated to selected_example
-                                });
-                                resolve_loop()
-                            }).catch(error => {
-                                return reject(error);
-                            });
-                        });
-                    }
-                })();
-            }).catch(function (error) {
-                console.log("Error retrieving task: " + error);
-                return reject(error);
-            });
-        } else { // stored locally
-
-            // get from sessionStorage
-            var desc_ids = sessionStorage.getItem('lis_desc_ids').split(',');
-            var retrieved_tasks = sessionStorage.getItem('lis_tasks').split(',');
-            var selected_examples = sessionStorage.getItem('lis_selected_examples').split(',');
-            var see_descs = sessionStorage.getItem('lis_see_desc').split('#');
-            var do_descs = sessionStorage.getItem('lis_do_desc').split('#');
-            var grid_descs = sessionStorage.getItem('lis_grid_desc').split('#');
-
-            // pop last item from each
-            const desc_id = desc_ids.pop();
-            const task_id = retrieved_tasks.pop();
-            const selected_example = parseInt(selected_examples.pop());
-
-            const grid_description = grid_descs.pop();
-            const see_description = see_descs.pop();
-            const do_description = do_descs.pop();
-
-            // store popped list in sessionStorage
-            sessionStorage.setItem('lis_desc_ids', desc_ids);
-            sessionStorage.setItem('lis_tasks', retrieved_tasks);
-            sessionStorage.setItem('lis_selected_examples', selected_examples);
-
-            // bc descriptions might have commas, cannot split by comma so can't store as list, must first join with a unique character ('#')
-            sessionStorage.setItem('lis_see_desc', see_descs.join('#'));
-            sessionStorage.setItem('lis_do_desc', do_descs.join('#'));
-            sessionStorage.setItem('lis_grid_desc', grid_descs.join('#'));
-
-            return resolve([desc_id, task_id, selected_example, grid_description, see_description, do_description]);
-        }
-    });
-}
-
 function get_words() {
     return new Promise(function (resolve, reject) {
         const summary_ref = db.collection("tasks").doc("summary");
@@ -254,19 +147,16 @@ function get_words() {
 // Store
 // ===================================
 
+/**
+ * store descriptions, task info and user info and user answers in firebase
+ * returns promise so that can transition to next task after storing
+ */
 function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attempts, attemp_jsons, conf, total_time, selected_example, gave_up_verification = false) {
-    /**
-     * 
-     * store descriptions, task info and user info and user answers in firebase
-     * returns promise so that can transition to next task after storing
-     */
-
-    console.log(task_id);
 
     return new Promise(function (resolve, reject) {
 
         // determine the type of description  
-        var didSelectExample = (selected_example != null);
+        var didSelectExample = (selected_example != -1);
         var desc_type = "language";
         if (didSelectExample) {
             if (do_desc == see_desc == grid_desc == "") {
@@ -277,56 +167,58 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attem
         }
 
         var batch = db.batch();
+        const task_doc_ref = db.collection("tasks").doc(task_id.toString());
 
         // set actual info for description in the specific task's collection
-        const desc_doc_ref = db.collection("tasks").doc(task_id.toString()).collection("descriptions").doc();
+        const desc_doc_ref = task_doc_ref.collection("descriptions").doc();
         batch.set(desc_doc_ref, {
             'see_description': see_desc,
             'do_description': do_desc,
             'grid_description': grid_desc,
+            'selected_example': selected_example,
+            'description_type': desc_type,
+
             'verification_attempts': parseInt(attempts),
             'gave_up_verification': gave_up_verification,
             'attempt_jsons': attemp_jsons,
+
             'confidence': parseInt(conf),
             'uid': parseInt(user_id),
-            'num_attempts': 0,
-            'listener_gave_up_count': 0,
             'time': total_time,
-            'selected_example': selected_example,
-            'description_type': desc_type
+
+            'num_attempts': 0,  // # listeners who used description
+            'num_success': 0,   // # listeners who used description successfully
+            'listener_gave_up_count': 0
         });
 
         // increment num_descriptions and ver_gave_up_count for task in tasks collection (not desc_gave_up_count bc they would not be submitting description, handled seperately)
         const increment = firebase.firestore.FieldValue.increment(1);
-        var gave_up_increment = firebase.firestore.FieldValue.increment(0);
 
-        // only increment if gave up
-        if (gave_up_verification) {
-            gave_up_increment = increment;
-        }
-
-        const task_doc_ref = db.collection("tasks").doc(task_id.toString());
-        batch.update(task_doc_ref, {
+        var task_update_data = {
             num_descriptions: increment,
-            ver_gave_up_count: gave_up_increment,
-        });
+            num_interactions: increment
+        };
+        if (gave_up_verification) {
+            task_update_data[ver_gave_up_count] = increment
+        }
+        batch.update(task_doc_ref, task_update_data);
 
         //increment total num descriptions
         const summary_ref = db.collection("tasks").doc("summary");
         const words = see_desc.match(/\b(\w+)\b/g).concat(do_desc.match(/\b(\w+)\b/g)).concat(grid_desc.match(/\b(\w+)\b/g));
-        console.log(words);
+
+        var summary_update_data = {
+            'words': firebase.firestore.FieldValue.arrayUnion(...words)
+        };
+        summary_update_data[`${task_id}_interactions_count`] = increment;
+
         if (didSelectExample) {
-            batch.update(summary_ref, {
-                total_descriptions_with_ex_io: increment,
-                'words': firebase.firestore.FieldValue.arrayUnion(...words)
-            });
+            summary_update_data['total_descriptions_with_ex_io'] = increment
         } else {
-            batch.update(summary_ref, {
-                total_descriptions_no_ex_io: increment,
-                'words': firebase.firestore.FieldValue.arrayUnion(...words)
-            });
+            summary_update_data['total_descriptions_no_ex_io'] = increment
         }
 
+        batch.update(summary_ref, summary_update_data);
 
         batch.commit().then(function () {
             return resolve();
@@ -344,36 +236,42 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, tota
     return new Promise(function (resolve, reject) {
 
         var batch = db.batch();
+        const task_doc = db.collection("tasks").doc(task_id.toString());
 
         // store attempt use in description doc's attempts collection
-        const desc_use_ref = db.collection("tasks").doc(task_id.toString()).collection("descriptions").doc(desc_id).collection("uses").doc();
+        const desc_use_ref = task_doc.collection("descriptions").doc(desc_id).collection("uses").doc();
         console.log(task_id.toString());
         batch.set(desc_use_ref, {
             'attempts': attempts,
             'attemp_jsons': attempt_jsons,
-            'uid': user_id,
             'gave_up': gave_up,
+
+            'uid': user_id,
             'time': total_time
         });
 
+        // increment number interactions for task
         const increment = firebase.firestore.FieldValue.increment(1);
-        var gave_up_increment = firebase.firestore.FieldValue.increment(0);
-        if (gave_up) {
-            gave_up_increment = increment;
-        }
-
-        // increment the description's number of attempts and number of times the listener gave up (if they gave up)
-        const desc_doc = db.collection("tasks").doc(task_id.toString()).collection("descriptions").doc(desc_id);
-        batch.update(desc_doc, {
-            num_attempts: increment,
-            listener_gave_up_count: gave_up_increment
+        batch.update(task_doc, {
+            num_interactions: increment
         });
+        
+        // increment the description's number of attempts and number of times the listener gave up (if they gave up)
+        // TODO: What counts as a success? Currently just if they do not give up.
+        const desc_doc = task_doc.collection("descriptions").doc(desc_id);
+        var desc_update_data = {num_attempts: increment};
+        if (gave_up) {
+            desc_update_data['listener_gave_up_count'] = increment;
+        } else {
+            desc_update_data['num_success'] = increment;
+        }
+        batch.update(desc_doc, desc_update_data);
 
         // increment the total number of attempts
         const summary_doc = db.collection("tasks").doc("summary");
-        batch.update(summary_doc, {
-            total_attempts: increment
-        });
+        var summary_data = {total_attempts: increment};
+        summary_data[`${task_id}_interactions_count`] = increment;
+        batch.update(summary_doc, summary_data);
 
         batch.commit().then(function () {
             return resolve();
@@ -505,20 +403,30 @@ function init_tasks_collection() {
      * Be careful! It will overwrite everything.
      */
 
-    db.collection("tasks").doc("summary").set({
+
+    var summary_data = {
         'words': []
-    });
+    }
+    for (i=0;i<400;i++) { 
+        summary_data[`${i}_interactions_count`] = 0
+    }
+
+    db.collection("tasks").doc("summary").set(summary_data);
 
     (async function loop() {
         for (task_num = 0; task_num < 400; task_num++) {
             await new Promise(function (resolve, reject) {
                 console.log(task_num);
 
-                db.collection("tasks").doc(task_num.toString()).set({
+                const task_data = {
                     'num_descriptions': 0,
+                    'num_interactions': 0,
                     'ver_gave_up_count': 0,
                     'desc_gave_up_count': 0
-                }).then(function () {
+                }
+
+                db.collection("tasks").doc(task_num.toString()).set(task_data)
+                .then(function () {
                     console.log("stored " + task_num.toString());
                     resolve();
                 }).catch(function (err) {

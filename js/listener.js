@@ -16,29 +16,28 @@ $(window).on('load',function(){
     update_progress_bar();
 
     // get listening task
-    random_listen_retrieve(TOTAL_TASKS_TO_COMPLETE).then((data) => {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const task = urlParams.get('task');
+    const desc_id = urlParams.get('id');
 
-        [desc_id, task_id, selected_example, grid_description, see_description, do_description] = data;
-        console.log(task_id);
+    DESC_ID = desc_id;
+    TASK_ID = task;
+    loadTask(task);
+    get_description_by_id(task, desc_id).then(description => {
+        SELECTED_EXAMPLE = description.selected_example;
 
-        console.log(desc_id, task_id, selected_example, grid_description, see_description, do_description);
-
-        DESC_ID = desc_id;
-        TASK_ID = task_id;
-        SELECTED_EXAMPLE = selected_example;
-
-        loadTask(TASK_ID);
-
-        if (see_description == "") {
+        if (description.see_description == "") {
             $("#grid_size_p").text("This description has no language. Use just the shown example to guess the output.");
             $("#see_p").text("");
             $("#do_p").text("");
         } else {
-            $("#grid_size_p").text(grid_description);
-            $("#see_p").text(see_description);
-            $("#do_p").text(do_description);
+            $("#grid_size_p").text(description.grid_desc);
+            $("#see_p").text(description.see_desc);
+            $("#do_p").text(description.do_desc);
         }
     }).catch(error => {
+        console.log(error);
         errorMsg("Failed to load the task. Please ensure your internet connection and try again.");
     });
 

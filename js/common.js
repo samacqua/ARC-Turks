@@ -74,6 +74,21 @@ function next_task(first_task=false) {
         sessionStorage.setItem('items_complete', num_tasks_complete);
     }
 
+    select_casino().then(task => {
+
+        select_arm(task).then(desc_id => {
+            if (desc_id == -1) {
+                window.location.href = `speaker.html?task=${task}`;
+            } else {
+                window.location.href = `listener.html?task=${task}&id=${desc_id}`;
+            }
+        }).catch(error => {
+            console.log(error);
+        });
+    }).catch(error => {
+        console.log(error);
+    });
+
     // if ratio is too big, then give them describer task
     // if completed enough tasks, finish
     shouldGiveDescription()
