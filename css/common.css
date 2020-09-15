@@ -113,16 +113,17 @@ video {
     margin:0;
     padding: 0;
 
-    bottom:5%;
-    left: 5%;
-    right: 40%;
+    /* bottom:5%; */
+    /* left: 5%; */
+    /* right: 40%; */
 
     color: white;
     background:rgba(0,0,0,0.0);
     border-radius: 10px;
-    z-index: -1;
+    z-index: -2;
 
     font-size: 30px;
+    text-align: center;
 }
 
 #objective-text {

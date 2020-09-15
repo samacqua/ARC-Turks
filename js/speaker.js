@@ -71,6 +71,9 @@ var TUT_LIST = [
 var CUR_HIGHLIGHT = null;
 
 $(function () {
+    $( "#trans-layer" ).click(function() {
+        continue_tutorial();
+    });
     $("#dark-layer").click(function () {
         continue_tutorial();
     });
@@ -86,10 +89,12 @@ function continue_tutorial() {
 
     // if last one, then get rid of dark layer
     if (TUT_LIST.length == 0) {
+        $("#trans-layer").css('z-index', -1);
         $("#dark-layer").css('z-index', -1);
         $("#dark-layer").css('background-color', 'white');
         $("#tut-message").css('z-index', -2);
         $("#tut-continue-message").css('z-index', -2);
+        $("#tut-continue-message").css('background', 'rgba(0,0,0,0.0)');
 
         $("#grid_size_form").css("visibility", "hidden");
 
@@ -114,15 +119,22 @@ function continue_tutorial() {
     // set dark layer and message
     $("#dark-layer").css('z-index', 500);
     $("#dark-layer").css('background-color', 'rgba(0,0,0,0.7)');
+    $("#trans-layer").css('z-index', 503);
     $("#tut-message").css('z-index', 502);
     $("#tut-message").css('top', `${next_item[2]}px`);
     $("#tut-message").css('left', `${next_item[3]}%`);
     $("#tut-message").css('right', `${next_item[4]}%`);
     $("#tut-message").html(next_item[0]);
     $("#tut-continue-message").css('z-index', 502);
+    $("#tut-continue-message").css('top', `${next_item[2] + $("#tut-message").outerHeight() + 10}px`);
+    $("#tut-continue-message").css('background', 'rgba(0,0,0,0.7)');
+    $("#tut-continue-message").html('Click anywhere to continue');
+    $("#tut-continue-message").css('left', `${next_item[3]}%`);
 
     if (next_item[1].length > 1) {
         $("#objective-text").html(next_item[0]);
+        $("#trans-layer").css('z-index', -1);
+        $("#tut-continue-message").html('Follow the Objective to continue');
     }
 
     // set highlight div to be above layer

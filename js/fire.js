@@ -192,10 +192,10 @@ function random_listen_retrieve() {
                                     do_descs.push(data.do_description);
                                     desc_ids.push(doc.id);
                                     selected_examples.push(data.selectedExample); // will be updated to selected_example
-                                }).catch(error => {
-                                    return reject(error);
                                 });
                                 resolve_loop()
+                            }).catch(error => {
+                                return reject(error);
                             });
                         });
                     }

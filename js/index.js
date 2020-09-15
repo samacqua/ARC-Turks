@@ -271,6 +271,7 @@ function continue_tutorial() {
         $("#dark-layer").css('background-color', 'white');
         $("#tut-message").css('z-index', -2);
         $("#tut-continue-message").css('z-index', -2);
+        $("#tut-continue-message").css('background', 'rgba(0,0,0,0.0)');
 
         $("#quiz_modal").modal("show");
         $("#objective-text").html('Create the correct output based on the description, example transformations, and input grid.');
@@ -283,17 +284,22 @@ function continue_tutorial() {
     $("#dark-layer").css('z-index', 500);
     $("#dark-layer").css('background-color', 'rgba(0,0,0,0.7)');
     $("#trans-layer").css('z-index', 503);
-    $("#trans-layer").css('background-color', 'rgba(0,0,0,0.0)');
     $("#tut-message").css('z-index', 502);
     $("#tut-message").css('top', `${next_item[2]}px`);
     $("#tut-message").css('left', `${next_item[3]}%`);
     $("#tut-message").css('right', `${next_item[4]}%`);
     $("#tut-message").html(next_item[0]);
     $("#tut-continue-message").css('z-index', 502);
+    $("#tut-continue-message").css('top', `${next_item[2] + $("#tut-message").outerHeight() + 10}px`);
+    $("#tut-continue-message").css('background', 'rgba(0,0,0,0.7)');
+    $("#tut-continue-message").html('Click anywhere to continue');
+    $("#tut-continue-message").css('left', `${next_item[3]}%`);
+
 
     if (next_item[1].length > 1) {
         $("#objective-text").html(next_item[0]);
         $("#trans-layer").css('z-index', -1);
+        $("#tut-continue-message").html('Follow the Objective to continue');
     }
 
     // set highlight div to be above layer
@@ -305,9 +311,6 @@ function continue_tutorial() {
             $(`#${id}`).css('background-color', 'gainsboro');
         }
     }
-
-    console.log($("#output-col").css('z-index'));
-    console.log($("#resize_control_btns").css('z-index'));
 
     CUR_HIGHLIGHT = next_item[1];
 }
