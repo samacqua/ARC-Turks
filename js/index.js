@@ -233,6 +233,9 @@ function pre_continue() {
 }
 
 $(function(){
+    $( "#trans-layer" ).click(function() {
+        pre_continue();
+    });
     $( "#dark-layer" ).click(function() {
         pre_continue();
     });
@@ -263,6 +266,7 @@ function continue_tutorial() {
 
     // if last one, then get rid of dark layer
     if (TUT_LIST.length == 0) {
+        $("#trans-layer").css('z-index', -1);
         $("#dark-layer").css('z-index', -1);
         $("#dark-layer").css('background-color', 'white');
         $("#tut-message").css('z-index', -2);
@@ -278,6 +282,8 @@ function continue_tutorial() {
     const next_item = TUT_LIST.shift();
     $("#dark-layer").css('z-index', 500);
     $("#dark-layer").css('background-color', 'rgba(0,0,0,0.7)');
+    $("#trans-layer").css('z-index', 503);
+    $("#trans-layer").css('background-color', 'rgba(0,0,0,0.0)');
     $("#tut-message").css('z-index', 502);
     $("#tut-message").css('top', `${next_item[2]}px`);
     $("#tut-message").css('left', `${next_item[3]}%`);
@@ -287,6 +293,7 @@ function continue_tutorial() {
 
     if (next_item[1].length > 1) {
         $("#objective-text").html(next_item[0]);
+        $("#trans-layer").css('z-index', -1);
     }
 
     // set highlight div to be above layer
