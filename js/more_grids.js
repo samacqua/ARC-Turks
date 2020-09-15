@@ -139,7 +139,7 @@ function loadJSONTask(train, test) {
     }
 
     const isListener = window.location.href.includes("listener");
-    const isStart = !(isListner || window.location.href.includes("speaker"));
+    const isStart = !(isListener || window.location.href.includes("speaker"));
 
     $("#task_preview").html("");
 
