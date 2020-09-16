@@ -20,6 +20,46 @@ var db = firebase.firestore();
 // ===================================
 
 /**
+ * Returns the task and desc_id of an unused description, if any
+ */
+function get_unused_desc() {
+    return new Promise(function (resolve, reject) {
+        const unused_ref = db.collection("unused_descs");
+        unused_ref.get().then(querySnapshot => {
+            console.log(`read ${querySnapshot.size} documents`);
+
+            shuffle(querySnapshot);
+            console.log(querySnapshot);
+
+            (async function loop() {
+                for (i = 0; i <= querySnapshot.size; i++) {
+                    await new Promise(function (res, reject) {
+
+                        if (i == querySnapshot.size) {
+                            return resolve(-1);
+                        }
+                        console.log(i);
+                        const desc = querySnapshot.docs[i].id;
+                        const task = querySnapshot.docs[i].data().task;
+                        console.log(desc);
+
+                        claim_unused_desc(desc).then(function() {
+                            console.log("claimed description!");
+                            return resolve([task, desc]);
+                        }).catch(error => {
+                            console.log(error);
+                            res();
+                        });
+                    });
+                }
+            })();
+        }).catch(error => {
+            return reject(error);
+        })
+    });
+}
+
+/**
  * Get count of interactions for all tasks.
  */
 function get_all_interactions_count() {
@@ -49,7 +89,6 @@ function get_task_descs_interactions_count(task) {
     return new Promise(function (resolve, reject) {
         const task_ref = db.collection("tasks").doc(`${task}`);
         task_ref.get().then(function (snapshot) {
-
             const data = snapshot.data()
             return resolve([data.num_descriptions, data.num_interactions]);
         })
@@ -220,6 +259,13 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attem
 
         batch.update(summary_ref, summary_update_data);
 
+        // add description to list of unused descriptions
+        const unused_ref = db.collection("unused_descs").doc();
+        batch.set(unused_ref, {
+            time_claimed: 0,
+            task: task_id.toString()
+        });
+
         batch.commit().then(function () {
             return resolve();
         }).catch(function (err) {
@@ -273,10 +319,47 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, tota
         summary_data[`${task_id}_interactions_count`] = increment;
         batch.update(summary_doc, summary_data);
 
+        // remove the description from the list of unused descriptions
+        const unused_ref = db.collection("unused_descs").doc(desc_id);
+        batch.delete(unused_ref);
+
         batch.commit().then(function () {
             return resolve();
         }).catch(function (err) {
             return reject(err);
+        });
+    });
+}
+
+/**
+ * Claim an unused description if it has not been claimed (or if that claim has expired)
+ * (a claim ensures that an unused description only forces 1 attempt, and the time is to make sure
+ *      there is no issue if someone claims it and never finishes)
+ */
+function claim_unused_desc(desc_id) {
+    return new Promise(function (resolve, reject) {
+        const desc_ref = db.collection("unused_descs").doc(desc_id);
+        return db.runTransaction(function(transaction) {
+            // This code may get re-run multiple times if there are conflicts.
+            return transaction.get(desc_ref).then(function(doc) {
+                if (!doc.exists) {
+                    throw "Document does not exist!";
+                }
+
+                const cur_date = Math.floor(Date.now() / 1000);
+                const time_to_wait = 60*10; // 10 minutes
+
+                if (cur_date - time_to_wait < doc.data().time_claimed) {
+                    throw "Description already claimed!"
+                }
+
+                transaction.update(desc_ref, { time_claimed: cur_date });
+            });
+        }).then(function() {
+            console.log("Transaction successfully committed!");
+            return resolve();
+        }).catch(function(error) {
+            return reject(error);
         });
     });
 }
@@ -339,57 +422,6 @@ function store_words(words) {
         console.log("stored words");
     }).catch(error => {
         console.log(error);
-    });
-}
-
-
-/**
- * if ratio of builder attempts to number of descriptions is higher than the goal ratio (in the database), then should create another description
- * returns a promise of (if should give builder task (0) or speaker (1) or speaker with example io (2), or speaker just choosing example io (3), total number of descriptions in db)
- */
-function shouldGiveDescription() {
-
-    return new Promise(function (resolve, reject) {
-
-        const summary_ref = db.collection("tasks").doc("summary");
-        summary_ref.get().then(function (snapshot) {
-            const tot_attempts = snapshot.data().total_attempts;
-
-            const nl_descs = snapshot.data().total_descriptions_no_ex_io;
-            const nl_ex_descs = snapshot.data().total_descriptions_with_ex_io;
-            const ex_descs = snapshot.data().just_example_description_count;
-
-            const goal_ratio = snapshot.data().goal_ratio;
-
-            const tot_descs = nl_descs + nl_ex_descs + ex_descs;
-
-            // to avoid division by 0
-            if (tot_descs == 0) {
-                return resolve([0, tot_descs]);
-            }
-
-            // trying to maintain ratio of attempts to descriptions
-            const cur_ratio = tot_attempts / tot_descs;
-            if (cur_ratio < goal_ratio) {
-                return resolve([0, tot_descs]);
-            } else {
-                console.log("Need description.");
-                console.log(nl_ex_descs);
-                console.log(nl_descs);
-
-                const desc_screens = [nl_descs, nl_ex_descs, ex_descs];
-                const min = Math.min(desc_screens);
-
-                for (var i = 0; i < desc_screens.length; i++) {
-                    if (desc_screens[i] == min) {
-                        return resolve([i + 1, tot_descs]);
-                    }
-                }
-            }
-        })
-        .catch(function (err) {
-            return reject(err);
-        });
     });
 }
 

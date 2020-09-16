@@ -62,6 +62,19 @@ function shuffle(a) {
 }
 
 /**
+ * Show the user their id
+ */
+function finish() {
+    $("#finish_modal_uid").text(uid.toString());
+    $("#finished_modal").modal('show');
+
+    const end_time = new Date();
+    const delta_time = (parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time'))) / 1000;
+
+    set_user_complete_time(uid, delta_time, 'time_to_complete');
+}
+
+/**
  * go to next task
  */
 function next_task(first_task=false) {
@@ -74,51 +87,46 @@ function next_task(first_task=false) {
         sessionStorage.setItem('items_complete', num_tasks_complete);
     }
 
-    select_casino().then(task => {
+    if (num_tasks_complete >= TOTAL_TASKS_TO_COMPLETE) {
+        finish();
+    }
 
-        select_arm(task).then(desc_id => {
-            if (desc_id == -1) {
-                window.location.href = `speaker.html?task=${task}`;
-            } else {
-                window.location.href = `listener.html?task=${task}&id=${desc_id}`;
-            }
-        }).catch(error => {
-            console.log(error);
-        });
+    get_unused_desc().then(task_desc => {
+
+        console.log(task_desc);
+
+        if (task_desc == -1) {
+
+            select_casino().then(task => {
+
+                select_arm(task).then(desc_id => {
+                    if (desc_id == -1) {
+                        console.log("speaker");
+                        console.log(task);
+                        window.location.href = `speaker.html?task=${task}`;
+                    } else {
+                        console.log("listener");
+                        console.log(task, desc_id);
+                        window.location.href = `listener.html?task=${task}&id=${desc_id}`;
+                    }
+                }).catch(error => {
+                    console.log(error);
+                });
+            }).catch(error => {
+                console.log(error);
+            });
+
+        } else {
+            const task = task_desc[0]
+            const desc_id = task_desc[1]
+            console.log("unused desc");
+            console.log(task, desc_id);
+            window.location.href = `listener.html?task=${task}&id=${desc_id}`;
+        }
+
     }).catch(error => {
         console.log(error);
     });
-
-    // if ratio is too big, then give them describer task
-    // if completed enough tasks, finish
-    shouldGiveDescription()
-    .then(function(promiseReturn) { 
-
-        // 0 == listener, 1 = speaker, 2 = speaker w example io, 3 = speaker just choose io
-        const next_task = promiseReturn[0];
-        const tot_descs = promiseReturn[1];
-
-        if (num_tasks_complete >= TOTAL_TASKS_TO_COMPLETE) {
-            // all done!
-            $("#finish_modal_uid").text(uid.toString());
-            $("#finished_modal").modal('show');
-
-            const end_time = new Date();
-            const delta_time = (parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time'))) / 1000;
-
-            set_user_complete_time(uid, delta_time, 'time_to_complete');
-        } 
-        // if final task, and the database needs a description, OR there aren't enough description tasks in the database (first couple users), then give speaker task
-        else if (((next_task != 0) && (num_tasks_complete == TOTAL_TASKS_TO_COMPLETE - 1)) || tot_descs < (TOTAL_TASKS_TO_COMPLETE - num_tasks_complete)) {
-            console.log(next_task);
-            const speaker_urls = ['speaker.html', 'speaker_nl_and_ex.html', 'speaker_ex.html'];
-            window.location.href = speaker_urls[next_task+1];
-        } else {
-            // next builder task
-            window.location.href = 'listener.html';
-        }
-    })
-    .catch(function(err) { console.log("Error getting attempts/description ratio: " + err); });
 }
 
 /**

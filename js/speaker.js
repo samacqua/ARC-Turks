@@ -326,14 +326,16 @@ $(document).ready(function () {
         }
     });
 
-    // highlight the textareas for words that have not been used yet
-    $('textarea').highlightWithinTextarea({
-        highlight: [
-            {
-                highlight: get_bad_words
-            }
-        ]
-    });
+    if (GOOD_WORDS.length > MIN_WORDS) {
+        // highlight the textareas for words that have not been used yet
+        $('textarea').highlightWithinTextarea({
+            highlight: [
+                {
+                    highlight: get_bad_words
+                }
+            ]
+        });
+    }
 
     //  Make it so modal with sliders has labels of slider values
     $("#conf_result").html($("#conf_form").val());
@@ -401,18 +403,8 @@ function exit_task_qs() {
 
     // store the description in the database
     store_description(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, conf, totalTime, -1, gave_up_verification = GAVE_UP)
-        .then(function () { finish(); })
+        .then(function () { next_task(); })
         .catch(function (error) { console.log('Error storing response ' + error); });
-}
-
-function finish() {
-    $("#finish_modal_uid").text(uid.toString());
-    $("#finished_modal").modal('show');
-
-    const end_time = new Date();
-    const delta_time = (parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time'))) / 1000;
-
-    set_user_complete_time(uid, delta_time, 'time_to_complete');
 }
 
 function give_up() {
@@ -427,8 +419,9 @@ function give_up() {
         return;
     }
 
+    // don't give them credit for completing the task if they have not completed it
     give_up_description(TASK_ID).then(function () {
-        finish();
+        next_task(first_task=true);
     });
 }
 
