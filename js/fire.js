@@ -60,21 +60,23 @@ function get_unused_desc() {
 }
 
 /**
- * Get count of interactions for all tasks.
+ * Get count of interactions and descriptions for all tasks.
  */
-function get_all_interactions_count() {
+function get_all_descriptions_interactions_count() {
     return new Promise(function (resolve, reject) {
         const summary_ref = db.collection("tasks").doc("summary");
         summary_ref.get().then(function (snapshot) {
 
             const data = snapshot.data()
             var interactions_count = [];
+            var descriptions_count = [];
 
             for (i=0;i<400;i++) {
                 interactions_count.push(data[`${i}_interactions_count`]);
+                descriptions_count.push(data[`${i}_descriptions_count`]);
             }
 
-            return resolve(interactions_count);
+            return resolve([descriptions_count, interactions_count]);
         })
         .catch(function (err) {
             return reject(err);
@@ -258,6 +260,7 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attem
             'words': firebase.firestore.FieldValue.arrayUnion(...words)
         };
         summary_update_data[`${task_id}_interactions_count`] = increment;
+        summary_update_data[`${task_id}_descriptions_count`] = increment;
 
         if (didSelectExample) {
             summary_update_data['total_descriptions_with_ex_io'] = increment
@@ -446,9 +449,10 @@ function init_tasks_collection() {
 
     var summary_data = {
         'words': []
-    }
+    };
     for (i=0;i<400;i++) { 
-        summary_data[`${i}_interactions_count`] = 0
+        summary_data[`${i}_interactions_count`] = 0;
+        summary_data[`${i}_descriptions_count`] = 0;
     }
 
     db.collection("tasks").doc("summary").set(summary_data);

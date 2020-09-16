@@ -1,10 +1,32 @@
 /**
  * Returns the casino (task) with least # interactions (descriptions + attempts)
+ * If force listener is true, it ensures casino that needs pull of existing arm, if any exist
  */
-function select_casino() {
+function select_casino(force_listener) {
     return new Promise(function (resolve, reject) {
-        get_all_interactions_count().then(num_interactions => {
-            num_interactions = num_interactions.map(add_noise);
+        get_all_descriptions_interactions_count().then(counts => {
+            var num_descriptions = counts[0];
+            var num_interactions = counts[1];
+
+            console.log(num_descriptions[154], num_interactions[154]);
+
+            const max = Math.max.apply(Math, num_interactions);
+
+            // make all tasks with no descs or # arms <= sqrt(# interactions) (so needs new arm) have the max score so
+            //      that they aren't picked once study is actually going, and so at the start
+            //      when there are no descriptions, not constantly pulling from single casino
+            if (force_listener) {
+                for (i=0;i<400;i++) {
+                    if (num_descriptions[i] <= Math.sqrt(num_interactions[i]) || num_descriptions[i] == 0) {
+                        num_interactions[i] += max;
+                    }
+                }
+            }
+
+            // add randomness so many people aren't pulling the same arm
+            num_interactions = num_interactions.map(val => {
+                return val + (Math.random() / 10)
+            });
             const min = Math.min.apply(Math, num_interactions);
             return resolve(num_interactions.indexOf(min));
         })
@@ -12,10 +34,6 @@ function select_casino() {
             return reject(err);
         });
     });
-}
-
-function add_noise(val) {
-    return val + (Math.random() / 10)
 }
 
 /**
@@ -66,7 +84,6 @@ function select_arm(task) {
 
 // TODO
 /**
- * Queue of descriptions with no attempts
  * Rank all descriptions, not just one casino
  * Ensure not listening to own description or describing a task they have listened to
  */

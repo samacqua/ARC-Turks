@@ -94,11 +94,12 @@ function next_task(first_task=false) {
 
     get_unused_desc().then(task_desc => {
 
-        console.log(task_desc);
-
         if (task_desc == -1) {
 
-            select_casino().then(task => {
+            // force listener if haven't completed enough tasks
+            const force_listener = (num_tasks_complete <= MIN_TASKS_BEFORE_SPEAKER);
+
+            select_casino(force_listener).then(task => {
 
                 select_arm(task).then(desc_id => {
                     if (desc_id == -1) {

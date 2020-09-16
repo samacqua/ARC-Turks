@@ -3,6 +3,8 @@ $(window).on('load',function(){
     // uncomment to initialize database
     // init_tasks_collection();
 
+    // next_task(first_task=true);
+
     // start timer to gather data on total time per user
     const start_time = new Date();
     sessionStorage.setItem('start_time', start_time.getTime());
