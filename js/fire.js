@@ -144,10 +144,7 @@ function get_description_by_id(task_id, desc_id) {
     return new Promise(function (resolve, reject) {
         const desc_ref = db.collection("tasks").doc(`${task_id}`).collection("descriptions").doc(desc_id);
 
-        console.log(desc_ref);
-
         desc_ref.get().then(function (snapshot) {
-            console.log(`read ${snapshot.size} documents`);
 
             const data = snapshot.data();
             var description = {
@@ -155,13 +152,14 @@ function get_description_by_id(task_id, desc_id) {
                 'see_desc': data.see_description, 
                 'do_desc': data.do_description,
                 'selected_example': data.selected_example,
-                'num_success': num_success,
+                'num_success': data.num_success,
                 'num_attempts': data.num_attempts,
-                'id': doc.id
+                'id': snapshot.id
             };
 
             return resolve(description);
         }).catch(error => {
+            console.log(error);
             return reject(error);
         });
     });
@@ -208,8 +206,18 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attem
         var batch = db.batch();
         const task_doc_ref = db.collection("tasks").doc(task_id.toString());
 
+        // create random id so queue and desc have same id
+        function uuidv4() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+              var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+              return v.toString(16);
+            });
+        }
+
+        const desc_id = uuidv4();
+
         // set actual info for description in the specific task's collection
-        const desc_doc_ref = task_doc_ref.collection("descriptions").doc();
+        const desc_doc_ref = task_doc_ref.collection("descriptions").doc(desc_id);
         batch.set(desc_doc_ref, {
             'see_description': see_desc,
             'do_description': do_desc,
@@ -260,7 +268,7 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attem
         batch.update(summary_ref, summary_update_data);
 
         // add description to list of unused descriptions
-        const unused_ref = db.collection("unused_descs").doc();
+        const unused_ref = db.collection("unused_descs").doc(desc_id);
         batch.set(unused_ref, {
             time_claimed: 0,
             task: task_id.toString()

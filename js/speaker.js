@@ -260,7 +260,7 @@ $(document).ready(function () {
 
         // for each novel word, add a row with buttons to replace word with similar words in database, or add the word
         $('#word-warning-size').empty();
-        if (matches.length != 0) {
+        if (matches.length != 0 && GOOD_WORDS.length > MIN_WORDS) {
             var items = [];
             $.each(matches, function (i, item) {
 
@@ -285,7 +285,7 @@ $(document).ready(function () {
 
         // for each novel word, add a row with buttons to replace word with similar words in database, or add the word
         $('#word-warning-see').empty();
-        if (matches.length != 0) {
+        if (matches.length != 0 && GOOD_WORDS.length > MIN_WORDS) {
             var items = [];
             $.each(matches, function (i, item) {
 
@@ -311,7 +311,8 @@ $(document).ready(function () {
 
         // for each novel word, add a row with buttons to replace word with similar words in database, or add the word
         $('#word-warning-do').empty();
-        if (matches.length != 0) {
+        
+        if (matches.length != 0 && GOOD_WORDS.length > MIN_WORDS) {
             var items = [];
             $.each(matches, function (i, item) {
 

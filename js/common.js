@@ -89,6 +89,7 @@ function next_task(first_task=false) {
 
     if (num_tasks_complete >= TOTAL_TASKS_TO_COMPLETE) {
         finish();
+        return;
     }
 
     get_unused_desc().then(task_desc => {
