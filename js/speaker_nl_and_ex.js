@@ -155,7 +155,7 @@ function showDescEx(i) {
     $("#ex_size_desc").text(PAST_DESCS[i]['grid_desc']);
     $("#ex_see_desc").text(PAST_DESCS[i]['see_desc']);
     $("#ex_do_desc").text(PAST_DESCS[i]['do_desc']);
-    $("#ex_ex_io").text(`Chosen example: ${PAST_DESCS[i]['selected_ex']+1}`);  // TODO: Load task
+    $("#ex_ex_io").text(`Chosen example: ${PAST_DESCS[i]['selected_ex']+1}`);  // TODO: Load task instead of just saying it was the one selected
     $("#desc_success").text(`${PAST_DESCS[i]['num_success']} of ${PAST_DESCS[i]['num_attempts']} people succeeded using this description.`);
 }
 

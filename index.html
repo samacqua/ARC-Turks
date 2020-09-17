@@ -47,15 +47,18 @@
 
 <body>
     <!-- Progress Bar -->
-    <div id="progress-bar-complete">
+    <div class="progress-bar-complete">
         <div class="progress md-progress">
-            <div class="progress-bar success" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="11"></div>
+            <div class="progress-bar success" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="11">
+            </div>
         </div>
-    
+
         <div class="progress-meter">
-            <div class="meter meter-right" style="width: 50.00%;"><span class="meter-text">All Done!</span></div>
-            <div class="meter meter-right" style="width: 33.33%;"><span class="meter-text">Finished Tutorial</span></div>
-            <div class="meter meter-right" style="width: 16.67%;"><span class="meter-text">Finished Instructions</span></div>
+            <div class="meter meter-right" style="width: 50%;" id="done_label"><span class="meter-text">All Done!</span></div>
+            <div class="meter meter-right" style="width: 25%;" id="tutorial_label"><span class="meter-text">Finished Tutorial</span>
+            </div>
+            <div class="meter meter-right" style="width: 25%;" id="instructions_label"><span class="meter-text">Finished Instructions</span>
+            </div>
         </div>
     </div>
 
@@ -137,12 +140,12 @@
                 <div id="resize_control_btns">
                     <label for="output_grid_size">Change grid size: </label>
                     <input type="text" id="output_grid_size" class="grid_size_field" name="size" value="3x3">
-                    <button type="button" class="btn btn-primary" onclick="indexResizeOutputGrid()" id="resize_btn">Resize</button>
+                    <button type="button" class="btn btn-primary" onclick="resizeOutputGrid(); pre_continue();" id="resize_btn">Resize</button>
                 </div>
 
                 <div id="edit_control_btns">
-                    <button type="button" class="btn btn-secondary" onclick="indexCopyFromInput()">Copy from input</button>
-                    <button type="button" class="btn btn-secondary" onclick="indexResetOutputGrid()">Reset grid</button>
+                    <button type="button" class="btn btn-secondary" onclick="copyFromInput(); pre_continue('copy_input');">Copy from input</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetOutputGrid(); pre_continue();">Reset grid</button>
                     <button type="button" class="btn btn-success" onclick="check_grid()">Check!</button>
                     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#giveUpModal">Give up</button>
                 </div>
@@ -233,7 +236,6 @@
                         <label for="age_form">What is your age?</label>
                         <input class="form-control" type="text" placeholder="Enter your age..." id="age_form">
                     </div>
-
 
                     <div class="modal-footer">
                         <button onclick="exit_demographic()" type="button" class="btn btn-primary">Submit</button>
@@ -350,6 +352,7 @@
                 </div>
                     <div class="modal-body" id="gen-modal-body">
     
+                        <!-- TODO: Fill in amounts and number of tasks to solve -->
                         <p>Great job! Now, you will continue to using actual descriptions.</p>
                         <p>You will complete a total of 6 tasks. You will recieve <strong>AMOUNT</strong> for completing the study, and a bonus of <strong>AMOUNT</strong> for each task that you complete correctly.</p>
                         <p>There is a chance that you will have the opportunity to describe a task on your own, for a bonus amount of <strong>AMOUNT</strong>. If so, you will be given more instructions.</p>
@@ -361,5 +364,4 @@
             </div>
         </div>
     </div>
-
 </html>

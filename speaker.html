@@ -1,56 +1,58 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ARC labeling interface</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ARC labeling interface</title>
 
-  <!-- Just to silence warning about not having icon -->
-  <link rel="shortcut icon" href="#" />
+    <!-- Just to silence warning about not having icon -->
+    <link rel="shortcut icon" href="#" />
 
-  <!-- The core Firebase JS SDK is always required and must be listed first -->
-  <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-database.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-firestore.js"></script>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-firestore.js"></script>
 
-  <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
 
-  <!-- JS Libraries -->
-  <!-- jQuery library -->
-  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <!-- JS Libraries -->
+    <!-- jQuery library -->
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
-  <!-- highlight-within-textarea CSS/JS -->
-  <link href="css/jquery.highlight-within-textarea.css" rel="stylesheet">
-  <script src="js/jquery.highlight-within-textarea.js"></script>
- 
-  <!-- Bootstrap JS (must be listed after jQuery) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <!-- highlight-within-textarea CSS/JS -->
+    <link href="css/jquery.highlight-within-textarea.css" rel="stylesheet">
+    <script src="js/jquery.highlight-within-textarea.js"></script>
 
-  <!-- CSS files -->
-  <link rel="stylesheet" type="text/css" href="css/common.css">
-  <link rel="stylesheet" type="text/css" href="css/speaker.css">
-  <link rel="stylesheet" type="text/css" href="css/grids.css">
-  <link rel="stylesheet" type="text/css" href="css/testing_interface.css">
+    <!-- Bootstrap JS (must be listed after jQuery) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
 
-  <!-- JS files -->
-  <script src="js/speaker.js"></script>
-  <script src="js/common.js"></script>
-  <script src="js/constants.js"></script>
-  <script src="js/grids.js"></script>
-  <script src="js/more_grids.js"></script>
-  <script src="js/fire.js"></script>
-  <script src="js/bandit.js"></script>
+    <!-- CSS files -->
+    <link rel="stylesheet" type="text/css" href="css/common.css">
+    <link rel="stylesheet" type="text/css" href="css/speaker.css">
+    <link rel="stylesheet" type="text/css" href="css/grids.css">
+    <link rel="stylesheet" type="text/css" href="css/testing_interface.css">
 
-  <script src="js/word_similarity.js"></script>
-  <script src="js/wordvecs10000.js"></script>
+    <!-- JS files -->
+    <script src="js/speaker.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/constants.js"></script>
+    <script src="js/grids.js"></script>
+    <script src="js/more_grids.js"></script>
+    <script src="js/fire.js"></script>
+    <script src="js/bandit.js"></script>
 
-  <!-- Font reference -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet" />
-
+    <!-- Font reference -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet" />
 </head>
 
 <body>
@@ -58,18 +60,22 @@
     <!-- Progress Bar -->
     <div class="progress-bar-complete">
         <div class="progress md-progress">
-            <div class="progress-bar success" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="11"></div>
+            <div class="progress-bar success" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="11">
+            </div>
         </div>
-    
+
         <div class="progress-meter">
-            <div class="meter meter-right" style="width: 50.00%;"><span class="meter-text">All Done!</span></div>
-            <div class="meter meter-right" style="width: 33.33%;"><span class="meter-text">Finished Tutorial</span></div>
-            <div class="meter meter-right" style="width: 16.67%;"><span class="meter-text">Finished Instructions</span></div>
+            <div class="meter meter-right" style="width: 50%;" id="done_label"><span class="meter-text">All Done!</span>
+            </div>
+            <div class="meter meter-right" style="width: 25%;" id="tutorial_label"><span class="meter-text">Finished Tutorial</span>
+            </div>
+            <div class="meter meter-right" style="width: 25%;" id="instructions_label"><span class="meter-text">Finished Instructions</span>
+            </div>
         </div>
     </div>
 
     <div class="row">
-        <div id="objective-col"class="col-md">
+        <div id="objective-col" class="col-md">
             <h3 class="objective"><b>Objective:</b></h3>
             <h5 class="objective" id="objective-text">Using the previous descriptions as reference, describe the common pattern in the input-output grids.</h5>
         </div>
@@ -99,24 +105,24 @@
                 </div>
 
             </div>
-    
+
             <div class="col-md-4" id="description_ex_col">
                 <div class="col-header">
                     <h1 class="col-title">Old Descriptions</h1>
                 </div>
                 <nav aria-label="Page navigation example">
                     <ul class="pagination justify-content-center" id="paginator"></ul>
-                  </nav>
+                </nav>
 
-                  <div id="ex_descriptions">
-                      <p id="ex_size_desc" class="unselectable"></p>
-                      <p id="ex_see_desc" class="unselectable"></p>
-                      <p id="ex_do_desc" class="unselectable"></p>
-                      <p id="desc_success" class="unselectable"></p>
-                  </div>
+                <div id="ex_descriptions">
+                    <p id="ex_size_desc" class="unselectable"></p>
+                    <p id="ex_see_desc" class="unselectable"></p>
+                    <p id="ex_do_desc" class="unselectable"></p>
+                    <p id="desc_success" class="unselectable"></p>
+                </div>
 
             </div>
-    
+
             <div class="col-md-4" id="description_col">
 
                 <div class="col-header">
@@ -124,74 +130,90 @@
                 </div>
 
                 <div class="form-check" id="grid_size_change_box">
-                    <input class="form-check-input" type="checkbox" value="" id="grid_size_changes" data-toggle="toggle">
+                    <input class="form-check-input" type="checkbox" value="" id="grid_size_changes"
+                        data-toggle="toggle">
                     <label class="form-check-label" for="defaultCheck1">
-                      Grid size changes
+                        Grid size changes
                     </label>
-                  </div>
+                </div>
                 </br>
 
                 <div class="form-group" id="grid_size_form">
                     <label for="grid_size_desc">How does the grid size change?</label>
-                    <textarea class="form-control" id="grid_size_desc" rows="1" placeholder="The grid size..."></textarea>
+                    <textarea class="form-control" id="grid_size_desc" rows="1"
+                        placeholder="The grid size..."></textarea>
                     <small id="emailHelp" class="form-text text-muted">Start with "The grid size..."</small>
-                  </div>
+                </div>
 
-                  <div>
+                <div>
                     <ul id="word-warning-grid_size_desc"></ul>
                 </div>
-                
+
                 <div class="form-group" id="see_desc_form">
                     <label for="what_you_see">What should you expect to see in the input grid?</label>
-                    <textarea class="form-control" id="what_you_see" rows="2" placeholder="In the input, you should see..."></textarea>
-                    <small id="emailHelp" class="form-text text-muted">Start with "In the input, you should see..."</small>
-                  </div>
-                
+                    <textarea class="form-control" id="what_you_see" rows="2"
+                        placeholder="In the input, you should see..."></textarea>
+                    <small id="emailHelp" class="form-text text-muted">Start with "In the input, you should
+                        see..."</small>
+                </div>
+
                 <div>
                     <ul id="word-warning-what_you_see"></ul>
                 </div>
 
                 <div class="form-group" id="do_desc_form">
                     <label for="what_you_do">What do you do to create the output grid?</label>
-                    <textarea class="form-control" id="what_you_do" rows="2" placeholder="To make the output, you have to..."></textarea>
-                    <small id="emailHelp" class="form-text text-muted">Start with "To make the output, you have to..."</small>
-                  </div>
+                    <textarea class="form-control" id="what_you_do" rows="2"
+                        placeholder="To make the output, you have to..."></textarea>
+                    <small id="emailHelp" class="form-text text-muted">Start with "To make the output, you have
+                        to..."</small>
+                </div>
 
                 <div>
                     <ul id="word-warning-what_you_do"></ul>
                 </div>
 
                 <div id="desc_col_buttons">
-                    <button onclick="$('#submitModal').modal('show')" type="button" class="btn btn-primary desc-buttons">Submit</button>
-                    <button type="button" class="btn btn-danger desc-buttons" data-toggle="modal" data-target="#giveUpModal">Give up</button>
+                    <button onclick="$('#submitModal').modal('show')" type="button"
+                        class="btn btn-primary desc-buttons">Submit</button>
+                    <button type="button" class="btn btn-danger desc-buttons" data-toggle="modal"
+                        data-target="#giveUpModal">Give up</button>
                 </div>
                 </br>
-                <button onclick="$('#instructionsModal').modal('show')" type="button" class="btn btn-secondary">Show Instructions</button>
+                <button onclick="$('#instructionsModal').modal('show')" type="button" class="btn btn-secondary">Show
+                    Instructions</button>
             </div>
         </div>
     </div>
-  
+
     <!-- Instructions Modal -->
-    <div class="modal fade" id="instructionsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal fade" id="instructionsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
                 </div>
-                    <div class="modal-body" id="gen-modal-body">
-                        <p>For this task, you will not be using a description of a transformation to make the correct grid. Instead, you will be <i>creating the description.</i></p>
-                        <p>You are shown a few examples of the pattern on the left. You have to recognize the pattern, then describe the pattern in the middle so that someone, given a new input grid, can create the correct output grid.</p>
-                        <p>You can give up after some time, but you will <b>not be eligible for a bonus for this task.</b></p>
-                    </div>
+                <div class="modal-body" id="gen-modal-body">
+                    <p>For this task, you will not be using a description of a transformation to make the correct grid.
+                        Instead, you will be <i>creating the description.</i></p>
+                    <p>You are shown a few examples of the pattern on the left. You have to recognize the pattern, then
+                        describe the pattern in the middle so that someone, given a new input grid, can create the
+                        correct output grid.</p>
+                    <p>You can give up after some time, but you will <b>not be eligible for a bonus for this task.</b>
+                    </p>
+                </div>
                 <div class="modal-footer">
-                    <button onclick="continue_tutorial()" type="button" class="btn btn-primary" data-dismiss="modal">Continue</button>
+                    <button onclick="continue_tutorial()" type="button" class="btn btn-primary"
+                        data-dismiss="modal">Continue</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Task Qs Modal -->
-    <div class="modal fade" id="task_qs_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal fade" id="task_qs_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -200,23 +222,27 @@
                 <div class="modal-body" id="final-modal-body">
 
                     <label for="conf_form">
-                        <p>How confident are you that someone else, given your description, could create the correct output grid for the input grid you were just shown?</p>
-                        <p><b>0</b> means you are certain that they will not create the correct output grid, and <b>10</b> means you are certain that they will create the correct output grid.</p>
+                        <p>How confident are you that someone else, given your description, could create the correct
+                            output grid for the input grid you were just shown?</p>
+                        <p><b>0</b> means you are certain that they will not create the correct output grid, and
+                            <b>10</b> means you are certain that they will create the correct output grid.</p>
                     </label>
                     <input type="range" class="custom-range" min="0" max="10" step="1" id="conf_form">
                     <label id="conf_result"></label>
 
                     <div class="modal-footer">
-                        <button onclick="exit_task_qs()" type="button" class="btn btn-primary" data-dismiss="modal">Finish</button>
+                        <button onclick="exit_task_qs()" type="button" class="btn btn-primary"
+                            data-dismiss="modal">Finish</button>
                     </div>
-                    
+
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Confirm Submission Modal -->
-    <div class="modal fade" id="submitModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal fade" id="submitModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -227,51 +253,59 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button onclick="submit()" type="button" class="btn btn-primary" data-dismiss="modal">Submit</button>
+                    <button onclick="submit()" type="button" class="btn btn-primary"
+                        data-dismiss="modal">Submit</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Confirm Add Word Modal -->
-    <div class="modal fade" id="addWordModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal fade" id="addWordModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h3 class="modal-title" id="gen-modal-title">Confirm adding word</h3>
                 </div>
                 <div class="modal-body" id="gen-modal-body">
-                    <p>Are you sure that you want to add the word:<p>
+                    <p>Are you sure that you want to add the word:
+                    <p>
                     <p id="word_modal_text"></p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button onclick="add_current_candidate_word()" type="button" class="btn btn-primary" data-dismiss="modal">Add</button>
+                    <button onclick="add_current_candidate_word()" type="button" class="btn btn-primary"
+                        data-dismiss="modal">Add</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Give-up Modal -->
-    <div class="modal fade" id="giveUpModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal fade" id="giveUpModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h3 class="modal-title" id="gen-modal-title">Give Up</h3>
                 </div>
                 <div class="modal-body" id="gen-modal-body">
-                    <p>Are you sure that you can't determine the pattern? <strong>If you give up, you will not get paid for this problem.</strong></p>
+                    <p>Are you sure that you can't determine the pattern? <strong>If you give up, you will not get paid
+                            for this problem.</strong></p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">No, I'll try some more</button>
-                    <button onclick="give_up()" type="button" class="btn btn-danger" data-dismiss="modal">Give Up</button>
+                    <button onclick="give_up()" type="button" class="btn btn-danger" data-dismiss="modal">Give
+                        Up</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Finished Modal -->
-    <div class="modal fade" id="finished_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal fade" id="finished_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -286,4 +320,5 @@
     </div>
 
 </body>
+
 </html>

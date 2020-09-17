@@ -49,7 +49,7 @@ function setUpEditionGridListeners(jqGrid) {
             floodfillFromLocation(grid, cell.attr('x'), cell.attr('y'), symbol);
             syncFromDataGridToEditionGrid();
 
-
+            // if in tutorial and in challenge to flood fill yellow, check completion
             const isStart = !(window.location.href.includes("listener") || window.location.href.includes("speaker"));
             if (isStart) {
                 if ($("#objective-text").text().includes("yellow")) {
@@ -62,6 +62,7 @@ function setUpEditionGridListeners(jqGrid) {
             // Else: fill just this cell.
             setCellSymbol(cell, symbol);
 
+            // if in tutorial and in challenge to draw green squares, check completion
             const isStart = !(window.location.href.includes("listener") || window.location.href.includes("speaker"));
             if (isStart) {
                 if ($("#objective-text").text().includes("green")) {
@@ -143,7 +144,7 @@ function loadJSONTask(train, test) {
 
     $("#task_preview").html("");
 
-    if ((isListener || isStart) && (isNaN(SELECTED_EXAMPLE) || SELECTED_EXAMPLE == null)) {
+    if ((isListener || isStart) && SELECTED_EXAMPLE == -1) {
         $("#task_preview").html("There is no input-output example for this description.")
     }
 
@@ -270,7 +271,6 @@ function initializeSelectable() {
     }
     toolMode = $('input[name=tool_switching]:checked').val();
     if (toolMode == 'select') {
-        infoMsg('Drag over an area to select, and press "C" to copy');
         $('.selectable_grid').selectable(
             {
                 autoRefresh: false,
@@ -318,7 +318,15 @@ $(document).ready(function () {
     });
 
     $('input[type=radio][name=tool_switching]').change(function() {
-        initializeSelectable();
+        initializeSelectable(true);
+        toolMode = $('input[name=tool_switching]:checked').val();
+        if (toolMode == 'select') {
+            infoMsg('Drag over an area to select, and press "C" to copy');
+        } else if (toolMode == 'tool_floodfill') {
+            infoMsg('Click anywhere in the output to flood-fill that area with the selected color.');
+        } else if (toolMode == 'edit') {
+            infoMsg('Click anywhere in the output to color that cell with the selected color.');
+        }
     });
 
     $('body').keydown(function(event) {
@@ -390,10 +398,11 @@ $(document).ready(function () {
                 }
 
 
+                // if in tutorial and in challenge to copy-paste, check completion
                 const isStart = !(window.location.href.includes("listener") || window.location.href.includes("speaker"));
                 if (isStart) {
                     if ($("#objective-text").text().includes("copy")) {
-                        pre_continue();
+                        pre_continue('copy-paste');
                     }
                 }
 

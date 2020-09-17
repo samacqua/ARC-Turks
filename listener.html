@@ -49,13 +49,16 @@
     <!-- Progress Bar -->
     <div class="progress-bar-complete">
         <div class="progress md-progress">
-            <div class="progress-bar success" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="11"></div>
+            <div class="progress-bar success" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="11">
+            </div>
         </div>
-    
+
         <div class="progress-meter">
-            <div class="meter meter-right" style="width: 50.00%;"><span class="meter-text">All Done!</span></div>
-            <div class="meter meter-right" style="width: 33.33%;"><span class="meter-text">Finished Tutorial</span></div>
-            <div class="meter meter-right" style="width: 16.67%;"><span class="meter-text">Finished Instructions</span></div>
+            <div class="meter meter-right" style="width: 50%;" id="done_label"><span class="meter-text">All Done!</span></div>
+            <div class="meter meter-right" style="width: 25%;" id="tutorial_label"><span class="meter-text">Finished Tutorial</span>
+            </div>
+            <div class="meter meter-right" style="width: 25%;" id="instructions_label"><span class="meter-text">Finished Instructions</span>
+            </div>
         </div>
     </div>
 

@@ -1,4 +1,4 @@
-// makes it so can't exit out modal by pressing outside of it
+// so can't exit modal by pressing outside of it
 $.fn.modal.prototype.constructor.Constructor.Default.backdrop = 'static';
 $.fn.modal.prototype.constructor.Constructor.Default.keyboard =  false;
 
@@ -176,6 +176,21 @@ function update_progress_bar(tasks_inc=false, prac_inc=false) {
 }
 
 /**
+ * Correctly sizes the progress bar for the number of practice tasks and actual tasks
+ */
+function size_progress_bar() {
+    const total = TOTAL_TASKS_TO_COMPLETE + TOTAL_PRAC_TASKS + 1;   // +1 for tutorial
+
+    const instructions_width = 1 / total * 100;
+    const tutorial_width = TOTAL_PRAC_TASKS / total * 100;
+    const tasks_width = 100 - instructions_width - tutorial_width;
+
+    $("#instructions_label").css("width", `${instructions_width}%`);
+    $("#tutorial_label").css("width", `${tutorial_width}%`);
+    $("#done_label").css("width", `${tasks_width}%`);
+}
+
+/**
  * set up tooltip
  */
 $(window).on('load',function(){
@@ -184,3 +199,18 @@ $(window).on('load',function(){
         html: true
     });
 });
+
+/**
+ * Display a modal with the given title, text, and exit function.
+ */
+function show_modal(title, body_elements, button_title, action) {
+    $("#generic_modal_title").text(title);
+    for (i=0; i<body_elements.length;i++) {
+        const element = body_elements[i];
+        $("#generic_modal_body").append(element);
+    }
+    $("#generic_modal_exit_btn").html(button_title);
+    $("#generic_modal_exit_btn").attr("onclick", `${action}`);
+
+    $("#generic_modal").modal('show');
+}

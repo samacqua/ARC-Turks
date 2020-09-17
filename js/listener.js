@@ -1,6 +1,5 @@
 var START_DATE;
 var ATTEMPT_JSONS = [];
-var GAVE_UP = false;
 
 var DESC_ID;
 
@@ -13,6 +12,7 @@ $(window).on('load',function(){
     START_DATE = new Date();
 
     // show progress bar completion
+    size_progress_bar();
     update_progress_bar();
 
     // get listening task
@@ -78,7 +78,7 @@ function check() {
 
     const newDate = new Date();
     const totalTime = (newDate - START_DATE) / 1000;
-    store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up=GAVE_UP)
+    store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up=false)
         .then(function() {next_task();})
         .catch(function(error) {console.log("Error storing response: " + error);});
 }
@@ -98,20 +98,8 @@ function give_up() {
         return;
     }
 
-    infoMsg("You have given up. The output grid now has the correct answer. Press 'check' to submit this correct answer.");
-
-    GAVE_UP = true;
-    const answer = convertSerializedGridToGridObject(TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output']);
-
-    showAnswer(answer);
-    START_DATE = new Date();
-}
-
-function showAnswer(grid) {
-    /**
-     * set output grid to right answer
-     */
-    CURRENT_OUTPUT_GRID = grid;
-    syncFromDataGridToEditionGrid();
-    $('#output_grid_size').val(CURRENT_OUTPUT_GRID.height + 'x' + CURRENT_OUTPUT_GRID.width);
+    // TODO: How should we handle giving up? Just go to next task w/out incrementing?
+    store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up=true)
+        .then(function() {next_task(first_task = true);})
+        .catch(function(error) {console.log("Error storing response: " + error);});
 }

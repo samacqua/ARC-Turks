@@ -1,9 +1,9 @@
-$(window).on('load',function(){
+$(window).on('load', function () {
 
-    // uncomment to initialize database
-    // init_tasks_collection();
+    // init_tasks_collection();     // uncomment to initialize database
 
-    // next_task(first_task=true);
+    // correctly size the progress bar
+    size_progress_bar();
 
     // start timer to gather data on total time per user
     const start_time = new Date();
@@ -27,7 +27,7 @@ $(window).on('load',function(){
     $('#consentModal').modal('show');
 
     // assign a random id to the user
-    const user_id = Math.floor(Math.random()*1e10);
+    const user_id = Math.floor(Math.random() * 1e10);
     sessionStorage.setItem("uid", user_id);
 
     // set up quiz
@@ -35,38 +35,11 @@ $(window).on('load',function(){
     showQuestions(QUIZ_QUESTIONS, quizContainer);
 });
 
-// tell them to give up after 30 seconds
-window.setInterval(function(){
-    const cur_time = (new Date()).getTime()/1000;
-    if (Math.abs(cur_time - TUT_START_TIME / 1000 - 30) < 0.6) {
-        infoMsg("If you can't get the right answer, press give-up to see how to solve it.");
-    }
-}, 1000);
+// =======================
+// Tutorial
+// =======================
 
-function showAnswer(grid) {
-    /**
-     * set output grid to right answer
-     */
-    CURRENT_OUTPUT_GRID = grid;
-    syncFromDataGridToEditionGrid();
-    $('#output_grid_size').val(CURRENT_OUTPUT_GRID.height + 'x' + CURRENT_OUTPUT_GRID.width);
-}
-
-$(document).ready(function(){
-    /**
-     * makes it so slider has a label reflecting its value for demographics form
-     */
-    $("#age_result").html($("#age_form").val());
-    $("#age_form").change(function(){
-        $("#age_result").html($(this).val());
-    });
-
-    $("#dif_patt_result").html($("#dif_patt_form").val());
-    $("#dif_patt_form").change(function(){
-        $("#dif_patt_result").html($(this).val());
-    });
-});
-
+// each tutorial item has format: [step text, list of elements to highlight, top offset of message (pxs), left offset (%), right offset (%)]
 var TUT_LIST = [
     ["You will now be walked through the layout. Click any of the un-highlighted area to continue.", [], 200, 20, 20],
     ["This is the Objective bar. This is where your task will be written.", ["objective-col"], 200, 20, 20],
@@ -88,154 +61,136 @@ var TUT_LIST = [
     ["Try to copy the light-blue square into the top left corner of the input.", ["input-col", "output_grid", "toolbar_and_symbol_picker", "objective-col"], 500, 100, 100]
 ];
 
-function indexResizeOutputGrid() {
-    resizeOutputGrid();
+// TODO: fix speedrunning through tutorial
 
-    if (arraysEqual(CUR_HIGHLIGHT, ["resize_control_btns", "output_grid", "objective-col"])) {
-        if (CURRENT_OUTPUT_GRID.width == CURRENT_OUTPUT_GRID.height && CURRENT_OUTPUT_GRID.width == 2) {
-            infoMsg("Great job! You correctly resized the grid.");
-            setTimeout(function(){ continue_tutorial(); }, 2000);
-            return;
-        } else {
-            errorMsg("You resized the output grid, but to the wrong size.");
-        }
-    }
-}
+/**
+ * Before continuing the tutorial, checks if there is a task to complete
+ * If so, check if completed task/give user incremental feedback
+ * flag -- tells what called function, so we know if user reset grid or just colored it black, for example
+ */
+function pre_continue(flag = null) {
 
-var RESIZED_OUTPUT_GRID = false;
+    // if length > 1, then the tutorial is giving them a problem, so don't check if they have completed it before continuing
+    if (CUR_HIGHLIGHT.length > 1) {
 
-function indexCopyFromInput() {
-    copyFromInput();
+        syncFromEditionGridToDataGrid();
 
-    if (arraysEqual(CUR_HIGHLIGHT, ["input-col", "edit_control_btns", "output_grid", "objective-col"])) {
-        infoMsg("Great job! You have copied from the input grid. Now, reset the output grid.");
-        RESIZED_OUTPUT_GRID = true;
-    }
+        // the challenge can be identified by which elements are currently highlighted
+        if (arraysEqual(CUR_HIGHLIGHT, ["resize_control_btns", "output_grid", "objective-col"])) {
+            // challenge to resize output grid to 2x2
+            if (CURRENT_OUTPUT_GRID.width == CURRENT_OUTPUT_GRID.height && CURRENT_OUTPUT_GRID.width == 2) {
+                infoMsg("Great job! You correctly resized the grid.");
+                setTimeout(function () { continue_tutorial(); }, 2000);
+                return;
+            } else {
+                errorMsg("You resized the output grid, but to the wrong size.");
+            }
+        } else if (arraysEqual(CUR_HIGHLIGHT, ["input-col", "edit_control_btns", "output_grid", "objective-col"])) {
+            // challenge to copy from input and reset output grid
 
-}
-
-function indexResetOutputGrid() {
-    resetOutputGrid();
-    if (arraysEqual(CUR_HIGHLIGHT, ["input-col", "edit_control_btns", "output_grid", "objective-col"])) {
-        if (RESIZED_OUTPUT_GRID) {
-            infoMsg("Great job! You have copied from the input grid, and reset the output.");
-            setTimeout(function(){ continue_tutorial(); }, 2000);
-        } else {
-            errorMsg("First, copy from the input grid.");
-        }
-    }
-}
-
-function pre_continue() {
-            // if length > 1, then the tutorial is giving them a problem, so don't continue right away
-            if (CUR_HIGHLIGHT.length > 1) {
-
-                syncFromEditionGridToDataGrid();
-    
-                if (arraysEqual(CUR_HIGHLIGHT, ["input-col", "edit_control_btns", "output_grid", "objective-col"])) {
-                    console.log(CURRENT_INPUT_GRID);
-                    if (arraysEqual(CURRENT_OUTPUT_GRID.grid, CURRENT_INPUT_GRID.grid)) {
-                        errorMsg("You have copied from the input grid. Now, reset the output grid.");
-                        return;
-                    } else if (CURRENT_OUTPUT_GRID.grid.width == CURRENT_INPUT_GRID.grid.width && CURRENT_OUTPUT_GRID.height == CURRENT_INPUT_GRID.height) {
-                        
-                        for (var i = 0; i < CURRENT_OUTPUT_GRID.grid.length; i++){
-                            ref_row = CURRENT_OUTPUT_GRID.grid[i];
-                            for (var j = 0; j < ref_row.length; j++){
-                                if (ref_row[j] != 0) {
-                                    errorMsg("Your grid is the correct size, but you have to reset it.");
-                                    return;
-                                }
-                            }
-                        }
-                    }
-                } else if (arraysEqual(CUR_HIGHLIGHT, ["toolbar_and_symbol_picker", "output_grid", "objective-col"])) {
-    
-                    if ($("#objective-text").text().includes("green")) {
-                        console.log("green");
-                        console.log(CURRENT_OUTPUT_GRID);
-                        var green = 0;
-                        for (var i = 0; i < CURRENT_OUTPUT_GRID.grid.length; i++){
-                            ref_row = CURRENT_OUTPUT_GRID.grid[i];
-                            for (var j = 0; j < ref_row.length; j++){
-                                console.log(ref_row[j]);
-                                if (ref_row[j] == 3) {
-                                    green++;
-                                }
-                            }
-                        }
-    
-                        if (green == 3) {
-                            infoMsg("Great job! You drew 3 green cells.");
-                            setTimeout(function(){ continue_tutorial(); }, 1000);
-                            return;
-                        } else if (green != 0) {
-                            infoMsg("You have painted " + green + " cells green. Paint " + (3 - green).toString() + " more.")
+            if (arraysEqual(CURRENT_OUTPUT_GRID.grid, CURRENT_INPUT_GRID.grid)) {
+                if (flag == 'copy_input') {
+                    infoMsg("Great! You have copied from the input grid. Now, reset the output grid.");
+                } else {
+                    infoMsg("You have copied the input grid, but you could have done it easier by clicking the \"Copy from input\" button.");
+                }
+                return;
+            } else if (CURRENT_OUTPUT_GRID.grid.width == CURRENT_INPUT_GRID.grid.width && CURRENT_OUTPUT_GRID.height == CURRENT_INPUT_GRID.height) {
+                console.log("same size");
+                for (var i = 0; i < CURRENT_OUTPUT_GRID.grid.length; i++) {
+                    ref_row = CURRENT_OUTPUT_GRID.grid[i];
+                    for (var j = 0; j < ref_row.length; j++) {
+                        if (ref_row[j] != 0) {
+                            errorMsg("Your grid is the correct size, but you have to reset it.");
                             return;
                         }
                     }
-    
-                    if ($("#objective-text").text().includes("yellow")) {
-                        for (var i = 0; i < CURRENT_OUTPUT_GRID.grid.length; i++){
-                            ref_row = CURRENT_OUTPUT_GRID.grid[i];
-                            for (var j = 0; j < ref_row.length; j++){
-                                if (ref_row[j] != 4) {
-                                    errorMsg("You need to paint all squares yellow using flood fill.")
-                                    return;
-                                }
-                            }
-                        }
-                        infoMsg("Great job! You used flood fill.");
-                        setTimeout(function(){ continue_tutorial(); }, 1000);
-                        return;
-                    }
-                } else if ($("#objective-text").text().includes("copy")) {
-                    console.log("copy");
-                    const ref_grid = [
-                        [8, 8, 0],
-                        [8, 8, 0],
-                        [0, 0, 0]
-                    ]
-    
-                    if (CURRENT_OUTPUT_GRID.width != 3 || CURRENT_OUTPUT_GRID.height != 3) {
-                        errorMsg("Make sure that your output grid is 3x3.");
-                        return;
-                    }
-    
-                    for (var i = 0; i < ref_grid.length; i++){
-                        ref_row = ref_grid[i];
-                        for (var j = 0; j < ref_row.length; j++){
-                            if (ref_row[j] != CURRENT_OUTPUT_GRID.grid[i][j]) {
-                                errorMsg("To continue, follow the Objective.");
-                                return;
-                            }
+                }
+                infoMsg("Great job! You have copied from the input grid, and reset the output.");
+                setTimeout(function () { continue_tutorial(); }, 2000);
+                return;
+            }
+        } else if (arraysEqual(CUR_HIGHLIGHT, ["toolbar_and_symbol_picker", "output_grid", "objective-col"])) {
+            // challenge to draw 3 green cells or flood fill yellow (same highlighted elements)
+
+            if ($("#objective-text").text().includes("green")) {
+                // draw 3 green cells
+                console.log("green");
+                console.log(CURRENT_OUTPUT_GRID);
+                var green = 0;
+                for (var i = 0; i < CURRENT_OUTPUT_GRID.grid.length; i++) {
+                    ref_row = CURRENT_OUTPUT_GRID.grid[i];
+                    for (var j = 0; j < ref_row.length; j++) {
+                        console.log(ref_row[j]);
+                        if (ref_row[j] == 3) {
+                            green++;
                         }
                     }
-    
-                    infoMsg("Great job! You used copy-paste.");
-                    setTimeout(function(){ continue_tutorial(); }, 1000);
+                }
+
+                if (green == 3) {
+                    infoMsg("Great job! You drew 3 green cells.");
+                    setTimeout(function () { continue_tutorial(); }, 1000);
+                    return;
+                } else if (green != 0) {
+                    infoMsg("You have painted " + green + " cells green. Paint " + (3 - green).toString() + " more.")
                     return;
                 }
-                errorMsg("To continue, follow the Objective.");
-            } else {
-                continue_tutorial();
             }
-}
 
-$(function(){
-    $( "#trans-layer" ).click(function() {
-        pre_continue();
-    });
-    $( "#dark-layer" ).click(function() {
-        pre_continue();
-    });
-    $("#tut-message").click(function() {
-        pre_continue();
-    });
-    $("#tut-continue-message").click(function() {
-        pre_continue();
-    });
-});
+            if ($("#objective-text").text().includes("yellow")) {
+                // flood fill yellow
+                for (var i = 0; i < CURRENT_OUTPUT_GRID.grid.length; i++) {
+                    ref_row = CURRENT_OUTPUT_GRID.grid[i];
+                    for (var j = 0; j < ref_row.length; j++) {
+                        if (ref_row[j] != 4) {
+                            errorMsg("You need to paint all squares yellow using flood fill.")
+                            return;
+                        }
+                    }
+                }
+                infoMsg("Great job! You used flood fill.");
+                setTimeout(function () { continue_tutorial(); }, 1000);
+                return;
+            }
+        } else if (arraysEqual(CUR_HIGHLIGHT, ["input-col", "output_grid", "toolbar_and_symbol_picker", "objective-col"])) {
+            const ref_grid = [
+                [8, 8, 0],
+                [8, 8, 0],
+                [0, 0, 0]
+            ]
+
+            if (CURRENT_OUTPUT_GRID.width != 3 || CURRENT_OUTPUT_GRID.height != 3) {
+                errorMsg("Make sure that your output grid is 3x3.");
+                return;
+            }
+
+            for (var i = 0; i < ref_grid.length; i++) {
+                ref_row = ref_grid[i];
+                for (var j = 0; j < ref_row.length; j++) {
+                    if (ref_row[j] != CURRENT_OUTPUT_GRID.grid[i][j]) {
+                        errorMsg("To continue, follow the Objective.");
+                        return;
+                    }
+                }
+            }
+
+            if (flag != 'copy-paste') {
+                resetOutputGrid();
+                errorMsg("You have correctly drawn the shape, but use the 'Copy-Paste' tool to copy from the input grid.");
+                return;
+            }
+
+            infoMsg("Great job! You used copy-paste.");
+            setTimeout(function () { continue_tutorial(); }, 1000);
+            return;
+        }
+        errorMsg("To continue, follow the Objective.");
+    } else {
+        // not a challenge, so continue the tutorial
+        continue_tutorial();
+    }
+}
 
 var CUR_HIGHLIGHT = null;
 
@@ -243,7 +198,7 @@ function continue_tutorial() {
 
     // set last item to be behind dark layer
     if (CUR_HIGHLIGHT != null) {
-        for(i=0;i<CUR_HIGHLIGHT.length;i++) {
+        for (i = 0; i < CUR_HIGHLIGHT.length; i++) {
             $(`#${CUR_HIGHLIGHT[i]}`).css('position', 'static');
             $(`#${CUR_HIGHLIGHT[i]}`).css('z-index', 'auto');
         }
@@ -293,7 +248,7 @@ function continue_tutorial() {
     }
 
     // set highlight div to be above layer
-    for(i=0;i<next_item[1].length;i++) {
+    for (i = 0; i < next_item[1].length; i++) {
         const id = next_item[1][i];
         $(`#${id}`).css('position', 'relative');
         $(`#${id}`).css('z-index', '501');
@@ -304,6 +259,16 @@ function continue_tutorial() {
 
     CUR_HIGHLIGHT = next_item[1];
 }
+
+$(function () {
+    $("#tut-layer").click(function () {
+        pre_continue();
+    });
+});
+
+// =======================
+// ARC Completion
+// =======================
 
 function check_grid() {
     /**
@@ -320,9 +285,9 @@ function check_grid() {
         return
     }
 
-    for (var i = 0; i < reference_output.length; i++){
+    for (var i = 0; i < reference_output.length; i++) {
         ref_row = reference_output[i];
-        for (var j = 0; j < ref_row.length; j++){
+        for (var j = 0; j < ref_row.length; j++) {
             if (ref_row[j] != submitted_output[i][j]) {
                 errorMsg("Wrong answer. Try again.");
                 return
@@ -330,8 +295,8 @@ function check_grid() {
         }
     }
 
-    update_progress_bar(tasks_inc=false, prac_inc=true);
-    
+    update_progress_bar(tasks_inc = false, prac_inc = true);
+
     const uid = sessionStorage.getItem('uid');
     const tut_end_time = (new Date()).getTime();
     const tut_time = (tut_end_time - parseInt(TUT_START_TIME)) / 1000;
@@ -351,7 +316,7 @@ function check_grid() {
         // reset values
         resetOutputGrid();
         TEST_PAIRS = new Array();
-        
+
         // load task
         const task = PRAC_TASKS.shift();
         loadTask(task.task);
@@ -365,6 +330,10 @@ function check_grid() {
 
     $("#done_modal").modal("show");
 }
+
+// =======================
+// Store user information
+// =======================
 
 var TUT_START_TIME = 0;
 
@@ -389,10 +358,14 @@ function exit_demographic() {
     const uid = sessionStorage.getItem('uid');
     set_user_info(uid, age, gender);
 
-    $('#demographic_modal').one('hidden.bs.modal', function() { $('#introModal').modal('show'); }).modal('hide');
+    $('#demographic_modal').one('hidden.bs.modal', function () { $('#introModal').modal('show'); }).modal('hide');
 }
 
-function showQuestions(questions, quizContainer){
+// =======================
+// Quiz
+// =======================
+
+function showQuestions(questions, quizContainer) {
     /*
     For quiz
     */
@@ -401,20 +374,20 @@ function showQuestions(questions, quizContainer){
     var answers;
 
     // for each question...
-    for(var i=0; i<questions.length; i++){
-        
+    for (var i = 0; i < questions.length; i++) {
+
         // first reset the list of answers
         answers = [];
 
         // for each available answer to this question...
-        for(letter in questions[i].answers){
+        for (letter in questions[i].answers) {
 
             // ...add an html radio button
             answers.push(
                 '<label>'
-                    + '<input type="radio" name="question'+i+'" value="'+letter+'">'
-                    + letter + ': '
-                    + questions[i].answers[letter]
+                + '<input type="radio" name="question' + i + '" value="' + letter + '">'
+                + letter + ': '
+                + questions[i].answers[letter]
                 + '</label>'
             );
         }
@@ -422,7 +395,7 @@ function showQuestions(questions, quizContainer){
         // add this question and its answers to the output
         output.push(
             '<div class="question">' + questions[i].question + '</div>'
-            + '<div class="answers">' + answers.join('') + '</div>' 
+            + '<div class="answers">' + answers.join('') + '</div>'
             + '<hr>'
         );
     }
@@ -435,14 +408,14 @@ function check_quiz() {
     // gather answer containers from our quiz and check if correct
     var quizContainer = document.getElementById('quiz');
     var answerContainers = quizContainer.querySelectorAll('.answers');
-    
-    for(var i=0; i<QUIZ_QUESTIONS.length; i++){
-        userAnswer = (answerContainers[i].querySelector('input[name=question'+i+']:checked')||{}).value;
-        if(userAnswer != QUIZ_QUESTIONS[i].correctAnswer){
+
+    for (var i = 0; i < QUIZ_QUESTIONS.length; i++) {
+        userAnswer = (answerContainers[i].querySelector('input[name=question' + i + ']:checked') || {}).value;
+        if (userAnswer != QUIZ_QUESTIONS[i].correctAnswer) {
             errorMsg("You incorrectly answered question " + (i + 1).toString() + ". Please retry the quiz.");
             return;
         }
     }
 
-    $('#quiz_modal').one('hidden.bs.modal', function() { $('#instructionsModal').modal('show'); }).modal('hide');
+    $('#quiz_modal').one('hidden.bs.modal', function () { $('#instructionsModal').modal('show'); }).modal('hide');
 }

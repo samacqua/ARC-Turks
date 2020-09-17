@@ -11,6 +11,7 @@ $(window).on('load', function () {
     START_DATE = new Date();
 
     // get progress bar completion
+    size_progress_bar();
     update_progress_bar();
 
     // hide grid size form
@@ -22,14 +23,13 @@ $(window).on('load', function () {
     $("#what_you_do").val(HAVE_TO_PREFIX);
 
     // show initial instructions
-    // $('#instructionsModal').modal('show');
+    $('#instructionsModal').modal('show');
 
     // get words that have already been used
     get_words().then(words => {
         GOOD_WORDS = words.map(function (value) {
             return value.toLowerCase();
         });
-        console.log(GOOD_WORDS);
     }).catch(error => {
         infoMsg("Could not load words that can been used. Please check your internet connection and reload the page.");
     });
@@ -38,7 +38,6 @@ $(window).on('load', function () {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const task = urlParams.get('task');
-    console.log(task);
 
     loadTask(task);
     get_task_descriptions(task, "language").then(function (descriptions) {
@@ -51,9 +50,9 @@ $(window).on('load', function () {
 });
 
 
-// ===========
+// ==============
 // Tutorial
-// ===========
+// ==============
 
 var TUT_LIST = [
     ["You will now be walked through the layout. Click any of the un-highlighted area to continue.", [], 200, 20, 20],
@@ -72,16 +71,7 @@ var TUT_LIST = [
 var CUR_HIGHLIGHT = null;
 
 $(function () {
-    $( "#trans-layer" ).click(function() {
-        continue_tutorial();
-    });
-    $("#dark-layer").click(function () {
-        continue_tutorial();
-    });
-    $("#tut-message").click(function () {
-        continue_tutorial();
-    });
-    $("#tut-continue-message").click(function () {
+    $("#tut-layer").click(function () {
         continue_tutorial();
     });
 });
@@ -151,9 +141,9 @@ function continue_tutorial() {
     CUR_HIGHLIGHT = next_item[1];
 }
 
-// ===========
+// ==============
 // Past Descriptions
-// ===========
+// ==============
 
 var CURRENT_DESC = 0;
 
@@ -179,9 +169,9 @@ function showDescEx(i) {
     $("#desc_success").text(`${PAST_DESCS[i]['num_success']} of ${PAST_DESCS[i]['num_attempts']} people succeeded using this description.`);
 }
 
-// ===========
+// ==============
 // Highlight unused words
-// ===========
+// ==============
 
 // returns the regex for words that have not been used yet
 function get_bad_words(input) {
@@ -192,14 +182,14 @@ function get_bad_words(input) {
     }
 }
 
-// for each word that has not been used, returns that word and its two closest meaning words that have been used
-function get_replacement_words(words, amount=10) {
+// for each word that has not been used, returns that word and its closest meaning words that have been used in past descriptions
+function get_replacement_words(words, amount = 10) {
 
     return new Promise(function (resolve, reject) {
         if (words == null) {
             return resolve([])
         }
-    
+
         const replace_words = [];
         const ipv4URL = "ec2-3-15-182-141.us-east-2.compute.amazonaws.com";
 
@@ -213,10 +203,10 @@ function get_replacement_words(words, amount=10) {
                     }
 
                     const word = words[i].toLowerCase();
-            
+
                     const url = `http://${ipv4URL}:8000/api/closest?word=${word}&limit=${amount}`;
-                
-                    $.get(url, function(data, status) {
+
+                    $.get(url, function (data, status) {
                         var closest = data;
 
                         // if written word, make them replace with num
@@ -282,15 +272,15 @@ $(document).ready(function () {
         get_replacement_words(value.match(get_bad_words())).then(matches => {
 
             // for each novel word, add a row with buttons to replace word with similar words in database, or add the word
-            $('#word-warning-'+id).empty();
+            $('#word-warning-' + id).empty();
 
             if (matches.length != 0 && GOOD_WORDS.length > MIN_WORDS) {
                 var items = [];
                 $.each(matches, function (i, item) {
-    
+
                     const word = item[0];
                     const replacements = item[1];
-    
+
                     // create the html for the list items
                     items.push(
                         `<li><b>${word}</b>
@@ -299,24 +289,24 @@ $(document).ready(function () {
                             Replace with...
                         </button>
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">`
-                        + 
+                        +
                         // each list item has a dropdown of the suggested words
-                        `${(function() {
+                        `${(function () {
                             var html_text = "";
-                            for (i=0;i<replacements.length;i++) {
+                            for (i = 0; i < replacements.length; i++) {
                                 const replacement = replacements[i];
                                 const dropdown_item = `<a onclick="replace_word(\'${word}\',\'${replacement}\', '#${id}')" id="replace_${word}_0>${replacement}" class="dropdown-item" href="#">${replacement}</a>`;
                                 html_text += dropdown_item;
                             }
                             return html_text
                         })()}`
-                        + 
+                        +
                         `</div>
                         <button type="button" onclick="confirm_add_word(\'${word}\')" id="add_word_${word}" class="btn btn-danger add-word">add word</button></li>
                         </span>`);
                 });
-    
-                $('#word-warning-'+id).append(items.join(''));
+
+                $('#word-warning-' + id).append(items.join(''));
             }
         });
     });
@@ -337,6 +327,9 @@ $(document).ready(function () {
     });
 });
 
+// ==============
+// Other Page Logic
+// ==============
 
 function submit() {
     /**
@@ -414,7 +407,7 @@ function give_up() {
 
     // don't give them credit for completing the task if they have not completed it
     give_up_description(TASK_ID).then(function () {
-        next_task(first_task=true);
+        next_task(first_task = true);
     });
 }
 
