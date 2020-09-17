@@ -44,7 +44,6 @@ function get_unused_desc() {
                         console.log(desc);
 
                         claim_unused_desc(desc).then(function() {
-                            console.log("claimed description!");
                             return resolve([task, desc]);
                         }).catch(error => {
                             console.log(error);

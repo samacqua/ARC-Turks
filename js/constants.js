@@ -1,7 +1,7 @@
 const TOTAL_TASKS_TO_COMPLETE = 3;
 const MIN_TASKS_BEFORE_SPEAKER = 2;
 const TOTAL_PRAC_TASKS = 2;
-const MIN_WORDS = 200;
+const MIN_WORDS = 100;
 const DESCRIPTIONS_TYPE = "language"; // "language_and_example" "example"
 
 // easy tasks for demonstration purposes

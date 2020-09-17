@@ -22,7 +22,7 @@ $(window).on('load', function () {
     $("#what_you_do").val(HAVE_TO_PREFIX);
 
     // show initial instructions
-    $('#instructionsModal').modal('show');
+    // $('#instructionsModal').modal('show');
 
     // get words that have already been used
     get_words().then(words => {
@@ -185,33 +185,53 @@ function showDescEx(i) {
 
 // returns the regex for words that have not been used yet
 function get_bad_words(input) {
-    return new RegExp('\\b(?!(' + GOOD_WORDS.join("|") + ')\\b)[a-zA-Z]+', 'gmi')
+    if (GOOD_WORDS.length > MIN_WORDS) {
+        return new RegExp('\\b(?!(' + GOOD_WORDS.join("|") + ')\\b)[a-zA-Z]+', 'gmi')
+    } else {
+        return new RegExp('^\b$')
+    }
 }
 
 // for each word that has not been used, returns that word and its two closest meaning words that have been used
-function get_replacement_words(words) {
+function get_replacement_words(words, amount=10) {
 
-    if (words == null) {
-        return []
-    }
-
-    const replace_words = [];
-    for (i = 0; i < words.length; i++) {
-
-        // gets 2 closest words according to word2vec
-        const word = words[i].toLowerCase();
-        const dists_to_other_words = GOOD_WORDS.map(function (x) { return get_dist(word, x) });
-        var closest = dists_to_other_words.sort().slice(0, 2);
-
-        // if written word, make them replace with num
-        // better way than writing out mappings? must be.
-        const str_num_mapping = { 'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10 };
-        if (str_num_mapping[word] !== undefined) {
-            closest[0][1] = str_num_mapping[word];
+    return new Promise(function (resolve, reject) {
+        if (words == null) {
+            return resolve([])
         }
-        replace_words.push([words[i], closest[0][1], closest[1][1]]);
-    }
-    return replace_words;
+    
+        const replace_words = [];
+        const ipv4URL = "ec2-3-15-182-141.us-east-2.compute.amazonaws.com";
+
+        (async function loop() {
+
+            for (i = 0; i <= words.length; i++) {
+                await new Promise(function (res, rej) {
+
+                    if (i == words.length) {
+                        return resolve(replace_words);
+                    }
+
+                    const word = words[i].toLowerCase();
+            
+                    const url = `http://${ipv4URL}:8000/api/closest?word=${word}&limit=${amount}`;
+                
+                    $.get(url, function(data, status) {
+                        var closest = data;
+
+                        // if written word, make them replace with num
+                        // better way than writing out mappings? must be.
+                        const str_num_mapping = { 'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10 };
+                        if (str_num_mapping[word] !== undefined) {
+                            closest = [str_num_mapping[word]];
+                        }
+                        replace_words.push([words[i], closest]);
+                        res();
+                    });
+                });
+            }
+        })();
+    });
 }
 
 // replace a word in the textarea with another word
@@ -249,94 +269,66 @@ function add_current_candidate_word() {
 
 $(document).ready(function () {
 
-    // when the grid size textarea changes
-    $("#grid_size_desc").on("keyup", function () {
+    // when textarea changes
+    $('textarea').on("keyup", function () {
 
         // so they can't delete prefix
         var value = $(this).val();
-        $(this).val(GRID_SIZE_PREFIX + value.substring(GRID_SIZE_PREFIX.length));
+        const prefix_mapping = { 'grid_size_desc': GRID_SIZE_PREFIX, 'what_you_see': SHOULD_SEE_PREFIX, 'what_you_do': HAVE_TO_PREFIX }
+        const id = $(this).attr("id");
+        var prefix = prefix_mapping[id];
+        $(this).val(prefix + value.substring(prefix.length));
 
-        const matches = get_replacement_words(value.match(get_bad_words()));
+        get_replacement_words(value.match(get_bad_words())).then(matches => {
 
-        // for each novel word, add a row with buttons to replace word with similar words in database, or add the word
-        $('#word-warning-size').empty();
-        if (matches.length != 0 && GOOD_WORDS.length > MIN_WORDS) {
-            var items = [];
-            $.each(matches, function (i, item) {
+            // for each novel word, add a row with buttons to replace word with similar words in database, or add the word
+            $('#word-warning-'+id).empty();
 
-                items.push('<li><b>' + item[0] + '</b>'
-                    + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[1]}\', '#grid_size_desc')" class="btn btn-primary word-replace" id=replace_${item[0]}_0>${item[1]}</button>`
-                    + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[2]}\', '#grid_size_desc')" class="btn btn-primary word-replace" id=replace_${item[0]}_1>${item[2]}</button>`
-                    + `<button type="button" onclick="confirm_add_word(\'${item[0]}\')" id="add_word_${item[0]}" class="btn btn-danger add-word">add word</button></li>`);
-            });
-
-            $('#word-warning-size').append(items.join(''));
-        }
-    });
-
-    // when the see description texarea changes
-    $("#what_you_see").on("keyup", function () {
-
-        // so they can't delete prefix
-        var value = $(this).val();
-        $(this).val(SHOULD_SEE_PREFIX + value.substring(SHOULD_SEE_PREFIX.length));
-
-        const matches = get_replacement_words(value.match(get_bad_words()));
-
-        // for each novel word, add a row with buttons to replace word with similar words in database, or add the word
-        $('#word-warning-see').empty();
-        if (matches.length != 0 && GOOD_WORDS.length > MIN_WORDS) {
-            var items = [];
-            $.each(matches, function (i, item) {
-
-                items.push('<li><b>' + item[0] + '</b>'
-                    + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[1]}\', '#what_you_see')" class="btn btn-primary word-replace" id=replace_${item[0]}_0>${item[1]}</button>`
-                    + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[2]}\', '#what_you_see')" class="btn btn-primary word-replace" id=replace_${item[0]}_1>${item[2]}</button>`
-                    + `<button type="button" onclick="confirm_add_word(\'${item[0]}\')" id="add_word_${item[0]}" class="btn btn-danger add-word">add word</button></li>`);
-
-            });
-
-            $('#word-warning-see').append(items.join(''));
-        }
-    });
-
-    // when the do description textarea changes
-    $("#what_you_do").on("keyup", function () {
-
-        // so they can't delete prefix
-        var value = $(this).val();
-        $(this).val(HAVE_TO_PREFIX + value.substring(HAVE_TO_PREFIX.length));
-
-        const matches = get_replacement_words(value.match(get_bad_words()));
-
-        // for each novel word, add a row with buttons to replace word with similar words in database, or add the word
-        $('#word-warning-do').empty();
-        
-        if (matches.length != 0 && GOOD_WORDS.length > MIN_WORDS) {
-            var items = [];
-            $.each(matches, function (i, item) {
-
-                items.push('<li><b>' + item[0] + '</b>'
-                    + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[1]}\', '#what_you_do')" class="btn btn-primary word-replace" id=replace_${item[0]}_0>${item[1]}</button>`
-                    + `<button type="button" onclick="replace_word(\'${item[0]}\',\'${item[2]}\', '#what_you_do')" class="btn btn-primary word-replace" id=replace_${item[0]}_1>${item[2]}</button>`
-                    + `<button type="button" onclick="confirm_add_word(\'${item[0]}\')" id="add_word_${item[0]}" class="btn btn-danger add-word">add word</button></li>`);
-
-            });
-
-            $('#word-warning-do').append(items.join(''));
-        }
-    });
-
-    if (GOOD_WORDS.length > MIN_WORDS) {
-        // highlight the textareas for words that have not been used yet
-        $('textarea').highlightWithinTextarea({
-            highlight: [
-                {
-                    highlight: get_bad_words
-                }
-            ]
+            if (matches.length != 0 && GOOD_WORDS.length > MIN_WORDS) {
+                var items = [];
+                $.each(matches, function (i, item) {
+    
+                    const word = item[0];
+                    const replacements = item[1];
+    
+                    // create the html for the list items
+                    items.push(
+                        `<li><b>${word}</b>
+                        <span class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Replace with...
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">`
+                        + 
+                        // each list item has a dropdown of the suggested words
+                        `${(function() {
+                            var html_text = "";
+                            for (i=0;i<replacements.length;i++) {
+                                const replacement = replacements[i];
+                                const dropdown_item = `<a onclick="replace_word(\'${word}\',\'${replacement}\', '#${id}')" id="replace_${word}_0>${replacement}" class="dropdown-item" href="#">${replacement}</a>`;
+                                html_text += dropdown_item;
+                            }
+                            return html_text
+                        })()}`
+                        + 
+                        `</div>
+                        <button type="button" onclick="confirm_add_word(\'${word}\')" id="add_word_${word}" class="btn btn-danger add-word">add word</button></li>
+                        </span>`);
+                });
+    
+                $('#word-warning-'+id).append(items.join(''));
+            }
         });
-    }
+    });
+
+    // highlight the textareas for words that have not been used yet
+    $('textarea').highlightWithinTextarea({
+        highlight: [
+            {
+                highlight: get_bad_words
+            }
+        ]
+    });
 
     //  Make it so modal with sliders has labels of slider values
     $("#conf_result").html($("#conf_form").val());
@@ -372,7 +364,7 @@ function submit() {
         return
     }
 
-    if ($('#word-warning-size').children().length + $('#word-warning-see').children().length + $('#word-warning-do').children().length != 0) {
+    if ($('#word-warning-grid_size_desc').children().length + $('#word-warning-what_you_see').children().length + $('#word-warning-what_you_do').children().length != 0) {
         errorMsg("You must get rid of all red-highlighted words. If they are absolutely necessary for your description, add that word.");
         return
     }
