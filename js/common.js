@@ -103,12 +103,10 @@ function next_task(first_task=false) {
 
                 select_arm(task).then(desc_id => {
                     if (desc_id == -1) {
-                        console.log("speaker");
-                        console.log(task);
+                        console.log("speaker:", task);
                         window.location.href = `speaker.html?task=${task}`;
                     } else {
-                        console.log("listener");
-                        console.log(task, desc_id);
+                        console.log("listener:", task, desc_id);
                         window.location.href = `listener.html?task=${task}&id=${desc_id}&ver=false`;
                     }
                 }).catch(error => {
@@ -121,8 +119,7 @@ function next_task(first_task=false) {
         } else {
             const task = task_desc[0]
             const desc_id = task_desc[1]
-            console.log("unused desc");
-            console.log(task, desc_id);
+            console.log("unused desc:", task, desc_id);
             window.location.href = `listener.html?task=${task}&id=${desc_id}&ver=false`;
         }
 

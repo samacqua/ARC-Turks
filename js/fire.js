@@ -45,6 +45,7 @@ function get_unused_desc() {
 
                         const tasks_done = sessionStorage.getItem('tasks_completed').split(',');
                         if (tasks_done.includes(task)) {
+                            console.log("Already interacted with task:", task);
                             res();
                         } else {
                             claim_unused_desc(desc).then(function() {
@@ -367,7 +368,7 @@ function claim_unused_desc(desc_id) {
                 const time_to_wait = 60*10; // 10 minutes
 
                 if (cur_date - time_to_wait < doc.data().time_claimed) {
-                    throw "Description already claimed!"
+                    throw `Description for task ${doc.data().task} has already been claimed!`
                 }
 
                 transaction.update(desc_ref, { time_claimed: cur_date });
