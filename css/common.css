@@ -32,10 +32,6 @@ img {
     float: left;
 }
 
-.tooltip.show {
-    opacity: 1;
-}
-
 .col-header {
     clear:both;
     margin-bottom: 15px;
@@ -45,22 +41,9 @@ img {
     display: inline-block;
 }
 
-.help-btn {
-    float:right;   
-    padding: 3px;
-    margin-top: 5px;
-    background-color: cornflowerblue;
-    border-radius: 3px;
-    color: white;
-}
-
 video {
     width: 100%    !important;
     height: auto   !important;
-}
-
-.tooltip-inner {
-    max-width: 100% !important;
 }
 
 /*Message display*/

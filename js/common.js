@@ -188,16 +188,6 @@ function size_progress_bar() {
 }
 
 /**
- * set up tooltip
- */
-$(window).on('load',function(){
-    $('a[data-toggle="tooltip"]').tooltip({
-        animated: 'fade',
-        html: true
-    });
-});
-
-/**
  * Display a modal with the given title, text, and exit function.
  */
 function show_modal(title, body_elements, button_title, action) {
