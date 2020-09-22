@@ -23,7 +23,7 @@ $(window).on('load', function () {
     $("#what_you_do").val(HAVE_TO_PREFIX);
 
     // show initial instructions
-    // $('#instructionsModal').modal('show');
+    $('#instructionsModal').modal('show');
 
     // get words that have already been used
     get_words().then(words => {
@@ -270,6 +270,7 @@ $(document).ready(function () {
         var prefix = prefix_mapping[id];
         $(this).val(prefix + value.substring(prefix.length));
 
+        // TODO: List of words to replace is buggy
         get_replacement_words(value.match(get_bad_words())).then(matches => {
 
             // for each novel word, add a row with buttons to replace word with similar words in database, or add the word

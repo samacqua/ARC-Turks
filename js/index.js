@@ -22,9 +22,7 @@ $(window).on('load', function () {
     // prac_complete is for finishing instructions and practice tasks (for updating progress bar)
     sessionStorage.setItem("items_complete", "0");
     sessionStorage.setItem("prac_complete", "0");
-
-    next_task();
-    return;
+    sessionStorage.setItem('tasks_completed', "0");
 
     // get consent, then demographic, then present study, then begin solving patterns
     $('#consentModal').modal('show');

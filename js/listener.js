@@ -37,6 +37,8 @@ $(window).on('load',function(){
         $("#grid_size_p").text(grid_desc);
         $("#see_p").text(see_desc);
         $("#do_p").text(do_desc);
+
+        $('#verInstructionsModal').modal('show');
     } else {
         get_description_by_id(task, desc_id).then(description => {
             SELECTED_EXAMPLE = description.selected_example;
@@ -144,7 +146,11 @@ function give_up() {
     sessionStorage.setItem('tasks_done', tasks_done);
 
     // TODO: How should we handle giving up? Just go to next task w/out incrementing?
-    store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up=true)
-        .then(function() {next_task(first_task = true);})
-        .catch(function(error) {console.log("Error storing response: " + error);});
+    if (IS_VERIFICATION) {
+        give_up_description(TASK_ID).then(function () { next_task(first_task = true); });
+    } else {
+        store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up=true)
+            .then(function() {next_task(first_task = true);})
+            .catch(function(error) {console.log("Error storing response: " + error);});
+    }
 }
