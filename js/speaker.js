@@ -411,7 +411,7 @@ function give_up() {
 
         var tasks_done = sessionStorage.getItem('tasks_completed').split(',');
         tasks_done.push(TASK_ID);
-        sessionStorage.setItem('tasks_done', tasks_done);
+        sessionStorage.setItem('tasks_completed', tasks_done);
 
         next_task(first_task = true);
     });

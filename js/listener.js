@@ -101,7 +101,7 @@ function check() {
     // add to list of tasks completed , so we don't give same task
     var tasks_done = sessionStorage.getItem('tasks_completed').split(',');
     tasks_done.push(TASK_ID);
-    sessionStorage.setItem('tasks_done', tasks_done);
+    sessionStorage.setItem('tasks_completed', tasks_done);
 
     if (IS_VERIFICATION) {
         const queryString = window.location.search;
@@ -143,7 +143,7 @@ function give_up() {
     // add to list of tasks completed , so we don't give same task
     var tasks_done = sessionStorage.getItem('tasks_completed').split(',');
     tasks_done.push(TASK_ID);
-    sessionStorage.setItem('tasks_done', tasks_done);
+    sessionStorage.setItem('tasks_completed', tasks_done);
 
     // TODO: How should we handle giving up? Just go to next task w/out incrementing?
     if (IS_VERIFICATION) {
