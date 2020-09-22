@@ -20,7 +20,7 @@ var db = firebase.firestore();
 // ===================================
 
 /**
- * Returns the task and desc_id of an unused description, if any
+ * Returns the task and desc_id of an unused description that the user has not already done the task of, if any (otherwise return -1)
  */
 function get_unused_desc() {
     return new Promise(function (resolve, reject) {
@@ -43,12 +43,18 @@ function get_unused_desc() {
                         const task = querySnapshot.docs[i].data().task;
                         console.log(desc);
 
-                        claim_unused_desc(desc).then(function() {
-                            return resolve([task, desc]);
-                        }).catch(error => {
-                            console.log(error);
+                        const tasks_done = sessionStorage.getItem('tasks_completed').split(',');
+                        if (tasks_done.includes(task)) {
                             res();
-                        });
+                        } else {
+                            claim_unused_desc(desc).then(function() {
+                                return resolve([task, desc]);
+                            }).catch(error => {
+                                // throws an error if already claimed, so continue to next
+                                console.log(error);
+                                res();
+                            });
+                        }
                     });
                 }
             })();
@@ -189,7 +195,7 @@ function get_words() {
  * store descriptions, task info and user info and user answers in firebase
  * returns promise so that can transition to next task after storing
  */
-function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attempts, attemp_jsons, conf, total_time, selected_example, gave_up_verification = false) {
+function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attempts, attemp_jsons, desc_time, ver_time, selected_example) {
 
     return new Promise(function (resolve, reject) {
 
@@ -227,12 +233,13 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attem
             'description_type': desc_type,
 
             'verification_attempts': parseInt(attempts),
-            'gave_up_verification': gave_up_verification,
+            // 'gave_up_verification': gave_up_verification,
             'attempt_jsons': attemp_jsons,
 
-            'confidence': parseInt(conf),
+            // 'confidence': parseInt(conf),
             'uid': parseInt(user_id),
-            'time': total_time,
+            'description_time': desc_time,
+            'verification_time': ver_time,
 
             'num_attempts': 0,  // # listeners who used description
             'num_success': 0,   // # listeners who used description successfully
@@ -246,9 +253,9 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attem
             num_descriptions: increment,
             num_interactions: increment
         };
-        if (gave_up_verification) {
-            task_update_data[ver_gave_up_count] = increment
-        }
+        // if (gave_up_verification) {
+        //     task_update_data[ver_gave_up_count] = increment
+        // }
         batch.update(task_doc_ref, task_update_data);
 
         //increment total num descriptions

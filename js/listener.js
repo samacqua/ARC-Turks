@@ -3,9 +3,9 @@ var ATTEMPT_JSONS = [];
 
 var DESC_ID;
 
+var IS_VERIFICATION;
+
 const uid = sessionStorage.getItem('uid');
-const listener_tasks_done = parseInt(sessionStorage.getItem('l'));
-const speaker_tasks_done = parseInt(sessionStorage.getItem('s'));
 
 $(window).on('load',function(){
     // get date for making sure they try before giving up
@@ -20,30 +20,47 @@ $(window).on('load',function(){
     const urlParams = new URLSearchParams(queryString);
     const task = urlParams.get('task');
     const desc_id = urlParams.get('id');
+    IS_VERIFICATION = (urlParams.get('ver') == 'true');
 
     DESC_ID = desc_id;
     TASK_ID = task;
     loadTask(task);
-    get_description_by_id(task, desc_id).then(description => {
-        SELECTED_EXAMPLE = description.selected_example;
 
-        if (description.see_description == "") {
-            $("#grid_size_p").text("This description has no language. Use just the shown example to guess the output.");
-            $("#see_p").text("");
-            $("#do_p").text("");
-        } else {
-            $("#grid_size_p").text(description.grid_desc);
-            $("#see_p").text(description.see_desc);
-            $("#do_p").text(description.do_desc);
+    // if using their own description as a verification for that description, load it from urlparams
+    // if not, load from DB and give instructions
+    if (IS_VERIFICATION) {
+        SELECTED_EXAMPLE = -1;
+        const grid_desc = urlParams.get('grid');
+        const see_desc = urlParams.get('see');
+        const do_desc = urlParams.get('do');
+
+        $("#grid_size_p").text(grid_desc);
+        $("#see_p").text(see_desc);
+        $("#do_p").text(do_desc);
+    } else {
+        get_description_by_id(task, desc_id).then(description => {
+            SELECTED_EXAMPLE = description.selected_example;
+            loadTask(task);
+    
+            if (description.see_description == "") {
+                $("#grid_size_p").text("This description has no language. Use just the shown example to guess the output.");
+                $("#see_p").text("");
+                $("#do_p").text("");
+            } else {
+                $("#grid_size_p").text(description.grid_desc);
+                $("#see_p").text(description.see_desc);
+                $("#do_p").text(description.do_desc);
+            }
+        }).catch(error => {
+            console.log(error);
+            errorMsg("Failed to load the task. Please ensure your internet connection and try again.");
+        });
+
+        if (parseInt(sessionStorage.getItem('items_complete')) == 0) {
+            // show initial instructions
+            $('#instructionsModal').modal('show');
         }
-    }).catch(error => {
-        console.log(error);
-        errorMsg("Failed to load the task. Please ensure your internet connection and try again.");
-    });
 
-    if (parseInt(sessionStorage.getItem('items_complete')) == 0) {
-        // show initial instructions
-        $('#instructionsModal').modal('show');
     }
 });
 
@@ -78,9 +95,29 @@ function check() {
 
     const newDate = new Date();
     const totalTime = (newDate - START_DATE) / 1000;
-    store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up=false)
-        .then(function() {next_task();})
-        .catch(function(error) {console.log("Error storing response: " + error);});
+
+    // add to list of tasks completed , so we don't give same task
+    var tasks_done = sessionStorage.getItem('tasks_completed').split(',');
+    tasks_done.push(TASK_ID);
+    sessionStorage.setItem('tasks_done', tasks_done);
+
+    if (IS_VERIFICATION) {
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+
+        const grid_desc = urlParams.get('grid');
+        const see_desc = urlParams.get('see');
+        const do_desc = urlParams.get('do');
+        const desc_time = urlParams.get('time');
+
+        store_description(see_desc, do_desc, grid_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, desc_time, totalTime, -1)
+            .then(function () { next_task(); })
+            .catch(function (error) { console.log('Error storing response ' + error); });
+    } else {
+        store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up=false)
+            .then(function() {next_task();})
+            .catch(function(error) {console.log("Error storing response: " + error);});
+    }
 }
 
 function give_up() {
@@ -97,6 +134,14 @@ function give_up() {
         errorMsg("Please try your best guess at least once before giving up.");
         return;
     }
+
+    const newDate = new Date();
+    const totalTime = (newDate - START_DATE) / 1000;
+
+    // add to list of tasks completed , so we don't give same task
+    var tasks_done = sessionStorage.getItem('tasks_completed').split(',');
+    tasks_done.push(TASK_ID);
+    sessionStorage.setItem('tasks_done', tasks_done);
 
     // TODO: How should we handle giving up? Just go to next task w/out incrementing?
     store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up=true)

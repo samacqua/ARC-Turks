@@ -20,6 +20,12 @@ function select_casino(force_listener) {
                     if (num_descriptions[i] <= Math.sqrt(num_interactions[i]) || num_descriptions[i] == 0) {
                         num_interactions[i] += max;
                     }
+
+                    // if already done task, make sure it is not chosen again
+                    const tasks_done = sessionStorage.getItem('tasks_completed').split(',');
+                    if (tasks_done.includes(toString(i))) {
+                        num_interactions[i] += 2*max;
+                    }
                 }
             }
 

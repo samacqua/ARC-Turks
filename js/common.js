@@ -109,7 +109,7 @@ function next_task(first_task=false) {
                     } else {
                         console.log("listener");
                         console.log(task, desc_id);
-                        window.location.href = `listener.html?task=${task}&id=${desc_id}`;
+                        window.location.href = `listener.html?task=${task}&id=${desc_id}&ver=false`;
                     }
                 }).catch(error => {
                     console.log(error);
@@ -123,7 +123,7 @@ function next_task(first_task=false) {
             const desc_id = task_desc[1]
             console.log("unused desc");
             console.log(task, desc_id);
-            window.location.href = `listener.html?task=${task}&id=${desc_id}`;
+            window.location.href = `listener.html?task=${task}&id=${desc_id}&ver=false`;
         }
 
     }).catch(error => {

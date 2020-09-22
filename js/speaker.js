@@ -23,7 +23,7 @@ $(window).on('load', function () {
     $("#what_you_do").val(HAVE_TO_PREFIX);
 
     // show initial instructions
-    $('#instructionsModal').modal('show');
+    // $('#instructionsModal').modal('show');
 
     // get words that have already been used
     get_words().then(words => {
@@ -182,6 +182,7 @@ function get_bad_words(input) {
     }
 }
 
+// TODO: async making it buggy
 // for each word that has not been used, returns that word and its closest meaning words that have been used in past descriptions
 function get_replacement_words(words, amount = 10) {
 
@@ -362,17 +363,16 @@ function submit() {
         return
     }
 
-    $("#task_qs_modal").modal("show");
+    verify();
 
 }
 
-function exit_task_qs() {
+function verify() {
     /**
      * store submitted values and go to next task
      */
 
     // get entered values
-    var conf = $('#conf_form').val().trim();
     const see_desc = $.trim($("#what_you_see").val());
     const do_desc = $.trim($("#what_you_do").val());
     var grid_size_desc = $.trim($("#grid_size_desc").val());
@@ -387,10 +387,10 @@ function exit_task_qs() {
     const newTime = new Date();
     const totalTime = (newTime - START_DATE) / 1000;
 
-    // store the description in the database
-    store_description(see_desc, do_desc, grid_size_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, conf, totalTime, -1, gave_up_verification = GAVE_UP)
-        .then(function () { next_task(); })
-        .catch(function (error) { console.log('Error storing response ' + error); });
+    // Bring the user to the listener page, but show them their own description to ensure they wrote something decent
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    window.location.href = `listener.html?task=${urlParams.get('task')}&time=${totalTime}&see=${see_desc}&do=${do_desc}&grid=${grid_size_desc}&ver=true`;
 }
 
 function give_up() {
@@ -407,6 +407,11 @@ function give_up() {
 
     // don't give them credit for completing the task if they have not completed it
     give_up_description(TASK_ID).then(function () {
+
+        var tasks_done = sessionStorage.getItem('tasks_completed').split(',');
+        tasks_done.push(TASK_ID);
+        sessionStorage.setItem('tasks_done', tasks_done);
+
         next_task(first_task = true);
     });
 }

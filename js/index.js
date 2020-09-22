@@ -23,6 +23,9 @@ $(window).on('load', function () {
     sessionStorage.setItem("items_complete", "0");
     sessionStorage.setItem("prac_complete", "0");
 
+    next_task();
+    return;
+
     // get consent, then demographic, then present study, then begin solving patterns
     $('#consentModal').modal('show');
 
@@ -63,12 +66,29 @@ var TUT_LIST = [
 
 // TODO: fix speedrunning through tutorial
 
+// different feedback based on how they reached a state, these flags give that information
+var flags = { "copied_input": false, "copy_paste": false };
+
+// after some tasks, slight delay to ease transitions for user
+// this variable ensures they do not skip tutorial steps
+var WAITING_TO_CONTINUE = false;
+
 /**
  * Before continuing the tutorial, checks if there is a task to complete
  * If so, check if completed task/give user incremental feedback
  * flag -- tells what called function, so we know if user reset grid or just colored it black, for example
  */
 function pre_continue(flag = null) {
+
+    // check if done with tutorial, because copy, reset, and resize all call pre-continue (so user does not have to click to continue)
+    if (FINISHED_TUT) {
+        return;
+    }
+
+    // log that the flag has been called
+    if (flag) {
+        flags[flag] = true;
+    }
 
     // if length > 1, then the tutorial is giving them a problem, so don't check if they have completed it before continuing
     if (CUR_HIGHLIGHT.length > 1) {
@@ -80,7 +100,10 @@ function pre_continue(flag = null) {
             // challenge to resize output grid to 2x2
             if (CURRENT_OUTPUT_GRID.width == CURRENT_OUTPUT_GRID.height && CURRENT_OUTPUT_GRID.width == 2) {
                 infoMsg("Great job! You correctly resized the grid.");
-                setTimeout(function () { continue_tutorial(); }, 2000);
+                if (!WAITING_TO_CONTINUE) {
+                    WAITING_TO_CONTINUE = true;
+                    setTimeout(function () { continue_tutorial(); }, 2000);
+                }
                 return;
             } else {
                 errorMsg("You resized the output grid, but to the wrong size.");
@@ -89,7 +112,7 @@ function pre_continue(flag = null) {
             // challenge to copy from input and reset output grid
 
             if (arraysEqual(CURRENT_OUTPUT_GRID.grid, CURRENT_INPUT_GRID.grid)) {
-                if (flag == 'copy_input') {
+                if (flags['copy_input'] == true) {
                     infoMsg("Great! You have copied from the input grid. Now, reset the output grid.");
                 } else {
                     infoMsg("You have copied the input grid, but you could have done it easier by clicking the \"Copy from input\" button.");
@@ -107,7 +130,11 @@ function pre_continue(flag = null) {
                     }
                 }
                 infoMsg("Great job! You have copied from the input grid, and reset the output.");
-                setTimeout(function () { continue_tutorial(); }, 2000);
+                
+                if (!WAITING_TO_CONTINUE) {
+                    WAITING_TO_CONTINUE = true;
+                    setTimeout(function () { continue_tutorial(); }, 2000);
+                }
                 return;
             }
         } else if (arraysEqual(CUR_HIGHLIGHT, ["toolbar_and_symbol_picker", "output_grid", "objective-col"])) {
@@ -130,7 +157,10 @@ function pre_continue(flag = null) {
 
                 if (green == 3) {
                     infoMsg("Great job! You drew 3 green cells.");
-                    setTimeout(function () { continue_tutorial(); }, 1000);
+                    if (!WAITING_TO_CONTINUE) {
+                        WAITING_TO_CONTINUE = true;
+                        setTimeout(function () { continue_tutorial(); }, 1000);
+                    }
                     return;
                 } else if (green != 0) {
                     infoMsg("You have painted " + green + " cells green. Paint " + (3 - green).toString() + " more.")
@@ -150,7 +180,10 @@ function pre_continue(flag = null) {
                     }
                 }
                 infoMsg("Great job! You used flood fill.");
-                setTimeout(function () { continue_tutorial(); }, 1000);
+                if (!WAITING_TO_CONTINUE) {
+                    WAITING_TO_CONTINUE = true;
+                    setTimeout(function () { continue_tutorial(); }, 1000);
+                }
                 return;
             }
         } else if (arraysEqual(CUR_HIGHLIGHT, ["input-col", "output_grid", "toolbar_and_symbol_picker", "objective-col"])) {
@@ -175,14 +208,17 @@ function pre_continue(flag = null) {
                 }
             }
 
-            if (flag != 'copy-paste') {
+            if (flags['copy_paste'] != true) {
                 resetOutputGrid();
                 errorMsg("You have correctly drawn the shape, but use the 'Copy-Paste' tool to copy from the input grid.");
                 return;
             }
 
             infoMsg("Great job! You used copy-paste.");
-            setTimeout(function () { continue_tutorial(); }, 1000);
+            if (!WAITING_TO_CONTINUE) {
+                WAITING_TO_CONTINUE = true;
+                setTimeout(function () { continue_tutorial(); }, 1000);
+            }
             return;
         }
         errorMsg("To continue, follow the Objective.");
@@ -193,8 +229,11 @@ function pre_continue(flag = null) {
 }
 
 var CUR_HIGHLIGHT = null;
+var FINISHED_TUT = false;
 
 function continue_tutorial() {
+
+    WAITING_TO_CONTINUE = false;
 
     // set last item to be behind dark layer
     if (CUR_HIGHLIGHT != null) {
@@ -220,6 +259,8 @@ function continue_tutorial() {
 
         $("#quiz_modal").modal("show");
         $("#objective-text").html('Create the correct output based on the description, example transformations, and input grid.');
+
+        FINISHED_TUT = true;
 
         return;
     }

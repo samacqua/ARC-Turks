@@ -211,35 +211,6 @@
         </div>
     </div>
 
-    <!-- Task Qs Modal -->
-    <div class="modal fade" id="task_qs_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title" id="gen-modal-title">Exit Survey</h3>
-                </div>
-                <div class="modal-body" id="final-modal-body">
-
-                    <label for="conf_form">
-                        <p>How confident are you that someone else, given your description, could create the correct
-                            output grid for the input grid you were just shown?</p>
-                        <p><b>0</b> means you are certain that they will not create the correct output grid, and
-                            <b>10</b> means you are certain that they will create the correct output grid.</p>
-                    </label>
-                    <input type="range" class="custom-range" min="0" max="10" step="1" id="conf_form">
-                    <label id="conf_result"></label>
-
-                    <div class="modal-footer">
-                        <button onclick="exit_task_qs()" type="button" class="btn btn-primary"
-                            data-dismiss="modal">Finish</button>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Confirm Submission Modal -->
     <div class="modal fade" id="submitModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
         aria-hidden="true">
