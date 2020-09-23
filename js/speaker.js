@@ -25,11 +25,15 @@ $(window).on('load', function () {
     // show initial instructions
     $('#instructionsModal').modal('show');
 
-    // get words that have already been used
+    // get words that have already been used and their word vecs
     get_words().then(words => {
         GOOD_WORDS = words.map(function (value) {
             return value.toLowerCase();
         });
+        console.log(GOOD_WORDS.length);
+        for (i=0;i<GOOD_WORDS.length;i++) {
+            get_word_vec_cache(GOOD_WORDS[i]);
+        }
     }).catch(error => {
         infoMsg("Could not load words that can been used. Please check your internet connection and reload the page.");
     });
@@ -182,9 +186,63 @@ function get_bad_words(input) {
     }
 }
 
+// if the word has already been fetched, then returns its vec
+// otherwise, fetches from database
+CACHED_W2V = {};
+CACHED_WORDS = [];
+function get_word_vec_cache(word) {
+    return new Promise(function (resolve, reject) {
+        if (CACHED_WORDS.includes(word)) {
+            return resolve(CACHED_W2V[word]);
+        } else {
+            get_word_vec(word).then(vec => {
+                CACHED_WORDS.push(word);
+                CACHED_W2V[word] = vec;
+                return resolve(vec);
+            });
+        }
+    });
+}
+
+// get the closest n words (n=limit) that are in GOOD_WORDS
+function get_closest_words(word, limit=10) {
+    var dists = [];
+
+    return new Promise(function (resolve, reject) {
+        // get word vec of first word
+        get_word_vec_cache(word).then(vec1 => {
+            (async function loop() {
+                // get word vec for every word in GOOD_WORDS
+                for (i=0;i<=GOOD_WORDS.length;i++) {
+                    await new Promise(function (res, rej) {
+
+                        if (i == GOOD_WORDS.length) {
+                            var closest = dists.sort().reverse().slice(0,limit);
+                            return resolve(closest);
+                        }
+
+                        const comp_word = GOOD_WORDS[i];
+                        get_word_vec_cache(comp_word).then(vec2 => {
+
+                            if (vec1 == null || vec2 == null) {
+                                dists.push([100, comp_word]);
+                                res();
+                            } else {
+                                const dist = get_dist(vec1, vec2);
+                                dists.push([dist, comp_word]);
+                                res();
+                            }
+                        });
+                    });
+                }
+            })();
+        });
+    });
+}
+
 // TODO: async making it buggy
 // for each word that has not been used, returns that word and its closest meaning words that have been used in past descriptions
-function get_replacement_words(words, amount = 10) {
+function get_replacement_words(words, limit=10) {
 
     return new Promise(function (resolve, reject) {
         if (words == null) {
@@ -192,23 +250,17 @@ function get_replacement_words(words, amount = 10) {
         }
 
         const replace_words = [];
-        const ipv4URL = "ec2-3-15-182-141.us-east-2.compute.amazonaws.com";
 
-        (async function loop() {
+        (async function loop2() {
+            for (ii = 0; ii <= words.length; ii++) {
+                await new Promise(function (res2, rej) {
 
-            for (i = 0; i <= words.length; i++) {
-                await new Promise(function (res, rej) {
-
-                    if (i == words.length) {
+                    if (ii == words.length) {
                         return resolve(replace_words);
                     }
 
-                    const word = words[i].toLowerCase();
-
-                    const url = `http://${ipv4URL}:8000/api/closest?word=${word}&limit=${amount}`;
-
-                    $.get(url, function (data, status) {
-                        var closest = data;
+                    const word = words[ii].toLowerCase();
+                    get_closest_words(word, limit).then(closest => {
 
                         // if written word, make them replace with num
                         // better way than writing out mappings? must be.
@@ -216,8 +268,10 @@ function get_replacement_words(words, amount = 10) {
                         if (str_num_mapping[word] !== undefined) {
                             closest = [str_num_mapping[word]];
                         }
-                        replace_words.push([words[i], closest]);
-                        res();
+
+                        replace_words.push([words[ii], closest]);
+
+                        res2();
                     });
                 });
             }
@@ -270,46 +324,65 @@ $(document).ready(function () {
         var prefix = prefix_mapping[id];
         $(this).val(prefix + value.substring(prefix.length));
 
-        // TODO: List of words to replace is buggy
-        get_replacement_words(value.match(get_bad_words())).then(matches => {
+        // for each novel word, add a row with buttons to replace word with similar words in database, or add the word
+        $('#word-warning-' + id).empty();
 
-            // for each novel word, add a row with buttons to replace word with similar words in database, or add the word
-            $('#word-warning-' + id).empty();
+        const words_to_replace = value.match(get_bad_words());
+        if (words_to_replace != null && words_to_replace.length != 0 && GOOD_WORDS.length > MIN_WORDS) {
 
-            if (matches.length != 0 && GOOD_WORDS.length > MIN_WORDS) {
-                var items = [];
-                $.each(matches, function (i, item) {
+            var items = [];
+            $.each(words_to_replace, function (i, word) {
 
-                    const word = item[0];
-                    const replacements = item[1];
+                // create the html for the list items
+                items.push(
+                    `<li><b>${word}</b>
+                    <span class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Replace with...
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" id=${word}_${i}_dropdown>
+                    </div>
+                    <button type="button" onclick="confirm_add_word(\'${word}\')" id="add_word_${word}" class="btn btn-danger add-word">add word</button></li>
+                    </span>`);
+            });
 
-                    // create the html for the list items
-                    items.push(
-                        `<li><b>${word}</b>
-                        <span class="dropdown">
-                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Replace with...
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">`
-                        +
-                        // each list item has a dropdown of the suggested words
-                        `${(function () {
-                            var html_text = "";
-                            for (i = 0; i < replacements.length; i++) {
-                                const replacement = replacements[i];
-                                const dropdown_item = `<a onclick="replace_word(\'${word}\',\'${replacement}\', '#${id}')" id="replace_${word}_0>${replacement}" class="dropdown-item" href="#">${replacement}</a>`;
-                                html_text += dropdown_item;
-                            }
-                            return html_text
-                        })()}`
-                        +
-                        `</div>
-                        <button type="button" onclick="confirm_add_word(\'${word}\')" id="add_word_${word}" class="btn btn-danger add-word">add word</button></li>
-                        </span>`);
+            $('#word-warning-' + id).append(items.join(''));
+
+        }
+
+        get_replacement_words(words_to_replace).then(replacements => {
+            console.log(replacements);
+
+            if (words_to_replace != null && words_to_replace.length != 0 && GOOD_WORDS.length > MIN_WORDS) {
+
+                replacements.forEach(function(replacement_i, i) {
+                    console.log(i, replacement_i);
+
+                    const word = replacement_i[0];
+                    const replacement_words = replacement_i[1].map(function(item) { return item[1] });
+                    // console.log(i, word, replacement_words);
+
+                    if($(`#${word}_${i}_dropdown`).length != 0) {
+                        $(`#${word}_${i}_dropdown`).empty();
+                        $(`#${word}_${i}_dropdown`).append(
+                            `${(function () {
+                                var html_text = "";
+                                for (i = 0; i < replacement_words.length; i++) {
+                                    const replacement = replacement_words[i];
+                                    const dropdown_item = `<a onclick="replace_word(\'${word}\',\'${replacement}\', '#${id}')" id="replace_${word}_0>${replacement}" class="dropdown-item" href="#">${replacement}</a>`;
+                                    html_text += dropdown_item;
+                                }
+                                return html_text
+                            })()}`
+                        );
+                    }
                 });
+                // for (i=0;i<replacements.length;i++) {
 
-                $('#word-warning-' + id).append(items.join(''));
+
+                // }
             }
+
         });
     });
 

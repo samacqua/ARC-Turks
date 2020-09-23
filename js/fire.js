@@ -13,6 +13,7 @@ var firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
+var database = firebase.database();
 
 
 // ===================================
@@ -184,6 +185,17 @@ function get_words() {
         })
         .catch(function (err) {
             return reject(err);
+        });
+    });
+}
+
+/**
+ * Get word vec for word
+ */
+function get_word_vec(word) {
+    return new Promise(function (resolve, reject) {
+        database.ref('word2vec/' + word).once('value').then(function(snapshot) {
+            return resolve(snapshot.val());
         });
     });
 }
