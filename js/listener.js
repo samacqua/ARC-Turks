@@ -26,13 +26,28 @@ $(window).on('load',function(){
     TASK_ID = task;
     loadTask(task);
 
+    DESCRIPTIONS_TYPE = sessionStorage.getItem('type');
+
+    switch (DESCRIPTIONS_TYPE) {
+        case "nl":
+            $("#examples_area").remove();
+            break;
+        case "nl_ex":
+            break;
+        case "ex":
+            break;
+        default:
+            break;
+    }
+
     // if using their own description as a verification for that description, load it from urlparams
     // if not, load from DB and give instructions
     if (IS_VERIFICATION) {
-        SELECTED_EXAMPLE = -1;
         const grid_desc = urlParams.get('grid');
         const see_desc = urlParams.get('see');
         const do_desc = urlParams.get('do');
+        const selected_example = urlParams.get('se');
+        SELECTED_EXAMPLE = selected_example;
 
         $("#grid_size_p").text(grid_desc);
         $("#see_p").text(see_desc);
@@ -41,7 +56,7 @@ $(window).on('load',function(){
         $("#objective-text").text("Use the description you just wrote to create the correct output for the new input.");
         $('#verInstructionsModal').modal('show');
     } else {
-        get_description_by_id(task, desc_id).then(description => {
+        get_description_by_id(task, desc_id, DESCRIPTIONS_TYPE).then(description => {
             SELECTED_EXAMPLE = description.selected_example;
             loadTask(task);
     
@@ -115,11 +130,11 @@ function check() {
 
         sessionStorage.setItem('done_speaker_task', true);
 
-        store_description(see_desc, do_desc, grid_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, desc_time, totalTime, -1)
+        store_description(see_desc, do_desc, grid_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, desc_time, totalTime, -1, DESCRIPTIONS_TYPE)
             .then(function () { next_task(); })
             .catch(function (error) { console.log('Error storing response ' + error); });
     } else {
-        store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up=false)
+        store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up=false, DESCRIPTIONS_TYPE)
             .then(function() {next_task();})
             .catch(function(error) {console.log("Error storing response: " + error);});
     }
@@ -150,9 +165,9 @@ function give_up() {
 
     // TODO: How should we handle giving up? Just go to next task w/out incrementing?
     if (IS_VERIFICATION) {
-        give_up_description(TASK_ID).then(function () { next_task(first_task = true); });
+        give_up_description(TASK_ID, DESCRIPTIONS_TYPE).then(function () { next_task(first_task = true); });
     } else {
-        store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up=true)
+        store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up=true, DESCRIPTIONS_TYPE)
             .then(function() {next_task(first_task = true);})
             .catch(function(error) {console.log("Error storing response: " + error);});
     }

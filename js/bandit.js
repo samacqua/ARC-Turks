@@ -2,9 +2,9 @@
  * Returns the casino (task) with least # interactions (descriptions + attempts)
  * If force listener is true, it ensures casino that needs pull of existing arm, if any exist
  */
-function select_casino(force_listener) {
+function select_casino(force_listener, type) {
     return new Promise(function (resolve, reject) {
-        get_all_descriptions_interactions_count().then(counts => {
+        get_all_descriptions_interactions_count(DESCRIPTIONS_TYPE).then(counts => {
             var num_descriptions = counts[0];
             var num_interactions = counts[1];
 
@@ -45,9 +45,9 @@ function select_casino(force_listener) {
 /**
  * Returns the arm (description_id) that should be pulled. If the description_id is -1, that means pull a new arm (create a new description)
  */
-function select_arm(task) {
+function select_arm(task, type) {
     return new Promise(function (resolve, reject) {
-        get_task_descs_interactions_count(task).then(interactions_descriptions => {
+        get_task_descs_interactions_count(task, type).then(interactions_descriptions => {
 
             const num_arms = interactions_descriptions[0];
             const num_interactions = interactions_descriptions[1];
@@ -56,7 +56,7 @@ function select_arm(task) {
                 return resolve(-1);
             } else {
                 // UCB
-                get_task_descriptions(task, DESCRIPTIONS_TYPE).then(descriptions => {
+                get_task_descriptions(task, type).then(descriptions => {
 
                     console.log(descriptions);
 

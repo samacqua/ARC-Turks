@@ -22,7 +22,7 @@ var database = firebase.database();
 /**
  * Returns the task and desc_id of an unused description that the user has not already done the task of, if any (otherwise return -1)
  */
-function get_unused_desc(type="nl") {
+function get_unused_desc(type) {
     return new Promise(function (resolve, reject) {
         const unused_ref = db.collection(type+"_unused_descs");
         
@@ -69,7 +69,7 @@ function get_unused_desc(type="nl") {
 /**
  * Get count of interactions and descriptions for all tasks.
  */
-function get_all_descriptions_interactions_count(type="nl") {
+function get_all_descriptions_interactions_count(type) {
     return new Promise(function (resolve, reject) {
         const summary_ref = db.collection(type+"_tasks").doc("summary");
         
@@ -95,7 +95,7 @@ function get_all_descriptions_interactions_count(type="nl") {
 /**
  * Get the number of descriptions and total number of interactions for a task
  */
-function get_task_descs_interactions_count(task, type="nl") {
+function get_task_descs_interactions_count(task, type) {
     return new Promise(function (resolve, reject) {
         const task_ref = db.collection(type+"_tasks").doc(`${task}`);
 
@@ -113,7 +113,7 @@ function get_task_descs_interactions_count(task, type="nl") {
 /**
  * Get all the descriptions for a task
  */
-function get_task_descriptions(task_id, type="nl") {
+function get_task_descriptions(task_id, type) {
 
     return new Promise(function (resolve, reject) {
         const task_descs_ref = db.collection(type+"_tasks").doc(`${task_id}`).collection("descriptions");
@@ -148,7 +148,7 @@ function get_task_descriptions(task_id, type="nl") {
 /**
  * get a description by it's id and by its task id
  */
-function get_description_by_id(task_id, desc_id, type="nl") {
+function get_description_by_id(task_id, desc_id, type) {
     return new Promise(function (resolve, reject) {
         const desc_ref = db.collection(type+"_tasks").doc(`${task_id}`).collection("descriptions").doc(desc_id);
 
@@ -209,20 +209,12 @@ function get_word_vec(word) {
  * store descriptions, task info and user info and user answers in firebase
  * returns promise so that can transition to next task after storing
  */
-function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attempts, attemp_jsons, desc_time, ver_time, selected_example, type="nl") {
+function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attempts, attemp_jsons, desc_time, ver_time, selected_example, type) {
 
     return new Promise(function (resolve, reject) {
 
         var batch = db.batch();
         const task_doc_ref = db.collection(type+"_tasks").doc(task_id.toString());
-
-        // create random id so queue and desc have same id
-        function uuidv4() {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-              var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-              return v.toString(16);
-            });
-        }
 
         const desc_id = uuidv4();
 
@@ -290,7 +282,7 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attem
     });
 }
 
-function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, total_time, gave_up = false, type="nl") {
+function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, total_time, gave_up = false, type) {
     /**
      * store info for listener task in firebase
      * returns promise so that can transition to next task after storing
@@ -351,7 +343,7 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, tota
  * (a claim ensures that an unused description only forces 1 attempt, and the time is to make sure
  *      there is no issue if someone claims it and never finishes)
  */
-function claim_unused_desc(desc_id, type="nl") {
+function claim_unused_desc(desc_id, type) {
     return new Promise(function (resolve, reject) {
         const desc_ref = db.collection(type+"_unused_descs").doc(desc_id);
         return db.runTransaction(function(transaction) {
@@ -382,7 +374,8 @@ function claim_unused_desc(desc_id, type="nl") {
 /**
  * Store user demographic information
  */
-function set_user_info(user_id, age, gender, type="nl") {
+function set_user_info(user_id, age, gender, type) {
+    console.log("Setting user info");
     db.collection("users").doc(user_id.toString()).set({
         'user_id': user_id,
         'age': age,
@@ -413,7 +406,7 @@ function set_user_complete_time(user_id, time, task_name) {
 /**
  * increment the number of times the user gave up while trying to describe the task
  */
-function give_up_description(task_id, type="nl") {
+function give_up_description(task_id, type) {
 
     return new Promise(function (resolve, reject) {
         const increment = firebase.firestore.FieldValue.increment(1);

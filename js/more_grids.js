@@ -41,6 +41,7 @@ function setUpEditionGridListeners(jqGrid) {
         cell = $(event.target);
         symbol = getSelectedSymbol();
 
+        const isStart = !(window.location.href.includes("listener") || window.location.href.includes("speaker"));
         mode = $('input[name=tool_switching]:checked').val();
         if (mode == 'floodfill') {
             // If floodfill: fill all connected cells.
@@ -50,7 +51,6 @@ function setUpEditionGridListeners(jqGrid) {
             syncFromDataGridToEditionGrid();
 
             // if in tutorial and in challenge to flood fill yellow, check completion
-            const isStart = !(window.location.href.includes("listener") || window.location.href.includes("speaker"));
             if (isStart) {
                 if ($("#objective-text").text().includes("yellow")) {
                     pre_continue();
@@ -63,9 +63,8 @@ function setUpEditionGridListeners(jqGrid) {
             setCellSymbol(cell, symbol);
 
             // if in tutorial and in challenge to draw green squares, check completion
-            const isStart = !(window.location.href.includes("listener") || window.location.href.includes("speaker"));
             if (isStart) {
-                if ($("#objective-text").text().includes("green")) {
+                if ($("#objective-text").text().includes("green") || $("#objective-text").text().includes("copy")) {
                     pre_continue();
                 }
             }
@@ -95,8 +94,8 @@ function fillPairPreview(pairId, inputGrid, outputGrid) {
         elem.src = 'img/arrow.png';
         elem.setAttribute("id", "arrow");
 
-        const needsExample = window.location.href.includes("speaker") && window.location.href.includes("ex");
-        if (needsExample) {
+        const isSpeakerExample = window.location.href.includes("speaker") && DESCRIPTIONS_TYPE.includes("ex");
+        if (isSpeakerExample) {
             var text = document.createElement("p");
             text.innerHTML = pairId+1;
             text.setAttribute("id", "io_id");
@@ -120,16 +119,11 @@ function fillPairPreview(pairId, inputGrid, outputGrid) {
     fitCellsToContainer(jqOutputGrid, outputGrid.height, outputGrid.width, col_width, col_width);
 }
 
-// const LISTENER_TYPES = 
-
-// // if 0, then NL and io example, if 1, then just NL, if 2, then just io example
-// var LISTENER_TYPE = 0;
-
 function loadJSONTask(train, test) {
     $('#modal_bg').hide();
 
-    const isSpeakerEx = window.location.href.includes("speaker") && window.location.href.includes("ex");
-    if (isSpeakerEx) {
+    const isSpeakerExample = window.location.href.includes("speaker") && DESCRIPTIONS_TYPE.includes("ex");
+    if (isSpeakerExample) {
         for (var i = 0; i < train.length; i++) {
 
             var option = $("<option></option>").val(i+1);

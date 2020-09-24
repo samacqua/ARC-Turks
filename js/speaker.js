@@ -59,7 +59,7 @@ $(window).on('load', function () {
     const task = urlParams.get('task');
 
     loadTask(task);
-    get_task_descriptions(task, "language").then(function (descriptions) {
+    get_task_descriptions(task, DESCRIPTIONS_TYPE).then(function (descriptions) {
         PAST_DESCS = descriptions;
         createExampleDescsPager(descriptions);
         showDescEx(0);
@@ -75,6 +75,11 @@ $(window).on('load', function () {
     }).catch(error => {
         errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
     });
+
+    DESCRIPTIONS_TYPE = sessionStorage.getItem('type');
+    if (DESCRIPTIONS_TYPE == "nl") {
+        $("#select_ex_io").remove();
+    }
 });
 
 
@@ -489,13 +494,17 @@ function verify() {
     const see_desc = $.trim($("#what_you_see").val());
     const do_desc = $.trim($("#what_you_do").val());
     var grid_size_desc = $.trim($("#grid_size_desc").val());
+    var selected_example = -1;
+    if (DESCRIPTIONS_TYPE.includes("ex")) {
+        selected_example = parseInt($.trim($("#selectExampleIO").val()) - 1);
+    }
 
     // store the grid size does not change 
     if (grid_size_desc == GRID_SIZE_PREFIX) {
         grid_size_desc = `${GRID_SIZE_PREFIX} does not change.`
     }
 
-    infoMsg("All done! Loading next task...")
+    infoMsg("Bringing you to verfication...")
 
     const newTime = new Date();
     const totalTime = (newTime - START_DATE) / 1000;
@@ -503,7 +512,8 @@ function verify() {
     // Bring the user to the listener page, but show them their own description to ensure they wrote something decent
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    window.location.href = `listener.html?task=${urlParams.get('task')}&time=${totalTime}&see=${see_desc}&do=${do_desc}&grid=${grid_size_desc}&ver=true`;
+
+    window.location.href = `listener.html?task=${urlParams.get('task')}&time=${totalTime}&see=${see_desc}&do=${do_desc}&grid=${grid_size_desc}&se=${selected_example}&ver=true`;
 }
 
 function give_up() {
@@ -519,7 +529,7 @@ function give_up() {
     }
 
     // don't give them credit for completing the task if they have not completed it
-    give_up_description(TASK_ID).then(function () {
+    give_up_description(TASK_ID, DESCRIPTIONS_TYPE).then(function () {
 
         var tasks_done = sessionStorage.getItem('tasks_completed').split(',');
         tasks_done.push(TASK_ID);

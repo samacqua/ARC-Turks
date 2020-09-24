@@ -63,7 +63,7 @@ $(window).on('load', function () {
     $('#consentModal').modal('show');
 
     // assign a random id to the user
-    const user_id = Math.floor(Math.random() * 1e10);
+    const user_id = uuidv4();
     sessionStorage.setItem("uid", user_id);
 
     // get the type of descriptions (nl, nl_ex, ex)
@@ -73,6 +73,7 @@ $(window).on('load', function () {
         const urlParams = new URLSearchParams(queryString);
         DESCRIPTIONS_TYPE = urlParams.get('type');
     }
+    sessionStorage.setItem('type', DESCRIPTIONS_TYPE);
 
     switch (DESCRIPTIONS_TYPE) {
         case "nl":
@@ -238,7 +239,6 @@ function pre_continue(flag = null) {
                 for (var i = 0; i < CURRENT_OUTPUT_GRID.grid.length; i++) {
                     ref_row = CURRENT_OUTPUT_GRID.grid[i];
                     for (var j = 0; j < ref_row.length; j++) {
-                        console.log(ref_row[j]);
                         if (ref_row[j] == 3) {
                             green++;
                         }
@@ -402,8 +402,6 @@ function continue_tutorial() {
             $(`#${id}`).css('background-color', 'gainsboro');
         }
 
-        console.log(id, $('#' + id).offset().top);
-
         if ($('#' + id).offset().top < max_top) {
             max_top = $('#' + id).offset().top;
             max_id = id;
@@ -516,7 +514,7 @@ function exit_demographic() {
     const gender = $('#gender_form').find("option:selected").text();
     const age = $('#age_form').val().trim();
     const uid = sessionStorage.getItem('uid');
-    set_user_info(uid, age, gender);
+    set_user_info(uid, age, gender, DESCRIPTIONS_TYPE);
 
     const introModalID = DESCRIPTIONS_TYPE + 'IntroModal';
     $('#demographic_modal').one('hidden.bs.modal', function () { $('#' + introModalID).modal('show'); }).modal('hide');
