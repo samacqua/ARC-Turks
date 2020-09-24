@@ -3,7 +3,7 @@ var QUIZ_QUESTIONS;
 $(window).on('load', function () {
 
     // init_firestore(); // uncomment to initialize database
-    
+
     // correctly size the progress bar
     size_progress_bar();
 
@@ -67,7 +67,7 @@ function set_objective(desc_type) {
             break;
         default:
             throw "Unknown description type"
-            break; 
+            break;
     }
 }
 
@@ -89,22 +89,22 @@ function format_desc_area(desc_type) {
  * Adds the correct walkthrough steps depending on the description type
  */
 function format_walkthrough(desc_type) {
-    for (i=0;i<TUT_LIST.length;i++) {
+    for (i = 0; i < TUT_LIST.length; i++) {
         if (arraysEqual(TUT_LIST[i][1], ["objective-col"])) {
             switch (desc_type) {
                 case "nl":
-                    TUT_LIST.splice(i+1, 0, 
+                    TUT_LIST.splice(i + 1, 0,
                         ["This is the description area. This is where the pattern is described.", ["description-col"], 30, 35, 10],
                         ["This is the description, which is written by another person.", ["description-text"], 30, 35, 10]);
                     break;
                 case "nl_ex":
-                    TUT_LIST.splice(i+1, 0, 
+                    TUT_LIST.splice(i + 1, 0,
                         ["This is the description area. This is where the pattern is described.", ["description-col"], 30, 35, 10],
                         ["This is the description, which is written by another person.", ["description-text"], 30, 35, 10],
                         ["This is the examples area, which is where there will be an example of the transformation.", ["examples_area"], 30, 35, 10]);
                     break;
                 case "ex":
-                    TUT_LIST.splice(i+1, 0, 
+                    TUT_LIST.splice(i + 1, 0,
                         ["This is the examples area. This is where an example of the pattern is shown.", ["description-col"], 30, 35, 10]);
                     break;
                 default:
@@ -139,7 +139,7 @@ var TUT_LIST = [
 ];
 
 // different feedback based on how they reached a state, these flags give that information
-var flags = { "copied_input": false};
+var flags = { "copied_input": false };
 
 // after some tasks, slight delay to ease transitions for user
 // this variable ensures they do not skip tutorial steps
@@ -199,7 +199,7 @@ function pre_continue(flag = null) {
                     }
                 }
                 infoMsg("Great job! You have copied from the input grid, and reset the output.");
-                
+
                 WAITING_TO_CONTINUE = true;
                 setTimeout(function () { continue_tutorial(); }, 2000);
                 return;
@@ -313,17 +313,17 @@ function continue_tutorial() {
         $("#quiz_modal").modal("show");
 
         switch (DESCRIPTIONS_TYPE) {
-        case "nl":
-            $("#objective-text").html('Create the correct output based on the description and input grid.');
-            break;
-        case "nl_ex":
-            $("#objective-text").html('Create the correct output based on the description, example transformation, and input grid.');
-            break;
-        case "ex":
-            $("#objective-text").html('Create the correct output based on the example transformation.');
-            break;
-        default:
-            break;
+            case "nl":
+                $("#objective-text").html('Create the correct output based on the description and input grid.');
+                break;
+            case "nl_ex":
+                $("#objective-text").html('Create the correct output based on the description, example transformation, and input grid.');
+                break;
+            case "ex":
+                $("#objective-text").html('Create the correct output based on the example transformation.');
+                break;
+            default:
+                break;
         }
 
         FINISHED_TUT = true;
@@ -374,7 +374,7 @@ function continue_tutorial() {
     // scroll to top highlighted element
     if (max_id != "") {
         $([document.documentElement, document.body]).animate({
-            scrollTop: $('#' + max_id).offset().top-10
+            scrollTop: $('#' + max_id).offset().top - 10
         }, 1000);
     }
 
@@ -416,7 +416,7 @@ function check_grid() {
 
     update_progress_bar(prac_inc = true);
 
-    const uid = sessionStorage.getItem('uid') || uuidv4()+"dev";
+    const uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
     const tut_end_time = (new Date()).getTime();
     const tut_time = (tut_end_time - parseInt(TUT_START_TIME)) / 1000;
     TUT_START_TIME = (new Date()).getTime();
@@ -457,7 +457,7 @@ function check_grid() {
 var TUT_START_TIME = 0;
 
 function send_user_complete_instructions_time() {
-    const uid = sessionStorage.getItem('uid') || uuidv4()+"dev";
+    const uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
 
     const instructions_start_time = sessionStorage.getItem('start_time') || 0;
     const end_instructions_time = (new Date()).getTime();
@@ -474,7 +474,7 @@ function exit_demographic() {
      */
     const gender = $('#gender_form').find("option:selected").text();
     const age = $('#age_form').val().trim();
-    const uid = sessionStorage.getItem('uid') || uuidv4()+"dev";
+    const uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
     set_user_info(uid, age, gender, DESCRIPTIONS_TYPE);
 
     const introModalID = DESCRIPTIONS_TYPE + 'IntroModal';

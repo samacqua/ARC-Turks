@@ -20,8 +20,8 @@ $(window).on('load',function(){
     const urlParams = new URLSearchParams(queryString);
     const task = urlParams.get('task') || Math.floor(Math.random()*400).toString();
     const desc_id = urlParams.get('id');
-    if (desc_id == null) throw "You must provide a description id in the URL";
     IS_VERIFICATION = (urlParams.get('ver') == 'true');
+    if (desc_id == null && !IS_VERIFICATION) throw "You must provide a description id in the URL";
 
     DESC_ID = desc_id;
     TASK_ID = task;
