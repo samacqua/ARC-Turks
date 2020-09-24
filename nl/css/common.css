@@ -1,0 +1,208 @@
+img {
+    width: 100%;
+    padding-bottom: 15px;
+    height: auto;
+}
+
+.objective {
+    text-align: center;
+}
+
+#objective-col {
+    background-color: rgb(231, 180, 231);
+    margin-top: 20px;
+    padding-top: 8px;
+    transition: all .5s ease-in-out ;
+    -webkit-transition: all .5s ease-in-out ;
+    -moz-transition: all .5s ease-in-out ;
+    -o-transition: all .5s ease-in-out ;
+}
+
+#arrow {
+    width: 90%;
+    z-index: 100;
+    height: auto;
+}
+
+#io_id {
+    z-index: 110;
+    position: absolute;
+    padding-bottom: 80px;
+    font-size: 36px;
+    font-family: "Arial Rounded MT Bold", "Helvetica Rounded", Arial, sans-serif;
+    color: black;
+    font-weight: bold;
+    text-shadow: -1px -1px 0 rgb(255, 255, 255), 1px -1px 0 rgb(255, 255, 255), -1px 1px 0 rgb(255, 255, 255), 1px 1px 0 rgb(255, 255, 255);
+    float: left;
+}
+
+.col-header {
+    clear:both;
+    margin-bottom: 15px;
+}
+
+.col-title {
+    display: inline-block;
+}
+
+video {
+    width: 100%    !important;
+    height: auto   !important;
+}
+
+/*Message display*/
+
+#error_display {
+    background-color: rgb(255, 100, 100);
+    color: black;
+    width: 80%;
+    float: left;
+    font-size: 20px;
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-top: 10px;
+    display: none;
+}
+
+#dark-layer, #trans-layer {
+    position: fixed;
+    padding:0;
+    margin:0;
+
+    top:0;
+    left:0;
+
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+#tut-message {
+    position:fixed;
+    margin:0;
+    padding: 0;
+
+    top:50%;
+    left: 20%;
+    right: 20%;
+
+    color: white;
+    background:rgba(0,0,0,0.7);
+    border-radius: 10px;
+    z-index: -1;
+
+    font-size: 30px;
+    text-align: center;
+}
+
+#tut-continue-message {
+    position:fixed;
+    margin:0;
+    padding: 0;
+
+    /* bottom:5%; */
+    /* left: 5%; */
+    /* right: 40%; */
+
+    color: white;
+    background:rgba(0,0,0,0.0);
+    border-radius: 10px;
+    z-index: -2;
+
+    font-size: 30px;
+    text-align: center;
+}
+
+#objective-text {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+#info_display {
+    color: black;
+    width: 80%;
+    float: left;
+    font-size: 20px;
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-top: 10px;
+    display: none;
+}
+
+.progress {
+    color: green;
+    width: 70%;
+    height: 25px;
+    margin-left: 15%;
+    margin-right: 15%;
+    margin-top: 5px;
+}
+
+.progress-bar {
+    width: 0%;
+    height: 25px;
+}
+
+#progress-bar-complete {
+    background-color: white;
+}
+
+/* So that we can animate the progress: https://stackoverflow.com/questions/23575095/animating-bootstrap-progress-bar-width-with-jquery */
+.progress.active .progress-bar {
+    -webkit-transition: none !important;
+    transition: none !important;
+}
+
+.progress-meter {
+	min-height: 15px;
+    border-bottom: 2px solid rgb(160, 160, 160);
+    width: 70%;
+    margin-left: 15%;
+    margin-right: 15%;
+    margin-bottom: 20px;
+}
+
+.progress-meter > .meter {
+	position: relative;
+	float: left;
+	min-height: 15px;
+	border-width: 0px;
+	border-style: solid;
+	border-color: rgb(160, 160, 160);
+}
+
+.progress-meter > .meter-left {
+	border-left-width: 2px;
+}
+
+.progress-meter > .meter-right {
+	float: right;
+	border-right-width: 2px;
+}
+
+.progress-meter > .meter-right:last-child {
+	border-left-width: 2px;
+}
+
+.progress-meter > .meter > .meter-text {
+	position: absolute;
+    display: inline-block;
+	bottom: -20px;
+    width: 100%;
+	font-weight: 700;
+	font-size: 0.85em;
+	color: rgb(160, 160, 160);
+    text-align: left;
+    overflow: visible;
+    white-space: nowrap;
+}
+
+.progress-meter > .meter.meter-right > .meter-text {
+	text-align: right;
+}
+
+.task_label {
+    text-align: center;
+    margin: 10px;
+    font-weight: bold;
+}
