@@ -4,10 +4,10 @@ class Grid {
         this.height = height;
         this.width = width;
         this.grid = new Array(height);
-        for (var i = 0; i < height; i++){
+        for (var i = 0; i < height; i++) {
             this.grid[i] = new Array(width);
-            for (var j = 0; j < width; j++){
-                if (values != undefined && values[i] != undefined && values[i][j] != undefined){
+            for (var j = 0; j < width; j++) {
+                if (values != undefined && values[i] != undefined && values[i][j] != undefined) {
                     this.grid[i][j] = values[i][j];
                 } else {
                     this.grid[i][j] = 0;
@@ -23,7 +23,7 @@ function floodfillFromLocation(grid, i, j, symbol) {
     symbol = parseInt(symbol);
 
     target = grid[i][j];
-    
+
     if (target == symbol) {
         return;
     }
@@ -68,10 +68,10 @@ function fillJqGridWithData(jqGrid, dataGrid) {
     height = dataGrid.height;
     width = dataGrid.width;
 
-    for (var i = 0; i < height; i++){
+    for (var i = 0; i < height; i++) {
         var row = $(document.createElement('div'));
         row.addClass('row');
-        for (var j = 0; j < width; j++){
+        for (var j = 0; j < width; j++) {
             var cell = $(document.createElement('div'));
             cell.addClass('cell');
             cell.attr('x', i);
@@ -92,8 +92,8 @@ function copyJqGridToDataGrid(jqGrid, dataGrid) {
     if (dataGrid.width != col_count) {
         return
     }
-    jqGrid.find('.row').each(function(i, row) {
-        $(row).find('.cell').each(function(j, cell) {
+    jqGrid.find('.row').each(function (i, row) {
+        $(row).find('.cell').each(function (j, cell) {
             dataGrid.grid[i][j] = parseInt($(cell).attr('symbol'));
         });
     });

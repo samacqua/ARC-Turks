@@ -5,9 +5,9 @@ var DESC_ID;
 
 var IS_VERIFICATION;
 
-const uid = sessionStorage.getItem('uid') || uuidv4()+"dev";
+const uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
 
-$(window).on('load',function(){
+$(window).on('load', function () {
     // get date for making sure they try before giving up
     START_DATE = new Date();
 
@@ -18,7 +18,7 @@ $(window).on('load',function(){
     // get listening task
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    const task = urlParams.get('task') || Math.floor(Math.random()*400).toString();
+    const task = urlParams.get('task') || Math.floor(Math.random() * 400).toString();
     const desc_id = urlParams.get('id');
     IS_VERIFICATION = (urlParams.get('ver') == 'true');
     if (desc_id == null && !IS_VERIFICATION) throw "You must provide a description id in the URL";
@@ -60,7 +60,7 @@ $(window).on('load',function(){
         get_description_by_id(task, desc_id, DESCRIPTIONS_TYPE).then(description => {
             SELECTED_EXAMPLE = description.selected_example;
             loadTask(task);
-    
+
             if (description.see_description == "") {
                 $("#grid_size_p").text("This description has no language. Use just the shown example to guess the output.");
                 $("#see_p").text("");
@@ -111,16 +111,16 @@ function check() {
         return
     }
 
-    for (var i = 0; i < reference_output.length; i++){
+    for (var i = 0; i < reference_output.length; i++) {
         ref_row = reference_output[i];
-        for (var j = 0; j < ref_row.length; j++){
+        for (var j = 0; j < ref_row.length; j++) {
             if (ref_row[j] != submitted_output[i][j]) {
                 errorMsg("Wrong answer. Try again.");
                 return
             }
         }
     }
-    
+
     infoMsg("Correct!");
 
     const newDate = new Date();
@@ -146,9 +146,9 @@ function check() {
             .then(function () { next_task(); })
             .catch(function (error) { console.log('Error storing response ' + error); });
     } else {
-        store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up=false, DESCRIPTIONS_TYPE)
-            .then(function() {next_task();})
-            .catch(function(error) {console.log("Error storing response: " + error);});
+        store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up = false, DESCRIPTIONS_TYPE)
+            .then(function () { next_task(); })
+            .catch(function (error) { console.log("Error storing response: " + error); });
     }
 }
 
@@ -157,7 +157,7 @@ function give_up() {
      * if after 1 minute, cannot figure out pattern or get correct output, give them the answer
      */
     const newTime = new Date();
-    if ((newTime - START_DATE)/1000 < 30) {
+    if ((newTime - START_DATE) / 1000 < 30) {
         errorMsg("Please try to figure out the pattern for at least 30 seconds before you give up.");
         return;
     }
@@ -178,8 +178,8 @@ function give_up() {
     if (IS_VERIFICATION) {
         give_up_description(TASK_ID, DESCRIPTIONS_TYPE).then(function () { next_task(first_task = true); });
     } else {
-        store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up=true, DESCRIPTIONS_TYPE)
-            .then(function() {next_task(first_task = true);})
-            .catch(function(error) {console.log("Error storing response: " + error);});
+        store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up = true, DESCRIPTIONS_TYPE)
+            .then(function () { next_task(first_task = true); })
+            .catch(function (error) { console.log("Error storing response: " + error); });
     }
 }

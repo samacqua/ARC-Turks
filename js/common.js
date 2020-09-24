@@ -2,7 +2,7 @@ var DESCRIPTIONS_TYPE;
 
 // so can't exit modal by pressing outside of it
 $.fn.modal.prototype.constructor.Constructor.Default.backdrop = 'static';
-$.fn.modal.prototype.constructor.Constructor.Default.keyboard =  false;
+$.fn.modal.prototype.constructor.Constructor.Default.keyboard = false;
 
 /**
  * show an error message at the top of the screen.
@@ -17,7 +17,7 @@ function errorMsg(msg) {
     console.log(msg);
 
     $('#error_display').html(msg);
-    $('#error_display').css({"visibility": "visible"});
+    $('#error_display').css({ "visibility": "visible" });
     $('#error_display').fadeIn(300);
     $('#error_display').delay(6000).fadeOut(300);
 }
@@ -35,7 +35,7 @@ function infoMsg(msg) {
     console.log(msg);
 
     $('#info_display').html(msg);
-    $('#info_display').css({"visibility": "visible"});
+    $('#info_display').css({ "visibility": "visible" });
     $('#info_display').fadeIn(300);
     $('#info_display').delay(6000).fadeOut(300);
 }
@@ -43,9 +43,9 @@ function infoMsg(msg) {
 /**
  * Checks equality of two arrays
  */
-function arraysEqual(a1,a2) {
+function arraysEqual(a1, a2) {
     /* WARNING: arrays must not contain {objects} or behavior may be undefined */
-    return JSON.stringify(a1)==JSON.stringify(a2);
+    return JSON.stringify(a1) == JSON.stringify(a2);
 }
 
 /**
@@ -78,7 +78,7 @@ function finish() {
     set_user_complete_time(uid, delta_time, 'time_to_complete');
 }
 
-function get_next_task(first_task=false) {
+function get_next_task(first_task = false) {
 
     return new Promise(function (resolve, reject) {
         var num_tasks_complete = parseInt(sessionStorage.getItem('items_complete') || 0);
@@ -129,7 +129,7 @@ function get_next_task(first_task=false) {
 /**
  * go to next task
  */
-function next_task(first_task=false) {
+function next_task(first_task = false) {
 
     var num_tasks_complete = parseInt(sessionStorage.getItem('items_complete') || 0);
 
@@ -182,14 +182,14 @@ function next_task(first_task=false) {
 
 function scroll_highlight_objective() {
     $([document.documentElement, document.body]).animate({
-        scrollTop: $('#objective-col').offset().top-10
+        scrollTop: $('#objective-col').offset().top - 10
     }, 1000);
 
     $('#objective-col').css('-webkit-box-shadow', '0 0 40px purple');
     $('#objective-col').css('-moz-box-shadow', '0 0 40px purple');
     $('#objective-col').css('box-shadow', '0 0 40px purple');
 
-    setTimeout(function() {
+    setTimeout(function () {
         $('#objective-col').css('-webkit-box-shadow', '0 0 0px rgba(0,0,0,0)');
         $('#objective-col').css('-moz-box-shadow', '0 0 0px rgba(0,0,0,0)');
         $('#objective-col').css('box-shadow', '0 0 0px rgba(0,0,0,0)');
@@ -200,9 +200,9 @@ function scroll_highlight_objective() {
  * resize the grids if the window size changes
  */
 var globalResizeTimer = null;
-$(window).resize(function() {
-    if(globalResizeTimer != null) window.clearTimeout(globalResizeTimer);
-    globalResizeTimer = window.setTimeout(function() {
+$(window).resize(function () {
+    if (globalResizeTimer != null) window.clearTimeout(globalResizeTimer);
+    globalResizeTimer = window.setTimeout(function () {
         try {
             resizeOutputGrid();
         } catch (err) {
@@ -216,7 +216,7 @@ $(window).resize(function() {
  * update the progress bar at the top of the screen
  * @param {*} prac_inc true if want to increment number of practice tasks complete
  */
-function update_progress_bar(prac_inc=false) {
+function update_progress_bar(prac_inc = false) {
     var tasks_complete = parseInt(sessionStorage.getItem('items_complete') || 0);
     var prac_complete = parseInt(sessionStorage.getItem('prac_complete') || 0);
     if (prac_inc) {
@@ -250,7 +250,7 @@ function size_progress_bar() {
 
 // create random id so queue and desc have same id
 function uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });

@@ -15,14 +15,14 @@ function select_casino(force_listener, type) {
             //      that they aren't picked once study is actually going, and so at the start
             //      when there are no descriptions, not constantly pulling from single casino
             if (force_listener) {
-                for (i=0;i<400;i++) {
+                for (i = 0; i < 400; i++) {
                     if (num_descriptions[i] <= Math.sqrt(num_interactions[i]) || num_descriptions[i] == 0) {
                         num_interactions[i] += max;
                     }
 
                     // if already done task, make sure it is not chosen again
                     if (tasks_done.includes(i.toString())) {
-                        num_interactions[i] += 2*max;
+                        num_interactions[i] += 2 * max;
                     }
                 }
             }
@@ -34,9 +34,9 @@ function select_casino(force_listener, type) {
             const min = Math.min.apply(Math, num_interactions);
             return resolve(num_interactions.indexOf(min));
         })
-        .catch(function (err) {
-            return reject(err);
-        });
+            .catch(function (err) {
+                return reject(err);
+            });
     });
 }
 
@@ -57,16 +57,16 @@ function select_arm(task, type) {
                 get_task_descriptions(task, type).then(descriptions => {
 
                     var ucbs = [];
-                    for (i=0;i<descriptions.length;i++) {
-        
-                        const priors = [1,1];
-        
+                    for (i = 0; i < descriptions.length; i++) {
+
+                        const priors = [1, 1];
+
                         const a = descriptions[i]['num_success'] + prior[0];
                         const b = descriptions[i]['num_attempts'] - a + prior[1];
-        
+
                         const mean = a / (a + b);
-                        const variance = a*b / ((a+b)**2 * (a+b+1));
-        
+                        const variance = a * b / ((a + b) ** 2 * (a + b + 1));
+
                         ucbs.push(mean + Math.sqrt(variance))
                     }
                     const argmin = ucbs.indexOf(Math.min.apply(Math, ucbs));
@@ -82,10 +82,3 @@ function select_arm(task, type) {
         })
     });
 }
-
-
-// TODO
-/**
- * Rank all descriptions, not just one casino
- * Ensure not listening to own description or describing a task they have listened to
- */

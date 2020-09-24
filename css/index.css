@@ -1,6 +1,7 @@
-.question{
-	font-weight: 600;
+.question {
+    font-weight: 600;
 }
+
 .answers {
     margin-bottom: 20px;
 }
@@ -12,12 +13,14 @@
 }
 
 #io_ex {
-    -webkit-filter: blur(5px) grayscale(100%); /* Safari 6.0 - 9.0 */
+    -webkit-filter: blur(5px) grayscale(100%);
+    /* Safari 6.0 - 9.0 */
     filter: blur(5px) grayscale(100%);
 }
 
 #io_ex:hover {
-    -webkit-filter: blur(0px) grayscale(0%); /* Safari 6.0 - 9.0 */
+    -webkit-filter: blur(0px) grayscale(0%);
+    /* Safari 6.0 - 9.0 */
     filter: blur(0px) grayscale(0%);
 }
 

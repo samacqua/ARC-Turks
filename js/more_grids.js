@@ -37,7 +37,7 @@ function getSelectedSymbol() {
 }
 
 function setUpEditionGridListeners(jqGrid) {
-    jqGrid.find('.cell').click(function(event) {
+    jqGrid.find('.cell').click(function (event) {
         cell = $(event.target);
         symbol = getSelectedSymbol();
 
@@ -97,7 +97,7 @@ function fillPairPreview(pairId, inputGrid, outputGrid) {
         const isSpeakerExample = window.location.href.includes("speaker") && DESCRIPTIONS_TYPE.includes("ex");
         if (isSpeakerExample) {
             var text = document.createElement("p");
-            text.innerHTML = pairId+1;
+            text.innerHTML = pairId + 1;
             text.setAttribute("id", "io_id");
             jqArrow.append(text);
         }
@@ -126,8 +126,8 @@ function loadJSONTask(train, test) {
     if (isSpeakerExample) {
         for (var i = 0; i < train.length; i++) {
 
-            var option = $("<option></option>").val(i+1);
-            option.html(i+1);
+            var option = $("<option></option>").val(i + 1);
+            option.html(i + 1);
 
             $("#selectExampleIO").append(option);
         }
@@ -156,7 +156,7 @@ function loadJSONTask(train, test) {
         output_grid = convertSerializedGridToGridObject(values)
         fillPairPreview(i, input_grid, output_grid);
     }
-    for (var i=0; i < test.length; i++) {
+    for (var i = 0; i < test.length; i++) {
         pair = test[i];
         TEST_PAIRS.push(pair);
     }
@@ -177,7 +177,7 @@ function loadTaskFromFile(e) {
         return;
     }
     var reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
         var contents = e.target.result;
 
         try {
@@ -201,10 +201,10 @@ function loadTask(task_index) {
         throw "Tried to load a null task. Ensure that you are providing a task number."
     }
     var subset = "training";
-    $.getJSON("https://api.github.com/repos/samacqua/ARC-Turks/contents/data/" + subset, function(tasks) {
+    $.getJSON("https://api.github.com/repos/samacqua/ARC-Turks/contents/data/" + subset, function (tasks) {
         var task = tasks[task_index];
 
-        $.getJSON(task["download_url"], function(json) {
+        $.getJSON(task["download_url"], function (json) {
             try {
                 train = json['train'];
                 test = json['test'];
@@ -247,8 +247,8 @@ function initializeSelectable() {
             {
                 autoRefresh: false,
                 filter: '> .row > .cell',
-                start: function(event, ui) {
-                    $('.ui-selected').each(function(i, e) {
+                start: function (event, ui) {
+                    $('.ui-selected').each(function (i, e) {
                         $(e).removeClass('ui-selected');
                     });
                 }
@@ -260,35 +260,35 @@ function initializeSelectable() {
 // Initial event binding.
 
 $(document).ready(function () {
-    $('#symbol_picker').find('.symbol_preview').click(function(event) {
+    $('#symbol_picker').find('.symbol_preview').click(function (event) {
         symbol_preview = $(event.target);
-        $('#symbol_picker').find('.symbol_preview').each(function(i, preview) {
+        $('#symbol_picker').find('.symbol_preview').each(function (i, preview) {
             $(preview).removeClass('selected-symbol-preview');
         })
         symbol_preview.addClass('selected-symbol-preview');
 
         toolMode = $('input[name=tool_switching]:checked').val();
         if (toolMode == 'select') {
-            $('.edition_grid').find('.ui-selected').each(function(i, cell) {
+            $('.edition_grid').find('.ui-selected').each(function (i, cell) {
                 symbol = getSelectedSymbol();
                 setCellSymbol($(cell), symbol);
             });
         }
     });
 
-    $('.edition_grid').each(function(i, jqGrid) {
+    $('.edition_grid').each(function (i, jqGrid) {
         setUpEditionGridListeners($(jqGrid));
     });
 
-    $('.load_task').on('change', function(event) {
+    $('.load_task').on('change', function (event) {
         loadTaskFromFile(event);
     });
 
-    $('.load_task').on('click', function(event) {
-      event.target.value = "";
+    $('.load_task').on('click', function (event) {
+        event.target.value = "";
     });
 
-    $('input[type=radio][name=tool_switching]').change(function() {
+    $('input[type=radio][name=tool_switching]').change(function () {
         initializeSelectable(true);
         toolMode = $('input[name=tool_switching]:checked').val();
         if (toolMode == 'select') {
@@ -300,7 +300,7 @@ $(document).ready(function () {
         }
     });
 
-    $('body').keydown(function(event) {
+    $('body').keydown(function (event) {
         mode = $('input[name=tool_switching]:checked').val();
 
         if (mode != 'select') {
@@ -309,14 +309,14 @@ $(document).ready(function () {
         // Copy and paste functionality.
         if (event.which == 67) {
             // Press C
-            
+
             selected = $('.ui-selected');
             if (selected.length == 0) {
                 return;
             }
 
             COPY_PASTE_DATA = [];
-            for (var i = 0; i < selected.length; i ++) {
+            for (var i = 0; i < selected.length; i++) {
                 x = parseInt($(selected[i]).attr('x'));
                 y = parseInt($(selected[i]).attr('y'));
                 symbol = parseInt($(selected[i]).attr('symbol'));
@@ -347,7 +347,7 @@ $(document).ready(function () {
                 ys = new Array();
                 symbols = new Array();
 
-                for (var i = 0; i < COPY_PASTE_DATA.length; i ++) {
+                for (var i = 0; i < COPY_PASTE_DATA.length; i++) {
                     xs.push(COPY_PASTE_DATA[i][0]);
                     ys.push(COPY_PASTE_DATA[i][1]);
                     symbols.push(COPY_PASTE_DATA[i][2]);
@@ -355,7 +355,7 @@ $(document).ready(function () {
 
                 minx = Math.min(...xs);
                 miny = Math.min(...ys);
-                for (var i = 0; i < xs.length; i ++) {
+                for (var i = 0; i < xs.length; i++) {
                     x = xs[i];
                     y = ys[i];
                     symbol = symbols[i];
