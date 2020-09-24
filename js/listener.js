@@ -142,7 +142,7 @@ function check() {
 
         sessionStorage.setItem('done_speaker_task', true);
 
-        store_description(see_desc, do_desc, grid_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, desc_time, totalTime, -1, DESCRIPTIONS_TYPE)
+        store_description(see_desc, do_desc, grid_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, desc_time, totalTime, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE)
             .then(function () { next_task(); })
             .catch(function (error) { console.log('Error storing response ' + error); });
     } else {
