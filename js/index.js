@@ -25,7 +25,7 @@ $(window).on('load', function () {
     sessionStorage.setItem('tasks_completed', "-1");
 
     // get consent, then demographic, then present study, then begin solving patterns
-    $('#consentModal').modal('show');
+    $('#instructionsModal').modal('show');
 
     // assign a random id to the user
     const user_id = Math.floor(Math.random() * 1e10);
@@ -42,27 +42,25 @@ $(window).on('load', function () {
 
 // each tutorial item has format: [step text, list of elements to highlight, top offset of message (pxs), left offset (%), right offset (%)]
 var TUT_LIST = [
-    ["You will now be walked through the layout. Click any of the un-highlighted area to continue.", [], 200, 20, 20],
-    ["This is the Objective bar. This is where your task will be written.", ["objective-col"], 200, 20, 20],
-    ["This is the description area. This is where you will learn the pattern. There are two parts:", ["description-col"], 30, 30, 10],
-    ["This is the description, which is written by another person.", ["description-text"], 200, 30, 10],
-    ["This is the examples area, which is where there will be an example of the transformation.", ["task_preview"], 200, 30, 10],
-    ["This is the input area. You will apply the transformation to this grid.", ["input-col"], 40, 20, 20],
-    ["This is the output area. This is where you will create the correct output grid. Let's break it down a little more...", ["output-col"], 40, 10, 30],
-    ["This is where you can change the grid size.", ["resize_control_btns"], 400, 5, 35],
-    ["Try changing the grid size to 2x2.", ["resize_control_btns", "output_grid", "objective-col"], 400, 100, 100],
-    ["With these buttons, you can copy the entire input grid, reset the grid, check your answer, and give up.", ["edit_control_btns"], 400, 5, 35],
-    ["Try copying the input grid, then resetting the output grid.", ["input-col", "edit_control_btns", "output_grid", "objective-col"], 400, 100, 100],
-    ["These modes are how you change the output grid.", ["toolbar_and_symbol_picker"], 500, 5, 35],
-    ["With the draw mode, you can edit individual pixels.", ["draw"], 500, 5, 35],
-    ["Try drawing 3 green pixels in the output grid.", ["toolbar_and_symbol_picker", "output_grid", "objective-col"], 500, 100, 100],
-    ["With flood fill, you can fill in entire areas.", ["floodfill"], 500, 5, 35],
-    ["Try making the entire output grid yellow using flood fill.", ["toolbar_and_symbol_picker", "output_grid", "objective-col"], 500, 100, 100],
-    ["With copy-paste, you can copy a part of the grid with C and paste with V.", ["copypaste"], 500, 5, 35],
+    ["You will now be walked through the layout. Click any of the un-highlighted area to continue.", [], 30, 20, 20],
+    ["This is the Objective bar. This is where your task will be written.", ["objective-col"], 30, 20, 20],
+    ["This is the description area. This is where you will learn the pattern. There are two parts:", ["description-col"], 30, 35, 10],
+    ["This is the description, which is written by another person.", ["description-text"], 30, 35, 10],
+    ["This is the examples area, which is where there will be an example of the transformation.", ["task_preview"], 30, 35, 10],
+    ["This is the input area. You will apply the transformation to this grid.", ["input-col"], 30, 5, 70],
+    ["This is the output area. This is where you will create the correct output grid. Let's break it down a little more...", ["output-col"], 30, 10, 35],
+    ["This is where you can change the grid size.", ["resize_control_btns"], 50, 5, 35],
+    ["Try changing the grid size to 2x2.", ["resize_control_btns", "output_grid", "objective-col"], 50, 100, 100],
+    ["With these buttons, you can copy the entire input grid, reset the grid, check your answer, and give up.", ["edit_control_btns"], 60, 5, 35],
+    ["Try copying the input grid, then resetting the output grid.", ["input-col", "edit_control_btns", "output_grid", "objective-col"], 30, 100, 100],
+    ["These modes are how you change the output grid.", ["toolbar_and_symbol_picker"], 60, 5, 35],
+    ["With the draw mode, you can edit individual pixels.", ["draw"], 60, 5, 35],
+    ["Try drawing 3 green pixels in the output grid.", ["toolbar_and_symbol_picker", "output_grid", "objective-col"], 30, 100, 100],
+    ["With flood fill, you can fill in entire areas.", ["floodfill"], 60, 5, 35],
+    ["Try making the entire output grid yellow using flood fill.", ["toolbar_and_symbol_picker", "output_grid", "objective-col"], 30, 100, 100],
+    ["With copy-paste, you can copy a part of the grid with C and paste with V.", ["copypaste"], 60, 5, 35],
     ["Try to copy the light-blue square into the top left corner of the input.", ["input-col", "output_grid", "toolbar_and_symbol_picker", "objective-col"], 500, 100, 100]
 ];
-
-// TODO: fix speedrunning through tutorial
 
 // different feedback based on how they reached a state, these flags give that information
 var flags = { "copied_input": false, "copy_paste": false };
@@ -269,12 +267,12 @@ function continue_tutorial() {
     $("#dark-layer").css('background-color', 'rgba(0,0,0,0.7)');
     $("#trans-layer").css('z-index', 503);
     $("#tut-message").css('z-index', 502);
-    $("#tut-message").css('top', `${next_item[2]}px`);
+    $("#tut-message").css('top', `${next_item[2]}%`);
     $("#tut-message").css('left', `${next_item[3]}%`);
     $("#tut-message").css('right', `${next_item[4]}%`);
     $("#tut-message").html(next_item[0]);
     $("#tut-continue-message").css('z-index', 502);
-    $("#tut-continue-message").css('top', `${next_item[2] + $("#tut-message").outerHeight() + 10}px`);
+    $("#tut-continue-message").css('top', `calc(${next_item[2]}% + ${$("#tut-message").outerHeight() + 10}px)`);
     $("#tut-continue-message").css('background', 'rgba(0,0,0,0.7)');
     $("#tut-continue-message").html('Click anywhere to continue');
     $("#tut-continue-message").css('left', `${next_item[3]}%`);
@@ -287,6 +285,8 @@ function continue_tutorial() {
     }
 
     // set highlight div to be above layer
+    var max_top = 100000;
+    var max_id = "";
     for (i = 0; i < next_item[1].length; i++) {
         const id = next_item[1][i];
         $(`#${id}`).css('position', 'relative');
@@ -294,6 +294,20 @@ function continue_tutorial() {
         if (id != "objective-col") {
             $(`#${id}`).css('background-color', 'gainsboro');
         }
+
+        console.log(id, $('#' + id).offset().top);
+
+        if ($('#' + id).offset().top < max_top) {
+            max_top = $('#' + id).offset().top;
+            max_id = id;
+        }
+    }
+
+    // scroll to top highlighted element
+    if (max_id != "") {
+        $([document.documentElement, document.body]).animate({
+            scrollTop: $('#' + max_id).offset().top-10
+        }, 1000);
     }
 
     CUR_HIGHLIGHT = next_item[1];

@@ -10,6 +10,7 @@
 
   <!-- The core Firebase JS SDK is always required and must be listed first -->
   <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-firestore.js"></script>
 
   <!-- Bootstrap CSS -->
@@ -320,7 +321,7 @@
                     <p><b>In order to continue, you must solve them both.</b></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="update_progress_bar(tasks_inc=false, prac_inc=true); send_user_complete_instructions_time()" data-dismiss="modal">Okay!</button>
+                    <button type="button" class="btn btn-primary" onclick="update_progress_bar(tasks_inc=false, prac_inc=true); send_user_complete_instructions_time(); scroll_highlight_objective();" data-dismiss="modal">Okay!</button>
                 </div>
             </div>
         </div>

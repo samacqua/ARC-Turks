@@ -38,6 +38,7 @@ $(window).on('load',function(){
         $("#see_p").text(see_desc);
         $("#do_p").text(do_desc);
 
+        $("#objective-text").text("Use the description you just wrote to create the correct output for the new input.");
         $('#verInstructionsModal').modal('show');
     } else {
         get_description_by_id(task, desc_id).then(description => {

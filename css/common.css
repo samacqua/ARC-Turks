@@ -12,6 +12,10 @@ img {
     background-color: rgb(231, 180, 231);
     margin-top: 20px;
     padding-top: 8px;
+    transition: all .5s ease-in-out ;
+    -webkit-transition: all .5s ease-in-out ;
+    -moz-transition: all .5s ease-in-out ;
+    -o-transition: all .5s ease-in-out ;
 }
 
 #arrow {

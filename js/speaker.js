@@ -92,7 +92,8 @@ function continue_tutorial() {
         $("#tut-continue-message").css('background', 'rgba(0,0,0,0.0)');
 
         $("#grid_size_form").css("visibility", "hidden");
-
+        scroll_highlight_objective();
+        
         return;
     }
 
@@ -204,6 +205,13 @@ function get_word_vec_cache(word) {
     });
 }
 
+function compare(a, b) {
+    if (a[0] > b[0]) return 1;
+    if (b[0] > a[0]) return -1;
+  
+    return 0;
+}
+
 // get the closest n words (n=limit) that are in GOOD_WORDS
 function get_closest_words(word, limit=10) {
     var dists = [];
@@ -211,13 +219,14 @@ function get_closest_words(word, limit=10) {
     return new Promise(function (resolve, reject) {
         // get word vec of first word
         get_word_vec_cache(word).then(vec1 => {
+
             (async function loop() {
                 // get word vec for every word in GOOD_WORDS
                 for (i=0;i<=GOOD_WORDS.length;i++) {
                     await new Promise(function (res, rej) {
 
                         if (i == GOOD_WORDS.length) {
-                            var closest = dists.sort().reverse().slice(0,limit);
+                            var closest = dists.sort(compare).slice(0,limit);
                             return resolve(closest);
                         }
 

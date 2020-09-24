@@ -128,6 +128,22 @@ function next_task(first_task=false) {
     });
 }
 
+function scroll_highlight_objective() {
+    $([document.documentElement, document.body]).animate({
+        scrollTop: $('#objective-col').offset().top-10
+    }, 1000);
+
+    $('#objective-col').css('-webkit-box-shadow', '0 0 40px purple');
+    $('#objective-col').css('-moz-box-shadow', '0 0 40px purple');
+    $('#objective-col').css('box-shadow', '0 0 40px purple');
+
+    setTimeout(function() {
+        $('#objective-col').css('-webkit-box-shadow', '0 0 0px rgba(0,0,0,0)');
+        $('#objective-col').css('-moz-box-shadow', '0 0 0px rgba(0,0,0,0)');
+        $('#objective-col').css('box-shadow', '0 0 0px rgba(0,0,0,0)');
+    }, 2000);
+}
+
 /**
  * resize the grids if the window size changes
  */

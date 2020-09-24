@@ -10,6 +10,7 @@
 
   <!-- The core Firebase JS SDK is always required and must be listed first -->
   <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-firestore.js"></script>
 
   <!-- Bootstrap CSS -->
@@ -182,7 +183,7 @@
                         <p>Keep in mind that some tasks will have an example input-output showing the transformation.</p>
                     </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Okay!</button>
+                    <button onclick="scroll_highlight_objective()" type="button" class="btn btn-primary" data-dismiss="modal">Okay!</button>
                 </div>
             </div>
         </div>
@@ -200,7 +201,7 @@
                         <p>Use your description, and your memory of past input-output pairs, to create the correct output grid.</p>
                     </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Okay!</button>
+                    <button onclick="scroll_highlight_objective()" type="button" class="btn btn-primary" data-dismiss="modal">Okay!</button>
                 </div>
             </div>
         </div>
