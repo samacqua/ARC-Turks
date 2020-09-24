@@ -15,7 +15,6 @@ $(window).on('load', function () {
     $("#grid_size_p").text(task.grid_desc);
     $("#see_p").text(task.see_desc);
     $("#do_p").text(task.do_desc);
-    SELECTED_EXAMPLE = task.selected_example;
 
     // initialize the number of items complete, and the number of practice items complete
     // items_complete is number of actual tasks (for determining when complete with study)

@@ -205,7 +205,7 @@ var TASKS_DESCRIBED = [];
 
 function randomTask() {
     var subset = "training";
-    $.getJSON("https://api.github.com/repos/samacqua/ARC-Turks/contents/data/" + subset, function(tasks) {
+    $.getJSON("https://api.github.com/repos/samacqua/ARC-Turks/contents/common/data/" + subset, function(tasks) {
         var task_index = Math.floor(Math.random() * tasks.length);
         console.log(task_index);
         TASKS_DESCRIBED.push(task_index);
@@ -228,7 +228,7 @@ function randomTask() {
 function loadTask(task_index) {
     console.log(task_index);
     var subset = "training";
-    $.getJSON("https://api.github.com/repos/samacqua/ARC-Turks/contents/data/" + subset, function(tasks) {
+    $.getJSON("https://api.github.com/repos/samacqua/ARC-Turks/contents/common/data/" + subset, function(tasks) {
         var task = tasks[task_index];
         TASKS_DESCRIBED.push(task_index);
 
