@@ -59,8 +59,10 @@ $(window).on('load',function(){
             errorMsg("Failed to load the task. Please ensure your internet connection and try again.");
         });
 
-        // show initial instructions
-        $('#instructionsModal').modal('show');
+        if (parseInt(sessionStorage.getItem('items_complete')) == 0) {
+            // show initial instructions
+            $('#instructionsModal').modal('show');
+        }
 
     }
 });
@@ -110,6 +112,8 @@ function check() {
         const see_desc = urlParams.get('see');
         const do_desc = urlParams.get('do');
         const desc_time = urlParams.get('time');
+
+        sessionStorage.setItem('done_speaker_task', true);
 
         store_description(see_desc, do_desc, grid_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, desc_time, totalTime, -1)
             .then(function () { next_task(); })

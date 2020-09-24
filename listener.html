@@ -34,7 +34,7 @@
   <!-- JS files -->
   <script src="js/listener.js"></script>
   <script src="js/common.js"></script>
-  <script src="../common/constants.js"></script>
+  <script src="js/constants.js"></script>
   <script src="js/grids.js"></script>
   <script src="js/more_grids.js"></script>
   <script src="js/fire.js"></script>
@@ -66,7 +66,7 @@
     <div class="row">
         <div id="objective-col"class="col-md">
             <h3 class="objective"><b>Objective:</b></h3>
-            <h5 class="objective" id="objective-text">Create the correct output based on the description, example transformations, and input grid.</h5>
+            <h5 class="objective" id="objective-text">Create the correct output based on the description and input grid.</h5>
         </div>
     </div>
 
@@ -83,12 +83,6 @@
                 <p id="grid_size_p">The grid size...</p>
                 <p id="see_p">In the input, you should see...</p>
                 <p id="do_p">To make the output, you have to...</p>
-
-                <hr>
-                <h3>Example Transformation</h3>
-                <div id="task_preview">
-                    Loading...
-                </div>
             </div>
 
             <div class="col-md-4">
@@ -180,7 +174,6 @@
                     <div class="modal-body" id="gen-modal-body">
                         <p>For this task, you will do exactly what you did in the practice tasks: use a description to create a grid.</p>
                         <p>The layout is the exact same. Remember, <b>use as little attempts as possible, and if you give up, you will not be paid a bonus for this task.</b></p>
-                        <p>Keep in mind that some tasks will have an example input-output showing the transformation.</p>
                     </div>
                 <div class="modal-footer">
                     <button onclick="scroll_highlight_objective()" type="button" class="btn btn-primary" data-dismiss="modal">Okay!</button>
