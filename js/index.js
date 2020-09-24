@@ -3,48 +3,12 @@ var QUIZ_QUESTIONS;
 $(window).on('load', function () {
 
     // init_firestore(); // uncomment to initialize database
-
-    // set_user_info("uidtest", "agetest", "gendertest", "nl_ex");
-    // set_user_complete_time("uidtest", "timetest", "tasktest");
-
-    // (see_desc, do_desc, grid_desc, task_id, user_id, attempts, attemp_jsons, desc_time, ver_time, selected_example, type="nl")
-    // store_description("seetest", "dotest", "gridtest", "0", "uidtest", "1", "[]", "100", "30", "0", "ex");
-    // give_up_description("0", type="ex");
-    // get_description_by_id("0", "1531426a-bf49-4581-876c-67c0316bd02b", "nl").then(description => {
-    //     console.log(description);
-    // });
-    // get_task_descriptions("0", "nl").then(descriptions => {
-    //     console.log(descriptions);
-    // });
-    // get_task_descs_interactions_count("0", type="nl").then(count => {
-    //     console.log(count)
-    // });
-    // get_all_descriptions_interactions_count("nl").then(counts => {
-    //     console.log(counts);
-    // });
-    // get_unused_desc("nl").then(desc => {
-    //     console.log(desc);
-    // });
-
-    // (desc_id, task_id, user_id, attempts, attempt_jsons, total_time, gave_up = false, type="nl")
-    // store_listener("1531426a-bf49-4581-876c-67c0316bd02b", "0", "uidtest", "2", [{}], "100", gave_up=false, type="nl");
-
-    // claim_unused_desc("a7fa8814-f1d1-4c1e-9946-640d56c74b2d", "nl_ex");
-
-    // get_words().then(words => {
-    //     console.log(words);
-    // });
-
-    // get_word_vec("apple").then(vec => {
-    //     console.log(vec);
-    // });
     
     // correctly size the progress bar
     size_progress_bar();
 
     // start timer to gather data on total time per user
-    const start_time = new Date();
-    sessionStorage.setItem('start_time', start_time.getTime());
+    sessionStorage.setItem('start_time', new Date().getTime());
 
     // load first practice task
     const task = PRAC_TASKS.shift();
@@ -57,75 +21,23 @@ $(window).on('load', function () {
     // initialize the number of items complete, and the number of practice items complete
     sessionStorage.setItem("items_complete", "0"); // number of actual tasks (for determining when complete with study)
     sessionStorage.setItem("prac_complete", "0"); //for finishing instructions and practice tasks (for updating progress bar)
-    sessionStorage.setItem('tasks_completed', "-1"); // a list of tasks completed to avoid doing same task twice
 
-    // get consent, then demographic, then present study, then begin solving patterns
+    // consent --> demographic --> overview --> walkthrough --> practice --> real tasks
     $('#consentModal').modal('show');
 
     // assign a random id to the user
-    const user_id = uuidv4();
-    sessionStorage.setItem("uid", user_id);
+    sessionStorage.setItem("uid", uuidv4());
 
     // get the type of descriptions (nl, nl_ex, ex)
-    DESCRIPTIONS_TYPE = "nl";
-    if (field_exists('type')) {
-        const queryString = window.location.search;
-        const urlParams = new URLSearchParams(queryString);
-        DESCRIPTIONS_TYPE = urlParams.get('type');
-    }
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    DESCRIPTIONS_TYPE = urlParams.get('type') || "nl";
     sessionStorage.setItem('type', DESCRIPTIONS_TYPE);
 
-    switch (DESCRIPTIONS_TYPE) {
-        case "nl":
-            // remove examples area
-            $("#examples_area").remove();
-
-            // edit tutorial
-            for (i=0;i<TUT_LIST.length;i++) {
-                if (arraysEqual(TUT_LIST[i][1], ["objective-col"])) {
-                    TUT_LIST.splice(i+1, 0, 
-                    ["This is the description area. This is where the pattern is described.", ["description-col"], 30, 35, 10],
-                    ["This is the description, which is written by another person.", ["description-text"], 30, 35, 10]);
-                    break;
-                }
-            }
-            break;
-        case "nl_ex":
-            // change objective text
-            $("#objective-text").html('Create the correct output based on the description, example transformation, and input grid.');
-            // edit tutorial
-            for (i=0;i<TUT_LIST.length;i++) {
-                if (arraysEqual(TUT_LIST[i][1], ["objective-col"])) {
-                    console.log("in");
-                    TUT_LIST.splice(i+1, 0, 
-                    ["This is the description area. This is where the pattern is described.", ["description-col"], 30, 35, 10],
-                    ["This is the description, which is written by another person.", ["description-text"], 30, 35, 10],
-                    ["This is the examples area, which is where there will be an example of the transformation.", ["examples_area"], 30, 35, 10]);
-                    break;
-                }
-            }
-            break;
-        case "ex":
-            // remove description
-            $("#description-text").remove();
-
-            // change objective text
-            $("#objective-text").html('Create the correct output based on the example transformation.');
-
-            // edit tutorial
-            for (i=0;i<TUT_LIST.length;i++) {
-                if (arraysEqual(TUT_LIST[i][1], ["objective-col"])) {
-                    TUT_LIST.splice(i+1, 0, 
-                    ["This is the examples area. This is where an example of the pattern is shown.", ["description-col"], 30, 35, 10]);
-                    break;
-                }
-            }
-            break;
-        default:
-            break;
-    }
-
-    console.log(DESCRIPTIONS_TYPE);
+    // format walkthrough/tutorial based on description type
+    format_walkthrough(DESCRIPTIONS_TYPE);
+    format_desc_area(DESCRIPTIONS_TYPE);
+    set_objective(DESCRIPTIONS_TYPE);
 
     // set up quiz
     QUIZ_QUESTIONS = GEN_QUIZ_QUESTIONS;
@@ -133,6 +45,75 @@ $(window).on('load', function () {
     var quizContainer = document.getElementById('quiz');
     showQuestions(QUIZ_QUESTIONS, quizContainer);
 });
+
+
+// =======================
+// Format 
+// =======================
+
+/**
+ * set the objective based on the description type
+ */
+function set_objective(desc_type) {
+    switch (desc_type) {
+        case "nl":
+            $("#objective-text").html('Create the correct output based on the description and input grid.');
+            break;
+        case "nl_ex":
+            $("#objective-text").html('Create the correct output based on the description, example transformation, and input grid.');
+            break;
+        case "ex":
+            $("#objective-text").html('Create the correct output based on the example transformation.');
+            break;
+        default:
+            throw "Unknown description type"
+            break; 
+    }
+}
+
+/**
+ * format the description area based on the description type
+ */
+function format_desc_area(desc_type) {
+    if (desc_type == "nl") {
+        // remove examples area
+        $("#examples_area").remove();
+    } else if (desc_type == "ex") {
+        // remove description
+        $("#description-text").remove();
+    }
+}
+
+
+/**
+ * Adds the correct walkthrough steps depending on the description type
+ */
+function format_walkthrough(desc_type) {
+    for (i=0;i<TUT_LIST.length;i++) {
+        if (arraysEqual(TUT_LIST[i][1], ["objective-col"])) {
+            switch (desc_type) {
+                case "nl":
+                    TUT_LIST.splice(i+1, 0, 
+                        ["This is the description area. This is where the pattern is described.", ["description-col"], 30, 35, 10],
+                        ["This is the description, which is written by another person.", ["description-text"], 30, 35, 10]);
+                    break;
+                case "nl_ex":
+                    TUT_LIST.splice(i+1, 0, 
+                        ["This is the description area. This is where the pattern is described.", ["description-col"], 30, 35, 10],
+                        ["This is the description, which is written by another person.", ["description-text"], 30, 35, 10],
+                        ["This is the examples area, which is where there will be an example of the transformation.", ["examples_area"], 30, 35, 10]);
+                    break;
+                case "ex":
+                    TUT_LIST.splice(i+1, 0, 
+                        ["This is the examples area. This is where an example of the pattern is shown.", ["description-col"], 30, 35, 10]);
+                    break;
+                default:
+                    throw "Unknown description type"
+                    break;
+            }
+        }
+    }
+}
 
 // =======================
 // Tutorial
@@ -158,7 +139,7 @@ var TUT_LIST = [
 ];
 
 // different feedback based on how they reached a state, these flags give that information
-var flags = { "copied_input": false, "copy_paste": false };
+var flags = { "copied_input": false};
 
 // after some tasks, slight delay to ease transitions for user
 // this variable ensures they do not skip tutorial steps
@@ -172,7 +153,7 @@ var WAITING_TO_CONTINUE = false;
 function pre_continue(flag = null) {
 
     // check if done with tutorial, because copy, reset, and resize all call pre-continue (so user does not have to click to continue)
-    if (FINISHED_TUT) {
+    if (FINISHED_TUT || WAITING_TO_CONTINUE) {
         return;
     }
 
@@ -191,10 +172,8 @@ function pre_continue(flag = null) {
             // challenge to resize output grid to 2x2
             if (CURRENT_OUTPUT_GRID.width == CURRENT_OUTPUT_GRID.height && CURRENT_OUTPUT_GRID.width == 2) {
                 infoMsg("Great job! You correctly resized the grid.");
-                if (!WAITING_TO_CONTINUE) {
-                    WAITING_TO_CONTINUE = true;
-                    setTimeout(function () { continue_tutorial(); }, 2000);
-                }
+                WAITING_TO_CONTINUE = true;
+                setTimeout(function () { continue_tutorial(); }, 2000);
                 return;
             } else {
                 errorMsg("You resized the output grid, but to the wrong size.");
@@ -222,10 +201,8 @@ function pre_continue(flag = null) {
                 }
                 infoMsg("Great job! You have copied from the input grid, and reset the output.");
                 
-                if (!WAITING_TO_CONTINUE) {
-                    WAITING_TO_CONTINUE = true;
-                    setTimeout(function () { continue_tutorial(); }, 2000);
-                }
+                WAITING_TO_CONTINUE = true;
+                setTimeout(function () { continue_tutorial(); }, 2000);
                 return;
             }
         } else if (arraysEqual(CUR_HIGHLIGHT, ["toolbar_and_symbol_picker", "output_grid", "objective-col"])) {
@@ -233,8 +210,6 @@ function pre_continue(flag = null) {
 
             if ($("#objective-text").text().includes("green")) {
                 // draw 3 green cells
-                console.log("green");
-                console.log(CURRENT_OUTPUT_GRID);
                 var green = 0;
                 for (var i = 0; i < CURRENT_OUTPUT_GRID.grid.length; i++) {
                     ref_row = CURRENT_OUTPUT_GRID.grid[i];
@@ -247,10 +222,8 @@ function pre_continue(flag = null) {
 
                 if (green == 3) {
                     infoMsg("Great job! You drew 3 green cells.");
-                    if (!WAITING_TO_CONTINUE) {
-                        WAITING_TO_CONTINUE = true;
-                        setTimeout(function () { continue_tutorial(); }, 1000);
-                    }
+                    WAITING_TO_CONTINUE = true;
+                    setTimeout(function () { continue_tutorial(); }, 1000);
                     return;
                 } else if (green != 0) {
                     infoMsg("You have painted " + green + " cells green. Paint " + (3 - green).toString() + " more.")
@@ -270,10 +243,8 @@ function pre_continue(flag = null) {
                     }
                 }
                 infoMsg("Great job! You used flood fill.");
-                if (!WAITING_TO_CONTINUE) {
-                    WAITING_TO_CONTINUE = true;
-                    setTimeout(function () { continue_tutorial(); }, 1000);
-                }
+                WAITING_TO_CONTINUE = true;
+                setTimeout(function () { continue_tutorial(); }, 1000);
                 return;
             }
         } else if (arraysEqual(CUR_HIGHLIGHT, ["input-col", "output_grid", "toolbar_and_symbol_picker", "objective-col"])) {
@@ -292,23 +263,16 @@ function pre_continue(flag = null) {
                 ref_row = ref_grid[i];
                 for (var j = 0; j < ref_row.length; j++) {
                     if (ref_row[j] != CURRENT_OUTPUT_GRID.grid[i][j]) {
-                        errorMsg("To continue, follow the Objective.");
+                        errorMsg("Don't draw the shape, use the 'Copy-Paste' tool.");
+                        resetOutputGrid();
                         return;
                     }
                 }
             }
 
-            if (flags['copy_paste'] != true) {
-                resetOutputGrid();
-                errorMsg("You have correctly drawn the shape, but use the 'Copy-Paste' tool to copy from the input grid.");
-                return;
-            }
-
             infoMsg("Great job! You used copy-paste.");
-            if (!WAITING_TO_CONTINUE) {
-                WAITING_TO_CONTINUE = true;
-                setTimeout(function () { continue_tutorial(); }, 1000);
-            }
+            WAITING_TO_CONTINUE = true;
+            setTimeout(function () { continue_tutorial(); }, 1000);
             return;
         }
         errorMsg("To continue, follow the Objective.");
@@ -453,9 +417,9 @@ function check_grid() {
         }
     }
 
-    update_progress_bar(tasks_inc = false, prac_inc = true);
+    update_progress_bar(prac_inc = true);
 
-    const uid = sessionStorage.getItem('uid');
+    const uid = sessionStorage.getItem('uid') || uuidv4()+"dev";
     const tut_end_time = (new Date()).getTime();
     const tut_time = (tut_end_time - parseInt(TUT_START_TIME)) / 1000;
     TUT_START_TIME = (new Date()).getTime();
@@ -496,9 +460,9 @@ function check_grid() {
 var TUT_START_TIME = 0;
 
 function send_user_complete_instructions_time() {
-    const uid = sessionStorage.getItem('uid');
+    const uid = sessionStorage.getItem('uid') || uuidv4()+"dev";
 
-    const instructions_start_time = sessionStorage.getItem('start_time');
+    const instructions_start_time = sessionStorage.getItem('start_time') || 0;
     const end_instructions_time = (new Date()).getTime();
     const delta = (end_instructions_time - parseInt(instructions_start_time)) / 1000;
 
@@ -513,7 +477,7 @@ function exit_demographic() {
      */
     const gender = $('#gender_form').find("option:selected").text();
     const age = $('#age_form').val().trim();
-    const uid = sessionStorage.getItem('uid');
+    const uid = sessionStorage.getItem('uid') || uuidv4()+"dev";
     set_user_info(uid, age, gender, DESCRIPTIONS_TYPE);
 
     const introModalID = DESCRIPTIONS_TYPE + 'IntroModal';

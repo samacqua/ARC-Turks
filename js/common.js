@@ -70,8 +70,10 @@ function finish() {
     $("#finish_modal_uid").text(uid.toString());
     $("#finished_modal").modal('show');
 
+    update_progress_bar();
+
     const end_time = new Date();
-    const delta_time = (parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time'))) / 1000;
+    const delta_time = (parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time') || 0)) / 1000;
 
     set_user_complete_time(uid, delta_time, 'time_to_complete');
 }
@@ -81,7 +83,7 @@ function finish() {
  */
 function next_task(first_task=false) {
 
-    var num_tasks_complete = parseInt(sessionStorage.getItem('items_complete'));
+    var num_tasks_complete = parseInt(sessionStorage.getItem('items_complete') || 0);
 
     if (!first_task) {
         // increment number of tasks complete if not loading the first task, bc next task is called after completing a task
@@ -165,17 +167,11 @@ $(window).resize(function() {
 
 /**
  * update the progress bar at the top of the screen
- * @param {*} tasks_inc true if want to increment number of tasks complete
  * @param {*} prac_inc true if want to increment number of practice tasks complete
  */
-function update_progress_bar(tasks_inc=false, prac_inc=false) {
-    var tasks_complete = parseInt(sessionStorage.getItem('items_complete'));
-    var prac_complete = parseInt(sessionStorage.getItem('prac_complete'));
-
-    if (tasks_inc) {
-        tasks_complete++;
-        sessionStorage.setItem('items_complete', tasks_complete);
-    }
+function update_progress_bar(prac_inc=false) {
+    var tasks_complete = parseInt(sessionStorage.getItem('items_complete') || 0);
+    var prac_complete = parseInt(sessionStorage.getItem('prac_complete') || 0);
     if (prac_inc) {
         prac_complete++;
         sessionStorage.setItem('prac_complete', prac_complete);
@@ -218,15 +214,6 @@ function show_modal(title, body_elements, button_title, action) {
     $("#generic_modal_exit_btn").attr("onclick", `${action}`);
 
     $("#generic_modal").modal('show');
-}
-
-function field_exists(field) {
-    var url = window.location.href;
-    if(url.indexOf('?' + field + '=') != -1)
-        return true;
-    else if(url.indexOf('&' + field + '=') != -1)
-        return true;
-    return false
 }
 
 // create random id so queue and desc have same id

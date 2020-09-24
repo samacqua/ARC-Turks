@@ -1,10 +1,9 @@
 var START_DATE;
 var ATTEMPT_JSONS = [];
-var GAVE_UP = false;
 var GOOD_WORDS = [];
 var PAST_DESCS = [];
 
-const uid = sessionStorage.getItem('uid');
+const uid = sessionStorage.getItem('uid') || uuidv4()+"dev";
 
 $(window).on('load', function () {
     // get date to check they are trying before giving up
@@ -31,17 +30,15 @@ $(window).on('load', function () {
 
     // get words that have already been used and their word vecs
     get_words().then(words => {
-        GOOD_WORDS = words.map(function (value) {
-            return value.toLowerCase();
-        });
+        GOOD_WORDS = words.map(function (value) { return value.toLowerCase() });
         console.log("Length of previously used words:", GOOD_WORDS.length);
 
-        // get word vecs from db and cache it
+        // get word vecs from db and cache them
         for (i=0;i<GOOD_WORDS.length;i++) {
             get_word_vec_cache(GOOD_WORDS[i]);
         }
 
-        // only show message about highlighting words that have previously not been used if we will be highlighting words
+        // only show message about highlighting words if we will be highlighting words
         if (GOOD_WORDS.length < MIN_WORDS) {
             for (i=0;i<TUT_LIST.length;i++) {
                 if (TUT_LIST[i][0].includes("If you use a word in your description that has not been used")) {
@@ -50,13 +47,13 @@ $(window).on('load', function () {
             }
         }
     }).catch(error => {
-        infoMsg("Could not load words that can been used. Please check your internet connection and reload the page.");
+        errorMsg("Could not load words that can been used. Please check your internet connection and reload the page.");
     });
 
     // get speaker task
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    const task = urlParams.get('task');
+    const task = urlParams.get('task') || Math.floor(Math.random()*400).toString();  // if none provided, give random task (just for when messing around w it, won't actually happen)
 
     loadTask(task);
     get_task_descriptions(task, DESCRIPTIONS_TYPE).then(function (descriptions) {
@@ -76,9 +73,17 @@ $(window).on('load', function () {
         errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
     });
 
-    DESCRIPTIONS_TYPE = sessionStorage.getItem('type');
+    DESCRIPTIONS_TYPE = sessionStorage.getItem('type') || "nl";
     if (DESCRIPTIONS_TYPE == "nl") {
         $("#select_ex_io").remove();
+    } else if (DESCRIPTIONS_TYPE == "nl_ex") {
+        for (i=0;i<TUT_LIST.length;i++) {
+            if (TUT_LIST[i][0].includes("describe what you need to do to create the correct output")) {
+                TUT_LIST.splice(i+1, 0, ["Then, select one input output example to go along with your description.", ["select_ex_io"], 40, 5, 35]);
+            }
+        }
+    } else if (DESCRIPTIONS_TYPE == "ex") {
+        throw "Description type for speaker task should be natural language or natural language+example, not just example."
     }
 });
 
@@ -88,17 +93,17 @@ $(window).on('load', function () {
 // ==============
 
 var TUT_LIST = [
-    ["You will now be walked through the layout. Click any of the un-highlighted area to continue.", [], 200, 20, 20],
-    ["This is the examples area. As you can see, there are multiple input-output examples. There is a common pattern that changes each input grid to its respective output grid.", ["io_ex_col"], 30, 30, 10],
-    ["This is the old descriptions area. Any past attempts to describe the pattern will be shown here.", ["description_ex_col"], 40, 20, 20],
-    ["At the bottom of each description, you will see how well people did using the description. So, if the description did pretty well, you may want to slightly change it. But, if it did badly, you should rewrite the entire description.", ["description_ex_col"], 40, 20, 20],
-    ["This is the description area. This is where you will describe the pattern you recognized in the examples area. You will break your description into 3 sections:", ["description_col"], 40, 20, 20],
-    ["First, if the grid size changes, check this box.", ["grid_size_change_box"], 180, 10, 30],
-    ["If the grid size does change, then describe how it changed.", ["grid_size_form"], 180, 10, 30],
-    ["Then describe what you should expect to see in the input.", ["see_desc_form"], 400, 5, 35],
-    ["Then, describe what you need to do to create the correct output. Keep in mind that the person using your description will see a different input grid than you are seeing.", ["do_desc_form"], 400, 5, 35],
-    ["If you use a word in your description that has not been used, it will be highlighted red. To submit your description, you must replace every red word, or manually add it.", ["description_col"], 400, 5, 35],
-    ["Once you are happy with your description, press the Submit button. If you cannot describe the pattern, or realize you do not know the pattern, you can give up (but you will not be eligible for a bonus).", ["desc_col_buttons"], 500, 5, 35],
+    ["You will now be walked through the layout. Click any of the un-highlighted area to continue.", [], 30, 20, 20],
+    ["This is the examples area. As you can see, there are multiple input-output examples. There is a common pattern that changes each input grid to its respective output grid.", ["io_ex_col"], 30, 35, 10],
+    ["This is the old descriptions area. Any past attempts to describe the pattern will be shown here.", ["description_ex_col"], 30, 5, 65],
+    ["At the bottom of each description, you will see how well people did using the description. So, if the description did pretty well, you may want to slightly change it. But, if it did badly, you should rewrite the entire description.", ["description_ex_col"], 60, 5, 65],
+    ["This is the description area. This is where you will describe the pattern you recognized in the examples area. You will break your description into 3 sections:", ["description_col"], 30, 10, 35],
+    ["First, if the grid size changes, check this box.", ["grid_size_change_box"], 30, 10, 35],
+    ["If the grid size does change, then describe how it changed.", ["grid_size_form"], 40, 10, 35],
+    ["Then describe what you should expect to see in the input.", ["see_desc_form"], 40, 10, 35],
+    ["Then, describe what you need to do to create the correct output. Keep in mind that the person using your description will see a different input grid than you are seeing.", ["do_desc_form"], 40, 5, 35],
+    ["If you use a word in your description that has not been used, it will be highlighted red. To submit your description, you must replace every red word, or manually add it.", ["description_col"], 40, 5, 35],
+    ["Once you are happy with your description, press the Submit button. If you cannot describe the pattern, or realize you do not know the pattern, you can give up (but you will not be eligible for a bonus).", ["desc_col_buttons"], 40, 5, 35],
 ];
 
 var CUR_HIGHLIGHT = null;
@@ -146,12 +151,12 @@ function continue_tutorial() {
     $("#dark-layer").css('background-color', 'rgba(0,0,0,0.7)');
     $("#trans-layer").css('z-index', 503);
     $("#tut-message").css('z-index', 502);
-    $("#tut-message").css('top', `${next_item[2]}px`);
+    $("#tut-message").css('top', `${next_item[2]}%`);
     $("#tut-message").css('left', `${next_item[3]}%`);
     $("#tut-message").css('right', `${next_item[4]}%`);
     $("#tut-message").html(next_item[0]);
     $("#tut-continue-message").css('z-index', 502);
-    $("#tut-continue-message").css('top', `${next_item[2] + $("#tut-message").outerHeight() + 10}px`);
+    $("#tut-continue-message").css('top', `calc(${next_item[2]}% + ${$("#tut-message").outerHeight() + 10}px)`);
     $("#tut-continue-message").css('background', 'rgba(0,0,0,0.7)');
     $("#tut-continue-message").html('Click anywhere to continue');
     $("#tut-continue-message").css('left', `${next_item[3]}%`);
@@ -285,7 +290,6 @@ function get_closest_words(word, limit=10) {
     });
 }
 
-// TODO: async making it buggy
 // for each word that has not been used, returns that word and its closest meaning words that have been used in past descriptions
 function get_replacement_words(words, limit=10) {
 
@@ -512,8 +516,7 @@ function verify() {
     // Bring the user to the listener page, but show them their own description to ensure they wrote something decent
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-
-    window.location.href = `listener.html?task=${urlParams.get('task')}&time=${totalTime}&see=${see_desc}&do=${do_desc}&grid=${grid_size_desc}&se=${selected_example}&ver=true`;
+    window.location.href = `listener.html?task=${urlParams.get('task') || "0"}&time=${totalTime}&see=${see_desc}&do=${do_desc}&grid=${grid_size_desc}&se=${selected_example}&ver=true`;
 }
 
 function give_up() {
@@ -531,7 +534,7 @@ function give_up() {
     // don't give them credit for completing the task if they have not completed it
     give_up_description(TASK_ID, DESCRIPTIONS_TYPE).then(function () {
 
-        var tasks_done = sessionStorage.getItem('tasks_completed').split(',');
+        var tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
         tasks_done.push(TASK_ID);
         sessionStorage.setItem('tasks_completed', tasks_done);
 

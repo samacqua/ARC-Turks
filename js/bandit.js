@@ -8,8 +8,6 @@ function select_casino(force_listener, type) {
             var num_descriptions = counts[0];
             var num_interactions = counts[1];
 
-            console.log(num_descriptions[154], num_interactions[154]);
-
             const max = Math.max.apply(Math, num_interactions);
 
             // make all tasks with no descs or # arms <= sqrt(# interactions) (so needs new arm) have the max score so
@@ -22,7 +20,7 @@ function select_casino(force_listener, type) {
                     }
 
                     // if already done task, make sure it is not chosen again
-                    const tasks_done = sessionStorage.getItem('tasks_completed').split(',');
+                    const tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
                     if (tasks_done.includes(toString(i))) {
                         num_interactions[i] += 2*max;
                     }

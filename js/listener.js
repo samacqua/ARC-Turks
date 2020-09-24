@@ -5,7 +5,7 @@ var DESC_ID;
 
 var IS_VERIFICATION;
 
-const uid = sessionStorage.getItem('uid');
+const uid = sessionStorage.getItem('uid') || uuidv4()+"dev";
 
 $(window).on('load',function(){
     // get date for making sure they try before giving up
@@ -18,15 +18,16 @@ $(window).on('load',function(){
     // get listening task
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    const task = urlParams.get('task');
+    const task = urlParams.get('task') || Math.floor(Math.random()*400).toString();
     const desc_id = urlParams.get('id');
+    if (desc_id == null) throw "You must provide a description id in the URL";
     IS_VERIFICATION = (urlParams.get('ver') == 'true');
 
     DESC_ID = desc_id;
     TASK_ID = task;
     loadTask(task);
 
-    DESCRIPTIONS_TYPE = sessionStorage.getItem('type');
+    DESCRIPTIONS_TYPE = sessionStorage.getItem('type') || "nl";
 
     switch (DESCRIPTIONS_TYPE) {
         case "nl":
@@ -43,10 +44,10 @@ $(window).on('load',function(){
     // if using their own description as a verification for that description, load it from urlparams
     // if not, load from DB and give instructions
     if (IS_VERIFICATION) {
-        const grid_desc = urlParams.get('grid');
-        const see_desc = urlParams.get('see');
-        const do_desc = urlParams.get('do');
-        const selected_example = urlParams.get('se');
+        const grid_desc = urlParams.get('grid') || "";
+        const see_desc = urlParams.get('see') || "";
+        const do_desc = urlParams.get('do') || "";
+        const selected_example = urlParams.get('se') || "0";
         SELECTED_EXAMPLE = selected_example;
 
         $("#grid_size_p").text(grid_desc);
@@ -73,15 +74,26 @@ $(window).on('load',function(){
             console.log(error);
             errorMsg("Failed to load the task. Please ensure your internet connection and try again.");
         });
-
-        if (parseInt(sessionStorage.getItem('items_complete')) == 0) {
-            // show initial instructions
-            $('#instructionsModal').modal('show');
-        }
-
+        set_instructions_modal(DESCRIPTIONS_TYPE);
+        $('#instructionsModal').modal('show');
     }
 });
 
+function set_instructions_modal(desc_type) {
+    switch (desc_type) {
+        case "nl":
+            $("#instruction_reminder").text("For this task, you will do exactly what you did in the practice tasks: use a description to create a grid.");
+            break;
+        case "nl_ex":
+            $("#instruction_reminder").text("For this task, you will do exactly what you did in the practice tasks: use a description and an example translation to create a grid.");
+            break;
+        case "ex":
+            $("#instruction_reminder").text("For this task, you will do exactly what you did in the practice tasks: use an example of a pattern to create a grid.");
+            break;
+        default:
+            break;
+    }
+}
 
 function check() {
     /**
@@ -115,7 +127,7 @@ function check() {
     const totalTime = (newDate - START_DATE) / 1000;
 
     // add to list of tasks completed , so we don't give same task
-    var tasks_done = sessionStorage.getItem('tasks_completed').split(',');
+    var tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
     tasks_done.push(TASK_ID);
     sessionStorage.setItem('tasks_completed', tasks_done);
 
@@ -123,10 +135,10 @@ function check() {
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
 
-        const grid_desc = urlParams.get('grid');
-        const see_desc = urlParams.get('see');
-        const do_desc = urlParams.get('do');
-        const desc_time = urlParams.get('time');
+        const grid_desc = urlParams.get('grid') || "";
+        const see_desc = urlParams.get('see') || "";
+        const do_desc = urlParams.get('do') || "";
+        const desc_time = urlParams.get('time') || "0";
 
         sessionStorage.setItem('done_speaker_task', true);
 
@@ -145,7 +157,6 @@ function give_up() {
      * if after 1 minute, cannot figure out pattern or get correct output, give them the answer
      */
     const newTime = new Date();
-    console.log((newTime - START_DATE)/1000);
     if ((newTime - START_DATE)/1000 < 30) {
         errorMsg("Please try to figure out the pattern for at least 30 seconds before you give up.");
         return;
@@ -159,7 +170,7 @@ function give_up() {
     const totalTime = (newDate - START_DATE) / 1000;
 
     // add to list of tasks completed , so we don't give same task
-    var tasks_done = sessionStorage.getItem('tasks_completed').split(',');
+    var tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
     tasks_done.push(TASK_ID);
     sessionStorage.setItem('tasks_completed', tasks_done);
 

@@ -30,7 +30,6 @@ function get_unused_desc(type) {
             console.log(`read ${querySnapshot.size} documents`);
 
             shuffle(querySnapshot);
-            console.log(querySnapshot);
 
             (async function loop() {
                 for (i = 0; i <= querySnapshot.size; i++) {
@@ -39,12 +38,10 @@ function get_unused_desc(type) {
                         if (i == querySnapshot.size) {
                             return resolve(-1);
                         }
-                        console.log(i);
                         const desc = querySnapshot.docs[i].id;
                         const task = querySnapshot.docs[i].data().task;
-                        console.log(desc);
 
-                        const tasks_done = sessionStorage.getItem('tasks_completed').split(',');
+                        const tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
                         if (tasks_done.includes(task)) {
                             console.log("Already interacted with task:", task);
                             res();

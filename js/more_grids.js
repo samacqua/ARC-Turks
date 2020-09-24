@@ -221,6 +221,9 @@ function randomTask() {
 
 function loadTask(task_index) {
     console.log(task_index);
+    if (task_index == null) {
+        throw "Tried to load a null task. Ensure that you are providing a task number."
+    }
     var subset = "training";
     $.getJSON("https://api.github.com/repos/samacqua/ARC-Turks/contents/data/" + subset, function(tasks) {
         var task = tasks[task_index];
@@ -396,7 +399,7 @@ $(document).ready(function () {
                 const isStart = !(window.location.href.includes("listener") || window.location.href.includes("speaker"));
                 if (isStart) {
                     if ($("#objective-text").text().includes("copy")) {
-                        pre_continue('copy_paste');
+                        pre_continue();
                     }
                 }
 
