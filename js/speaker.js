@@ -391,7 +391,6 @@ $(document).ready(function () {
         }
 
         get_replacement_words(words_to_replace).then(replacements => {
-            console.log(replacements);
 
             if (words_to_replace != null && words_to_replace.length != 0 && GOOD_WORDS.length > MIN_WORDS) {
 

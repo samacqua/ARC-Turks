@@ -1,3 +1,5 @@
+var DESCRIPTIONS_TYPE;
+
 // so can't exit modal by pressing outside of it
 $.fn.modal.prototype.constructor.Constructor.Default.backdrop = 'static';
 $.fn.modal.prototype.constructor.Constructor.Default.keyboard =  false;
@@ -92,7 +94,7 @@ function next_task(first_task=false) {
         return;
     }
 
-    get_unused_desc().then(task_desc => {
+    get_unused_desc(DESCRIPTIONS_TYPE).then(task_desc => {
 
         if (task_desc == -1) {
 
@@ -216,4 +218,13 @@ function show_modal(title, body_elements, button_title, action) {
     $("#generic_modal_exit_btn").attr("onclick", `${action}`);
 
     $("#generic_modal").modal('show');
+}
+
+function field_exists(field) {
+    var url = window.location.href;
+    if(url.indexOf('?' + field + '=') != -1)
+        return true;
+    else if(url.indexOf('&' + field + '=') != -1)
+        return true;
+    return false
 }

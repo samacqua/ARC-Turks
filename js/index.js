@@ -1,7 +1,44 @@
+var QUIZ_QUESTIONS;
+
 $(window).on('load', function () {
 
-    // init_tasks_collection();     // uncomment to initialize database
+    // init_firestore(); // uncomment to initialize database
 
+    // set_user_info("uidtest", "agetest", "gendertest", "nl_ex");
+    // set_user_complete_time("uidtest", "timetest", "tasktest");
+
+    // (see_desc, do_desc, grid_desc, task_id, user_id, attempts, attemp_jsons, desc_time, ver_time, selected_example, type="nl")
+    // store_description("seetest", "dotest", "gridtest", "0", "uidtest", "1", "[]", "100", "30", "0", "ex");
+    // give_up_description("0", type="ex");
+    // get_description_by_id("0", "1531426a-bf49-4581-876c-67c0316bd02b", "nl").then(description => {
+    //     console.log(description);
+    // });
+    // get_task_descriptions("0", "nl").then(descriptions => {
+    //     console.log(descriptions);
+    // });
+    // get_task_descs_interactions_count("0", type="nl").then(count => {
+    //     console.log(count)
+    // });
+    // get_all_descriptions_interactions_count("nl").then(counts => {
+    //     console.log(counts);
+    // });
+    // get_unused_desc("nl").then(desc => {
+    //     console.log(desc);
+    // });
+
+    // (desc_id, task_id, user_id, attempts, attempt_jsons, total_time, gave_up = false, type="nl")
+    // store_listener("1531426a-bf49-4581-876c-67c0316bd02b", "0", "uidtest", "2", [{}], "100", gave_up=false, type="nl");
+
+    // claim_unused_desc("a7fa8814-f1d1-4c1e-9946-640d56c74b2d", "nl_ex");
+
+    // get_words().then(words => {
+    //     console.log(words);
+    // });
+
+    // get_word_vec("apple").then(vec => {
+    //     console.log(vec);
+    // });
+    
     // correctly size the progress bar
     size_progress_bar();
 
@@ -15,13 +52,12 @@ $(window).on('load', function () {
     $("#grid_size_p").text(task.grid_desc);
     $("#see_p").text(task.see_desc);
     $("#do_p").text(task.do_desc);
+    SELECTED_EXAMPLE = task.selected_example;
 
     // initialize the number of items complete, and the number of practice items complete
-    // items_complete is number of actual tasks (for determining when complete with study)
-    // prac_complete is for finishing instructions and practice tasks (for updating progress bar)
-    sessionStorage.setItem("items_complete", "0");
-    sessionStorage.setItem("prac_complete", "0");
-    sessionStorage.setItem('tasks_completed', "-1");
+    sessionStorage.setItem("items_complete", "0"); // number of actual tasks (for determining when complete with study)
+    sessionStorage.setItem("prac_complete", "0"); //for finishing instructions and practice tasks (for updating progress bar)
+    sessionStorage.setItem('tasks_completed', "-1"); // a list of tasks completed to avoid doing same task twice
 
     // get consent, then demographic, then present study, then begin solving patterns
     $('#consentModal').modal('show');
@@ -30,7 +66,69 @@ $(window).on('load', function () {
     const user_id = Math.floor(Math.random() * 1e10);
     sessionStorage.setItem("uid", user_id);
 
+    // get the type of descriptions (nl, nl_ex, ex)
+    DESCRIPTIONS_TYPE = "nl";
+    if (field_exists('type')) {
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        DESCRIPTIONS_TYPE = urlParams.get('type');
+    }
+
+    switch (DESCRIPTIONS_TYPE) {
+        case "nl":
+            // remove examples area
+            $("#examples_area").remove();
+
+            // edit tutorial
+            for (i=0;i<TUT_LIST.length;i++) {
+                if (arraysEqual(TUT_LIST[i][1], ["objective-col"])) {
+                    TUT_LIST.splice(i+1, 0, 
+                    ["This is the description area. This is where the pattern is described.", ["description-col"], 30, 35, 10],
+                    ["This is the description, which is written by another person.", ["description-text"], 30, 35, 10]);
+                    break;
+                }
+            }
+            break;
+        case "nl_ex":
+            // change objective text
+            $("#objective-text").html('Create the correct output based on the description, example transformation, and input grid.');
+            // edit tutorial
+            for (i=0;i<TUT_LIST.length;i++) {
+                if (arraysEqual(TUT_LIST[i][1], ["objective-col"])) {
+                    console.log("in");
+                    TUT_LIST.splice(i+1, 0, 
+                    ["This is the description area. This is where the pattern is described.", ["description-col"], 30, 35, 10],
+                    ["This is the description, which is written by another person.", ["description-text"], 30, 35, 10],
+                    ["This is the examples area, which is where there will be an example of the transformation.", ["examples_area"], 30, 35, 10]);
+                    break;
+                }
+            }
+            break;
+        case "ex":
+            // remove description
+            $("#description-text").remove();
+
+            // change objective text
+            $("#objective-text").html('Create the correct output based on the example transformation.');
+
+            // edit tutorial
+            for (i=0;i<TUT_LIST.length;i++) {
+                if (arraysEqual(TUT_LIST[i][1], ["objective-col"])) {
+                    TUT_LIST.splice(i+1, 0, 
+                    ["This is the examples area. This is where an example of the pattern is shown.", ["description-col"], 30, 35, 10]);
+                    break;
+                }
+            }
+            break;
+        default:
+            break;
+    }
+
+    console.log(DESCRIPTIONS_TYPE);
+
     // set up quiz
+    QUIZ_QUESTIONS = GEN_QUIZ_QUESTIONS;
+    QUIZ_QUESTIONS.unshift(TASK_SPECIFIC_QUESTION[DESCRIPTIONS_TYPE]);
     var quizContainer = document.getElementById('quiz');
     showQuestions(QUIZ_QUESTIONS, quizContainer);
 });
@@ -43,8 +141,6 @@ $(window).on('load', function () {
 var TUT_LIST = [
     ["You will now be walked through the layout. Click any of the un-highlighted area to continue.", [], 30, 20, 20],
     ["This is the Objective bar. This is where your task will be written.", ["objective-col"], 30, 20, 20],
-    ["This is the description area. This is where the pattern is described.", ["description-col"], 30, 35, 10],
-    ["This is the description, which is written by another person.", ["description-text"], 30, 35, 10],
     ["This is the input area. You will apply the transformation to this grid.", ["input-col"], 30, 5, 70],
     ["This is the output area. This is where you will create the correct output grid. Let's break it down a little more...", ["output-col"], 30, 10, 35],
     ["This is where you can change the grid size.", ["resize_control_btns"], 50, 5, 35],
@@ -252,7 +348,20 @@ function continue_tutorial() {
         $("#tut-continue-message").css('background', 'rgba(0,0,0,0.0)');
 
         $("#quiz_modal").modal("show");
-        $("#objective-text").html('Create the correct output based on the description, example transformations, and input grid.');
+
+        switch (DESCRIPTIONS_TYPE) {
+        case "nl":
+            $("#objective-text").html('Create the correct output based on the description and input grid.');
+            break;
+        case "nl_ex":
+            $("#objective-text").html('Create the correct output based on the description, example transformation, and input grid.');
+            break;
+        case "ex":
+            $("#objective-text").html('Create the correct output based on the example transformation.');
+            break;
+        default:
+            break;
+        }
 
         FINISHED_TUT = true;
 
@@ -409,50 +518,13 @@ function exit_demographic() {
     const uid = sessionStorage.getItem('uid');
     set_user_info(uid, age, gender);
 
-    $('#demographic_modal').one('hidden.bs.modal', function () { $('#introModal').modal('show'); }).modal('hide');
+    const introModalID = DESCRIPTIONS_TYPE + 'IntroModal';
+    $('#demographic_modal').one('hidden.bs.modal', function () { $('#' + introModalID).modal('show'); }).modal('hide');
 }
 
 // =======================
 // Quiz
 // =======================
-
-const QUIZ_QUESTIONS = [
-    {
-        question: "Your goal is to...",
-        answers: {
-            a: 'create grids that look like other grids',
-            b: 'write a description of the transformation based on grid examples so that another person can create the correct output grid',
-            c: 'use a description of the pattern to create the correct output grid'
-        },
-        correctAnswer: 'c'
-    },
-    {
-        question: "It is important to...",
-        answers: {
-            a: 'Use as few attempts as possible.',
-            b: 'Complete the tasks as fast as possible.',
-            c: 'Use as many colors as possible.'
-        },
-        correctAnswer: 'a'
-    },
-    {
-        question: "To edit the output grid, what are the 3 modes you can use and their correct description?",
-        answers: {
-            a: '1). Draw -- to edit individual pixels. 2). Flood fill -- to fill in entire areas. 3). Copy-paste -- to copy a section of the grid.',
-            b: '1). Draw -- to edit individual pixels. 2). Stamper -- to place down a stamp of a shape. 3). Line -- to make a line between two pixels.',
-            c: 'There is only one mode.'
-        },
-        correctAnswer: 'a'
-    },
-    {
-        question: "If you give up, will you be given a bonus for completing that task?",
-        answers: {
-            a: 'Yes.',
-            b: 'No.',
-        },
-        correctAnswer: 'b'
-    }
-];
 
 function showQuestions(questions, quizContainer) {
     /*

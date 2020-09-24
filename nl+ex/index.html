@@ -246,8 +246,49 @@
         </div>
     </div>
 
-    <!-- Introduction Modal -->
-    <div class="modal fade" id="introModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <!-- NL Introduction Modal -->
+    <div class="modal fade" id="nlIntroModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Overview of Your Role</h3>
+                </div>
+                    <div class="modal-body" id="gen-modal-body">
+
+                        <p>If I showed you this grid:</p>
+
+                        <img class="io" src="img/grid_inp_1.png">
+
+                        <p>And I told you: </p>
+                        <p><strong>"Make this grid blue"</strong></p>
+                        <p>Would you be able to make this transformation? Would you create the correct output shown below (hover over to show)?</p>
+
+                        <img class="io" id="io_ex"src="img/grid_out_1.png">
+
+                        <hr>
+                        <p>Great! If I gave you this grid:</p>
+
+                        <img class="io" src="img/grid_inp_2.png">
+
+                        <p>And I told you:</p>
+                            <p><strong>"You should see a 3x3 grid with a colored dot in the middle. Create a 5x5 grid that is filled with the middle color."</strong></p>
+                        <p> Would you be able to make this transformation? Would you create the correct output shown below (hover over to show)?</p>
+
+                        <img class="io" id="io_ex" src="img/grid_out_2.png">
+
+                        <p>These are simple examples of the tasks you will solve in this study. You will be given a description of a transformation, and you will have to use that description to create the correct output. You will also be given an example of the transformation.</p>
+                        <p><b>It is important that you use as few attempts as possible. The more tasks you complete, and the fewer attempts you take on each, the bigger reward you will get.</b></p>
+                        <p>You can always give up on a task, but you will not be given a bonus for that task.</p>
+                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="START_TIME = new Date(); continue_tutorial()">Continue to Examples</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NL+example Introduction Modal -->
+    <div class="modal fade" id="nl+exIntroModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
