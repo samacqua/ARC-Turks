@@ -113,6 +113,8 @@ function check() {
         const do_desc = urlParams.get('do');
         const desc_time = urlParams.get('time');
 
+        sessionStorage.setItem('done_speaker_task', true);
+
         store_description(see_desc, do_desc, grid_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, desc_time, totalTime, -1)
             .then(function () { next_task(); })
             .catch(function (error) { console.log('Error storing response ' + error); });

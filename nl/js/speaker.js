@@ -23,16 +23,31 @@ $(window).on('load', function () {
     $("#what_you_do").val(HAVE_TO_PREFIX);
 
     // show initial instructions
-    $('#instructionsModal').modal('show');
+    if (sessionStorage.getItem('done_speaker_task') == 'true') {
+        $('#minimalInstructionsModal').modal('show');
+    } else {
+        $('#instructionsModal').modal('show');
+    }
 
     // get words that have already been used and their word vecs
     get_words().then(words => {
         GOOD_WORDS = words.map(function (value) {
             return value.toLowerCase();
         });
-        console.log(GOOD_WORDS.length);
+        console.log("Length of previously used words:", GOOD_WORDS.length);
+
+        // get word vecs from db and cache it
         for (i=0;i<GOOD_WORDS.length;i++) {
             get_word_vec_cache(GOOD_WORDS[i]);
+        }
+
+        // only show message about highlighting words that have previously not been used if we will be highlighting words
+        if (GOOD_WORDS.length < MIN_WORDS) {
+            for (i=0;i<TUT_LIST.length;i++) {
+                if (TUT_LIST[i][0].includes("If you use a word in your description that has not been used")) {
+                    TUT_LIST.splice(i, 1);
+                }
+            }
         }
     }).catch(error => {
         infoMsg("Could not load words that can been used. Please check your internet connection and reload the page.");
@@ -48,6 +63,15 @@ $(window).on('load', function () {
         PAST_DESCS = descriptions;
         createExampleDescsPager(descriptions);
         showDescEx(0);
+
+        // if no descriptions, do not tell them about the anatomy of descriptions
+        if (descriptions.length == 0) {
+            for (i=0;i<TUT_LIST.length;i++) {
+                if (TUT_LIST[i][0].includes("At the bottom of each description")) {
+                    TUT_LIST.splice(i, 1);
+                }
+            }
+        }
     }).catch(error => {
         errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
     });
@@ -141,6 +165,13 @@ function continue_tutorial() {
         if (id != "objective-col") {
             $(`#${id}`).css('background-color', 'gainsboro');
         }
+    }
+
+    // scroll to highlighted element
+    if (next_item[1].length > 0) {
+        $([document.documentElement, document.body]).animate({
+            scrollTop: $('#' + next_item[1][0]).offset().top-10
+        }, 1000);
     }
 
     CUR_HIGHLIGHT = next_item[1];
@@ -275,7 +306,7 @@ function get_replacement_words(words, limit=10) {
                         // better way than writing out mappings? must be.
                         const str_num_mapping = { 'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10 };
                         if (str_num_mapping[word] !== undefined) {
-                            closest = [str_num_mapping[word]];
+                            closest = [([0, str_num_mapping[word]])];
                         }
 
                         replace_words.push([words[ii], closest]);

@@ -45,7 +45,7 @@
     <!-- JS files -->
     <script src="js/speaker.js"></script>
     <script src="js/common.js"></script>
-    <script src="js/constants.js"></script>
+    <script src="../common/constants.js"></script>
     <script src="js/grids.js"></script>
     <script src="js/more_grids.js"></script>
     <script src="js/fire.js"></script>
@@ -207,6 +207,29 @@
                 <div class="modal-footer">
                     <button onclick="continue_tutorial()" type="button" class="btn btn-primary"
                         data-dismiss="modal">Continue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Minimal Instructions Modal -->
+    <div class="modal fade" id="minimalInstructionsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
+                </div>
+                <div class="modal-body" id="gen-modal-body">
+                    <p>For this task, you will once again <i>create the description.</i></p>
+                    <p>You are shown a few examples of the pattern on the left. You have to recognize the pattern, then
+                        describe the pattern in the middle so that someone, given a new input grid, can create the
+                        correct output grid.</p>
+                    <p>You can give up after some time, but you will <b>not be eligible for a bonus for this task.</b>
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="scroll_highlight_objective();" type="button" class="btn btn-primary" data-dismiss="modal">Continue</button>
                 </div>
             </div>
         </div>

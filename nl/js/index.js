@@ -24,7 +24,7 @@ $(window).on('load', function () {
     sessionStorage.setItem('tasks_completed', "-1");
 
     // get consent, then demographic, then present study, then begin solving patterns
-    $('#instructionsModal').modal('show');
+    $('#consentModal').modal('show');
 
     // assign a random id to the user
     const user_id = Math.floor(Math.random() * 1e10);
@@ -43,9 +43,8 @@ $(window).on('load', function () {
 var TUT_LIST = [
     ["You will now be walked through the layout. Click any of the un-highlighted area to continue.", [], 30, 20, 20],
     ["This is the Objective bar. This is where your task will be written.", ["objective-col"], 30, 20, 20],
-    ["This is the description area. This is where you will learn the pattern. There are two parts:", ["description-col"], 30, 35, 10],
+    ["This is the description area. This is where the pattern is described.", ["description-col"], 30, 35, 10],
     ["This is the description, which is written by another person.", ["description-text"], 30, 35, 10],
-    ["This is the examples area, which is where there will be an example of the transformation.", ["task_preview"], 30, 35, 10],
     ["This is the input area. You will apply the transformation to this grid.", ["input-col"], 30, 5, 70],
     ["This is the output area. This is where you will create the correct output grid. Let's break it down a little more...", ["output-col"], 30, 10, 35],
     ["This is where you can change the grid size.", ["resize_control_btns"], 50, 5, 35],
