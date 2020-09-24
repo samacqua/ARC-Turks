@@ -78,6 +78,54 @@ function finish() {
     set_user_complete_time(uid, delta_time, 'time_to_complete');
 }
 
+function get_next_task(first_task=false) {
+
+    return new Promise(function (resolve, reject) {
+        var num_tasks_complete = parseInt(sessionStorage.getItem('items_complete') || 0);
+
+        if (!first_task) {
+            // increment number of tasks complete if not loading the first task, bc next task is called after completing a task
+            num_tasks_complete++;
+        }
+
+        if (num_tasks_complete >= TOTAL_TASKS_TO_COMPLETE) {
+            return resolve("finish");
+        }
+
+        get_unused_desc(DESCRIPTIONS_TYPE).then(task_desc => {
+
+            if (task_desc == -1) {
+
+                // force listener if haven't completed enough tasks
+                const force_listener = (num_tasks_complete <= MIN_TASKS_BEFORE_SPEAKER);
+
+                select_casino(force_listener, DESCRIPTIONS_TYPE).then(task => {
+
+                    select_arm(task, DESCRIPTIONS_TYPE).then(desc_id => {
+                        if (desc_id == -1) {
+                            return resolve(`speaker.html?task=${task}`);
+                        } else {
+                            return resolve(`listener.html?task=${task}&id=${desc_id}&ver=false`);
+                        }
+                    }).catch(error => {
+                        console.log(error);
+                    });
+                }).catch(error => {
+                    console.log(error);
+                });
+
+            } else {
+                const task = task_desc[0]
+                const desc_id = task_desc[1]
+                return resolve(`listener.html?task=${task}&id=${desc_id}&ver=false`);
+            }
+
+        }).catch(error => {
+            console.log(error);
+        });
+    });
+}
+
 /**
  * go to next task
  */

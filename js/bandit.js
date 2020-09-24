@@ -4,11 +4,12 @@
  */
 function select_casino(force_listener, type) {
     return new Promise(function (resolve, reject) {
-        get_all_descriptions_interactions_count(DESCRIPTIONS_TYPE).then(counts => {
+        get_all_descriptions_interactions_count(type).then(counts => {
             var num_descriptions = counts[0];
             var num_interactions = counts[1];
 
             const max = Math.max.apply(Math, num_interactions);
+            const tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
 
             // make all tasks with no descs or # arms <= sqrt(# interactions) (so needs new arm) have the max score so
             //      that they aren't picked once study is actually going, and so at the start
@@ -20,8 +21,7 @@ function select_casino(force_listener, type) {
                     }
 
                     // if already done task, make sure it is not chosen again
-                    const tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
-                    if (tasks_done.includes(toString(i))) {
+                    if (tasks_done.includes(i.toString())) {
                         num_interactions[i] += 2*max;
                     }
                 }
