@@ -155,11 +155,10 @@ var globalResizeTimer = null;
 $(window).resize(function() {
     if(globalResizeTimer != null) window.clearTimeout(globalResizeTimer);
     globalResizeTimer = window.setTimeout(function() {
-        console.log('resize');
         try {
             resizeOutputGrid();
         } catch (err) {
-            console.log("no output grid");
+            console.log("no output grid to resize");
         }
         loadTask(TASK_ID);
     }, 500);
@@ -199,21 +198,6 @@ function size_progress_bar() {
     $("#instructions_label").css("width", `${instructions_width}%`);
     $("#tutorial_label").css("width", `${tutorial_width}%`);
     $("#done_label").css("width", `${tasks_width}%`);
-}
-
-/**
- * Display a modal with the given title, text, and exit function.
- */
-function show_modal(title, body_elements, button_title, action) {
-    $("#generic_modal_title").text(title);
-    for (i=0; i<body_elements.length;i++) {
-        const element = body_elements[i];
-        $("#generic_modal_body").append(element);
-    }
-    $("#generic_modal_exit_btn").html(button_title);
-    $("#generic_modal_exit_btn").attr("onclick", `${action}`);
-
-    $("#generic_modal").modal('show');
 }
 
 // create random id so queue and desc have same id

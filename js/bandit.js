@@ -56,8 +56,6 @@ function select_arm(task, type) {
                 // UCB
                 get_task_descriptions(task, type).then(descriptions => {
 
-                    console.log(descriptions);
-
                     var ucbs = [];
                     for (i=0;i<descriptions.length;i++) {
         

@@ -189,7 +189,6 @@ function pre_continue(flag = null) {
                 }
                 return;
             } else if (CURRENT_OUTPUT_GRID.grid.width == CURRENT_INPUT_GRID.grid.width && CURRENT_OUTPUT_GRID.height == CURRENT_INPUT_GRID.height) {
-                console.log("same size");
                 for (var i = 0; i < CURRENT_OUTPUT_GRID.grid.length; i++) {
                     ref_row = CURRENT_OUTPUT_GRID.grid[i];
                     for (var j = 0; j < ref_row.length; j++) {
@@ -397,8 +396,6 @@ function check_grid() {
      * checks if output is correct. If so and completed enough tasks, move on to actual task
      */
     syncFromEditionGridToDataGrid();
-    console.log(TEST_PAIRS);
-    console.log(CURRENT_TEST_PAIR_INDEX);
     reference_output = TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output'];
     submitted_output = CURRENT_OUTPUT_GRID.grid;
 

@@ -372,7 +372,6 @@ function claim_unused_desc(desc_id, type) {
  * Store user demographic information
  */
 function set_user_info(user_id, age, gender, type) {
-    console.log("Setting user info");
     db.collection("users").doc(user_id.toString()).set({
         'user_id': user_id,
         'age': age,

@@ -195,30 +195,6 @@ function loadTaskFromFile(e) {
     reader.readAsText(file);
 }
 
-var TASKS_DESCRIBED = [];
-
-function randomTask() {
-    var subset = "training";
-    $.getJSON("https://api.github.com/repos/samacqua/ARC-Turks/contents/data/" + subset, function(tasks) {
-        var task_index = Math.floor(Math.random() * tasks.length);
-        console.log(task_index);
-        TASKS_DESCRIBED.push(task_index);
-        var task = tasks[task_index];
-        $.getJSON(task["download_url"], function(json) {
-            try {
-                train = json['train'];
-                test = json['test'];
-            } catch (e) {
-                errorMsg('Bad file format');
-                return;
-            }
-            loadJSONTask(train, test);
-            TASK_ID = task_index;
-            //$('#load_task_file_input')[0].value = "";
-        })
-    })
-}
-
 function loadTask(task_index) {
     console.log(task_index);
     if (task_index == null) {
@@ -227,7 +203,6 @@ function loadTask(task_index) {
     var subset = "training";
     $.getJSON("https://api.github.com/repos/samacqua/ARC-Turks/contents/data/" + subset, function(tasks) {
         var task = tasks[task_index];
-        TASKS_DESCRIBED.push(task_index);
 
         $.getJSON(task["download_url"], function(json) {
             try {
@@ -275,7 +250,6 @@ function initializeSelectable() {
                 start: function(event, ui) {
                     $('.ui-selected').each(function(i, e) {
                         $(e).removeClass('ui-selected');
-                        console.log("bb");
                     });
                 }
             }

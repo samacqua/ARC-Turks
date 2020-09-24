@@ -404,11 +404,9 @@ $(document).ready(function () {
             if (words_to_replace != null && words_to_replace.length != 0 && GOOD_WORDS.length > MIN_WORDS) {
 
                 replacements.forEach(function(replacement_i, i) {
-                    console.log(i, replacement_i);
 
                     const word = replacement_i[0];
                     const replacement_words = replacement_i[1].map(function(item) { return item[1] });
-                    // console.log(i, word, replacement_words);
 
                     if($(`#${word}_${i}_dropdown`).length != 0) {
                         $(`#${word}_${i}_dropdown`).empty();
@@ -525,7 +523,6 @@ function give_up() {
      */
 
     const newTime = new Date();
-    console.log((newTime - START_DATE) / 1000);
     if ((newTime - START_DATE) / 1000 < 30) {
         errorMsg("Please try to figure out the pattern for at least thirty seconds before you give up.");
         return;
