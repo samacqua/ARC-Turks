@@ -53,7 +53,7 @@ $(window).on('load', function () {
     // get speaker task
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    const task = urlParams.get('task') || Math.floor(Math.random()*400).Î();  // if none provided, give random task (just for when messing around w it, won't actually happen)
+    const task = urlParams.get('task') || Math.floor(Math.random()*400);  // if none provided, give random task (just for when messing around w it, won't actually happen)
 
     loadTask(task);
     get_task_descriptions(task, DESCRIPTIONS_TYPE).then(function (descriptions) {

@@ -427,6 +427,7 @@ function init_firestore() {
      * Just sets 0 value to all tasks in db. 
      * Be careful! It will overwrite everything.
      */
+    const num_tasks = 400;
 
     console.log("Starting initialization...");
     var summary_data = {};
@@ -437,7 +438,7 @@ function init_firestore() {
         console.log("Initialized words in Firestore.")
 
         // store counts of interactions and descriptions for each description type for bandit algorithm
-        for (i = 0; i < 400; i++) {
+        for (i = 0; i < num_tasks; i++) {
             summary_data[`${i}_interactions_count`] = 0;
             summary_data[`${i}_descriptions_count`] = 0;
         }
@@ -453,7 +454,7 @@ function init_firestore() {
         console.log("Initialized ex summary in Firestore.");
 
         var batch = db.batch();
-        for (task_num = 0; task_num < 400; task_num++) {
+        for (task_num = 0; task_num < num_tasks; task_num++) {
             const task_data = {
                 'num_descriptions': 0,
                 'num_interactions': 0,
@@ -467,7 +468,7 @@ function init_firestore() {
         console.log("Initialized all nl tasks in Firestore.");
 
         var batch = db.batch();
-        for (task_num = 0; task_num < 400; task_num++) {
+        for (task_num = 0; task_num < num_tasks; task_num++) {
             const task_data = {
                 'num_descriptions': 0,
                 'num_interactions': 0,
@@ -481,7 +482,7 @@ function init_firestore() {
         console.log("Initialized all nl_ex tasks in Firestore.");
 
         var batch = db.batch();
-        for (task_num = 0; task_num < 400; task_num++) {
+        for (task_num = 0; task_num < num_tasks; task_num++) {
             const task_data = {
                 'num_descriptions': 0,
                 'num_interactions': 0,
