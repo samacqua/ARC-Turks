@@ -15,7 +15,7 @@ function select_casino(force_listener, type) {
             //      that they aren't picked once study is actually going, and so at the start
             //      when there are no descriptions, not constantly pulling from single casino
             if (force_listener) {
-                for (i = 0; i < 400; i++) {
+                for (i = 0; i < NUM_TASKS; i++) {
                     if (num_descriptions[i] <= Math.sqrt(num_interactions[i]) || num_descriptions[i] == 0) {
                         num_interactions[i] += max;
                     }
