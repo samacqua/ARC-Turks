@@ -427,8 +427,7 @@ function check_grid() {
     // if not last practice task
     if (PRAC_TASKS.length != 0) {
 
-
-        $("#give_up_gif").attr('src', `img/give_up_${TOTAL_PRAC_TASKS - PRAC_TASKS.length + 1}.gif`);
+        $("#give_up_vid").attr('src', `img/give_up_${TOTAL_PRAC_TASKS - PRAC_TASKS.length + 1}.mp4`);
 
         infoMsg("Correct! Solve " + (PRAC_TASKS.length).toString() + " more problem(s).");
 
