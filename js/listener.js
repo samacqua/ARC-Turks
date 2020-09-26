@@ -21,7 +21,10 @@ $(window).on('load', function () {
     const task = urlParams.get('task') || Math.floor(Math.random() * NUM_TASKS).toString();
     const desc_id = urlParams.get('id');
     IS_VERIFICATION = (urlParams.get('ver') == 'true');
-    if (desc_id == null && !IS_VERIFICATION) throw "You must provide a description id in the URL";
+    if (desc_id == null && !IS_VERIFICATION) {
+        errorMsg("You must provide a description id in the URL");
+        throw  "You must provide a description id in the URL";
+    }
 
     DESC_ID = desc_id;
     TASK_ID = task;
@@ -71,7 +74,7 @@ $(window).on('load', function () {
                 $("#do_p").text(description.do_desc);
             }
         }).catch(error => {
-            console.log(error);
+            console.error(error);
             errorMsg("Failed to load the task. Please ensure your internet connection and try again.");
         });
         set_instructions_modal(DESCRIPTIONS_TYPE);
@@ -144,11 +147,11 @@ function check() {
 
         store_description(see_desc, do_desc, grid_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, desc_time, totalTime, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE)
             .then(function () { next_task(); })
-            .catch(function (error) { console.log('Error storing response ' + error); });
+            .catch(function (error) { console.error('Error storing response ' + error); });
     } else {
         store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up = false, DESCRIPTIONS_TYPE)
             .then(function () { next_task(); })
-            .catch(function (error) { console.log("Error storing response: " + error); });
+            .catch(function (error) { console.error("Error storing response: " + error); });
     }
 }
 
@@ -180,6 +183,6 @@ function give_up() {
     } else {
         store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up = true, DESCRIPTIONS_TYPE)
             .then(function () { next_task(first_task = true); })
-            .catch(function (error) { console.log("Error storing response: " + error); });
+            .catch(function (error) { console.error("Error storing response: " + error); });
     }
 }

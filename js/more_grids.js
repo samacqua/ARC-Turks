@@ -196,9 +196,9 @@ function loadTaskFromFile(e) {
 }
 
 function loadTask(task_index) {
-    console.log(task_index);
+    console.log("Loading task:", task_index);
     if (task_index == null) {
-        throw "Tried to load a null task. Ensure that you are providing a task number."
+        console.warn("Tried to load a null task. Ensure that you are providing a task number.");
     }
     var subset = "training";
     $.getJSON("https://api.github.com/repos/samacqua/ARC-Turks/contents/data/" + subset, function (tasks) {

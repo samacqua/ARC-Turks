@@ -14,7 +14,7 @@ function errorMsg(msg) {
     $('#error_display').hide();
     $('#info_display').hide();
 
-    console.log(msg);
+    console.warn(msg);
 
     $('#error_display').html(msg);
     $('#error_display').css({ "visibility": "visible" });
@@ -108,10 +108,10 @@ function get_next_task(first_task = false) {
                             return resolve(`listener.html?task=${task}&id=${desc_id}&ver=false`);
                         }
                     }).catch(error => {
-                        console.log(error);
+                        console.error(error);
                     });
                 }).catch(error => {
-                    console.log(error);
+                    console.error(error);
                 });
 
             } else {
@@ -121,7 +121,7 @@ function get_next_task(first_task = false) {
             }
 
         }).catch(error => {
-            console.log(error);
+            console.error(error);
         });
     });
 }
@@ -162,10 +162,10 @@ function next_task(first_task = false) {
                         window.location.href = `listener.html?task=${task}&id=${desc_id}&ver=false`;
                     }
                 }).catch(error => {
-                    console.log(error);
+                    console.error(error);
                 });
             }).catch(error => {
-                console.log(error);
+                console.error(error);
             });
 
         } else {
@@ -176,7 +176,7 @@ function next_task(first_task = false) {
         }
 
     }).catch(error => {
-        console.log(error);
+        console.error(error);
     });
 }
 
@@ -206,7 +206,7 @@ $(window).resize(function () {
         try {
             resizeOutputGrid();
         } catch (err) {
-            console.log("no output grid to resize");
+            console.warn("Tried to resize the output grid, but there is no output grid to resize.");
         }
         loadTask(TASK_ID);
     }, 500);

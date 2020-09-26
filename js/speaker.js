@@ -83,7 +83,7 @@ $(window).on('load', function () {
             }
         }
     } else if (DESCRIPTIONS_TYPE == "ex") {
-        throw "Description type for speaker task should be natural language or natural language+example, not just example."
+        console.error("Description type for speaker task should be natural language or natural language+example, not just example.");
     }
 });
 

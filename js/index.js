@@ -66,7 +66,7 @@ function set_objective(desc_type) {
             $("#objective-text").html('Create the correct output based on the example transformation.');
             break;
         default:
-            throw "Unknown description type"
+            console.error("Unknown description type");
             break;
     }
 }
@@ -108,7 +108,7 @@ function format_walkthrough(desc_type) {
                         ["This is the examples area. This is where an example of the pattern is shown.", ["description-col"], 30, 35, 10]);
                     break;
                 default:
-                    throw "Unknown description type"
+                    console.error("Unknown description type");
                     break;
             }
         }

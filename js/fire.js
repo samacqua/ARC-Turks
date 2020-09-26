@@ -43,14 +43,14 @@ function get_unused_desc(type) {
 
                         const tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
                         if (tasks_done.includes(task)) {
-                            console.log("Already interacted with task:", task);
+                            console.log("Already interacted with task:", task, ", so will find another task.");
                             res();
                         } else {
                             claim_unused_desc(desc, type).then(function () {
                                 return resolve([task, desc]);
                             }).catch(error => {
                                 // throws an error if already claimed, so continue to next
-                                console.log(error);
+                                console.error(error);
                                 res();
                             });
                         }
@@ -165,7 +165,7 @@ function get_description_by_id(task_id, desc_id, type) {
 
             return resolve(description);
         }).catch(error => {
-            console.log(error);
+            console.error(error);
             return reject(error);
         });
     });
@@ -347,7 +347,7 @@ function claim_unused_desc(desc_id, type) {
             // This code may get re-run multiple times if there are conflicts.
             return transaction.get(desc_ref).then(function (doc) {
                 if (!doc.exists) {
-                    throw "Document does not exist!";
+                    throw "Trying to claim an unused description that does not exist!";
                 }
 
                 const cur_date = Math.floor(Date.now() / 1000);
@@ -380,7 +380,7 @@ function set_user_info(user_id, age, gender, type) {
     }).then(function () {
         console.log("set user info successfully");
     }).catch(function (err) {
-        console.log(err);
+        console.error(err);
     });
 }
 
@@ -395,7 +395,7 @@ function set_user_complete_time(user_id, time, task_name) {
         .then(function () {
             console.log(`set user time: ${task_name} successfully`);
         }).catch(function (err) {
-            console.log(err);
+            console.error(err);
         });
 }
 
@@ -493,10 +493,8 @@ function init_firestore() {
     }).then(function () {
         console.log("Initialized all ex tasks in Firestore.");
         console.log("Initialized Firestore!");
-        // resolve();
     }).catch(error => {
-        console.log("Error intializing Firestore: ", error);
-        // reject(error);
+        console.error("Error intializing Firestore: ", error);
     });
 }
 
@@ -534,7 +532,7 @@ function download_stamps_JSON() {
         // download the file:
         download_file(blob, "ARC-Stamps.json");
     }).catch(error => {
-        console.log("failed getting data.");
+        console.error("Failed getting data.");
         return reject(error);
     });
 }
