@@ -328,7 +328,7 @@ $(document).ready(function () {
         if (event.which == 86) {
             // Press V
             if (COPY_PASTE_DATA.length == 0) {
-                errorMsg('No data to paste.');
+                errorMsg('You must first copy (by selecting an area and pressing "C") to paste.');
                 return;
             }
             selected = $('.edition_grid').find('.ui-selected');
@@ -339,46 +339,41 @@ $(document).ready(function () {
 
             jqGrid = $(selected.parent().parent()[0]);
 
-            if (selected.length == 1) {
-                targetx = parseInt(selected.attr('x'));
-                targety = parseInt(selected.attr('y'));
+            targetx = parseInt(selected.attr('x'));
+            targety = parseInt(selected.attr('y'));
 
-                xs = new Array();
-                ys = new Array();
-                symbols = new Array();
+            xs = new Array();
+            ys = new Array();
+            symbols = new Array();
 
-                for (var i = 0; i < COPY_PASTE_DATA.length; i++) {
-                    xs.push(COPY_PASTE_DATA[i][0]);
-                    ys.push(COPY_PASTE_DATA[i][1]);
-                    symbols.push(COPY_PASTE_DATA[i][2]);
+            for (var i = 0; i < COPY_PASTE_DATA.length; i++) {
+                xs.push(COPY_PASTE_DATA[i][0]);
+                ys.push(COPY_PASTE_DATA[i][1]);
+                symbols.push(COPY_PASTE_DATA[i][2]);
+            }
+
+            minx = Math.min(...xs);
+            miny = Math.min(...ys);
+            for (var i = 0; i < xs.length; i++) {
+                x = xs[i];
+                y = ys[i];
+                symbol = symbols[i];
+                newx = x - minx + targetx;
+                newy = y - miny + targety;
+                res = jqGrid.find('[x="' + newx + '"][y="' + newy + '"] ');
+                if (res.length == 1) {
+                    cell = $(res[0]);
+                    setCellSymbol(cell, symbol);
                 }
+            }
 
-                minx = Math.min(...xs);
-                miny = Math.min(...ys);
-                for (var i = 0; i < xs.length; i++) {
-                    x = xs[i];
-                    y = ys[i];
-                    symbol = symbols[i];
-                    newx = x - minx + targetx;
-                    newy = y - miny + targety;
-                    res = jqGrid.find('[x="' + newx + '"][y="' + newy + '"] ');
-                    if (res.length == 1) {
-                        cell = $(res[0]);
-                        setCellSymbol(cell, symbol);
-                    }
+
+            // if in tutorial and in challenge to copy-paste, check completion
+            const isStart = !(window.location.href.includes("listener") || window.location.href.includes("speaker"));
+            if (isStart) {
+                if ($("#objective-text").text().includes("copy")) {
+                    pre_continue();
                 }
-
-
-                // if in tutorial and in challenge to copy-paste, check completion
-                const isStart = !(window.location.href.includes("listener") || window.location.href.includes("speaker"));
-                if (isStart) {
-                    if ($("#objective-text").text().includes("copy")) {
-                        pre_continue();
-                    }
-                }
-
-            } else {
-                errorMsg('Can only paste at a specific location; only select *one* cell as paste destination.');
             }
         }
     });
