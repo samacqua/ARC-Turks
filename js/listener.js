@@ -107,7 +107,7 @@ function check() {
      * check if output grid same as correct answer. if so, store info and move to next task
      */
     if (SENDING_TO_NEXT == true) {
-        break;
+        return;
     }
     syncFromEditionGridToDataGrid();
     reference_output = TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output'];
@@ -152,11 +152,19 @@ function check() {
         const desc_time = urlParams.get('time') || "0";
 
         store_description(see_desc, do_desc, grid_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, desc_time, totalTime, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE)
-            .then(function () { next_task(); })
+            .then(function () { 
+                set_user_complete_time(uid, totalTime, `${TASK_ID}_speaker`).then(function() {
+                    next_task(); 
+                }).catch(function (error) { console.error('Error storing response ' + error); });
+            })
             .catch(function (error) { console.error('Error storing response ' + error); });
     } else {
         store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up = false, DESCRIPTIONS_TYPE)
-            .then(function () { next_task(); })
+            .then(function () { 
+                set_user_complete_time(uid, totalTime, `${TASK_ID}_listener`).then(function() {
+                    next_task(); 
+                }).catch(function (error) { console.error('Error storing response ' + error); });
+            })
             .catch(function (error) { console.error("Error storing response: " + error); });
     }
 }
