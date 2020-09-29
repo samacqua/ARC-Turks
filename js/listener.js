@@ -5,9 +5,10 @@ var DESC_ID;
 
 var IS_VERIFICATION;
 
-const uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
+var uid;
 
 $(window).on('load', function () {
+    uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
     // get date for making sure they try before giving up
     START_DATE = new Date();
 
