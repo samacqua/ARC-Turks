@@ -396,8 +396,10 @@ function set_user_complete_time(user_id, time, task_name) {
         db.collection("users").doc(user_id.toString()).update(data)
             .then(function () {
                 console.log(`set user time: ${task_name} successfully`);
+                return resolve();
             }).catch(function (err) {
                 console.error(err);
+                return reject(err);
             });
     });
 }
