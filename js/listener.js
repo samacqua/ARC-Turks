@@ -101,10 +101,14 @@ function set_instructions_modal(desc_type) {
     }
 }
 
+var SENDING_TO_NEXT = false;
 function check() {
     /**
      * check if output grid same as correct answer. if so, store info and move to next task
      */
+    if (SENDING_TO_NEXT == true) {
+        break;
+    }
     syncFromEditionGridToDataGrid();
     reference_output = TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output'];
     submitted_output = CURRENT_OUTPUT_GRID.grid;
@@ -127,6 +131,7 @@ function check() {
         }
     }
 
+    SENDING_TO_NEXT = true;
     infoMsg("Correct!");
 
     const newDate = new Date();
