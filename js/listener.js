@@ -53,6 +53,8 @@ $(window).on('load', function () {
         const selected_example = urlParams.get('se') || "0";
         SELECTED_EXAMPLE = selected_example;
 
+        sessionStorage.setItem('done_speaker_task', true);
+
         $("#grid_size_p").text(grid_desc);
         $("#see_p").text(see_desc);
         $("#do_p").text(do_desc);
@@ -142,8 +144,6 @@ function check() {
         const see_desc = urlParams.get('see') || "";
         const do_desc = urlParams.get('do') || "";
         const desc_time = urlParams.get('time') || "0";
-
-        sessionStorage.setItem('done_speaker_task', true);
 
         store_description(see_desc, do_desc, grid_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, desc_time, totalTime, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE)
             .then(function () { next_task(); })

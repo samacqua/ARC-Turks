@@ -135,7 +135,7 @@ var TUT_LIST = [
     ["With flood fill, you can fill in entire areas.", ["floodfill"], 60, 5, 35],
     ["Try making the entire output grid yellow using flood fill.", ["toolbar_and_symbol_picker", "output_grid", "objective-col"], 30, 100, 100],
     ["With copy-paste, you can copy a part of the grid with C and paste with V.", ["copypaste"], 60, 5, 35],
-    ["Try to copy the light-blue square into the top left corner of the input.", ["input-col", "output_grid", "toolbar_and_symbol_picker", "objective-col"], 500, 100, 100]
+    ["Try to copy the light-blue square into the top left corner of the input. <br>(Make sure you are in copy-paste mode, then select an area and press 'C' to copy, and select an area and press 'V' to paste)", ["input-col", "output_grid", "toolbar_and_symbol_picker", "objective-col"], 500, 100, 100]
 ];
 
 // different feedback based on how they reached a state, these flags give that information
@@ -421,14 +421,16 @@ function check_grid() {
     const tut_time = (tut_end_time - parseInt(TUT_START_TIME)) / 1000;
     TUT_START_TIME = (new Date()).getTime();
 
+    window.clearTimeout(GIVE_UP_HINT);
+    GIVE_UP_HINT = setTimeout(function() {infoMsg("If you cannot figure out the pattern, press 'give up.'")}, 60000);
+
     const title = `tutorial_ex_${TOTAL_PRAC_TASKS - PRAC_TASKS.length}`;
     set_user_complete_time(uid, tut_time, title);
 
     // if not last practice task
     if (PRAC_TASKS.length != 0) {
 
-
-        $("#give_up_gif").attr('src', `img/give_up_${TOTAL_PRAC_TASKS - PRAC_TASKS.length + 1}.gif`);
+        $("#give_up_vid").attr('src', `img/give_up_${TOTAL_PRAC_TASKS - PRAC_TASKS.length + 1}.mp4`);
 
         infoMsg("Correct! Solve " + (PRAC_TASKS.length).toString() + " more problem(s).");
 
@@ -455,6 +457,7 @@ function check_grid() {
 // =======================
 
 var TUT_START_TIME = 0;
+var GIVE_UP_HINT;
 
 function send_user_complete_instructions_time() {
     const uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
@@ -464,6 +467,7 @@ function send_user_complete_instructions_time() {
     const delta = (end_instructions_time - parseInt(instructions_start_time)) / 1000;
 
     TUT_START_TIME = end_instructions_time;
+    GIVE_UP_HINT = setTimeout(function() {infoMsg("If you cannot figure out the pattern, press 'give up' to see the solution.")}, 60000);
 
     set_user_complete_time(uid, delta, 'instructions_time');
 }
