@@ -135,11 +135,11 @@ var TUT_LIST = [
     ["With flood fill, you can fill in entire areas.", ["floodfill"], 60, 5, 35],
     ["Try making the entire output grid yellow using flood fill.", ["toolbar_and_symbol_picker", "output_grid", "objective-col"], 30, 100, 100],
     ["With copy-paste, you can copy a part of the grid with C and paste with V.", ["copypaste"], 60, 5, 35],
-    ["Try to copy the light-blue square into the top left corner of the input. <br>(Make sure you are in copy-paste mode, then select an area and press 'C' to copy, and select an area and press 'V' to paste)", ["input-col", "output_grid", "toolbar_and_symbol_picker", "objective-col"], 500, 100, 100]
+    ["Try to copy the entire light-blue square from the input into the top left corner of the input. <br>(Make sure you are in copy-paste mode, then select an area and press 'C' to copy, and select an area and press 'V' to paste)", ["input-col", "output_grid", "toolbar_and_symbol_picker", "objective-col"], 500, 100, 100]
 ];
 
 // different feedback based on how they reached a state, these flags give that information
-var flags = { "copied_input": false };
+var flags = { "copied_input": false, 'copy-paste': false };
 
 // after some tasks, slight delay to ease transitions for user
 // this variable ensures they do not skip tutorial steps
@@ -173,7 +173,7 @@ function pre_continue(flag = null) {
             if (CURRENT_OUTPUT_GRID.width == CURRENT_OUTPUT_GRID.height && CURRENT_OUTPUT_GRID.width == 2) {
                 infoMsg("Great job! You correctly resized the grid.");
                 WAITING_TO_CONTINUE = true;
-                setTimeout(function () { continue_tutorial(); }, 2000);
+                setTimeout(function () { continue_tutorial(); }, 1000);
                 return;
             } else {
                 errorMsg("You resized the output grid, but to the wrong size.");
@@ -201,7 +201,7 @@ function pre_continue(flag = null) {
                 infoMsg("Great job! You have copied from the input grid, and reset the output.");
 
                 WAITING_TO_CONTINUE = true;
-                setTimeout(function () { continue_tutorial(); }, 2000);
+                setTimeout(function () { continue_tutorial(); }, 1000);
                 return;
             }
         } else if (arraysEqual(CUR_HIGHLIGHT, ["toolbar_and_symbol_picker", "output_grid", "objective-col"])) {
@@ -262,8 +262,12 @@ function pre_continue(flag = null) {
                 ref_row = ref_grid[i];
                 for (var j = 0; j < ref_row.length; j++) {
                     if (ref_row[j] != CURRENT_OUTPUT_GRID.grid[i][j]) {
-                        errorMsg("Don't draw the shape, use the 'Copy-Paste' tool.");
-                        resetOutputGrid();
+                        if (flags['copy-paste'] == false) {
+                            errorMsg("Don't draw the shape, use the 'Copy-Paste' tool.");
+                        } else {
+                            errorMsg("You correctly used copy-paste, but make sure you are copying the correct pattern into the correct location.");
+                        }
+                        setTimeout(function() { resetOutputGrid() }, 500);
                         return;
                     }
                 }
@@ -415,6 +419,7 @@ function check_grid() {
     }
 
     update_progress_bar(prac_inc = true);
+    scroll_highlight_objective();
 
     const uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
     const tut_end_time = (new Date()).getTime();

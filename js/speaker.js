@@ -94,7 +94,7 @@ var TUT_LIST = [
     ["You will now be walked through the layout. Click any of the un-highlighted area to continue.", [], 30, 20, 20],
     ["This is the examples area. As you can see, there are multiple input-output examples. There is a common pattern that changes each input grid to its respective output grid.", ["io_ex_col"], 30, 35, 10],
     ["This is the old descriptions area. Any past attempts to describe the pattern will be shown here.", ["description_ex_col"], 30, 5, 65],
-    ["At the bottom of each description, you will see how well people did using the description. So, if the description did pretty well, you may want to slightly change it. But, if it did badly, you should rewrite the entire description.", ["description_ex_col"], 60, 5, 65],
+    ["At the bottom of each description, you will see how well people did using the description. So, if the description did pretty well, you may want to slightly change it. But, if it did badly, you should rewrite the entire description.", ["description_ex_col"], 30, 5, 65],
     ["This is the description area. This is where you will describe the pattern you recognized in the examples area. You will break your description into 3 sections:", ["description_col"], 30, 10, 35],
     ["First, if the grid size changes, check this box.", ["grid_size_change_box"], 30, 10, 35],
     ["If the grid size does change, then describe how it changed.", ["grid_size_form"], 40, 10, 35],
@@ -499,9 +499,9 @@ function verify() {
         selected_example = parseInt($.trim($("#selectExampleIO").val()) - 1);
     }
 
-    // store the grid size does not change 
+    // store the grid size is the same as the input grid size
     if (grid_size_desc == GRID_SIZE_PREFIX) {
-        grid_size_desc = `${GRID_SIZE_PREFIX} does not change.`
+        grid_size_desc = `${GRID_SIZE_PREFIX} is the same as the input grid size.`
     }
 
     infoMsg("Bringing you to verfication...")

@@ -8,9 +8,9 @@ const NUM_TASKS = 10;
 const PRAC_TASKS = [
     {
         "task": 341,
-        "grid_desc": "The grid size... does not change.",
+        "grid_desc": "The grid size... is the same as the input grid size.",
         "see_desc": "In the input, you should see... a light blue 2x2 square with 4 colored cells around it.",
-        "do_desc": "To make the output, you have to... move each colored cell on top of the corner of the light blue square that it is closest to.",
+        "do_desc": "To make the output, you have to... move each colored cell to cover the corner of the light blue square that it is closest to.",
         "selected_example": 0
     },
     {

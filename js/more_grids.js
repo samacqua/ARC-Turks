@@ -372,7 +372,7 @@ $(document).ready(function () {
             const isStart = !(window.location.href.includes("listener") || window.location.href.includes("speaker"));
             if (isStart) {
                 if ($("#objective-text").text().includes("copy")) {
-                    pre_continue();
+                    pre_continue('copy-paste');
                 }
             }
         }
