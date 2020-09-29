@@ -16,13 +16,14 @@ function select_casino(force_listener, type) {
             //      when there are no descriptions, not constantly pulling from single casino
             if (force_listener) {
                 for (i = 0; i < NUM_TASKS; i++) {
-                    if (num_descriptions[i] <= Math.sqrt(num_interactions[i]) || num_descriptions[i] == 0) {
-                        num_interactions[i] += max;
+                    const ii = TASKS_TO_USE[i]; // TODO: get rid of ii and references -- temp hack to use old descriptions for pilot-pilot
+                    if (num_descriptions[ii] <= Math.sqrt(num_interactions[ii]) || num_descriptions[ii] == 0) {
+                        num_interactions[ii] += max;
                     }
 
                     // if already done task, make sure it is not chosen again
-                    if (tasks_done.includes(i.toString())) {
-                        num_interactions[i] += 2 * max;
+                    if (tasks_done.includes(ii.toString())) {
+                        num_interactions[ii] += 2 * max;
                     }
                 }
             }
@@ -31,8 +32,9 @@ function select_casino(force_listener, type) {
             num_interactions = num_interactions.map(val => {
                 return val + (Math.random() / 10)
             });
+            console.log(num_interactions);
             const min = Math.min.apply(Math, num_interactions);
-            return resolve(num_interactions.indexOf(min));
+            return resolve(TASKS_TO_USE[num_interactions.indexOf(min)]);    // return resolve(num_interactions.indexOf(min));
         })
             .catch(function (err) {
                 return reject(err);

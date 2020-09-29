@@ -67,6 +67,7 @@ function shuffle(a) {
  * Show the user their id
  */
 function finish() {
+    const uid = sessionStorage.getItem('uid') | "no uid";
     $("#finish_modal_uid").text(uid.toString());
     $("#finished_modal").modal('show');
 

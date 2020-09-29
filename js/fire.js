@@ -77,8 +77,9 @@ function get_all_descriptions_interactions_count(type) {
             var descriptions_count = [];
 
             for (i = 0; i < NUM_TASKS; i++) {
-                interactions_count.push(data[`${i}_interactions_count`]);
-                descriptions_count.push(data[`${i}_descriptions_count`]);
+                const ii = TASKS_TO_USE[i]; // TODO: get rid of ii and references -- temp hack to use old descriptions for pilot-pilot
+                interactions_count.push(data[`${ii}_interactions_count`]);
+                descriptions_count.push(data[`${ii}_descriptions_count`]);
             }
 
             return resolve([descriptions_count, interactions_count]);
