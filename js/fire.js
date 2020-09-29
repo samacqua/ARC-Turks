@@ -389,15 +389,17 @@ function set_user_info(user_id, age, gender, type) {
  * Store the amount of time it took a user to complete a task
  */
 function set_user_complete_time(user_id, time, task_name) {
-    var data = {};
-    data[task_name] = time;
+    return new Promise(function (resolve, reject) {
+        var data = {};
+        data[task_name] = time;
 
-    db.collection("users").doc(user_id.toString()).update(data)
-        .then(function () {
-            console.log(`set user time: ${task_name} successfully`);
-        }).catch(function (err) {
-            console.error(err);
-        });
+        db.collection("users").doc(user_id.toString()).update(data)
+            .then(function () {
+                console.log(`set user time: ${task_name} successfully`);
+            }).catch(function (err) {
+                console.error(err);
+            });
+    });
 }
 
 /**
