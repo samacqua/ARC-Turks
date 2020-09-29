@@ -3,8 +3,6 @@ var ATTEMPT_JSONS = [];
 var GOOD_WORDS = [];
 var PAST_DESCS = [];
 
-const uid = sessionStorage.getItem('uid') || uuidv4()+"dev";
-
 $(window).on('load', function () {
     // get date to check they are trying before giving up
     START_DATE = new Date();
@@ -55,6 +53,7 @@ $(window).on('load', function () {
     const urlParams = new URLSearchParams(queryString);
     const task = urlParams.get('task') || Math.floor(Math.random()*NUM_TASKS);  // if none provided, give random task (just for when messing around w it, won't actually happen)
 
+    DESCRIPTIONS_TYPE = sessionStorage.getItem('type') || "nl";
     loadTask(task);
     get_task_descriptions(task, DESCRIPTIONS_TYPE).then(function (descriptions) {
         PAST_DESCS = descriptions;
@@ -73,7 +72,6 @@ $(window).on('load', function () {
         errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
     });
 
-    DESCRIPTIONS_TYPE = sessionStorage.getItem('type') || "nl";
     if (DESCRIPTIONS_TYPE == "nl") {
         $("#select_ex_io").remove();
     } else if (DESCRIPTIONS_TYPE == "nl_ex") {
