@@ -16,14 +16,14 @@ function select_casino(force_listener, type) {
             //      when there are no descriptions, not constantly pulling from single casino
             if (force_listener) {
                 for (i = 0; i < NUM_TASKS; i++) {
-                    const ii = TASKS_TO_USE[i]; // TODO: get rid of ii and references -- temp hack to use old descriptions for pilot-pilot
-                    if (num_descriptions[ii] <= Math.sqrt(num_interactions[ii]) || num_descriptions[ii] == 0) {
-                        num_interactions[ii] += max;
+                    if (num_descriptions[i] <= Math.sqrt(num_interactions[i]) || num_descriptions[i] == 0) {
+                        num_interactions[i] += max;
                     }
 
+                    const ii = TASKS_TO_USE[i]; // TODO: get rid of ii and references -- temp hack to use old descriptions for pilot-pilot
                     // if already done task, make sure it is not chosen again
                     if (tasks_done.includes(ii.toString())) {
-                        num_interactions[ii] += 2 * max;
+                        num_interactions[i] += 2 * max;
                     }
                 }
             }
