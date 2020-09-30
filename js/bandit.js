@@ -78,9 +78,8 @@ function select_arm(task, type) {
 
                         ucbs.push(mean + Math.sqrt(variance))
                     }
-                    const argmin = ucbs.indexOf(Math.min.apply(Math, ucbs));
-
-                    return resolve(descriptions[argmin]['id']);
+                    const argmax = ucbs.indexOf(Math.max.apply(Math, ucbs));
+                    return resolve(descriptions[argmax]['id']);
 
                 }).catch(error => {
                     return reject(error);
