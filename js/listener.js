@@ -116,7 +116,7 @@ function check() {
     // have to store as json string bc firebase cannot store nested arrays
     ATTEMPT_JSONS.push(JSON.stringify(submitted_output));
 
-    if (reference_output.length != submitted_output.length) {
+    if (reference_output.length != submitted_output.length || reference_output[0].length != submitted_output[0].length) {
         errorMsg("Wrong answer. Try again.");
         return
     }

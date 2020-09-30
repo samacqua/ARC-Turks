@@ -207,7 +207,7 @@ function get_word_vec(word) {
  * store descriptions, task info and user info and user answers in firebase
  * returns promise so that can transition to next task after storing
  */
-function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attempts, attemp_jsons, desc_time, ver_time, selected_example, type) {
+function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attempts, attempt_jsons, desc_time, ver_time, selected_example, type) {
 
     return new Promise(function (resolve, reject) {
 
@@ -219,7 +219,7 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attem
         // set actual info for description in the specific task's collection
         var desc_data = {
             'verification_attempts': parseInt(attempts),
-            'attempt_jsons': attemp_jsons,
+            'attempt_jsons': attempt_jsons,
 
             'uid': user_id,
             'description_time': parseInt(desc_time),
@@ -295,7 +295,7 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, tota
         const desc_use_ref = task_doc.collection("descriptions").doc(desc_id).collection("uses").doc();
         batch.set(desc_use_ref, {
             'attempts': attempts,
-            'attemp_jsons': attempt_jsons,
+            'attempt_jsons': attempt_jsons,
             'gave_up': gave_up,
             'timestamp': ((new Date()).getTime() / 1000),
 
