@@ -528,7 +528,6 @@ function give_up() {
 
     // don't give them credit for completing the task if they have not completed it
     give_up_description(TASK_ID, DESCRIPTIONS_TYPE).then(function () {
-
         var tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
         tasks_done.push(TASK_ID);
         sessionStorage.setItem('tasks_completed', tasks_done);

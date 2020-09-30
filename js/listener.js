@@ -193,7 +193,7 @@ function give_up() {
 
     // TODO: How should we handle giving up? Just go to next task w/out incrementing?
     if (IS_VERIFICATION) {
-        give_up_description(TASK_ID, DESCRIPTIONS_TYPE).then(function () { next_task(first_task = true); });
+        give_up_description(TASK_ID, DESCRIPTIONS_TYPE).then(function() { next_task(first_task = true); });
     } else {
         store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up = true, DESCRIPTIONS_TYPE)
             .then(function () { next_task(first_task = true); })
