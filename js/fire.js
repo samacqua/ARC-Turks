@@ -224,6 +224,7 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attem
             'uid': user_id,
             'description_time': parseInt(desc_time),
             'verification_time': parseInt(ver_time),
+            'timestamp': ((new Date()).getTime() / 1000),
 
             'num_attempts': 0,  // # listeners who used description
             'num_success': 0,   // # listeners who used description successfully
@@ -296,6 +297,7 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, tota
             'attempts': attempts,
             'attemp_jsons': attempt_jsons,
             'gave_up': gave_up,
+            'timestamp': ((new Date()).getTime() / 1000),
 
             'uid': user_id,
             'time': parseInt(total_time)
