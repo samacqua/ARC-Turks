@@ -320,7 +320,8 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, tota
         const desc_doc = task_doc.collection("descriptions").doc(desc_id);
         var desc_update_data = { num_attempts: increment };
         if (success) {
-            desc_update_data['num_success'] = increment;
+            const success_inc = firebase.firestore.FieldValue.increment(1/attempts);
+            desc_update_data['num_success'] = success_inc;
         }
         batch.update(desc_doc, desc_update_data);
 
