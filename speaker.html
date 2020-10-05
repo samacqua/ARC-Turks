@@ -176,10 +176,10 @@
                 </div>
 
                 <div id="desc_col_buttons">
-                    <button onclick="$('#submitModal').modal('show')" type="button"
-                        class="btn btn-primary desc-buttons">Submit</button>
-                    <button type="button" class="btn btn-danger desc-buttons" data-toggle="modal"
-                        data-target="#giveUpModal">Give up</button>
+                    <span id="submit_btn"><button onclick="$('#submitModal').modal('show')" type="button"
+                        class="btn btn-primary desc-buttons">Submit</button></span> 
+                    <span id="give_up_btn"><button type="button" class="btn btn-danger desc-buttons" data-toggle="modal"
+                        data-target="#giveUpModal">Give up</button></span>
                 </div>
                 </br>
                 <button onclick="$('#instructionsModal').modal('show')" type="button" class="btn btn-secondary">Show
@@ -288,8 +288,8 @@
                     <h3 class="modal-title" id="gen-modal-title">Give Up</h3>
                 </div>
                 <div class="modal-body" id="gen-modal-body">
-                    <p>Are you sure that you can't determine the pattern? <strong>If you give up, you will not get paid
-                            for this problem.</strong></p>
+                    <p>Are you sure that you can't determine the pattern? <strong>If you give up, you will be given a new problem to replace
+                            this problem.</strong></p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">No, I'll try some more</button>

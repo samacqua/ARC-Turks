@@ -97,7 +97,8 @@ var TUT_LIST = [
     ["Then describe what you should expect to see in the input.", ["see_desc_form"], 40, 10, 35],
     ["Then, describe what you need to do to create the correct output. Keep in mind that the person using your description will see a different input grid than you are seeing.", ["do_desc_form"], 40, 5, 35],
     ["If you use a word in your description that has not been used, it will be highlighted red. To submit your description, you must replace every red word, or manually add it.", ["description_col"], 40, 5, 35],
-    ["Once you are happy with your description, press the Submit button. If you cannot describe the pattern, or realize you do not know the pattern, you can give up (but you will not be eligible for a bonus).", ["desc_col_buttons"], 40, 5, 35],
+    ["If you cannot describe the pattern, or realize you do not know the pattern, you can give up, and you will be given a new task to solve instead.", ["give_up_btn"], 40, 5, 35],
+    ["Once you are happy with your description, press the Submit button.", ["submit_btn"], 40, 5, 35],
 ];
 
 var CUR_HIGHLIGHT = null;

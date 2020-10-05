@@ -3,8 +3,7 @@ const MIN_TASKS_BEFORE_SPEAKER = 2;
 const TOTAL_PRAC_TASKS = 2;
 const MIN_WORDS = 100;
 const NUM_TASKS = 3;   // TODO: Change back to 400
-
-const TASKS_TO_USE = [0, 5, 6];  // TODO: Remove and all references, temp for pilot-pilot
+const MAX_ATTEMPTS_BUILDER = 3;
 
 // easy tasks for demonstration purposes
 const PRAC_TASKS = [

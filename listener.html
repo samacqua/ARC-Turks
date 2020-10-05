@@ -151,8 +151,6 @@
                 <button type="button" class="btn btn-secondary" onclick="copyFromInput()">Copy from input</button>
                 <button type="button" class="btn btn-secondary" onclick="resetOutputGrid()">Reset grid</button>
                 <button type="button" class="btn btn-success" onclick="check()">Check!</button>
-                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#giveUpModal">Give
-                    up</button>
 
                 <div id="toolbar">
                     <div>
@@ -272,27 +270,6 @@
                 <div class="modal-body" id="final-modal-body">
                     <p id="final_message">Thank you for participating in this study! Your survey code is: </p>
                     <h5 id="finish_modal_uid"></h5>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Give-up Modal -->
-    <div class="modal fade" id="giveUpModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title" id="gen-modal-title">Give Up</h3>
-                </div>
-                <div class="modal-body" id="gen-modal-body">
-                    <p>Are you sure that you can't determine the pattern? <strong>If you give up, you will not get paid
-                            for this problem.</strong></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No, I'll try some more</button>
-                    <button onclick="give_up()" type="button" class="btn btn-danger" data-dismiss="modal">Give
-                        Up</button>
                 </div>
             </div>
         </div>

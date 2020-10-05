@@ -101,7 +101,7 @@ function set_instructions_modal(desc_type) {
     }
 }
 
-var SENDING_TO_NEXT = false;
+var SENDING_TO_NEXT = false;    // while waiting for async calls, don't let user submit multiple times
 function check() {
     /**
      * check if output grid same as correct answer. if so, store info and move to next task
@@ -117,7 +117,12 @@ function check() {
     ATTEMPT_JSONS.push(JSON.stringify(submitted_output));
 
     if (reference_output.length != submitted_output.length || reference_output[0].length != submitted_output[0].length) {
-        errorMsg("Wrong answer. Try again.");
+        errorMsg(`Wrong answer. Try again. You have ${MAX_ATTEMPTS_BUILDER - ATTEMPT_JSONS.length} attempts left.`);
+            // used all attempts
+        if (ATTEMPT_JSONS.length == MAX_ATTEMPTS_BUILDER) {
+            SENDING_TO_NEXT = true;
+            used_all_attempts();
+        }
         return
     }
 
@@ -125,7 +130,12 @@ function check() {
         ref_row = reference_output[i];
         for (var j = 0; j < ref_row.length; j++) {
             if (ref_row[j] != submitted_output[i][j]) {
-                errorMsg("Wrong answer. Try again.");
+                errorMsg(`Wrong answer. Try again. You have ${MAX_ATTEMPTS_BUILDER - ATTEMPT_JSONS.length} attempts left.`);
+                    // used all attempts
+                if (ATTEMPT_JSONS.length == MAX_ATTEMPTS_BUILDER) {
+                    SENDING_TO_NEXT = true;
+                    used_all_attempts();
+                }
                 return
             }
         }
@@ -159,7 +169,7 @@ function check() {
             })
             .catch(function (error) { console.error('Error storing response ' + error); });
     } else {
-        store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up = false, DESCRIPTIONS_TYPE)
+        store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, success = true, DESCRIPTIONS_TYPE)
             .then(function () { 
                 set_user_complete_time(uid, totalTime, `${TASK_ID}_${DESCRIPTIONS_TYPE}_listener`).then(function() {
                     next_task(); 
@@ -169,34 +179,17 @@ function check() {
     }
 }
 
-function give_up() {
-    /**
-     * if after 1 minute, cannot figure out pattern or get correct output, give them the answer
-     */
-    const newTime = new Date();
-    if ((newTime - START_DATE) / 1000 < 30) {
-        errorMsg("Please try to figure out the pattern for at least 30 seconds before you give up.");
-        return;
-    }
-    if (ATTEMPT_JSONS.length < 1) {
-        errorMsg("Please try your best guess at least once before giving up.");
-        return;
-    }
+function used_all_attempts() {
+    const totalTime = ((new Date()) - START_DATE) / 1000;
+    errorMsg("Wrong answer. You have used all of your attempts. Bringing you to your next task...");
 
-    const newDate = new Date();
-    const totalTime = (newDate - START_DATE) / 1000;
-
-    // add to list of tasks completed , so we don't give same task
-    var tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
-    tasks_done.push(TASK_ID);
-    sessionStorage.setItem('tasks_completed', tasks_done);
-
-    // TODO: How should we handle giving up? Just go to next task w/out incrementing?
-    if (IS_VERIFICATION) {
-        give_up_description(TASK_ID, DESCRIPTIONS_TYPE).then(function() { next_task(first_task = true); });
-    } else {
-        store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up = true, DESCRIPTIONS_TYPE)
-            .then(function () { next_task(first_task = true); })
+    setTimeout(function() { 
+        if (IS_VERIFICATION) {
+            give_up_description(TASK_ID, DESCRIPTIONS_TYPE).then(function() { next_task(first_task = true); });
+        } else {
+            store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, success = false, DESCRIPTIONS_TYPE)
+            .then(function () { next_task(first_task = true); })    // should we count a failure 3 attempts as a completed task?
             .catch(function (error) { console.error("Error storing response: " + error); });
-    }
+        }
+     }, 1000);
 }

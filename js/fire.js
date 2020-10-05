@@ -10,13 +10,13 @@
 // };
 
 var firebaseConfig = {
-    apiKey: "AIzaSyDkx-mZ05NkpseYk7BN2kj8BmeWPoXOEwU",
-    authDomain: "arc-v3.firebaseapp.com",
-    databaseURL: "https://arc-v3.firebaseio.com",
-    projectId: "arc-v3",
-    storageBucket: "arc-v3.appspot.com",
-    messagingSenderId: "400560292229",
-    appId: "1:400560292229:web:c9b42b032c4da3aa4844ec"
+    apiKey: "AIzaSyA9yXW7Tnx3IYdiXMnmO20qp7IKc6lakS8",
+    authDomain: "arc-turk-ex-ios.firebaseapp.com",
+    databaseURL: "https://arc-turk-ex-ios.firebaseio.com",
+    projectId: "arc-turk-ex-ios",
+    storageBucket: "arc-turk-ex-ios.appspot.com",
+    messagingSenderId: "687250358397",
+    appId: "1:687250358397:web:16ac92ca0995b5d117b114"
   };
 
 // Initialize Firebase
@@ -87,9 +87,8 @@ function get_all_descriptions_interactions_count(type) {
             var descriptions_count = [];
 
             for (i = 0; i < NUM_TASKS; i++) {
-                const ii = TASKS_TO_USE[i]; // TODO: get rid of ii and references -- temp hack to use old descriptions for pilot-pilot
-                interactions_count.push(data[`${ii}_interactions_count`]);
-                descriptions_count.push(data[`${ii}_descriptions_count`]);
+                interactions_count.push(data[`${i}_interactions_count`]);
+                descriptions_count.push(data[`${i}_descriptions_count`]);
             }
 
             return resolve([descriptions_count, interactions_count]);
@@ -134,13 +133,12 @@ function get_task_descriptions(task_id, type) {
                 // doc.data() is never undefined for query doc snapshots
                 // loop will only run once, just indexing querySnapshot giving issues
                 const data = doc.data();
-                const num_success = data.num_attempts - data.listener_gave_up_count;
                 const description = {
                     'grid_desc': data.grid_description,
                     'see_desc': data.see_description,
                     'do_desc': data.do_description,
                     'selected_ex': data.selected_example,
-                    'num_success': num_success,
+                    'num_success': data.num_success,
                     'num_attempts': data.num_attempts,
                     'id': doc.id
                 };
@@ -228,7 +226,7 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attem
 
         // set actual info for description in the specific task's collection
         var desc_data = {
-            'verification_attempts': parseInt(attempts),
+            'num_verification_attempts': parseInt(attempts),
             'attempt_jsons': attempt_jsons,
 
             'uid': user_id,
@@ -238,7 +236,6 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attem
 
             'num_attempts': 0,  // # listeners who used description
             'num_success': 0,   // # listeners who used description successfully
-            'listener_gave_up_count': 0
         }
 
         if (type == "nl" || type == "nl_ex") {
@@ -291,7 +288,7 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attem
     });
 }
 
-function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, total_time, gave_up = false, type) {
+function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, total_time, success = true, type) {
     /**
      * store info for listener task in firebase
      * returns promise so that can transition to next task after storing
@@ -304,9 +301,9 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, tota
         // store attempt use in description doc's attempts collection
         const desc_use_ref = task_doc.collection("descriptions").doc(desc_id).collection("uses").doc();
         batch.set(desc_use_ref, {
-            'attempts': attempts,
+            'num_attempts': attempts,
             'attempt_jsons': attempt_jsons,
-            'gave_up': gave_up,
+            'success': success,
             'timestamp': ((new Date()).getTime() / 1000),
 
             'uid': user_id,
@@ -322,9 +319,7 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, tota
         // increment the description's number of attempts and number of times the listener gave up (if they gave up)
         const desc_doc = task_doc.collection("descriptions").doc(desc_id);
         var desc_update_data = { num_attempts: increment };
-        if (gave_up) {
-            desc_update_data['listener_gave_up_count'] = increment;
-        } else {
+        if (success) {
             desc_update_data['num_success'] = increment;
         }
         batch.update(desc_doc, desc_update_data);
