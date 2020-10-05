@@ -523,10 +523,13 @@ function give_up() {
 
     // don't give them credit for completing the task if they have not completed it
     give_up_description(TASK_ID, DESCRIPTIONS_TYPE).then(function () {
-        var tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
-        tasks_done.push(TASK_ID);
-        sessionStorage.setItem('tasks_completed', tasks_done);
 
-        next_task(first_task = true);
+        set_user_complete_time(sessionStorage.getItem("uid"), (newTime - START_DATE) / 1000, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker_(veto)`).then(function() {
+            var tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
+            tasks_done.push(TASK_ID);
+            sessionStorage.setItem('tasks_completed', tasks_done);
+    
+            next_task(first_task = true);
+        });
     });
 }
