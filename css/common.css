@@ -36,6 +36,11 @@ img {
     float: left;
 }
 
+mark {
+    background-color: rgba(70, 221, 248, 0.3);
+    border-radius: 3px;
+}
+
 .col-header {
     clear: both;
     margin-bottom: 15px;

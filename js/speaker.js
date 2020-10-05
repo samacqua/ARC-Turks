@@ -11,9 +11,6 @@ $(window).on('load', function () {
     size_progress_bar();
     update_progress_bar();
 
-    // hide grid size form
-    $("#grid_size_form").css("visibility", "hidden");
-
     // fill textbox forms with actual text
     $("#grid_size_desc").val(GRID_SIZE_PREFIX);
     $("#what_you_see").val(SHOULD_SEE_PREFIX);
@@ -96,8 +93,7 @@ var TUT_LIST = [
     ["This is the old descriptions area. Any past attempts to describe the pattern will be shown here.", ["description_ex_col"], 30, 5, 65],
     ["At the bottom of each description, you will see how well people did using the description. So, if the description did pretty well, you may want to slightly change it. But, if it did badly, you should rewrite the entire description.", ["description_ex_col"], 30, 5, 65],
     ["This is the description area. This is where you will describe the pattern you recognized in the examples area. You will break your description into 3 sections:", ["description_col"], 30, 10, 35],
-    ["First, if the grid size changes, check this box.", ["grid_size_change_box"], 30, 10, 35],
-    ["If the grid size does change, then describe how it changed.", ["grid_size_form"], 40, 10, 35],
+    ["First, describe how the grid size changes. If it does not change, then make a note of that.", ["grid_size_form"], 40, 10, 35],
     ["Then describe what you should expect to see in the input.", ["see_desc_form"], 40, 10, 35],
     ["Then, describe what you need to do to create the correct output. Keep in mind that the person using your description will see a different input grid than you are seeing.", ["do_desc_form"], 40, 5, 35],
     ["If you use a word in your description that has not been used, it will be highlighted red. To submit your description, you must replace every red word, or manually add it.", ["description_col"], 40, 5, 35],
@@ -123,7 +119,6 @@ function continue_tutorial() {
         $("#tut-continue-message").css('z-index', -2);
         $("#tut-continue-message").css('background', 'rgba(0,0,0,0.0)');
 
-        $("#grid_size_form").css("visibility", "hidden");
         scroll_highlight_objective();
         
         return;
@@ -455,11 +450,15 @@ function submit() {
      * If starting with right phrase, actually entered text, and has used all known words or added the unknown words, then unhide validation
      */
 
-    if ($("#what_you_see").val().trim().length < 33) {
+    if ($("#grid_size_desc").val().trim().length - GRID_SIZE_PREFIX.length < 5) {
+        errorMsg("Please enter a description of how the grid size changes.");
+        return
+    }
+    if ($("#what_you_see").val().trim().length - SHOULD_SEE_PREFIX.length < 5) {
         errorMsg("Please enter a description of what you see.");
         return
     }
-    if ($("#what_you_do").val().trim().length < 36) {
+    if ($("#what_you_do").val().trim().length - HAVE_TO_PREFIX.length < 5) {
         errorMsg("Please enter a description of what you change.");
         return
     }
@@ -499,11 +498,6 @@ function verify() {
         selected_example = parseInt($.trim($("#selectExampleIO").val()) - 1);
     }
 
-    // store the grid size is the same as the input grid size
-    if (grid_size_desc == GRID_SIZE_PREFIX) {
-        grid_size_desc = `${GRID_SIZE_PREFIX} is the same as the input grid size.`
-    }
-
     infoMsg("Bringing you to verfication...")
 
     const newTime = new Date();
@@ -535,19 +529,3 @@ function give_up() {
         next_task(first_task = true);
     });
 }
-
-$(function ()
-/**
- * listen for change in check box about if grid size changes
- */ {
-    $('#grid_size_changes').on('change', function () {
-        if (this.checked) {
-            $("#grid_size_form").css("visibility", "visible");
-        } else {
-            $("#grid_size_desc").val(GRID_SIZE_PREFIX);
-            $("textarea").trigger('keyup');
-            $("textarea").highlightWithinTextarea('update');
-            $("#grid_size_form").css("visibility", "hidden");
-        }
-    });
-});
