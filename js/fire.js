@@ -215,7 +215,7 @@ function get_word_vec(word) {
  * store descriptions, task info and user info and user answers in firebase
  * returns promise so that can transition to next task after storing
  */
-function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attempts, attempt_jsons, desc_time, ver_time, selected_example, type) {
+function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confidence, attempts, attempt_jsons, desc_time, ver_time, selected_example, type) {
 
     return new Promise(function (resolve, reject) {
 
@@ -228,6 +228,7 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, attem
         var desc_data = {
             'num_verification_attempts': parseInt(attempts),
             'attempt_jsons': attempt_jsons,
+            'confidence': confidence,
 
             'uid': user_id,
             'description_time': parseInt(desc_time),
@@ -343,6 +344,61 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, tota
     });
 }
 
+function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, user_id, confidence, attempts, attempt_jsons, desc_time, ver_time, selected_example, type) {
+    return new Promise(function (resolve, reject) {
+
+        var batch = db.batch();
+
+        const desc_id = uuidv4();
+        const desc_doc_ref = db.collection(type + "_failed_descs").doc(desc_id);
+
+        // set actual info for description in the specific task's collection
+        var desc_data = {
+            'num_verification_attempts': parseInt(attempts),
+            'attempt_jsons': attempt_jsons,
+
+            'uid': user_id,
+            'description_time': parseInt(desc_time),
+            'verification_time': parseInt(ver_time),
+            'timestamp': ((new Date()).getTime() / 1000)
+        }
+
+        // record if could not solve verification or if confidence was not high enough
+        if (confidence != null) {
+            desc_data['confidence'] = confidence;
+            desc_data['succeeded_verification'] = true;
+        } else {
+            desc_data['succeeded_verification'] = false;
+        }
+
+        if (type == "nl" || type == "nl_ex") {
+            desc_data['see_description'] = see_desc;
+            desc_data['do_description'] = do_desc;
+            desc_data['grid_description'] = grid_desc;
+        }
+        if (type == "ex" || type == "nl_ex") {
+            desc_data['selected_example'] = selected_example;
+        }
+
+        batch.set(desc_doc_ref, desc_data);
+
+        // increment num_descriptions and ver_gave_up_count for task in tasks collection (not desc_gave_up_count bc they would not be submitting description, handled seperately)
+        const increment = firebase.firestore.FieldValue.increment(1);
+        const task_ref = db.collection(type + "_tasks").doc(task_id.toString());
+
+        var task_update_data = {
+            desc_failure_count: increment,
+        };
+        batch.update(task_ref, task_update_data);
+
+        batch.commit().then(function () {
+            return resolve();
+        }).catch(function (err) {
+            return reject(err);
+        });
+    });
+}
+
 /**
  * Claim an unused description if it has not been claimed (or if that claim has expired)
  * (a claim ensures that an unused description only forces 1 attempt, and the time is to make sure
@@ -444,6 +500,13 @@ function init_firestore() {
     console.log("Starting initialization...");
     var summary_data = {};
 
+    const task_data = {
+        'num_descriptions': 0,
+        'num_interactions': 0,
+        'desc_gave_up_count': 0,    // number of times someone gave up on a description before submitting description
+        'desc_failure_count': 0     // number of times someone submitted description, then failed verfication or gave low confidence score (<5)
+    }
+
     db.collection('total').doc('summary').set({
         'words': []
     }).then(function () {
@@ -467,11 +530,6 @@ function init_firestore() {
 
         var batch = db.batch();
         for (task_num = 0; task_num < NUM_TASKS; task_num++) {
-            const task_data = {
-                'num_descriptions': 0,
-                'num_interactions': 0,
-                'desc_gave_up_count': 0
-            }
             batch.set(db.collection("nl_tasks").doc(task_num.toString()), task_data);
         }
         return batch.commit();
@@ -481,11 +539,6 @@ function init_firestore() {
 
         var batch = db.batch();
         for (task_num = 0; task_num < NUM_TASKS; task_num++) {
-            const task_data = {
-                'num_descriptions': 0,
-                'num_interactions': 0,
-                'desc_gave_up_count': 0
-            }
             batch.set(db.collection("nl_ex_tasks").doc(task_num.toString()), task_data);
         }
         return batch.commit();
@@ -495,11 +548,6 @@ function init_firestore() {
 
         var batch = db.batch();
         for (task_num = 0; task_num < NUM_TASKS; task_num++) {
-            const task_data = {
-                'num_descriptions': 0,
-                'num_interactions': 0,
-                'desc_gave_up_count': 0
-            }
             batch.set(db.collection("ex_tasks").doc(task_num.toString()), task_data);
         }
         return batch.commit();
