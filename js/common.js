@@ -69,7 +69,7 @@ function shuffle(a) {
 function finish() {
     const uid = sessionStorage.getItem('uid') || "no uid";
     $("#finish_modal_uid").text(uid.toString());
-    $("#finished_modal").modal('show');
+    $("#demographic_modal").modal('show');
 
     update_progress_bar();
 
@@ -77,6 +77,19 @@ function finish() {
     const delta_time = (parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time') || 0)) / 1000;
 
     set_user_complete_time(uid, delta_time, 'time_to_complete');
+}
+
+function exit_demographic() {
+    /**
+     * Get info from demographic modal
+     */
+    const gender = $('#gender_form').find("option:selected").text();
+    const age = $('#age_form').val().trim();
+    const uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
+    set_user_demographics(uid, age, gender, DESCRIPTIONS_TYPE);
+
+    const introModalID = DESCRIPTIONS_TYPE + 'IntroModal';
+    $('#demographic_modal').one('hidden.bs.modal', function () { $('#finished_modal').modal('show'); }).modal('hide');
 }
 
 function get_next_task(first_task = false) {

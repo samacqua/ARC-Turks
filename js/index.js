@@ -51,6 +51,12 @@ $(window).on('load', function () {
 // Format 
 // =======================
 
+
+function show_intro() {
+    const introModalID = DESCRIPTIONS_TYPE + 'IntroModal';
+    $('#consentModal').one('hidden.bs.modal', function () { $('#' + introModalID).modal('show'); }).modal('hide');
+}
+
 /**
  * set the objective based on the description type
  */
@@ -475,19 +481,6 @@ function send_user_complete_instructions_time() {
     GIVE_UP_HINT = setTimeout(function() {infoMsg("If you cannot figure out the pattern, press 'give up' to see the solution.")}, 60000);
 
     set_user_complete_time(uid, delta, 'instructions_time');
-}
-
-function exit_demographic() {
-    /**
-     * Get info from demographic modal
-     */
-    const gender = $('#gender_form').find("option:selected").text();
-    const age = $('#age_form').val().trim();
-    const uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
-    set_user_info(uid, age, gender, DESCRIPTIONS_TYPE);
-
-    const introModalID = DESCRIPTIONS_TYPE + 'IntroModal';
-    $('#demographic_modal').one('hidden.bs.modal', function () { $('#' + introModalID).modal('show'); }).modal('hide');
 }
 
 // =======================

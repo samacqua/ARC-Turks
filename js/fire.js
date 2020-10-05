@@ -1,13 +1,23 @@
 // Your web app's Firebase configuration
+// var firebaseConfig = {
+//     apiKey: "AIzaSyDe9mlqTQbwPvn-ZqS7pjAEnTv-ys9wGAY",
+//     authDomain: "arc-pilot-pilot.firebaseapp.com",
+//     databaseURL: "https://arc-pilot-pilot.firebaseio.com",
+//     projectId: "arc-pilot-pilot",
+//     storageBucket: "arc-pilot-pilot.appspot.com",
+//     messagingSenderId: "637909145149",
+//     appId: "1:637909145149:web:63e02da1ff6bcd3e767c54"
+// };
+
 var firebaseConfig = {
-    apiKey: "AIzaSyDe9mlqTQbwPvn-ZqS7pjAEnTv-ys9wGAY",
-    authDomain: "arc-pilot-pilot.firebaseapp.com",
-    databaseURL: "https://arc-pilot-pilot.firebaseio.com",
-    projectId: "arc-pilot-pilot",
-    storageBucket: "arc-pilot-pilot.appspot.com",
-    messagingSenderId: "637909145149",
-    appId: "1:637909145149:web:63e02da1ff6bcd3e767c54"
-};
+    apiKey: "AIzaSyDkx-mZ05NkpseYk7BN2kj8BmeWPoXOEwU",
+    authDomain: "arc-v3.firebaseapp.com",
+    databaseURL: "https://arc-v3.firebaseio.com",
+    projectId: "arc-v3",
+    storageBucket: "arc-v3.appspot.com",
+    messagingSenderId: "400560292229",
+    appId: "1:400560292229:web:c9b42b032c4da3aa4844ec"
+  };
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
@@ -310,7 +320,6 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, tota
         });
 
         // increment the description's number of attempts and number of times the listener gave up (if they gave up)
-        // TODO: What counts as a success? Currently just if they do not give up.
         const desc_doc = task_doc.collection("descriptions").doc(desc_id);
         var desc_update_data = { num_attempts: increment };
         if (gave_up) {
@@ -374,28 +383,30 @@ function claim_unused_desc(desc_id, type) {
 /**
  * Store user demographic information
  */
-function set_user_info(user_id, age, gender, type) {
-    db.collection("users").doc(user_id.toString()).set({
-        'user_id': user_id,
-        'age': age,
-        'gender': gender,
-        'type_tasks': type
-    }).then(function () {
-        console.log("set user info successfully");
-    }).catch(function (err) {
-        console.error(err);
+function set_user_demographics(user_id, age, gender) {
+    return new Promise(function (resolve, reject) {
+        db.collection("users").doc(user_id.toString()).update({
+            'age': age,
+            'gender': gender,
+        }).then(function () {
+            console.log("successfully set user demographics.");
+            return resolve();
+        }).catch(function (err) {
+            console.error(err);
+            return reject(err);
+        });
     });
 }
 
 /**
- * Store the amount of time it took a user to complete a task
+ * Store the amount of time it took a user to complete a task for a created user. If the user does not exist, create them
  */
 function set_user_complete_time(user_id, time, task_name) {
     return new Promise(function (resolve, reject) {
         var data = {};
         data[task_name] = time;
 
-        db.collection("users").doc(user_id.toString()).update(data)
+        db.collection("users").doc(user_id.toString()).set(data, {merge: true})
             .then(function () {
                 console.log(`set user time: ${task_name} successfully`);
                 return resolve();

@@ -153,7 +153,7 @@ function check() {
 
         store_description(see_desc, do_desc, grid_desc, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, desc_time, totalTime, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE)
             .then(function () { 
-                set_user_complete_time(uid, totalTime, `${TASK_ID}_speaker`).then(function() {
+                set_user_complete_time(uid, totalTime, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker`).then(function() {
                     next_task(); 
                 }).catch(function (error) { console.error('Error storing response ' + error); });
             })
@@ -161,7 +161,7 @@ function check() {
     } else {
         store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, gave_up = false, DESCRIPTIONS_TYPE)
             .then(function () { 
-                set_user_complete_time(uid, totalTime, `${TASK_ID}_listener`).then(function() {
+                set_user_complete_time(uid, totalTime, `${TASK_ID}_${DESCRIPTIONS_TYPE}_listener`).then(function() {
                     next_task(); 
                 }).catch(function (error) { console.error('Error storing response ' + error); });
             })
