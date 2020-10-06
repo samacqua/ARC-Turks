@@ -128,6 +128,7 @@ function format_walkthrough(desc_type) {
 // each tutorial item has format: [step text, list of elements to highlight, top offset of message (pxs), left offset (%), right offset (%)]
 var TUT_LIST = [
     ["You will now be walked through the layout. Click any of the un-highlighted area to continue.", [], 30, 20, 20],
+    ["If you notice any issues with the study, please report it by pressing this button.", ["feedback_btn"], 20, 35, 10],
     ["This is the Objective bar. This is where your task will be written.", ["objective-col"], 30, 20, 20],
     ["This is the input area. You will apply the transformation to this grid.", ["input-col"], 30, 5, 70],
     ["This is the output area. This is where you will create the correct output grid. Let's break it down a little more...", ["output-col"], 30, 10, 35],
@@ -141,7 +142,7 @@ var TUT_LIST = [
     ["With flood fill, you can fill in entire areas.", ["floodfill"], 60, 5, 35],
     ["Try making the entire output grid yellow using flood fill.", ["toolbar_and_symbol_picker", "output_grid", "objective-col"], 30, 100, 100],
     ["With copy-paste, you can copy a part of the grid with C and paste with V.", ["copypaste"], 60, 5, 35],
-    ["Try to copy the entire light-blue square from the input into the top left corner of the input. <br>(Make sure you are in copy-paste mode, then select an area and press 'C' to copy, and select an area and press 'V' to paste)", ["input-col", "output_grid", "toolbar_and_symbol_picker", "objective-col"], 500, 100, 100]
+    ["Try to copy the entire light-blue square from the input into the top left corner of the input. <br>(Make sure you are in copy-paste mode, then select an area and press 'C' to copy, and select an area and press 'V' to paste)", ["input-col", "output_grid", "toolbar_and_symbol_picker", "objective-col"], 500, 100, 100],
 ];
 
 // different feedback based on how they reached a state, these flags give that information
@@ -301,7 +302,9 @@ function continue_tutorial() {
     // set last item to be behind dark layer
     if (CUR_HIGHLIGHT != null) {
         for (i = 0; i < CUR_HIGHLIGHT.length; i++) {
-            $(`#${CUR_HIGHLIGHT[i]}`).css('position', 'static');
+            if (CUR_HIGHLIGHT[i] != "feedback_btn") {
+                $(`#${CUR_HIGHLIGHT[i]}`).css('position', 'static');
+            }
             $(`#${CUR_HIGHLIGHT[i]}`).css('z-index', 'auto');
         }
     }
@@ -369,9 +372,12 @@ function continue_tutorial() {
     var max_id = "";
     for (i = 0; i < next_item[1].length; i++) {
         const id = next_item[1][i];
-        $(`#${id}`).css('position', 'relative');
+
+        if (id != "feedback_btn") {
+            $(`#${id}`).css('position', 'relative');
+        }
         $(`#${id}`).css('z-index', '501');
-        if (id != "objective-col") {
+        if (id != "objective-col" && id != "feedback_btn") {
             $(`#${id}`).css('background-color', 'gainsboro');
         }
 

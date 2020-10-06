@@ -86,6 +86,8 @@
         <div class="alert alert-success" id="info_display"></div>
         <div class="alert alert-danger" id="error_display"></div>
 
+        <button id="feedback_btn" type="button" class="btn btn-success" onclick="$('#bug_report_modal').modal('show');">Report Bug</button>
+
         <div class="row">
             <div class="col-md-4" id="description-col">
                 <div class="col-header">
@@ -295,6 +297,26 @@
                 <div class="modal-body" id="final-modal-body">
                     <p id="final_message">Thank you for participating in this study! Your survey code is: </p>
                     <h5 id="finish_modal_uid"></h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bug Report Modal -->
+    <div class="modal fade" id="bug_report_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Bug Report/Feedback</h3>
+                </div>
+                <div class="modal-body" id="gen-modal-body">
+                    <label for="exampleFormControlTextarea1">Please describe the bug:</label>
+                    <textarea class="form-control" id="bug_desc_textarea" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="store_bug_report();" data-dismiss="modal">Submit</button>
                 </div>
             </div>
         </div>

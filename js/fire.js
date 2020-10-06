@@ -195,7 +195,6 @@ function get_words() {
             });
     });
 }
-
 /**
  * Get word vec for word
  */
@@ -233,7 +232,7 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confi
             'uid': user_id,
             'description_time': parseInt(desc_time),
             'verification_time': parseInt(ver_time),
-            'timestamp': ((new Date()).getTime() / 1000),
+            'timestamp': new Date(),
 
             'num_attempts': 0,  // # listeners who used description
             'num_success': 0,   // # listeners who used description successfully
@@ -305,7 +304,7 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, tota
             'num_attempts': attempts,
             'attempt_jsons': attempt_jsons,
             'success': success,
-            'timestamp': ((new Date()).getTime() / 1000),
+            'timestamp': new Date(),
 
             'uid': user_id,
             'time': parseInt(total_time)
@@ -360,7 +359,7 @@ function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, use
             'uid': user_id,
             'description_time': parseInt(desc_time),
             'verification_time': parseInt(ver_time),
-            'timestamp': ((new Date()).getTime() / 1000)
+            'timestamp': new Date()
         }
 
         // record if could not solve verification or if confidence was not high enough
@@ -487,6 +486,24 @@ function give_up_description(task_id, type) {
         });
     });
 }
+
+function store_bug_report() {
+    return new Promise(function (resolve, reject) {
+        db.collection("bug_reports").add({
+            'description': $("#bug_desc_textarea").val(),
+            'timestamp': new Date(),
+            'uid': sessionStorage.getItem('uid'),
+            'url': window.location.href
+        }).then(function() {
+            console.log("reported bug successfully");
+            return resolve();
+        }).catch(err => {
+            console.log("error reporting bug:", err);
+            return reject(err);
+        });
+    });
+}
+
 
 // ===================================
 // Initialize
