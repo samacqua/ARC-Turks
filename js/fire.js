@@ -504,6 +504,25 @@ function store_bug_report() {
     });
 }
 
+function store_feedback(description, date, uid) {
+    return new Promise(function (resolve, reject) {
+
+        console.log(description, date, uid);
+
+        db.collection("feedback").add({
+            'description': description,
+            'timestamp': date,
+            'uid': uid
+        }).then(function() {
+            console.log("done");
+            return resolve();
+        }).catch(err => {
+            console.log("error");
+            return reject(err);
+        });
+    });
+}
+
 
 // ===================================
 // Initialize

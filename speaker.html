@@ -347,6 +347,14 @@
                     <p id="final_message">Thank you for participating in this study! Your survey code is: </p>
                     <h5 id="finish_modal_uid"></h5>
                 </div>
+
+                <div class="modal-body" id="gen-modal-body">
+                    <label for="feedback_textarea">(Optional): If you have any feedback on the study interface, or you experienced any issues, please share them here:</label>
+                    <textarea class="form-control" id="feedback_textarea" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="save_user_feedback();">Submit feedback</button>
+                </div>
             </div>
         </div>
     </div>
@@ -360,7 +368,7 @@
                     <h3 class="modal-title" id="gen-modal-title">Bug Report/Feedback</h3>
                 </div>
                 <div class="modal-body" id="gen-modal-body">
-                    <label for="exampleFormControlTextarea1">Please describe the bug:</label>
+                    <label for="bug_desc_textarea">Please describe the bug:</label>
                     <textarea class="form-control" id="bug_desc_textarea" rows="3"></textarea>
                 </div>
                 <div class="modal-footer">

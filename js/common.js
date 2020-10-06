@@ -92,6 +92,15 @@ function exit_demographic() {
     $('#demographic_modal').one('hidden.bs.modal', function () { $('#finished_modal').modal('show'); }).modal('hide');
 }
 
+function save_user_feedback() {
+    store_feedback($("#feedback_textarea").val(), new Date(), sessionStorage.getItem('uid') || uuidv4() + "dev").then(function() {
+        infoMsg("Successfully stored feedback. Thank you for your participation!");
+    }).catch(err => {
+        errorMsg("Error storing feedback.");
+        console.error(err);
+    });
+}
+
 function get_next_task(first_task = false) {
 
     return new Promise(function (resolve, reject) {
