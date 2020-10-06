@@ -422,5 +422,5 @@ function copyFromInput() {
     syncFromEditionGridToDataGrid();
     CURRENT_OUTPUT_GRID = convertSerializedGridToGridObject(CURRENT_INPUT_GRID.grid);
     syncFromDataGridToEditionGrid();
-    $('#output_grid_size').val(CURRENT_OUTPUT_GRID.height + 'x' + CURRENT_OUTPUT_GRID.width);
+    $('#output_grid_size').val(CURRENT_OUTPUT_GRID.width + 'x' + CURRENT_OUTPUT_GRID.height);
 }
