@@ -1,15 +1,4 @@
-// Your web app's Firebase configuration
-// var firebaseConfig = {
-//     apiKey: "AIzaSyDe9mlqTQbwPvn-ZqS7pjAEnTv-ys9wGAY",
-//     authDomain: "arc-pilot-pilot.firebaseapp.com",
-//     databaseURL: "https://arc-pilot-pilot.firebaseio.com",
-//     projectId: "arc-pilot-pilot",
-//     storageBucket: "arc-pilot-pilot.appspot.com",
-//     messagingSenderId: "637909145149",
-//     appId: "1:637909145149:web:63e02da1ff6bcd3e767c54"
-// };
-
-var firebaseConfig = {
+var devFirebaseConfig = {
     apiKey: "AIzaSyA9yXW7Tnx3IYdiXMnmO20qp7IKc6lakS8",
     authDomain: "arc-turk-ex-ios.firebaseapp.com",
     databaseURL: "https://arc-turk-ex-ios.firebaseio.com",
@@ -17,6 +6,16 @@ var firebaseConfig = {
     storageBucket: "arc-turk-ex-ios.appspot.com",
     messagingSenderId: "687250358397",
     appId: "1:687250358397:web:16ac92ca0995b5d117b114"
+};
+
+var firebaseConfig = {
+    apiKey: "AIzaSyBT4huUvuS3_zxmQ9TTSbWfQGVl-UaqmYE",
+    authDomain: "arc-pilot-pilot-v2.firebaseapp.com",
+    databaseURL: "https://arc-pilot-pilot-v2.firebaseio.com",
+    projectId: "arc-pilot-pilot-v2",
+    storageBucket: "arc-pilot-pilot-v2.appspot.com",
+    messagingSenderId: "714534944811",
+    appId: "1:714534944811:web:1e7641ad7ff39e1af16a6e"
   };
 
 // Initialize Firebase
