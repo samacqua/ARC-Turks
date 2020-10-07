@@ -161,10 +161,12 @@
                 </div>
 
                 <div id="edit_control_btns">
-                    <button type="button" class="btn btn-secondary"
+                    <span id="copy-reset-btns">
+                        <button type="button" class="btn btn-secondary"
                         onclick="copyFromInput(); pre_continue('copy_input');">Copy from input</button>
-                    <button type="button" class="btn btn-secondary" onclick="resetOutputGrid(); pre_continue();">Reset
+                        <button type="button" class="btn btn-secondary" onclick="resetOutputGrid(); pre_continue();">Reset
                         grid</button>
+                    </span>
                     <button type="button" class="btn btn-success" onclick="check_grid()">Check!</button>
                     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#giveUpModal">Give
                         up</button>
@@ -465,11 +467,11 @@
                 <div class="modal-body" id="gen-modal-body">
 
                     <!-- TODO: Fill in amounts and number of tasks to solve -->
-                    <p>Great job! Now, you will continue to using actual descriptions.</p>
+                    <p>Great job finishing the tutorial.</p>
                     <p>You will complete a total of 3 tasks. You will recieve <strong>AMOUNT</strong> for completing the
                         study, and a bonus of <strong>AMOUNT</strong> for each task that you complete correctly.</p>
                     <p>There is a chance that you will have the opportunity to describe a task on your own, for a bonus
-                        amount of <strong>AMOUNT</strong>. If so, you will be given more instructions.</p>
+                        amount of <strong>AMOUNT</strong>. If so, you will be given another tutorial.</p>
 
                 </div>
                 <div class="modal-footer">

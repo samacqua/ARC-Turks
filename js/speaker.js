@@ -89,7 +89,7 @@ $(window).on('load', function () {
 
 var TUT_LIST = [
     ["You will now be walked through the layout. Click any of the un-highlighted area to continue.", [], 30, 20, 20],
-    ["This is the examples area. As you can see, there are multiple input-output examples. There is a common pattern that changes each input grid to its respective output grid.", ["io_ex_col"], 30, 35, 10],
+    ["This is the examples area. As you can see, there are multiple input-output examples. There is a single pattern that changes each input grid to its respective output grid.", ["io_ex_col"], 30, 35, 10],
     ["This is the old descriptions area. Any past attempts to describe the pattern will be shown here.", ["description_ex_col"], 30, 5, 65],
     ["At the bottom of each description, you will see how well people did using the description. So, if the description did pretty well, you may want to slightly change it. But, if it did badly, you should rewrite the entire description.", ["description_ex_col"], 30, 5, 65],
     ["This is the description area. This is where you will describe the pattern you recognized in the examples area. You will break your description into 3 sections:", ["description_col"], 30, 10, 35],
@@ -97,7 +97,7 @@ var TUT_LIST = [
     ["Then describe what you should expect to see in the input.", ["see_desc_form"], 40, 10, 35],
     ["Then, describe what you need to do to create the correct output. Keep in mind that the person using your description will see a different input grid than you are seeing.", ["do_desc_form"], 40, 5, 35],
     ["If you use a word in your description that has not been used, it will be highlighted red. To submit your description, you must replace every red word, or manually add it.", ["description_col"], 40, 5, 35],
-    ["If you cannot describe the pattern, or realize you do not know the pattern, you can give up, and you will be given a new task to solve instead.", ["give_up_btn"], 40, 5, 35],
+    ["If you realize you do not know the pattern, or you cannot describe the pattern, you can give up. If you give up, you will be given a new task to solve instead.", ["give_up_btn"], 40, 5, 35],
     ["Once you are happy with your description, press the Submit button.", ["submit_btn"], 40, 5, 35],
 ];
 

@@ -130,19 +130,19 @@ var TUT_LIST = [
     ["You will now be walked through the layout. Click any of the un-highlighted area to continue.", [], 30, 20, 20],
     ["If you notice any issues with the study, please report it by pressing this button.", ["feedback_btn"], 20, 35, 10],
     ["This is the Objective bar. This is where your task will be written.", ["objective-col"], 30, 20, 20],
-    ["This is the input area. You will apply the transformation to this grid.", ["input-col"], 30, 5, 70],
+    ["This is the input area. You will apply the pattern to this grid.", ["input-col"], 30, 5, 70],
     ["This is the output area. This is where you will create the correct output grid. Let's break it down a little more...", ["output-col"], 30, 10, 35],
     ["This is where you can change the grid size.", ["resize_control_btns"], 50, 5, 35],
     ["Try changing the grid size to 2x2.", ["resize_control_btns", "output_grid", "objective-col"], 50, 100, 100],
     ["With these buttons, you can copy the entire input grid, reset the grid, check your answer, and give up.", ["edit_control_btns"], 60, 5, 35],
-    ["Try copying the input grid, then resetting the output grid.", ["input-col", "edit_control_btns", "output_grid", "objective-col"], 30, 100, 100],
+    ["Try copying the input grid, then resetting the output grid.", ["input-col", "copy-reset-btns", "output_grid", "objective-col"], 30, 100, 100],
     ["These modes are how you change the output grid.", ["toolbar_and_symbol_picker"], 60, 5, 35],
     ["With the draw mode, you can edit individual pixels.", ["draw"], 60, 5, 35],
     ["Try drawing 3 green pixels in the output grid.", ["toolbar_and_symbol_picker", "output_grid", "objective-col"], 30, 100, 100],
     ["With flood fill, you can fill in entire areas.", ["floodfill"], 60, 5, 35],
     ["Try making the entire output grid yellow using flood fill.", ["toolbar_and_symbol_picker", "output_grid", "objective-col"], 30, 100, 100],
     ["With copy-paste, you can copy a part of the grid with C and paste with V.", ["copypaste"], 60, 5, 35],
-    ["Try to copy the entire light-blue square from the input into the top left corner of the input. <br>(Make sure you are in copy-paste mode, then select an area and press 'C' to copy, and select an area and press 'V' to paste)", ["input-col", "output_grid", "toolbar_and_symbol_picker", "objective-col"], 500, 100, 100],
+    ["Try to copy the entire light-blue square from the input into the top left corner of the output. <br>(Make sure you are in copy-paste mode, then select an area and press 'C' to copy, and select an area and press 'V' to paste)", ["input-col", "output_grid", "toolbar_and_symbol_picker", "objective-col"], 500, 100, 100],
 ];
 
 // different feedback based on how they reached a state, these flags give that information

@@ -217,8 +217,7 @@
                 </div>
                 <div class="modal-body" id="gen-modal-body">
                     <p>Now, you will be shown the description you just wrote and a <b>new input grid</b>.</p>
-                    <p>Use your description, and your memory of past input-output pairs, to create the correct output
-                        grid.</p>
+                    <p>Use your own description to create the correct output grid.</p>
                 </div>
                 <div class="modal-footer">
                     <button onclick="scroll_highlight_objective()" type="button" class="btn btn-primary"
@@ -266,13 +265,13 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title" id="gen-modal-title">Exit Survey</h3>
+                    <h3 class="modal-title" id="gen-modal-title">Confidence Survey</h3>
                 </div>
                 <div class="modal-body" id="final-modal-body">
 
                     <label for="conf_form">
                         <p>How confident are you that someone else, given your description, could create the correct output grid for the input grid you were just shown?</p>
-                        <p><b>0</b> means you are certain that they will not create the correct output grid, <b>5</b> means you are completely unsure, and <b>10</b> means you are certain that they will create the correct output grid.</p>
+                        <p><b>0</b> means you are certain that they will not create the correct output grid, <b>5</b> means you are unsure, and <b>10</b> means you are certain that they will create the correct output grid.</p>
                     </label>
                     <input type="range" class="custom-range" min="0" max="10" step="1" id="conf_form">
                     <label id="conf_result"></label>
