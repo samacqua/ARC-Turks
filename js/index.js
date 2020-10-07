@@ -185,7 +185,7 @@ function pre_continue(flag = null) {
             } else {
                 errorMsg("You resized the output grid, but to the wrong size.");
             }
-        } else if (arraysEqual(CUR_HIGHLIGHT, ["input-col", "edit_control_btns", "output_grid", "objective-col"])) {
+        } else if (arraysEqual(CUR_HIGHLIGHT, ["input-col", "copy-reset-btns", "output_grid", "objective-col"])) {
             // challenge to copy from input and reset output grid
 
             if (arraysEqual(CURRENT_OUTPUT_GRID.grid, CURRENT_INPUT_GRID.grid)) {
