@@ -550,7 +550,7 @@ function init_firestore() {
         'all', 'your', 'when', 'up', 'use', 'word', 'how', 'said', 'an', 'each', 'she', 'which', 'do', 'their', 'time', 'if', 'will', 'way', 'about',
         'many', 'then', 'them', 'would', 'write', 'like', 'so', 'these', 'her', 'long', 'make', 'thing', 'see', 'him', 'two', 'has', 'look', 'more', 
         'day', 'could', 'go', 'come', 'did', 'my', 'sound', 'no', 'most', 'number', 'who', 'over', 'know', 'water', 'than', 'call', 'first', 'people', 
-        'may', 'down', 'side', 'been', 'now', 'find'];
+        'may', 'down', 'side', 'been', 'now', 'find', "output", "grid", "size", "input", "should"];
     db.collection('total').doc('summary').set({
         'words': top_100_words
 
