@@ -545,8 +545,15 @@ function init_firestore() {
         'desc_failure_count': 0     // number of times someone submitted description, then failed verfication or gave low confidence score (<5)
     }
 
+    const top_100_words = ['the', 'of', 'to', 'and', 'a', 'in', 'is', 'it', 'you', 'that', 'he', 'was', 'for', 'on', 'are', 'with', 'as', 'I', 'his', 'they', 
+        'be', 'at', 'one', 'have', 'this', 'from', 'or', 'had', 'by', 'hot', 'but', 'some', 'what', 'there', 'we', 'can', 'out', 'other', 'were', 
+        'all', 'your', 'when', 'up', 'use', 'word', 'how', 'said', 'an', 'each', 'she', 'which', 'do', 'their', 'time', 'if', 'will', 'way', 'about',
+        'many', 'then', 'them', 'would', 'write', 'like', 'so', 'these', 'her', 'long', 'make', 'thing', 'see', 'him', 'two', 'has', 'look', 'more', 
+        'day', 'could', 'go', 'come', 'did', 'my', 'sound', 'no', 'most', 'number', 'who', 'over', 'know', 'water', 'than', 'call', 'first', 'people', 
+        'may', 'down', 'side', 'been', 'now', 'find'];
     db.collection('total').doc('summary').set({
-        'words': []
+        'words': top_100_words
+
     }).then(function () {
         console.log("Initialized words in Firestore.")
 

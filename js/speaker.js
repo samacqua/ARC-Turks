@@ -32,15 +32,6 @@ $(window).on('load', function () {
         for (i=0;i<GOOD_WORDS.length;i++) {
             get_word_vec_cache(GOOD_WORDS[i]);
         }
-
-        // only show message about highlighting words if we will be highlighting words
-        if (GOOD_WORDS.length < MIN_WORDS) {
-            for (i=0;i<TUT_LIST.length;i++) {
-                if (TUT_LIST[i][0].includes("If you use a word in your description that has not been used")) {
-                    TUT_LIST.splice(i, 1);
-                }
-            }
-        }
     }).catch(error => {
         errorMsg("Could not load words that can been used. Please check your internet connection and reload the page.");
     });
@@ -241,11 +232,7 @@ function showDescEx(i) {
 
 // returns the regex for words that have not been used yet
 function get_bad_words(input) {
-    if (GOOD_WORDS.length > MIN_WORDS) {
-        return new RegExp('\\b(?!(' + GOOD_WORDS.join("|") + ')\\b)[a-zA-Z]+', 'gmi')
-    } else {
-        return new RegExp('^\b$')
-    }
+    return new RegExp('\\b(?!(' + GOOD_WORDS.join("|") + ')\\b)[a-zA-Z]+', 'gmi')
 }
 
 // if the word has already been fetched, then returns its vec
@@ -397,7 +384,7 @@ $(document).ready(function () {
         $('#word-warning-' + id).empty();
 
         const words_to_replace = value.match(get_bad_words());
-        if (words_to_replace != null && words_to_replace.length != 0 && GOOD_WORDS.length > MIN_WORDS) {
+        if (words_to_replace != null && words_to_replace.length != 0) {
 
             var items = [];
             $.each(words_to_replace, function (i, word) {
@@ -421,7 +408,7 @@ $(document).ready(function () {
 
         get_replacement_words(words_to_replace).then(replacements => {
 
-            if (words_to_replace != null && words_to_replace.length != 0 && GOOD_WORDS.length > MIN_WORDS) {
+            if (words_to_replace != null && words_to_replace.length != 0) {
 
                 replacements.forEach(function(replacement_i, i) {
 
