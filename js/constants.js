@@ -1,4 +1,4 @@
-const TOTAL_TASKS_TO_COMPLETE = 3;
+const TOTAL_TASKS_TO_COMPLETE = 6;
 const MIN_TASKS_BEFORE_SPEAKER = 2;
 const TOTAL_PRAC_TASKS = 2;
 const NUM_TASKS = 3;   // TODO: Change back to 400
