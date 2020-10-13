@@ -19,7 +19,7 @@ var firebaseConfig = {
   };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(devFirebaseConfig);
 var db = firebase.firestore();
 var database = firebase.database();
 
@@ -458,6 +458,7 @@ function set_user_demographics(user_id, age, gender) {
         db.collection("users").doc(user_id.toString()).update({
             'age': age,
             'gender': gender,
+            'browser': get_browser()
         }).then(function () {
             console.log("successfully set user demographics.");
             return resolve();
@@ -512,7 +513,8 @@ function store_bug_report() {
             'description': $("#bug_desc_textarea").val(),
             'timestamp': new Date(),
             'uid': sessionStorage.getItem('uid'),
-            'url': window.location.href
+            'url': window.location.href,
+            'browser_type': get_browser()
         }).then(function() {
             console.log("reported bug successfully");
             return resolve();
