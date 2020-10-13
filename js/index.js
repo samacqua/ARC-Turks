@@ -140,7 +140,7 @@ var TUT_LIST = [
     ["With the draw mode, you can edit individual pixels.", ["draw"], 60, 5, 35],
     ["Try drawing 3 green pixels in the output grid.", ["toolbar_and_symbol_picker", "output_grid", "objective-col"], 30, 100, 100],
     ["With flood fill, you can fill in entire areas.", ["floodfill"], 60, 5, 35],
-    ["Try making the entire output grid yellow using flood fill.", ["toolbar_and_symbol_picker", "output_grid", "objective-col"], 30, 100, 100],
+    ["Use <b>flood fill</b> to fill inside the pink frame with yellow.", ["toolbar_and_symbol_picker", "output_grid", "objective-col"], 30, 100, 100],
     ["With copy-paste, you can copy a part of the grid with C and paste with V.", ["copypaste"], 60, 5, 35],
     ["Try to copy the entire light-blue square from the input into the top left corner of the output. <br>(Make sure you are in copy-paste mode, then select an area and press 'C' to copy, and select an area and press 'V' to paste)", ["input-col", "output_grid", "toolbar_and_symbol_picker", "objective-col"], 500, 100, 100],
 ];
@@ -239,11 +239,52 @@ function pre_continue(flag = null) {
 
             if ($("#objective-text").text().includes("yellow")) {
                 // flood fill yellow
+
+                const ref_grid = 
+                    [[0, 0, 0, 0, 0, 0, 0, 0], 
+                    [0, 6, 6, 6, 6, 6, 6, 0], 
+                    [0, 6, 4, 4, 4, 4, 6, 0], 
+                    [0, 6, 4, 4, 4, 4, 6, 0], 
+                    [0, 6, 4, 4, 4, 4, 6, 0], 
+                    [0, 6, 4, 4, 4, 4, 6, 0], 
+                    [0, 6, 6, 6, 6, 6, 6, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0]];
+
+                const wrong_ref_grid = 
+                    [[0, 0, 0, 0, 0, 0, 0, 0], 
+                    [0, 4, 4, 4, 4, 4, 4, 0], 
+                    [0, 4, 0, 0, 0, 0, 4, 0], 
+                    [0, 4, 0, 0, 0, 0, 4, 0],
+                    [0, 4, 0, 0, 0, 0, 4, 0],
+                    [0, 4, 0, 0, 0, 0, 4, 0],
+                    [0, 4, 4, 4, 4, 4, 4, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0]];
+                
                 for (var i = 0; i < CURRENT_OUTPUT_GRID.grid.length; i++) {
                     ref_row = CURRENT_OUTPUT_GRID.grid[i];
                     for (var j = 0; j < ref_row.length; j++) {
-                        if (ref_row[j] != 4) {
-                            errorMsg("You need to paint all squares yellow using flood fill.")
+                        if (ref_row[j] != ref_grid[i][j]) {
+
+                            if (arraysEqual(CURRENT_OUTPUT_GRID.grid, wrong_ref_grid)) {
+                                errorMsg("Fill inside the pink framed area with yellow, not the pink frame itself.");
+                            } else {
+                                errorMsg("Fill inside the pink framed area with yellow.");
+                            }
+
+                            setTimeout(function() {
+                                const flood_fill_test_grid = convertSerializedGridToGridObject(
+                                    [[0, 0, 0, 0, 0, 0, 0, 0], 
+                                     [0, 6, 6, 6, 6, 6, 6, 0], 
+                                     [0, 6, 0, 0, 0, 0, 6, 0], 
+                                     [0, 6, 0, 0, 0, 0, 6, 0], 
+                                     [0, 6, 0, 0, 0, 0, 6, 0], 
+                                     [0, 6, 0, 0, 0, 0, 6, 0], 
+                                     [0, 6, 6, 6, 6, 6, 6, 0],
+                                     [0, 0, 0, 0, 0, 0, 0, 0]]);
+                         
+                                 CURRENT_OUTPUT_GRID = flood_fill_test_grid;
+                                 syncFromDataGridToEditionGrid();
+                            }, 500);
                             return;
                         }
                     }
@@ -367,6 +408,22 @@ function continue_tutorial() {
         $("#tut-continue-message").html('Follow the Objective to continue');
     }
 
+    if ($("#objective-text").text().includes("yellow")) {
+        console.log("Flood fill yellow");
+        const flood_fill_test_grid = convertSerializedGridToGridObject(
+           [[0, 0, 0, 0, 0, 0, 0, 0], 
+            [0, 6, 6, 6, 6, 6, 6, 0], 
+            [0, 6, 0, 0, 0, 0, 6, 0], 
+            [0, 6, 0, 0, 0, 0, 6, 0], 
+            [0, 6, 0, 0, 0, 0, 6, 0], 
+            [0, 6, 0, 0, 0, 0, 6, 0], 
+            [0, 6, 6, 6, 6, 6, 6, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0]]);
+
+        CURRENT_OUTPUT_GRID = flood_fill_test_grid;
+        syncFromDataGridToEditionGrid();
+    }
+    
     // set highlight div to be above layer
     var max_top = 100000;
     var max_id = "";

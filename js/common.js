@@ -4,13 +4,16 @@ var DESCRIPTIONS_TYPE;
 $.fn.modal.prototype.constructor.Constructor.Default.backdrop = 'static';
 $.fn.modal.prototype.constructor.Constructor.Default.keyboard = false;
 
+
+var LAST_MSG_DISMISS_CALL_TIME = new Date();
+
 /**
  * show an error message at the top of the screen.
  * @param {*} msg the message to display
  */
 function errorMsg(msg) {
-    $('#error_display').stop(true, true);
-    $('#info_display').stop(true, true);
+    // $('#error_display').stop(true, true);
+    // $('#info_display').stop(true, true);
     $('#error_display').hide();
     $('#info_display').hide();
 
@@ -19,7 +22,15 @@ function errorMsg(msg) {
     $('#error_display').html(msg);
     $('#error_display').css({ "visibility": "visible" });
     $('#error_display').fadeIn(300);
-    $('#error_display').delay(6000).fadeOut(300);
+
+    const dismiss_call_time = new Date();
+    LAST_MSG_DISMISS_CALL_TIME = dismiss_call_time;
+
+    setTimeout(function () {
+        if (LAST_MSG_DISMISS_CALL_TIME == dismiss_call_time) {
+            $('#error_display').fadeOut(300);
+        }
+    }, 6000);
 }
 
 /**
@@ -37,7 +48,15 @@ function infoMsg(msg) {
     $('#info_display').html(msg);
     $('#info_display').css({ "visibility": "visible" });
     $('#info_display').fadeIn(300);
-    $('#info_display').delay(6000).fadeOut(300);
+
+    const dismiss_call_time = new Date();
+    LAST_MSG_DISMISS_CALL_TIME = dismiss_call_time;
+
+    setTimeout(function () {
+        if (LAST_MSG_DISMISS_CALL_TIME == dismiss_call_time) {
+            $('#info_display').fadeOut(300);
+        }
+    }, 6000);
 }
 
 /**

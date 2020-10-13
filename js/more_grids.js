@@ -64,7 +64,7 @@ function setUpEditionGridListeners(jqGrid) {
 
             // if in tutorial and in challenge to draw green squares, check completion
             if (isStart) {
-                if ($("#objective-text").text().includes("green") || $("#objective-text").text().includes("copy")) {
+                if ($("#objective-text").text().includes("green") || $("#objective-text").text().includes("yellow") || $("#objective-text").text().includes("copy")) {
                     pre_continue();
                 }
             }
@@ -267,13 +267,14 @@ $(document).ready(function () {
         })
         symbol_preview.addClass('selected-symbol-preview');
 
-        toolMode = $('input[name=tool_switching]:checked').val();
-        if (toolMode == 'select') {
-            $('.edition_grid').find('.ui-selected').each(function (i, cell) {
-                symbol = getSelectedSymbol();
-                setCellSymbol($(cell), symbol);
-            });
-        }
+        // let user fill in selected area with a color
+        // toolMode = $('input[name=tool_switching]:checked').val();
+        // if (toolMode == 'select') {
+        //     $('.edition_grid').find('.ui-selected').each(function (i, cell) {
+        //         symbol = getSelectedSymbol();
+        //         setCellSymbol($(cell), symbol);
+        //     });
+        // }
     });
 
     $('.edition_grid').each(function (i, jqGrid) {
