@@ -86,8 +86,9 @@ function get_all_descriptions_interactions_count(type) {
             var descriptions_count = [];
 
             for (i = 0; i < NUM_TASKS; i++) {
-                interactions_count.push(data[`${i}_interactions_count`]);
-                descriptions_count.push(data[`${i}_descriptions_count`]);
+                const ii = TASKS[i];
+                interactions_count.push(data[`${ii}_interactions_count`]);
+                descriptions_count.push(data[`${ii}_descriptions_count`]);
             }
 
             return resolve([descriptions_count, interactions_count]);
@@ -578,8 +579,9 @@ function init_firestore() {
 
         // store counts of interactions and descriptions for each description type for bandit algorithm
         for (i = 0; i < NUM_TASKS; i++) {
-            summary_data[`${i}_interactions_count`] = 0;
-            summary_data[`${i}_descriptions_count`] = 0;
+            const ii = TASKS[i];
+            summary_data[`${ii}_interactions_count`] = 0;
+            summary_data[`${ii}_descriptions_count`] = 0;
         }
 
         return db.collection("nl_tasks").doc("summary").set(summary_data);
@@ -594,7 +596,8 @@ function init_firestore() {
 
         var batch = db.batch();
         for (task_num = 0; task_num < NUM_TASKS; task_num++) {
-            batch.set(db.collection("nl_tasks").doc(task_num.toString()), task_data);
+            const ii = TASKS[task_num];
+            batch.set(db.collection("nl_tasks").doc(ii.toString()), task_data);
         }
         return batch.commit();
 
@@ -603,7 +606,8 @@ function init_firestore() {
 
         var batch = db.batch();
         for (task_num = 0; task_num < NUM_TASKS; task_num++) {
-            batch.set(db.collection("nl_ex_tasks").doc(task_num.toString()), task_data);
+            const ii = TASKS[task_num];
+            batch.set(db.collection("nl_ex_tasks").doc(ii.toString()), task_data);
         }
         return batch.commit();
 
@@ -612,7 +616,8 @@ function init_firestore() {
 
         var batch = db.batch();
         for (task_num = 0; task_num < NUM_TASKS; task_num++) {
-            batch.set(db.collection("ex_tasks").doc(task_num.toString()), task_data);
+            const ii = TASKS[task_num];
+            batch.set(db.collection("ex_tasks").doc(ii.toString()), task_data);
         }
         return batch.commit();
 

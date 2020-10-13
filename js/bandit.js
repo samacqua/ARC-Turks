@@ -22,12 +22,14 @@ function select_casino(force_listener, type) {
                     }
                 }
 
+                const ii = TASKS[i];
+
                 // if already done task, make sure it is not chosen again
-                if (tasks_done.includes(i.toString())) {
+                if (tasks_done.includes(ii.toString())) {
                     task_collisions += 1;
                     num_interactions[i] += 2 * max;
                     if (task_collisions == NUM_TASKS) {
-                        console.log("done bc no tasks they have not already interacted with");
+                        console.log("done bc no tasks left that they have not already interacted with");
                         finish();
                         return;
                     }
@@ -40,7 +42,7 @@ function select_casino(force_listener, type) {
             });
             console.log(num_interactions);
             const min = Math.min.apply(Math, num_interactions);
-            return resolve(num_interactions.indexOf(min));    // return resolve(num_interactions.indexOf(min));
+            return resolve(TASKS[num_interactions.indexOf(min)]);    // return resolve(num_interactions.indexOf(min));
         })
             .catch(function (err) {
                 return reject(err);

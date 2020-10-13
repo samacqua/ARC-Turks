@@ -19,7 +19,7 @@ $(window).on('load', function () {
     // get listening task
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    const task = urlParams.get('task') || Math.floor(Math.random() * NUM_TASKS).toString();
+    const task = urlParams.get('task') || TASKS[Math.floor(Math.random() * NUM_TASKS)].toString();
     const desc_id = urlParams.get('id');
     IS_VERIFICATION = (urlParams.get('ver') == 'true');
     if (desc_id == null && !IS_VERIFICATION) {
