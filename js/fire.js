@@ -139,6 +139,7 @@ function get_task_descriptions(task_id, type) {
                     'selected_ex': data.selected_example,
                     'num_success': data.num_success,
                     'num_attempts': data.num_attempts,
+                    'timestamp': data.timestamp,
                     'id': doc.id
                 };
                 descriptions.push(description);

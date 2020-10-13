@@ -53,7 +53,33 @@ $(window).on('load', function () {
     DESCRIPTIONS_TYPE = sessionStorage.getItem('type') || "nl";
     loadTask(task);
     get_task_descriptions(task, DESCRIPTIONS_TYPE).then(function (descriptions) {
+        descriptions.sort(function(a, b) {
+
+            if (a.num_attempts == 0) {
+                return 1
+            } else if (b.num_attempts == 0) {
+                return -1
+            }
+
+            function upperConfBound(x) {
+                const i = x.num_success + 1;
+                const j = x.num_attempts - i + 1;
+
+                const mean = i / (i + j);
+                const variance = i * j / ((i + j) ** 2 * (i + j + 1));
+
+                return mean + Math.sqrt(variance);
+            }
+
+            if (upperConfBound(a) > upperConfBound(b)) {
+                return -1
+            } else { 
+                return 1
+            }
+        });
+
         PAST_DESCS = descriptions;
+
         createExampleDescsPager(descriptions);
         showDescEx(0);
 
@@ -189,7 +215,7 @@ var CURRENT_DESC = 0;
 
 function createExampleDescsPager() {
 
-    if (PAST_DESCS.length > 1) {
+    if (PAST_DESCS.length >= 1) {
         $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${Math.max(CURRENT_DESC - 1, 0)})">Previous</a></li>`);
         for (i = 0; i < PAST_DESCS.length; i++) {
             $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${i});">${i + 1}</a></li>`);
