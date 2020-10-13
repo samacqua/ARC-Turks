@@ -253,8 +253,7 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confi
         const increment = firebase.firestore.FieldValue.increment(1);
 
         var task_update_data = {
-            num_descriptions: increment,
-            num_interactions: increment
+            num_descriptions: increment
         };
         batch.update(task_doc_ref, task_update_data);
 
@@ -268,7 +267,6 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confi
         //increment total num descriptions in summary ref
         const summary_ref = db.collection(type + "_tasks").doc("summary");    // summary for just this desc type
         var summary_update_data = {};
-        summary_update_data[`${task_id}_interactions_count`] = increment;
         summary_update_data[`${task_id}_descriptions_count`] = increment;
         batch.update(summary_ref, summary_update_data);
 
