@@ -192,7 +192,7 @@ function pre_continue(flag = null) {
                 if (flags['copy_input'] == true) {
                     infoMsg("Great! You have copied from the input grid. Now, reset the output grid.");
                 } else {
-                    infoMsg("You have copied the input grid, but you could have done it easier by clicking the \"Copy from input\" button.");
+                    infoMsg("You have copied the input grid, but you could have done it easier by clicking the \"Copy input grid\" button.");
                 }
                 return;
             } else if (CURRENT_OUTPUT_GRID.grid.width == CURRENT_INPUT_GRID.grid.width && CURRENT_OUTPUT_GRID.height == CURRENT_INPUT_GRID.height) {
