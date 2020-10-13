@@ -2,7 +2,7 @@ const TOTAL_TASKS_TO_COMPLETE = 6;
 const MIN_TASKS_BEFORE_SPEAKER = 2;
 const TOTAL_PRAC_TASKS = 2;
 const TASKS = [3,4,5];
-const NUM_TASKS = len(TASKS);   // TODO: Change back to 400
+const NUM_TASKS = TASKS.length;   // TODO: Change back to 400
 const MAX_ATTEMPTS_BUILDER = 3;
 
 // easy tasks for demonstration purposes
