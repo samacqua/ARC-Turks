@@ -347,7 +347,7 @@ function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, use
         var batch = db.batch();
 
         const desc_id = uuidv4();
-        const desc_doc_ref = db.collection(type + "_failed_descs").doc(desc_id);
+        const task_doc_ref = db.collection(type + "_tasks").doc(task_id.toString());
 
         // set actual info for description in the specific task's collection
         var desc_data = {
@@ -357,7 +357,10 @@ function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, use
             'uid': user_id,
             'description_time': parseInt(desc_time),
             'verification_time': parseInt(ver_time),
-            'timestamp': new Date()
+            'timestamp': new Date(),
+
+            'num_attempts': 5,
+            'num_success': 0
         }
 
         // record if could not solve verification or if confidence was not high enough
@@ -377,6 +380,7 @@ function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, use
             desc_data['selected_example'] = selected_example;
         }
 
+        const desc_doc_ref = task_doc_ref.collection("descriptions").doc(desc_id);
         batch.set(desc_doc_ref, desc_data);
 
         // increment num_descriptions and ver_gave_up_count for task in tasks collection (not desc_gave_up_count bc they would not be submitting description, handled seperately)
