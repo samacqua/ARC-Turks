@@ -18,7 +18,7 @@ function select_casino(force_listener, type) {
                 //      when there are no descriptions, not constantly pulling from single casino
                 if (force_listener) {
                     if (num_descriptions[i] <= Math.sqrt(num_interactions[i]) || num_descriptions[i] == 0) {
-                        num_interactions[i] += max;
+                        num_interactions[i] += max + 1;
                     }
                 }
 
@@ -27,7 +27,7 @@ function select_casino(force_listener, type) {
                 // if already done task, make sure it is not chosen again
                 if (tasks_done.includes(ii.toString())) {
                     task_collisions += 1;
-                    num_interactions[i] += 2 * max;
+                    num_interactions[i] += 2 * (max+1);
                     if (task_collisions == NUM_TASKS) {
                         console.log("done bc no tasks left that they have not already interacted with");
                         finish();

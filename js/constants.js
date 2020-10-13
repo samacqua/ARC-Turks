@@ -1,7 +1,7 @@
-const TOTAL_TASKS_TO_COMPLETE = 6;
+const TOTAL_TASKS_TO_COMPLETE = 3;
 const MIN_TASKS_BEFORE_SPEAKER = 2;
 const TOTAL_PRAC_TASKS = 2;
-const TASKS = [3,4,5];
+const TASKS = [7,8,9];
 const NUM_TASKS = TASKS.length;   // TODO: Change back to 400
 const MAX_ATTEMPTS_BUILDER = 3;
 
@@ -81,7 +81,6 @@ const TASK_SPECIFIC_QUESTION = {
         correctAnswer: 'c'
     }
 }
-
 
 const GRID_SIZE_PREFIX = "The output grid size...";
 const SHOULD_SEE_PREFIX = "In the input, you should see...";

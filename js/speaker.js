@@ -15,6 +15,7 @@ $(window).on('load', function () {
     $("#grid_size_desc").val(GRID_SIZE_PREFIX);
     $("#what_you_see").val(SHOULD_SEE_PREFIX);
     $("#what_you_do").val(HAVE_TO_PREFIX);
+    $('.descriptions').highlightWithinTextarea('update');
 
     // show initial instructions
     if (sessionStorage.getItem('done_speaker_task') == 'true') {
@@ -71,7 +72,7 @@ $(window).on('load', function () {
 
         PAST_DESCS = descriptions;
 
-        createExampleDescsPager(descriptions);
+        createExampleDescsPager();
         showDescEx(0);
 
         // if no descriptions, do not tell them about the anatomy of descriptions
@@ -108,12 +109,12 @@ var TUT_LIST = [
     ["You will now be walked through the layout. Click any of the un-highlighted area to continue.", [], 30, 20, 20],
     ["This is the examples area. As you can see, there are multiple input-output examples. There is a single pattern that changes each input grid to its respective output grid.", ["io_ex_col"], 30, 35, 10],
     ["This is the old descriptions area. Any past attempts to describe the pattern will be shown here.", ["description_ex_col"], 30, 5, 65],
-    ["At the bottom of each description, you will see how well people did using the description. So, if the description did pretty well, you may want to slightly change it. But, if it did badly, you should rewrite the entire description.", ["description_ex_col"], 30, 5, 65],
+    ["At the bottom of each description, you will see how well people did using the description. So, if the description did pretty well, you may want to only slightly change it. But, if it did poorly, you should rewrite the entire description.", ["desc_success"], 30, 5, 65],
     ["This is the description area. This is where you will describe the pattern you recognized in the examples area. You will break your description into 3 sections:", ["description_col"], 30, 10, 35],
-    ["First, describe how the grid size changes. If it does not change, then make a note of that.", ["grid_size_form"], 40, 10, 35],
-    ["Then describe what you should expect to see in the input.", ["see_desc_form"], 40, 10, 35],
+    ["First, describe what you should expect to see in the input.", ["see_desc_form"], 40, 10, 35],
+    ["Then, describe how the grid size changes. If it does not change, then make a note of that.", ["grid_size_form"], 40, 10, 35],
     ["Then, describe what you need to do to create the correct output. Keep in mind that the person using your description will see a different input grid than you are seeing.", ["do_desc_form"], 40, 5, 35],
-    ["If you use a word in your description that has not been used, it will be highlighted red. To submit your description, you must replace every red word, or manually add it.", ["description_col"], 40, 5, 35],
+    ["If you use a word in your description that has not been used, it will be <mark id='red_highlight'>highlighted red.</mark> To submit your description, you must replace every red word, or manually add it.", ["description_col"], 40, 5, 35],
     ["If you realize you do not know the pattern, or you cannot describe the pattern, you can give up. If you give up, you will be given a new task to solve instead.", ["give_up_btn"], 40, 5, 35],
     ["Once you are happy with your description, press the Submit button.", ["submit_btn"], 40, 5, 35],
 ];
@@ -204,14 +205,22 @@ function continue_tutorial() {
 
 var CURRENT_DESC = 0;
 
-function createExampleDescsPager() {
+function createExampleDescsPager(cur_ex=0) {
 
     if (PAST_DESCS.length >= 1) {
-        $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${Math.max(CURRENT_DESC - 1, 0)})">Previous</a></li>`);
+        $("#paginator").empty();
+        $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${Math.max(CURRENT_DESC - 1, 0)}); createExampleDescsPager(${Math.max(CURRENT_DESC-1)});">Previous</a></li>`);
         for (i = 0; i < PAST_DESCS.length; i++) {
-            $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${i});">${i + 1}</a></li>`);
+            console.log(i);
+            console.log(cur_ex);
+            if (i == cur_ex) {
+                console.log("a");
+                $("#paginator").append(`<li class="page-item active"><a class="page-link" href="#" onclick="showDescEx(${i});createExampleDescsPager(${i});">${i + 1}</a></li>`);
+            } else {
+                $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${i});createExampleDescsPager(${i});">${i + 1}</a></li>`);
+            }
         }
-        $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${Math.min(CURRENT_DESC + 1, PAST_DESCS.length - 1)})">Next</a></li>`);
+        $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${Math.min(CURRENT_DESC + 1, PAST_DESCS.length - 1)}); createExampleDescsPager(${Math.min(CURRENT_DESC+1, PAST_DESCS.length - 1)}); ">Next</a></li>`);
     }
 }
 
@@ -220,6 +229,7 @@ function showDescEx(i) {
         $("#ex_size_desc").text("There are no descriptions for this task yet.");
         return;
     }
+    CURRENT_DESC = i;
     $("#ex_size_desc").text(PAST_DESCS[i]['grid_desc']);
     $("#ex_see_desc").text(PAST_DESCS[i]['see_desc']);
     $("#ex_do_desc").text(PAST_DESCS[i]['do_desc']);
@@ -370,6 +380,14 @@ function add_current_candidate_word() {
 
 $(document).ready(function () {
 
+    $('.descriptions').on("input", function() {
+        var value = $(this).val();
+        const prefix_mapping = { 'grid_size_desc': GRID_SIZE_PREFIX, 'what_you_see': SHOULD_SEE_PREFIX, 'what_you_do': HAVE_TO_PREFIX }
+        const id = $(this).attr("id");
+        var prefix = prefix_mapping[id];
+        $(this).val(prefix + value.substring(prefix.length));
+    });
+
     // when textarea changes
     $('.descriptions').on("keyup", function () {
 
@@ -377,8 +395,8 @@ $(document).ready(function () {
         var value = $(this).val();
         const prefix_mapping = { 'grid_size_desc': GRID_SIZE_PREFIX, 'what_you_see': SHOULD_SEE_PREFIX, 'what_you_do': HAVE_TO_PREFIX }
         const id = $(this).attr("id");
-        var prefix = prefix_mapping[id];
-        $(this).val(prefix + value.substring(prefix.length));
+        // var prefix = prefix_mapping[id];
+        // $(this).val(prefix + value.substring(prefix.length));
 
         // for each novel word, add a row with buttons to replace word with similar words in database, or add the word
         $('#word-warning-' + id).empty();
@@ -439,6 +457,10 @@ $(document).ready(function () {
         highlight: [
             {
                 highlight: get_bad_words
+            },
+            {
+                highlight: [GRID_SIZE_PREFIX, HAVE_TO_PREFIX, SHOULD_SEE_PREFIX],
+                className: 'prefixes'
             }
         ]
     });

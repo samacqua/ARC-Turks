@@ -2,6 +2,23 @@
     font-weight: bold;
 }
 
+#red_highlight {
+    background-color: #ffadad;
+    border-radius: 3px;
+    color: darkslategray;
+}
+
+.prefixes {
+    background-color: snow !important;
+    color: black !important;
+    z-index: 100 !important;
+    position: sticky !important;
+    text-decoration: underline;
+    font-style: italic;
+    pointer-events: none;
+    /* font-weight: bold; */
+}
+
 #word_modal_text {
     font-weight: bold;
     text-align: center;

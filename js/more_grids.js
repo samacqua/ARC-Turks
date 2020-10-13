@@ -323,7 +323,7 @@ $(document).ready(function () {
                 symbol = parseInt($(selected[i]).attr('symbol'));
                 COPY_PASTE_DATA.push([x, y, symbol]);
             }
-            infoMsg('Cells copied! Select a target cell and press "V" to paste at location.');
+            infoMsg('Successfully copied! Select whre you want to paste your copied cells and press "V" to paste.');
 
         }
         if (event.which == 86) {
