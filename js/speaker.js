@@ -377,14 +377,14 @@ function add_current_candidate_word() {
     GOOD_WORDS.push(CUR_WORD_CANDIDATE);
 
     // so that functions called on textarea changes are called, and so highlights resize
-    $("textarea").trigger('keyup');
-    $("textarea").highlightWithinTextarea('update');
+    $(".descriptions").trigger('keyup');
+    $(".descriptions").highlightWithinTextarea('update');
 }
 
 $(document).ready(function () {
 
     // when textarea changes
-    $('textarea').on("keyup", function () {
+    $('.descriptions').on("keyup", function () {
 
         // so they can't delete prefix
         var value = $(this).val();
@@ -453,7 +453,7 @@ $(document).ready(function () {
     });
 
     // highlight the textareas for words that have not been used yet
-    $('textarea').highlightWithinTextarea({
+    $('.descriptions').highlightWithinTextarea({
         highlight: [
             {
                 highlight: get_bad_words

@@ -114,6 +114,8 @@ function exit_demographic() {
 function save_user_feedback() {
     store_feedback($("#feedback_textarea").val(), new Date(), sessionStorage.getItem('uid') || uuidv4() + "dev").then(function() {
         infoMsg("Successfully stored feedback. Thank you for your participation!");
+        $("#submit_feedback_btn").prop("disabled", true);
+        $("textarea").highlightWithinTextarea('destroy');
     }).catch(err => {
         errorMsg("Error storing feedback.");
         console.error(err);

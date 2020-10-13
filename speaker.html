@@ -138,7 +138,7 @@
 
                 <div class="form-group" id="see_desc_form">
                     <label for="what_you_see">What should you expect to see in the input grid?</label>
-                    <textarea class="form-control" id="what_you_see" rows="2"
+                    <textarea class="form-control descriptions" id="what_you_see" rows="2"
                         placeholder="In the input, you should see..."></textarea>
                     <small id="emailHelp" class="form-text text-muted">Start with "In the input, you should
                         see..."</small>
@@ -150,7 +150,7 @@
 
                 <div class="form-group" id="grid_size_form">
                     <label for="grid_size_desc">How does the grid size change?</label>
-                    <textarea class="form-control" id="grid_size_desc" rows="1"
+                    <textarea class="form-control descriptions" id="grid_size_desc" rows="1"
                         placeholder="The grid size..."></textarea>
                     <small id="emailHelp" class="form-text text-muted">Start with "The grid size..."</small>
                 </div>
@@ -161,7 +161,7 @@
 
                 <div class="form-group" id="do_desc_form">
                     <label for="what_you_do">What do you do to create the output grid?</label>
-                    <textarea class="form-control" id="what_you_do" rows="2"
+                    <textarea class="form-control descriptions" id="what_you_do" rows="2"
                         placeholder="To make the output, you have to..."></textarea>
                     <small id="emailHelp" class="form-text text-muted">Start with "To make the output, you have
                         to..."</small>
@@ -353,7 +353,7 @@
                     <textarea class="form-control" id="feedback_textarea" rows="3"></textarea>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="save_user_feedback();">Submit feedback</button>
+                    <button type="button" id="submit_feedback_btn" class="btn btn-primary" onclick="save_user_feedback();">Submit feedback</button>
                 </div>
             </div>
         </div>
