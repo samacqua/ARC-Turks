@@ -19,7 +19,7 @@ var firebaseConfig = {
   };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(devFirebaseConfig);
 var db = firebase.firestore();
 var database = firebase.database();
 
@@ -137,8 +137,10 @@ function get_task_descriptions(task_id, type) {
                     'see_desc': data.see_description,
                     'do_desc': data.do_description,
                     'selected_ex': data.selected_example,
-                    'num_success': data.num_success,
-                    'num_attempts': data.num_attempts,
+                    'bandit_attempts': data.bandit_attempts,
+                    'bandit_success_score': data.bandit_success_score,
+                    'display_num_attempts': data.display_num_attempts,
+                    'display_num_success': data.display_num_success,
                     'timestamp': data.timestamp,
                     'id': doc.id
                 };
@@ -162,13 +164,16 @@ function get_description_by_id(task_id, desc_id, type) {
 
             const data = snapshot.data();
             // if does not contain field, just returns undefined, so works for all desc kinds
-            var description = {
+            const description = {
                 'grid_desc': data.grid_description,
                 'see_desc': data.see_description,
                 'do_desc': data.do_description,
-                'selected_example': data.selected_example,
-                'num_success': data.num_success,
-                'num_attempts': data.num_attempts,
+                'selected_ex': data.selected_example,
+                'bandit_attempts': data.bandit_attempts,
+                'bandit_success_score': data.bandit_success_score,
+                'display_num_attempts': data.display_num_attempts,
+                'display_num_success': data.display_num_success,
+                'timestamp': data.timestamp,
                 'id': snapshot.id
             };
 
@@ -190,9 +195,9 @@ function get_words() {
         summary_ref.get().then(function (snapshot) {
             return resolve(snapshot.data().words)
         })
-            .catch(function (err) {
-                return reject(err);
-            });
+        .catch(function (err) {
+            return reject(err);
+        });
     });
 }
 /**
@@ -234,8 +239,11 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confi
             'verification_time': parseInt(ver_time),
             'timestamp': new Date(),
 
-            'num_attempts': 0,  // # listeners who used description
-            'num_success': 0,   // # listeners who used description successfully
+            'bandit_attempts': 0,       // # listeners who used description
+            'bandit_success_score': 0,  // # listeners who used description successfully, weighted (2 attempts = +0.5, ...)
+
+            'display_num_attempts': 0,  // # listeners who used description (# to be shown to speaker, stored seperately so fake descriptions can show fictional count)
+            'display_num_success': 0    // # listeners who used description successfully, unweighted
         }
 
         if (type == "nl" || type == "nl_ex") {
@@ -316,10 +324,14 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, tota
 
         // increment the description's number of attempts and number of times the listener gave up (if they gave up)
         const desc_doc = task_doc.collection("descriptions").doc(desc_id);
-        var desc_update_data = { num_attempts: increment };
+        var desc_update_data = { 
+            bandit_attempts: increment,
+            display_num_attempts: increment
+        };
         if (success) {
             const success_inc = firebase.firestore.FieldValue.increment(1/attempts);
-            desc_update_data['num_success'] = success_inc;
+            desc_update_data['display_num_success'] = increment;
+            desc_update_data['bandit_success_score'] = success_inc;
         }
         batch.update(desc_doc, desc_update_data);
 
@@ -359,8 +371,13 @@ function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, use
             'verification_time': parseInt(ver_time),
             'timestamp': new Date(),
 
-            'num_attempts': 5,
-            'num_success': 0
+            // store fake stats so that it is never selected by bandit,
+            // but can be shown to speaker as an example of a bad dsecription
+            'bandit_attempts': 100,
+            'bandit_success_score': 0,
+
+            'display_num_attempts': 3,
+            'display_num_success': 0
         }
 
         // record if could not solve verification or if confidence was not high enough

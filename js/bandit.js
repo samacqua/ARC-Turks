@@ -69,11 +69,11 @@ function select_arm(task, type) {
 
                         const priors = [1, 1];
 
-                        const a = descriptions[i]['num_success'] + priors[0];
-                        const b = descriptions[i]['num_attempts'] - a + priors[1];
+                        const a = descriptions[i]['bandit_success_score'] + priors[0];
+                        const b = descriptions[i]['bandit_attempts'] - a + priors[1];
 
                         const mean = a / (a + b);
-                        const variance = a * b / ((a + b) ** 2 * (a + b + 1));
+                        const variance = (a * b) / ((a + b)**2 * (a + b + 1));
 
                         ucbs.push(mean + Math.sqrt(variance))
                     }

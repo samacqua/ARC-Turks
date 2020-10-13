@@ -83,6 +83,11 @@ $(window).on('load', function () {
         set_instructions_modal(DESCRIPTIONS_TYPE);
         $('#instructionsModal').modal('show');
     }
+
+    // add to list of tasks completed , so we don't give same task
+    var tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
+    tasks_done.push(TASK_ID);
+    sessionStorage.setItem('tasks_completed', tasks_done);
 });
 
 function set_instructions_modal(desc_type) {
@@ -146,11 +151,6 @@ function check() {
 
     const newDate = new Date();
     const totalTime = (newDate - START_DATE) / 1000;
-
-    // add to list of tasks completed , so we don't give same task
-    var tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
-    tasks_done.push(TASK_ID);
-    sessionStorage.setItem('tasks_completed', tasks_done);
 
     if (IS_VERIFICATION) {
         $("#speaker_certainty_modal").modal('show');

@@ -78,6 +78,7 @@ video {
     margin-right: 10%;
     margin-top: 10px;
     display: none;
+    border-radius: 5px;
 }
 
 #dark-layer,
@@ -144,6 +145,7 @@ video {
     margin-right: 10%;
     margin-top: 10px;
     display: none;
+    border-radius: 5px;
 }
 
 .progress {
@@ -162,12 +164,6 @@ video {
 
 #progress-bar-complete {
     background-color: white;
-}
-
-/* So that we can animate the progress: https://stackoverflow.com/questions/23575095/animating-bootstrap-progress-bar-width-with-jquery */
-.progress.active .progress-bar {
-    -webkit-transition: none !important;
-    transition: none !important;
 }
 
 .progress-meter {

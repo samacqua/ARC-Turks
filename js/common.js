@@ -115,7 +115,6 @@ function save_user_feedback() {
     store_feedback($("#feedback_textarea").val(), new Date(), sessionStorage.getItem('uid') || uuidv4() + "dev").then(function() {
         infoMsg("Successfully stored feedback. Thank you for your participation!");
         $("#submit_feedback_btn").prop("disabled", true);
-        $("textarea").highlightWithinTextarea('destroy');
     }).catch(err => {
         errorMsg("Error storing feedback.");
         console.error(err);
@@ -272,9 +271,11 @@ function update_progress_bar(prac_inc = false) {
     const tot_tasks = TOTAL_TASKS_TO_COMPLETE + TOTAL_PRAC_TASKS + 1;
     const percent_complete = (tasks_complete + prac_complete) / tot_tasks * 100;
 
-    $(".progress-bar").animate({
+    console.log("called");
+    console.log(percent_complete);
+    $(".progress-bar").css({
         width: `${percent_complete}%`
-    }, 1000);
+    });
 }
 
 /**

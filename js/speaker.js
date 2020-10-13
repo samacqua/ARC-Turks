@@ -46,15 +46,15 @@ $(window).on('load', function () {
     get_task_descriptions(task, DESCRIPTIONS_TYPE).then(function (descriptions) {
         descriptions.sort(function(a, b) {
 
-            if (a.num_attempts == 0) {
+            if (a.display_num_attempts == 0) {
                 return 1
-            } else if (b.num_attempts == 0) {
+            } else if (b.display_num_attempts == 0) {
                 return -1
             }
 
             function upperConfBound(x) {
-                const i = x.num_success + 1;
-                const j = x.num_attempts - i + 1;
+                const i = x.bandit_success_score + 1;
+                const j = x.bandit_attempts - i + 1;
 
                 const mean = i / (i + j);
                 const variance = i * j / ((i + j) ** 2 * (i + j + 1));
@@ -223,7 +223,7 @@ function showDescEx(i) {
     $("#ex_size_desc").text(PAST_DESCS[i]['grid_desc']);
     $("#ex_see_desc").text(PAST_DESCS[i]['see_desc']);
     $("#ex_do_desc").text(PAST_DESCS[i]['do_desc']);
-    $("#desc_success").text(`${PAST_DESCS[i]['num_success']} of ${PAST_DESCS[i]['num_attempts']} people succeeded using this description.`);
+    $("#desc_success").html(`<b>${PAST_DESCS[i]['display_num_success']}</b> out of <b>${PAST_DESCS[i]['display_num_attempts']}</b> people succeeded using this description.`);
 }
 
 // ==============
@@ -422,7 +422,7 @@ $(document).ready(function () {
                                 var html_text = "";
                                 for (i = 0; i < replacement_words.length; i++) {
                                     const replacement = replacement_words[i];
-                                    const dropdown_item = `<a onclick="replace_word(\'${word}\',\'${replacement}\', '#${id}')" id="replace_${word}_0>${replacement}" class="dropdown-item" href="#">${replacement}</a>`;
+                                    const dropdown_item = `<a onclick="replace_word(\'${word}\',\'${replacement}\', '#${id}')" id="replace_${word}_${replacement}" class="dropdown-item" href="#">${replacement}</a>`;
                                     html_text += dropdown_item;
                                 }
                                 return html_text
@@ -430,12 +430,7 @@ $(document).ready(function () {
                         );
                     }
                 });
-                // for (i=0;i<replacements.length;i++) {
-
-
-                // }
             }
-
         });
     });
 
