@@ -26,13 +26,16 @@ $(window).on('load', function () {
 
     // get words that have already been used and their word vecs
     get_words().then(words => {
-        GOOD_WORDS = words.map(function (value) { return value.toLowerCase() });
-        console.log("Length of previously used words:", GOOD_WORDS.length);
-
         // get word vecs from db and cache them
-        for (i=0;i<GOOD_WORDS.length;i++) {
-            get_word_vec_cache(GOOD_WORDS[i]);
+        for (i=0;i<words.length;i++) {
+            let word = words[i];
+            GOOD_WORDS.push(word.toLowerCase());
+            // GOOD_WORDS = GOOD_WORDS.concat(prefix_suffix_permutations(word));
+            get_word_vec_cache(word);
         }
+        console.log("Length of previously used words:", words.length);
+        console.log("(with permutations): ", GOOD_WORDS.length);
+
     }).catch(error => {
         errorMsg("Could not load words that can been used. Please check your internet connection and reload the page.");
     });
@@ -209,15 +212,25 @@ function createExampleDescsPager(cur_ex=0) {
 
     if (PAST_DESCS.length >= 1) {
         $("#paginator").empty();
-        $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${Math.max(CURRENT_DESC - 1, 0)}); createExampleDescsPager(${Math.max(CURRENT_DESC-1)});">Previous</a></li>`);
-        for (i = 0; i < PAST_DESCS.length; i++) {
-            console.log(i);
-            console.log(cur_ex);
-            if (i == cur_ex) {
-                console.log("a");
-                $("#paginator").append(`<li class="page-item active"><a class="page-link" href="#" onclick="showDescEx(${i});createExampleDescsPager(${i});">${i + 1}</a></li>`);
-            } else {
-                $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${i});createExampleDescsPager(${i});">${i + 1}</a></li>`);
+        $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${Math.max(CURRENT_DESC - 1, 0)}); createExampleDescsPager(${Math.max(CURRENT_DESC-1, 0)});">Previous</a></li>`);
+
+        if (PAST_DESCS.length <= 4) {
+            for (i = 0; i < PAST_DESCS.length; i++) {
+                if (i == cur_ex) {
+                    $("#paginator").append(`<li class="page-item active"><a class="page-link" href="#" onclick="showDescEx(${i});createExampleDescsPager(${i});">${i + 1}</a></li>`);
+                } else {
+                    $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${i});createExampleDescsPager(${i});">${i + 1}</a></li>`);
+                }
+            }
+        } else {
+            if (cur_ex != 0) {
+                $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(0);createExampleDescsPager(0);">1</a></li>`);
+                $("#paginator").append(`<li class="page-item disabled"><a class="page-link">...</a></li>`);
+            }
+            $("#paginator").append(`<li class="page-item active"><a class="page-link" href="#" onclick="showDescEx(${cur_ex});createExampleDescsPager(${cur_ex});">${cur_ex + 1}</a></li>`);
+            if (cur_ex != PAST_DESCS.length - 1) {
+                $("#paginator").append(`<li class="page-item disabled"><a class="page-link">...</a></li>`);
+                $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${PAST_DESCS.length-1});createExampleDescsPager(${PAST_DESCS.length-1});">${PAST_DESCS.length}</a></li>`);
             }
         }
         $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${Math.min(CURRENT_DESC + 1, PAST_DESCS.length - 1)}); createExampleDescsPager(${Math.min(CURRENT_DESC+1, PAST_DESCS.length - 1)}); ">Next</a></li>`);
@@ -243,6 +256,19 @@ function showDescEx(i) {
 // returns the regex for words that have not been used yet
 function get_bad_words(input) {
     return new RegExp('\\b(?!(' + GOOD_WORDS.join("|") + ')\\b)[a-zA-Z]+', 'gmi')
+}
+
+// add common permutations of word
+function prefix_suffix_permutations(word) {
+    let permutations = [];
+
+    if (word.slice(-1) == "s") {
+        permutations.push(word.slice(0,-1));
+    } else {
+        permutations.push(word + "s");
+    }
+
+    return permutations;
 }
 
 // if the word has already been fetched, then returns its vec

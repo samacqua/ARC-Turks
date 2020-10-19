@@ -18,11 +18,6 @@ img {
     -o-transition: all .5s ease-in-out;
 }
 
-#copy-reset-btns {
-    padding-top: 15px;
-    padding-bottom: 15px;
-}
-
 #arrow {
     width: 90%;
     z-index: 100;

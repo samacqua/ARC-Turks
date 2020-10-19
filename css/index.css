@@ -13,6 +13,7 @@
 }
 
 #io_ex {
+    width: 50% !important;
     -webkit-filter: blur(5px) grayscale(100%);
     /* Safari 6.0 - 9.0 */
     filter: blur(5px) grayscale(100%);
@@ -25,7 +26,7 @@
 }
 
 .io {
-    width: 50%;
+    width: 100%;
     padding-bottom: 15px;
     height: auto;
 }

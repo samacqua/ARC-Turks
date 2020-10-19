@@ -133,16 +133,14 @@ var TUT_LIST = [
     ["This is the input area. You will apply the pattern to this grid.", ["input-col"], 30, 5, 70],
     ["This is the output area. This is where you will create the correct output grid. Let's break it down a little more...", ["output-col"], 30, 10, 35],
     ["This is where you can change the grid size.", ["resize_control_btns"], 50, 5, 35],
-    ["Try changing the grid size to 2x2.", ["resize_control_btns", "output_grid", "objective-col"], 50, 100, 100],
-    ["With these buttons, you can copy the entire input grid, reset the grid, check your answer, and give up.", ["edit_control_btns"], 60, 5, 35],
-    ["Try copying the input grid, then resetting the output grid.", ["input-col", "copy-reset-btns", "output_grid", "objective-col"], 30, 100, 100],
+    ["With these buttons, you can copy the entire input grid, make the entire output grid black, check your answer, and give up.", ["edit_control_btns"], 60, 5, 35],
+    ["Since the description says the output grid is the same size as the input grid, use 'Copy input grid' to make the correct output grid size.", ["grid_size_p", "input-col", "copy-from-input", "output_grid", "objective-col"], 30, 100, 100],
     ["These modes are how you change the output grid.", ["toolbar_and_symbol_picker"], 60, 5, 35],
     ["With the draw mode, you can edit individual pixels.", ["draw"], 60, 5, 35],
-    ["Try drawing 3 green pixels in the output grid.", ["toolbar_and_symbol_picker", "output_grid", "objective-col"], 30, 100, 100],
     ["With flood fill, you can fill in entire areas.", ["floodfill"], 60, 5, 35],
-    ["Use <b>flood fill</b> to fill inside the pink frame with yellow.", ["toolbar_and_symbol_picker", "output_grid", "objective-col"], 30, 100, 100],
+    ["Use <b>flood fill</b> to fill each 'hole' with yellow.", ["description-text", "toolbar_and_symbol_picker", "output_grid", "objective-col"], 30, 100, 100],
     ["With copy-paste, you can copy a part of the grid with C and paste with V.", ["copypaste"], 60, 5, 35],
-    ["Try to copy the entire light-blue square from the input into the top left corner of the output. <br>(Make sure you are in copy-paste mode, then select an area and press 'C' to copy, and select an area and press 'V' to paste)", ["input-col", "output_grid", "toolbar_and_symbol_picker", "objective-col"], 500, 100, 100],
+    ["You have now successfully used the description to create the output. Use the green 'Check!' button to check your answer!", ["objective-col", "input-col", "description-col", "output-col"], 500, 100, 100],
 ];
 
 // different feedback based on how they reached a state, these flags give that information
@@ -151,6 +149,8 @@ var flags = { "copied_input": false, 'copy-paste': false };
 // after some tasks, slight delay to ease transitions for user
 // this variable ensures they do not skip tutorial steps
 var WAITING_TO_CONTINUE = false;
+var LAST_YELLOW_SUM = 33;
+var YELLOW_SUM = 0; // sum of yellow squares filled, informs the error message given to the user
 
 /**
  * Before continuing the tutorial, checks if there is a task to complete
@@ -174,159 +174,75 @@ function pre_continue(flag = null) {
 
         syncFromEditionGridToDataGrid();
 
-        // the challenge can be identified by which elements are currently highlighted
-        if (arraysEqual(CUR_HIGHLIGHT, ["resize_control_btns", "output_grid", "objective-col"])) {
-            // challenge to resize output grid to 2x2
-            if (CURRENT_OUTPUT_GRID.width == CURRENT_OUTPUT_GRID.height && CURRENT_OUTPUT_GRID.width == 2) {
-                infoMsg("Great job! You correctly resized the grid.");
-                WAITING_TO_CONTINUE = true;
-                setTimeout(function () { continue_tutorial(); }, 1000);
-                return;
-            } else {
-                errorMsg("You resized the output grid, but to the wrong size.");
-            }
-        } else if (arraysEqual(CUR_HIGHLIGHT, ["input-col", "copy-reset-btns", "output_grid", "objective-col"])) {
+        if (arraysEqual(CUR_HIGHLIGHT, ["grid_size_p", "input-col", "copy-from-input", "output_grid", "objective-col"])) {
             // challenge to copy from input and reset output grid
 
             if (arraysEqual(CURRENT_OUTPUT_GRID.grid, CURRENT_INPUT_GRID.grid)) {
                 if (flags['copy_input'] == true) {
-                    infoMsg("Great! You have copied from the input grid. Now, reset the output grid.");
+                    infoMsg("Great job! You have copied from the input grid.");
                 } else {
                     infoMsg("You have copied the input grid, but you could have done it easier by clicking the \"Copy input grid\" button.");
                 }
-                return;
-            } else if (CURRENT_OUTPUT_GRID.grid.width == CURRENT_INPUT_GRID.grid.width && CURRENT_OUTPUT_GRID.height == CURRENT_INPUT_GRID.height) {
-                for (var i = 0; i < CURRENT_OUTPUT_GRID.grid.length; i++) {
-                    ref_row = CURRENT_OUTPUT_GRID.grid[i];
-                    for (var j = 0; j < ref_row.length; j++) {
-                        if (ref_row[j] != 0) {
-                            errorMsg("Your grid is the correct size, but you have to reset it.");
-                            return;
-                        }
-                    }
-                }
-                infoMsg("Great job! You have copied from the input grid, and reset the output.");
-
                 WAITING_TO_CONTINUE = true;
                 setTimeout(function () { continue_tutorial(); }, 1000);
+                $("#tool_floodfill").click();
                 return;
             }
-        } else if (arraysEqual(CUR_HIGHLIGHT, ["toolbar_and_symbol_picker", "output_grid", "objective-col"])) {
-            // challenge to draw 3 green cells or flood fill yellow (same highlighted elements)
+        } else if (arraysEqual(CUR_HIGHLIGHT, ["description-text", "toolbar_and_symbol_picker", "output_grid", "objective-col"])) {
+            // challenge to flood fill yellow
 
-            if ($("#objective-text").text().includes("green")) {
-                // draw 3 green cells
-                var green = 0;
-                for (var i = 0; i < CURRENT_OUTPUT_GRID.grid.length; i++) {
-                    ref_row = CURRENT_OUTPUT_GRID.grid[i];
-                    for (var j = 0; j < ref_row.length; j++) {
-                        if (ref_row[j] == 3) {
-                            green++;
-                        }
-                    }
-                }
+            const ref_grid = TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output'];
 
-                if (green == 3) {
-                    infoMsg("Great job! You drew 3 green cells.");
-                    WAITING_TO_CONTINUE = true;
-                    setTimeout(function () { continue_tutorial(); }, 1000);
-                    return;
-                } else if (green != 0) {
-                    infoMsg("You have painted " + green + " cells green. Paint " + (3 - green).toString() + " more.")
-                    return;
-                }
+            let mode = $('input[name=tool_switching]:checked').val();
+            if (mode == 'edit') {
+                errorMsg("Make sure that you are in 'floodfill' mode.");
+                return;
             }
-
-            if ($("#objective-text").text().includes("yellow")) {
-                // flood fill yellow
-
-                const ref_grid = 
-                    [[0, 0, 0, 0, 0, 0, 0, 0], 
-                    [0, 6, 6, 6, 6, 6, 6, 0], 
-                    [0, 6, 4, 4, 4, 4, 6, 0], 
-                    [0, 6, 4, 4, 4, 4, 6, 0], 
-                    [0, 6, 4, 4, 4, 4, 6, 0], 
-                    [0, 6, 4, 4, 4, 4, 6, 0], 
-                    [0, 6, 6, 6, 6, 6, 6, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0]];
-
-                const wrong_ref_grid = 
-                    [[0, 0, 0, 0, 0, 0, 0, 0], 
-                    [0, 4, 4, 4, 4, 4, 4, 0], 
-                    [0, 4, 0, 0, 0, 0, 4, 0], 
-                    [0, 4, 0, 0, 0, 0, 4, 0],
-                    [0, 4, 0, 0, 0, 0, 4, 0],
-                    [0, 4, 0, 0, 0, 0, 4, 0],
-                    [0, 4, 4, 4, 4, 4, 4, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0]];
                 
-                for (var i = 0; i < CURRENT_OUTPUT_GRID.grid.length; i++) {
-                    ref_row = CURRENT_OUTPUT_GRID.grid[i];
-                    for (var j = 0; j < ref_row.length; j++) {
-                        if (ref_row[j] != ref_grid[i][j]) {
-
-                            if (arraysEqual(CURRENT_OUTPUT_GRID.grid, wrong_ref_grid)) {
-                                errorMsg("Fill inside the pink framed area with yellow, not the pink frame itself.");
-                            } else {
-                                errorMsg("Fill inside the pink framed area with yellow.");
-                            }
-
-                            setTimeout(function() {
-                                const flood_fill_test_grid = convertSerializedGridToGridObject(
-                                    [[0, 0, 0, 0, 0, 0, 0, 0], 
-                                     [0, 6, 6, 6, 6, 6, 6, 0], 
-                                     [0, 6, 0, 0, 0, 0, 6, 0], 
-                                     [0, 6, 0, 0, 0, 0, 6, 0], 
-                                     [0, 6, 0, 0, 0, 0, 6, 0], 
-                                     [0, 6, 0, 0, 0, 0, 6, 0], 
-                                     [0, 6, 6, 6, 6, 6, 6, 0],
-                                     [0, 0, 0, 0, 0, 0, 0, 0]]);
-                         
-                                 CURRENT_OUTPUT_GRID = flood_fill_test_grid;
-                                 syncFromDataGridToEditionGrid();
-                            }, 500);
-                            return;
-                        }
-                    }
-                }
-                infoMsg("Great job! You used flood fill.");
-                WAITING_TO_CONTINUE = true;
-                setTimeout(function () { continue_tutorial(); }, 1000);
-                return;
-            }
-        } else if (arraysEqual(CUR_HIGHLIGHT, ["input-col", "output_grid", "toolbar_and_symbol_picker", "objective-col"])) {
-            const ref_grid = [
-                [8, 8, 0],
-                [8, 8, 0],
-                [0, 0, 0]
-            ]
-
-            if (CURRENT_OUTPUT_GRID.width != 3 || CURRENT_OUTPUT_GRID.height != 3) {
-                errorMsg("Make sure that your output grid is 3x3.");
-                return;
-            }
-
-            for (var i = 0; i < ref_grid.length; i++) {
-                ref_row = ref_grid[i];
+            for (var i = 0; i < CURRENT_OUTPUT_GRID.grid.length; i++) {
+                let ref_row = CURRENT_OUTPUT_GRID.grid[i];
                 for (var j = 0; j < ref_row.length; j++) {
-                    if (ref_row[j] != CURRENT_OUTPUT_GRID.grid[i][j]) {
-                        if (flags['copy-paste'] == false) {
-                            errorMsg("Don't draw the shape, use the 'Copy-Paste' tool.");
-                        } else {
-                            errorMsg("You correctly used copy-paste, but make sure you are copying the correct pattern into the correct location.");
+                    if (ref_row[j] != ref_grid[i][j]) {
+
+                        if (ref_row[j] == 0 && ref_grid[i][j] == 4) {
+                            YELLOW_SUM++;
+                            continue;
                         }
-                        setTimeout(function() { resetOutputGrid() }, 500);
+
+                        errorMsg("Only fill inside the holes with yellow.");
+                        LAST_YELLOW_SUM = YELLOW_SUM;
+                        YELLOW_SUM = 0;
                         return;
                     }
                 }
             }
-
-            infoMsg("Great job! You used copy-paste.");
+            for (var i = 0; i < CURRENT_OUTPUT_GRID.grid.length; i++) {
+                let ref_row = CURRENT_OUTPUT_GRID.grid[i];
+                for (var j = 0; j < ref_row.length; j++) {
+                    if (ref_row[j] != ref_grid[i][j]) {
+                        if (YELLOW_SUM < LAST_YELLOW_SUM) { // made progress
+                            infoMsg("Great! Continue filling in the holes with yellow.");
+                        } else {
+                            errorMsg("There are still some holes that have not been filled with yellow...");
+                        }
+                        LAST_YELLOW_SUM = YELLOW_SUM;
+                        YELLOW_SUM = 0;
+                        return;
+                    }
+                }
+            }
+            infoMsg("Great job! You used flood fill.");
             WAITING_TO_CONTINUE = true;
             setTimeout(function () { continue_tutorial(); }, 1000);
             return;
+        } else if (arraysEqual(CUR_HIGHLIGHT, ["objective-col", "input-col", "description-col", "output-col"])) {
+            if (flag == "check") {
+                infoMsg("You successfully completed your first task!");
+                WAITING_TO_CONTINUE = true;
+                setTimeout(function () { continue_tutorial(); }, 1500);
+                return;
+            }
         }
-        errorMsg("To continue, follow the Objective.");
     } else {
         // not a challenge, so continue the tutorial
         continue_tutorial();
@@ -349,11 +265,6 @@ function continue_tutorial() {
             $(`#${CUR_HIGHLIGHT[i]}`).css('z-index', 'auto');
         }
     }
-
-    // reset grid
-    $("#output_grid_size").val("3x3");
-    resizeOutputGrid();
-    resetOutputGrid();
 
     // if last one, then get rid of dark layer
     if (TUT_LIST.length == 0) {
@@ -406,22 +317,6 @@ function continue_tutorial() {
         $("#objective-text").html(next_item[0]);
         $("#trans-layer").css('z-index', -1);
         $("#tut-continue-message").html('Follow the Objective to continue');
-    }
-
-    if ($("#objective-text").text().includes("yellow")) {
-        console.log("Flood fill yellow");
-        const flood_fill_test_grid = convertSerializedGridToGridObject(
-           [[0, 0, 0, 0, 0, 0, 0, 0], 
-            [0, 6, 6, 6, 6, 6, 6, 0], 
-            [0, 6, 0, 0, 0, 0, 6, 0], 
-            [0, 6, 0, 0, 0, 0, 6, 0], 
-            [0, 6, 0, 0, 0, 0, 6, 0], 
-            [0, 6, 0, 0, 0, 0, 6, 0], 
-            [0, 6, 6, 6, 6, 6, 6, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0]]);
-
-        CURRENT_OUTPUT_GRID = flood_fill_test_grid;
-        syncFromDataGridToEditionGrid();
     }
     
     // set highlight div to be above layer
@@ -603,4 +498,11 @@ function check_quiz() {
     }
 
     $('#quiz_modal').one('hidden.bs.modal', function () { $('#instructionsModal').modal('show'); }).modal('hide');
+
+    // reset grid
+    $("#output_grid_size").val("3x3");
+    resizeOutputGrid();
+    resetOutputGrid();
+
+    $("#tool_edit").click();
 }

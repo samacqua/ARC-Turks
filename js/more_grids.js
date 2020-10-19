@@ -323,7 +323,7 @@ $(document).ready(function () {
                 symbol = parseInt($(selected[i]).attr('symbol'));
                 COPY_PASTE_DATA.push([x, y, symbol]);
             }
-            infoMsg('Successfully copied! Select whre you want to paste your copied cells and press "V" to paste.');
+            infoMsg('Successfully copied! Select where you want to paste your copied cells and press "V" to paste.');
 
         }
         if (event.which == 86) {
@@ -365,15 +365,6 @@ $(document).ready(function () {
                 if (res.length == 1) {
                     cell = $(res[0]);
                     setCellSymbol(cell, symbol);
-                }
-            }
-
-
-            // if in tutorial and in challenge to copy-paste, check completion
-            const isStart = !(window.location.href.includes("listener") || window.location.href.includes("speaker"));
-            if (isStart) {
-                if ($("#objective-text").text().includes("copy")) {
-                    pre_continue('copy-paste');
                 }
             }
         }

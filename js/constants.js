@@ -8,10 +8,10 @@ const MAX_ATTEMPTS_BUILDER = 3;
 // easy tasks for demonstration purposes
 const PRAC_TASKS = [
     {
-        "task": 341,
+        "task": 1,
         "grid_desc": "The output grid size... is the same as the input grid size.",
-        "see_desc": "In the input, you should see... a light blue 2x2 square with 4 colored cells around it.",
-        "do_desc": "To make the output, you have to... move each colored cell to cover the corner of the light blue square that it is closest to.",
+        "see_desc": "In the input, you should see... at least 1 green shape with holes.",
+        "do_desc": "To make the output, you have to... completely fill each hole with yellow.",
         "selected_example": 0
     },
     {
