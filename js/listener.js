@@ -186,7 +186,7 @@ function submit_description() {
     const grid_desc = urlParams.get('grid') || "";
     const see_desc = urlParams.get('see') || "";
     const do_desc = urlParams.get('do') || "";
-    const desc_time = urlParams.get('time') || "0";
+    const desc_time = parseInt(urlParams.get('time') || "0");
 
     var conf = $('#conf_form').val().trim();
 
@@ -222,7 +222,7 @@ function used_all_attempts() {
             const grid_desc = urlParams.get('grid') || "";
             const see_desc = urlParams.get('see') || "";
             const do_desc = urlParams.get('do') || "";
-            const desc_time = urlParams.get('time') || "0";
+            const desc_time = parseInt(urlParams.get('time') || "0");
         
             store_failed_ver_description(see_desc, do_desc, grid_desc, TASK_ID, uid, null, ATTEMPT_JSONS.length, ATTEMPT_JSONS, desc_time, totalTime, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE)
             .then(function () { 
