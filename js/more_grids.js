@@ -294,11 +294,11 @@ $(document).ready(function () {
         toolMode = $('input[name=tool_switching]:checked').val();
         if (toolMode == 'select') {
             infoMsg('Drag over an area to select, and press "C" to copy');
-        } else if (toolMode == 'tool_floodfill') {
+        }/* else if (toolMode == 'tool_floodfill') {
             infoMsg('Click anywhere in the output to flood-fill that area with the selected color.');
         } else if (toolMode == 'edit') {
             infoMsg('Click anywhere in the output to color that cell with the selected color.');
-        }
+        } */
     });
 
     $('body').keydown(function (event) {

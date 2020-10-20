@@ -1,7 +1,13 @@
+const TOTAL_TIME = 45;
+const INSTRUCTIONS_TIME = 1;
+const PRAC_TIME = 2;
+const TOTAL_PRAC_TASKS = 2;
+const SPEAKER_TIME = 6;
+const BUILDER_TIME = 2;
+
 const TOTAL_TASKS_TO_COMPLETE = 3;
 const MIN_TASKS_BEFORE_SPEAKER = 2;
-const TOTAL_PRAC_TASKS = 2;
-const TASKS = [7,8,9];
+const TASKS = [149, 286, 140, 354, 219, 277, 28, 135, 162, 384, 297, 26, 299, 388, 246, 74, 305, 94, 308, 77];
 const NUM_TASKS = TASKS.length;   // TODO: Change back to 400
 const MAX_ATTEMPTS_BUILDER = 3;
 

@@ -20,7 +20,7 @@ $(window).on('load', function () {
 
     // initialize the number of items complete, and the number of practice items complete
     sessionStorage.setItem("items_complete", "0"); // number of actual tasks (for determining when complete with study)
-    sessionStorage.setItem("prac_complete", "0"); //for finishing instructions and practice tasks (for updating progress bar)
+    sessionStorage.setItem("time_complete", "0"); //for finishing instructions and practice tasks (for updating progress bar)
 
     // consent --> demographic --> overview --> walkthrough --> practice --> real tasks
     $('#consentModal').modal('show');
@@ -382,7 +382,7 @@ function check_grid() {
         }
     }
 
-    update_progress_bar(prac_inc = true);
+    update_progress_bar(inc=PRAC_TIME);
     scroll_highlight_objective();
 
     const uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
@@ -394,7 +394,9 @@ function check_grid() {
     GIVE_UP_HINT = setTimeout(function() {infoMsg("If you cannot figure out the pattern, press 'give up.'")}, 60000);
 
     const title = `tutorial_ex_${TOTAL_PRAC_TASKS - PRAC_TASKS.length}`;
-    set_user_complete_time(uid, tut_time, title);
+    if (TUT_START_TIME != 0) {  // if complete task in walkthrough, don't log that time bc part of instructions
+        set_user_complete_time(uid, tut_time, title);
+    }
 
     // if not last practice task
     if (PRAC_TASKS.length != 0) {

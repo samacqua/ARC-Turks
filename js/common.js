@@ -121,18 +121,22 @@ function save_user_feedback() {
     });
 }
 
-function get_next_task(first_task = false) {
+function get_next_task(cur_task, first_task=false) {
 
     return new Promise(function (resolve, reject) {
+        
         var num_tasks_complete = parseInt(sessionStorage.getItem('items_complete') || 0);
+        var time_complete = parseInt(sessionStorage.getItem('time_complete') || 0);
 
         if (!first_task) {
             // increment number of tasks complete if not loading the first task, bc next task is called after completing a task
+            const task_times = { 'speaker': SPEAKER_TIME, 'tutorial': INSTRUCTIONS_TIME, 'listener': BUILDER_TIME };
             num_tasks_complete++;
+            time_complete += task_times[cur_task];
         }
 
-        if (num_tasks_complete >= TOTAL_TASKS_TO_COMPLETE) {
-            return resolve("finish");
+        if (time_complete >= TOTAL_TIME) {
+            return resolve('finish');
         }
 
         get_unused_desc(DESCRIPTIONS_TYPE).then(task_desc => {
@@ -172,17 +176,21 @@ function get_next_task(first_task = false) {
 /**
  * go to next task
  */
-function next_task(first_task = false) {
+function next_task(cur_task, first_task = false) {
 
     var num_tasks_complete = parseInt(sessionStorage.getItem('items_complete') || 0);
+    var time_complete = parseInt(sessionStorage.getItem('time_complete') || 0);
 
     if (!first_task) {
         // increment number of tasks complete if not loading the first task, bc next task is called after completing a task
+        const task_times = { 'speaker': SPEAKER_TIME, 'tutorial': INSTRUCTIONS_TIME, 'listener': BUILDER_TIME };
         num_tasks_complete++;
+        time_complete += task_times[cur_task];
         sessionStorage.setItem('items_complete', num_tasks_complete);
+        sessionStorage.setItem('time_complete', time_complete);
     }
 
-    if (num_tasks_complete >= TOTAL_TASKS_TO_COMPLETE) {
+    if (time_complete >= TOTAL_TIME) {
         finish();
         return;
     }
@@ -257,22 +265,16 @@ $(window).resize(function () {
 
 /**
  * update the progress bar at the top of the screen
- * @param {*} prac_inc true if want to increment number of practice tasks complete
+ * @param {*} inc amount to increment when updating, default 0
  */
-function update_progress_bar(prac_inc = false) {
-    var tasks_complete = parseInt(sessionStorage.getItem('items_complete') || 0);
-    var prac_complete = parseInt(sessionStorage.getItem('prac_complete') || 0);
-    if (prac_inc) {
-        prac_complete++;
-        sessionStorage.setItem('prac_complete', prac_complete);
-    }
+function update_progress_bar(inc=0) {
 
-    // + 1 is for instructions
-    const tot_tasks = TOTAL_TASKS_TO_COMPLETE + TOTAL_PRAC_TASKS + 1;
-    const percent_complete = (tasks_complete + prac_complete) / tot_tasks * 100;
+    var time_complete = parseInt(sessionStorage.getItem('time_complete') || 0);
+    time_complete  += inc;
+    sessionStorage.setItem('time_complete', time_complete);
 
-    console.log("called");
-    console.log(percent_complete);
+    const percent_complete = time_complete / TOTAL_TIME * 100;
+
     $(".progress-bar").css({
         width: `${percent_complete}%`
     });
@@ -282,15 +284,12 @@ function update_progress_bar(prac_inc = false) {
  * Correctly sizes the progress bar for the number of practice tasks and actual tasks
  */
 function size_progress_bar() {
-    const total = TOTAL_TASKS_TO_COMPLETE + TOTAL_PRAC_TASKS + 1;   // +1 for tutorial
 
-    const instructions_width = 1 / total * 100;
-    const tutorial_width = TOTAL_PRAC_TASKS / total * 100;
-    const tasks_width = 100 - instructions_width - tutorial_width;
+    const instructions = (INSTRUCTIONS_TIME + TOTAL_PRAC_TASKS*PRAC_TIME)/TOTAL_TIME * 100;
+    const tasks = 100 - instructions;
 
-    $("#instructions_label").css("width", `${instructions_width}%`);
-    $("#tutorial_label").css("width", `${tutorial_width}%`);
-    $("#done_label").css("width", `${tasks_width}%`);
+    $("#tutorial_label").css("width", `${instructions}%`);
+    $("#done_label").css("width", `${tasks}%`);
 }
 
 // create random id so queue and desc have same id

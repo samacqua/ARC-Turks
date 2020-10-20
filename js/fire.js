@@ -9,17 +9,17 @@ var devFirebaseConfig = {
 };
 
 var firebaseConfig = {
-    apiKey: "AIzaSyBT4huUvuS3_zxmQ9TTSbWfQGVl-UaqmYE",
-    authDomain: "arc-pilot-pilot-v2.firebaseapp.com",
-    databaseURL: "https://arc-pilot-pilot-v2.firebaseio.com",
-    projectId: "arc-pilot-pilot-v2",
-    storageBucket: "arc-pilot-pilot-v2.appspot.com",
-    messagingSenderId: "714534944811",
-    appId: "1:714534944811:web:1e7641ad7ff39e1af16a6e"
+    apiKey: "AIzaSyDDDTu85WtFnqwJlwZdon1accivFQzOKFw",
+    authDomain: "arc-pilot.firebaseapp.com",
+    databaseURL: "https://arc-pilot.firebaseio.com",
+    projectId: "arc-pilot",
+    storageBucket: "arc-pilot.appspot.com",
+    messagingSenderId: "16504691809",
+    appId: "1:16504691809:web:e847b8e2fd07580e6e1e20"
   };
 
 // Initialize Firebase
-firebase.initializeApp(devFirebaseConfig);
+firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
 var database = firebase.database();
 

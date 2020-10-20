@@ -24,22 +24,6 @@ $(window).on('load', function () {
         $('#instructionsModal').modal('show');
     }
 
-    // get words that have already been used and their word vecs
-    get_words().then(words => {
-        // get word vecs from db and cache them
-        for (i=0;i<words.length;i++) {
-            let word = words[i];
-            GOOD_WORDS.push(word.toLowerCase());
-            // GOOD_WORDS = GOOD_WORDS.concat(prefix_suffix_permutations(word));
-            get_word_vec_cache(word);
-        }
-        console.log("Length of previously used words:", words.length);
-        console.log("(with permutations): ", GOOD_WORDS.length);
-
-    }).catch(error => {
-        errorMsg("Could not load words that can been used. Please check your internet connection and reload the page.");
-    });
-
     // get speaker task
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
@@ -101,6 +85,22 @@ $(window).on('load', function () {
     } else if (DESCRIPTIONS_TYPE == "ex") {
         console.error("Description type for speaker task should be natural language or natural language+example, not just example.");
     }
+
+    // get words that have already been used and their word vecs
+    get_words().then(words => {
+        // get word vecs from db and cache them
+        for (i=0;i<words.length;i++) {
+            let word = words[i];
+            GOOD_WORDS.push(word.toLowerCase());
+            GOOD_WORDS = GOOD_WORDS.concat(prefix_suffix_permutations(word));
+            get_word_vec_cache(word);
+        }
+        console.log("Length of previously used words:", words.length);
+        console.log("(with permutations): ", GOOD_WORDS.length);
+
+    }).catch(error => {
+        errorMsg("Could not load words that can been used. Please check your internet connection and reload the page.");
+    });
 });
 
 
@@ -262,6 +262,10 @@ function get_bad_words(input) {
 function prefix_suffix_permutations(word) {
     let permutations = [];
 
+    if (word == "s") {  // if we add "", then nothing will match regex
+        return []
+    }
+
     if (word.slice(-1) == "s") {
         permutations.push(word.slice(0,-1));
     } else {
@@ -398,6 +402,12 @@ function confirm_add_word(word) {
 function add_current_candidate_word() {
 
     GOOD_WORDS.push(CUR_WORD_CANDIDATE);
+    GOOD_WORDS = GOOD_WORDS.concat(prefix_suffix_permutations(CUR_WORD_CANDIDATE));
+
+    let blank_index = GOOD_WORDS.indexOf("");   // ensure not adding ""
+    if (blank_index != -1) {
+        GOOD_WORDS.splice(GOOD_WORDS.indexOf(""), 1);    // remove "" from list if it exists
+    }
 
     // so that functions called on textarea changes are called, and so highlights resize
     $(".descriptions").trigger('keyup');
@@ -585,7 +595,7 @@ function give_up() {
             tasks_done.push(TASK_ID);
             sessionStorage.setItem('tasks_completed', tasks_done);
     
-            next_task(first_task = true);
+            next_task('speaker', first_task = true);
         });
     });
 }

@@ -118,6 +118,16 @@ function check() {
     reference_output = TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output'];
     submitted_output = CURRENT_OUTPUT_GRID.grid;
 
+    for (i=0;i<ATTEMPT_JSONS.length;i++) {
+        console.log(ATTEMPT_JSONS[i]);
+        console.log(JSON.stringify(submitted_output));
+
+        if (ATTEMPT_JSONS[i] == JSON.stringify(submitted_output)) {
+            errorMsg("You have already tried this grid. Try a different output before checking your answer.");
+            return;
+        }
+    }
+
     // have to store as json string bc firebase cannot store nested arrays
     ATTEMPT_JSONS.push(JSON.stringify(submitted_output));
 
@@ -158,7 +168,7 @@ function check() {
         store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, success = true, DESCRIPTIONS_TYPE)
             .then(function () { 
                 set_user_complete_time(uid, totalTime, `${TASK_ID}_${DESCRIPTIONS_TYPE}_listener`).then(function() {
-                    next_task(); 
+                    next_task('listener'); 
                 }).catch(function (error) { console.error('Error storing response ' + error); });
             })
             .catch(function (error) { console.error("Error storing response: " + error); });
@@ -183,8 +193,8 @@ function submit_description() {
     if (conf < 5) {
         store_failed_ver_description(see_desc, do_desc, grid_desc, TASK_ID, uid, conf, ATTEMPT_JSONS.length, ATTEMPT_JSONS, desc_time, totalTime, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE)
         .then(function () { 
-            set_user_complete_time(uid, totalTime, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker_(fail)`).then(function() {
-                next_task();
+            set_user_complete_time(uid, desc_time+totalTime, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker_(fail)`).then(function() {
+                next_task('speaker');
             }).catch(function (error) { console.error('Error storing response ' + error); });
         })
         .catch(function (error) { console.error('Error storing response ' + error); });
@@ -192,7 +202,7 @@ function submit_description() {
         store_description(see_desc, do_desc, grid_desc, TASK_ID, uid, conf, ATTEMPT_JSONS.length, ATTEMPT_JSONS, desc_time, totalTime, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE)
         .then(function () { 
             set_user_complete_time(uid, totalTime, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker`).then(function() {
-                next_task(); 
+                next_task('speaker'); 
             }).catch(function (error) { console.error('Error storing response ' + error); });
         })
         .catch(function (error) { console.error('Error storing response ' + error); });
@@ -216,8 +226,8 @@ function used_all_attempts() {
         
             store_failed_ver_description(see_desc, do_desc, grid_desc, TASK_ID, uid, null, ATTEMPT_JSONS.length, ATTEMPT_JSONS, desc_time, totalTime, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE)
             .then(function () { 
-                set_user_complete_time(uid, totalTime, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker_(fail)`).then(function() {
-                    next_task();
+                set_user_complete_time(uid, desc_time+totalTime, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker_(fail)`).then(function() {
+                    next_task('speaker');   
                 }).catch(function (error) { console.error('Error storing response ' + error); });
             })
         .catch(function (error) { console.error('Error storing response ' + error); });
@@ -225,7 +235,7 @@ function used_all_attempts() {
             store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, totalTime, success = false, DESCRIPTIONS_TYPE)
             .then(function () { 
                 set_user_complete_time(uid, totalTime, `${TASK_ID}_${DESCRIPTIONS_TYPE}_listener_(fail)`).then(function() {
-                    next_task(); 
+                    next_task('listener'); 
                 }).catch(function (error) { console.error('Error storing response ' + error); });
             })    // TODO: should we count a failure 3 attempts as a completed task?
             .catch(function (error) { console.error("Error storing response: " + error); });
