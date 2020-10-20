@@ -138,7 +138,7 @@ var TUT_LIST = [
     ["These modes are how you change the output grid.", ["toolbar_and_symbol_picker"], 60, 5, 35],
     ["With the draw mode, you can edit individual pixels.", ["draw"], 60, 5, 35],
     ["With flood fill, you can fill in entire areas.", ["floodfill"], 60, 5, 35],
-    ["With copy-paste, you can copy a part of the grid with C and paste with V.", ["copypaste"], 60, 5, 35],
+    ["With copy-paste, you can copy a part of the grid by dragging over the area and pressing 'C'. You can paste the copied grid by selecting where you want to paste it, and pressing 'V'.", ["copypaste"], 60, 5, 35],
     ["Use <b>flood fill</b> to fill each 'hole' with yellow.", ["description-text", "toolbar_and_symbol_picker", "output_grid", "objective-col"], 30, 100, 100],
     ["You have now successfully used the description to create the output. Use the green 'Check!' button to check your answer!", ["objective-col", "input-col", "description-col", "output-col"], 500, 100, 100],
 ];
@@ -350,7 +350,7 @@ function continue_tutorial() {
     CUR_HIGHLIGHT = next_item[1];
 
     if (arraysEqual(CUR_HIGHLIGHT, ["objective-col", "input-col", "description-col", "output-col"])) {
-        highlight_element("#check-btn", 4000);
+        highlight_element("#check-btn", 10000);
     }
 }
 
