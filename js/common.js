@@ -247,6 +247,18 @@ function scroll_highlight_objective() {
     }, 2000);
 }
 
+function highlight_element(id, time) {
+    $(id).css('-webkit-box-shadow', '0 0 40px green');
+    $(id).css('-moz-box-shadow', '0 0 40px green');
+    $(id).css('box-shadow', '0 0 40px green');
+
+    setTimeout(function () {
+        $(id).css('-webkit-box-shadow', '0 0 0px rgba(0,0,0,0)');
+        $(id).css('-moz-box-shadow', '0 0 0px rgba(0,0,0,0)');
+        $(id).css('box-shadow', '0 0 0px rgba(0,0,0,0)');
+    }, time);
+}
+
 /**
  * resize the grids if the window size changes
  */
