@@ -26,7 +26,9 @@ $(window).on('load', function () {
     $('#consentModal').modal('show');
 
     // assign a random id to the user
-    sessionStorage.setItem("uid", uuidv4());
+    const uid = uuidv4();
+    sessionStorage.setItem("uid", uid);
+    set_user_complete_time(uid, new Date(), 'start_time');
 
     // get the type of descriptions (nl, nl_ex, ex)
     const queryString = window.location.search;

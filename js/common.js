@@ -92,8 +92,8 @@ function finish() {
 
     update_progress_bar();
 
-    const end_time = new Date();
-    const delta_time = (parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time') || 0)) / 1000;
+    const end_time = (new Date()).getTime();
+    const delta_time = (end_time - parseInt(sessionStorage.getItem('start_time') || 0)) / 1000;
 
     set_user_complete_time(uid, delta_time, 'time_to_complete');
 }
