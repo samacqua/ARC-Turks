@@ -8,7 +8,7 @@ $(window).on('load', function () {
     size_progress_bar();
 
     // start timer to gather data on total time per user
-    sessionStorage.setItem('start_time', new Date().getTime());
+    sessionStorage.setItem('start_time', (new Date()).getTime());
 
     // load first practice task
     const task = PRAC_TASKS.shift();
@@ -20,7 +20,7 @@ $(window).on('load', function () {
 
     // initialize the number of items complete, and the number of practice items complete
     sessionStorage.setItem("items_complete", "0"); // number of actual tasks (for determining when complete with study)
-    sessionStorage.setItem("time_complete", "0"); //for finishing instructions and practice tasks (for updating progress bar)
+    sessionStorage.setItem("time_complete", "0"); // for finishing instructions and practice tasks (for updating progress bar)
 
     // consent --> demographic --> overview --> walkthrough --> practice --> real tasks
     $('#consentModal').modal('show');
@@ -276,8 +276,11 @@ function continue_tutorial() {
         $("#tut-continue-message").css('z-index', -2);
         $("#tut-continue-message").css('background', 'rgba(0,0,0,0.0)');
 
+        // store time and show quiz
+        send_user_complete_item('walkthrough_time', false);
         $("#quiz_modal").modal("show");
 
+        // set objective
         switch (DESCRIPTIONS_TYPE) {
             case "nl":
                 $("#objective-text").html('Create the correct output based on the description and input grid.');
@@ -293,7 +296,6 @@ function continue_tutorial() {
         }
 
         FINISHED_TUT = true;
-
         return;
     }
 
@@ -390,19 +392,6 @@ function check_grid() {
     update_progress_bar(inc=PRAC_TIME);
     scroll_highlight_objective();
 
-    const uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
-    const tut_end_time = (new Date()).getTime();
-    const tut_time = (tut_end_time - parseInt(TUT_START_TIME)) / 1000;
-    TUT_START_TIME = (new Date()).getTime();
-
-    window.clearTimeout(GIVE_UP_HINT);
-    GIVE_UP_HINT = setTimeout(function() {infoMsg("If you cannot figure out the pattern, press 'give up.'")}, 60000);
-
-    const title = `tutorial_ex_${TOTAL_PRAC_TASKS - PRAC_TASKS.length}`;
-    if (TUT_START_TIME != 0) {  // if complete task in walkthrough, don't log that time bc part of instructions
-        set_user_complete_time(uid, tut_time, title);
-    }
-
     // if not last practice task
     if (PRAC_TASKS.length != 0) {
 
@@ -425,6 +414,9 @@ function check_grid() {
         return;
     }
 
+    send_user_complete_item('practice_task_time', false);
+    window.clearTimeout(GIVE_UP_HINT);
+
     $("#done_modal").modal("show");
 }
 
@@ -432,20 +424,27 @@ function check_grid() {
 // Store user information
 // =======================
 
-var TUT_START_TIME = 0;
+var SECTION_START_TIME = 0;
+
+var START_WALKTHROUGH_TIME = 0;
+var START_QUIZ_TIME = 0;
+var START_PRAC_TASK_TIME = 0;
+
 var GIVE_UP_HINT;
 
-function send_user_complete_instructions_time() {
+function send_user_complete_item(item, from_start) {
     const uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
 
-    const instructions_start_time = sessionStorage.getItem('start_time') || 0;
-    const end_instructions_time = (new Date()).getTime();
-    const delta = (end_instructions_time - parseInt(instructions_start_time)) / 1000;
+    var start_time = SECTION_START_TIME;
+    if (from_start) {
+        start_time = parseInt(sessionStorage.getItem('start_time')) || 0;
+    }
 
-    TUT_START_TIME = end_instructions_time;
-    GIVE_UP_HINT = setTimeout(function() {infoMsg("If you cannot figure out the pattern, press 'give up' to see the solution.")}, 60000);
+    const end_time = (new Date()).getTime();
+    const delta = (end_time - start_time) / 1000;
 
-    set_user_complete_time(uid, delta, 'instructions_time');
+    SECTION_START_TIME = end_time;
+    set_user_complete_time(uid, delta, item);
 }
 
 // =======================

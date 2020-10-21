@@ -265,7 +265,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-dismiss="modal"
-                        onclick="START_TIME = new Date(); continue_tutorial()">Continue to Examples</button>
+                        onclick="send_user_complete_item('consent+instructions_time', true);continue_tutorial();">Continue</button>
                 </div>
             </div>
         </div>
@@ -314,7 +314,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-dismiss="modal"
-                        onclick="START_TIME = new Date(); continue_tutorial()">Continue to Examples</button>
+                        onclick="send_user_complete_item('consent+instructions_time', true); continue_tutorial()">Continue to Examples</button>
                 </div>
             </div>
         </div>
@@ -364,7 +364,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-dismiss="modal"
-                        onclick="START_TIME = new Date(); continue_tutorial()">Continue to Examples</button>
+                        onclick="send_user_complete_item('consent+instructions_time', true); continue_tutorial()">Continue to Examples</button>
                 </div>
             </div>
         </div>
@@ -406,7 +406,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary"
-                        onclick="update_progress_bar(inc=INSTRUCTIONS_TIME); send_user_complete_instructions_time(); scroll_highlight_objective();"
+                        onclick="update_progress_bar(inc=INSTRUCTIONS_TIME); send_user_complete_item('quiz_time', false); scroll_highlight_objective();
+                            GIVE_UP_HINT = setTimeout(function() { infoMsg('If you cannot figure out the pattern, press \'give up\' to see the solution.') }, 60000);"
                         data-dismiss="modal">Okay!</button>
                 </div>
             </div>
@@ -449,7 +450,7 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button onclick="next_task(cur_task='tutorial', first_task=true)" type="button" class="btn btn-primary"
+                    <button onclick="send_user_complete_item('tutorial_total_time', true); next_task(cur_task='tutorial', first_task=true);" type="button" class="btn btn-primary"
                         data-dismiss="modal">Okay</button>
                 </div>
             </div>
