@@ -194,7 +194,7 @@ function submit_description() {
     if (conf <= MIN_CONFIDENCE) {
         store_failed_ver_description(see_desc, do_desc, grid_desc, TASK_ID, uid, conf, ATTEMPT_JSONS.length, ATTEMPT_JSONS, desc_time, verification_time, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE)
         .then(function () { 
-            set_user_complete_time(uid, total_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker_(fail)`).then(function() {
+            set_user_complete_time(uid, total_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker_(low_conf)`).then(function() {
                 next_task('speaker');
             }).catch(function (error) { console.error('Error storing response ' + error); });
         })
