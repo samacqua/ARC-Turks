@@ -14,9 +14,6 @@ var MAX_CELL_SIZE = 100;
 var TASK_ID;
 var SELECTED_EXAMPLE = null;
 
-// for storing user attempts
-var SEQUENCE = [];
-
 function refreshEditionGrid(jqGrid, dataGrid) {
     fillJqGridWithData(jqGrid, dataGrid);
     setUpEditionGridListeners(jqGrid);
@@ -44,7 +41,7 @@ function setUpEditionGridListeners(jqGrid) {
         cell = $(event.target);
         symbol = getSelectedSymbol();
 
-        SEQUENCE.push([$('input[name=tool_switching]:checked').val(), cell.attr('x'), cell.attr('y'), symbol]);
+        ATTEMPTS_SEQUENCE.push([$('input[name=tool_switching]:checked').val(), cell.attr('x'), cell.attr('y'), symbol]);
 
         const isStart = !(window.location.href.includes("listener") || window.location.href.includes("speaker"));
         mode = $('input[name=tool_switching]:checked').val();
@@ -61,7 +58,6 @@ function setUpEditionGridListeners(jqGrid) {
                     pre_continue();
                 }
             }
-
         }
         else if (mode == 'edit') {
             // Else: fill just this cell.
@@ -331,7 +327,7 @@ $(document).ready(function () {
                 COPY_PASTE_DATA.push([x, y, symbol]);
             }
             infoMsg('Successfully copied! Select where you want to paste your copied cells and press "V" to paste.');
-            SEQUENCE.push(["copy", COPY_PASTE_DATA.slice()]);
+            ATTEMPTS_SEQUENCE.push(["copy", COPY_PASTE_DATA.slice()]);
 
         }
         if (event.which == 86) {
@@ -376,7 +372,7 @@ $(document).ready(function () {
                 }
             }
 
-            SEQUENCE.push(["paste", COPY_PASTE_DATA.slice(), targetx, targety]);
+            ATTEMPTS_SEQUENCE.push(["paste", COPY_PASTE_DATA.slice(), targetx, targety]);
         }
     });
 });
@@ -413,13 +409,13 @@ function resizeOutputGrid(replay=false) {
     refreshEditionGrid(jqGrid, CURRENT_OUTPUT_GRID);
 
     if (!replay) {
-        SEQUENCE.push(["resizeOutputGrid", width, height]);
+        ATTEMPTS_SEQUENCE.push(["resizeOutputGrid", width, height]);
     }
 }
 
 function resetOutputGrid(replay=false) {
     if (!replay) {
-        SEQUENCE.push(["resetOutputGrid"]);
+        ATTEMPTS_SEQUENCE.push(["resetOutputGrid"]);
     }
 
     syncFromEditionGridToDataGrid();
@@ -435,6 +431,6 @@ function copyFromInput(replay=false) {
     $('#output_grid_size').val(CURRENT_OUTPUT_GRID.width + 'x' + CURRENT_OUTPUT_GRID.height);
 
     if (!replay) {
-        SEQUENCE.push(["copyFromInput"]);
+        ATTEMPTS_SEQUENCE.push(["copyFromInput"]);
     }
 }

@@ -86,6 +86,26 @@ function showDescEx(i) {
     $("#ex_see_desc").text(cur_desc['see_desc']);
     $("#ex_do_desc").text(cur_desc['do_desc']);
     $("#desc_success").html(`<b>${cur_desc['display_num_success']}</b> out of <b>${cur_desc['display_num_attempts']}</b> people succeeded using this description.`);
+    
+    attempts_html = "";
+    for (let i=0;i<cur_desc.attempt_jsons.length; i++) {
+
+        let emoji_rep = "❌";
+        if (cur_desc.verification_success == true && i == cur_desc.attempt_jsons.length-1) {
+            emoji_rep = "✅"
+        }
+
+        let row = `
+            <button type="button" class="btn btn-secondary attempt_row" onclick='show_attempt_json(${cur_desc.attempt_jsons[i]})'>
+                <span class="build_name">verification attempt ${i+1}</span><span class="attempt_preview">${emoji_rep}</span>
+            </button>`
+
+        attempts_html += row;
+    }
+
+    attempts_html += `<button type="button" class="btn btn-secondary attempt_row" onclick='replay_create(${cur_desc.attempts_sequence})'>Play action sequence</button>`
+
+    $("#attempts_row").html(attempts_html);
 
     get_desc_builds(DESCRIPTIONS_TYPE, TASK_ID, cur_desc.id).then(builds => {
 
@@ -136,17 +156,19 @@ function show_attempt(desc_type, task, desc_id, attempt_id) {
         }
 
         let btn_func = `show_attempt_json(${use.attempt_jsons[i]})`;
-        if (use.attempt_recreations != undefined) {
-            btn_func = `replay_create(${use.attempt_recreations[i]})`;
+        if (use.attempts_sequence != undefined) {
+            btn_func = `replay_create(${use.attempts_sequence})`;
         }
 
         let row = `
-            <button type="button" class="btn btn-secondary attempt_row" onclick='${btn_func}'>
+            <button type="button" class="btn btn-secondary attempt_row" onclick='show_attempt_json(${use.attempt_jsons[i]})'>
                 <span class="build_name">attempt ${i+1}</span><span class="attempt_preview">${emoji_rep}</span>
             </button>`
 
         attempts_html += row;
     }
+
+    attempts_html += `<button type="button" class="btn btn-secondary attempt_row" onclick='replay_create(${use.attempts_sequence})'>Play action sequence</button>`
 
     $("#attempts_row").html(attempts_html);
 }
@@ -238,8 +260,9 @@ function load_new_task(task) {
 
         createExampleDescsPager();
         showDescEx(0);
-    }).catch(_ => {
+    }).catch(error => {
         errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
+        console.error(error);
     });
 }
 
@@ -336,6 +359,12 @@ function replay_create(sequence, iter=-1, delay=1000) {
                 $("#output_grid_size").val(x + 'x' + y);
                 resizeOutputGrid(replay=true);
                 break;
+            case "check":
+                if (action[1] == true) {
+                    infoMsg("Checked: correct!");
+                } else {
+                    errorMsg("Checked: false.");
+                }
             default:
                 break;
         }
@@ -365,7 +394,7 @@ function get_desc_builds(description_type, task, desc_id) {
                 const description = {
                     'num_attempts': data.num_attempts,
                     'attempt_jsons': data.attempt_jsons,
-                    'attempt_recreations': data.attempt_recreations,
+                    'attempts_sequence': data.attempts_sequence,
                     'success': data.success,
                     'time': data.time,
                     'timestamp': data.timestamp,

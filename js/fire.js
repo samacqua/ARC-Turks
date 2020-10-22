@@ -142,6 +142,9 @@ function get_task_descriptions(task_id, type) {
                     'bandit_success_score': data.bandit_success_score,
                     'display_num_attempts': data.display_num_attempts,
                     'display_num_success': data.display_num_success,
+                    'attempt_jsons': data.attempt_jsons,
+                    'attempts_sequence': data.attempts_sequence,
+                    'verification_success': data.verification_success,
                     'timestamp': data.timestamp,
                     'id': doc.id
                 };
@@ -220,7 +223,7 @@ function get_word_vec(word) {
  * store descriptions, task info and user info and user answers in firebase
  * returns promise so that can transition to next task after storing
  */
-function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confidence, attempts, attempt_jsons, desc_time, ver_time, selected_example, type) {
+function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confidence, attempts, attempt_jsons, attempts_sequence, desc_time, ver_time, selected_example, type) {
 
     return new Promise(function (resolve, reject) {
 
@@ -233,6 +236,8 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confi
         var desc_data = {
             'num_verification_attempts': parseInt(attempts),
             'attempt_jsons': attempt_jsons,
+            'attempts_sequence': attempts_sequence,
+            'verification_success': true,
             'confidence': confidence,
 
             'uid': user_id,
@@ -295,7 +300,7 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confi
     });
 }
 
-function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, total_time, success = true, type) {
+function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, attempts_sequence, total_time, success = true, type) {
     /**
      * store info for listener task in firebase
      * returns promise so that can transition to next task after storing
@@ -310,6 +315,7 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, tota
         batch.set(desc_use_ref, {
             'num_attempts': attempts,
             'attempt_jsons': attempt_jsons,
+            'attempts_sequence': attempts_sequence,
             'success': success,
             'timestamp': new Date(),
 
@@ -354,7 +360,7 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, tota
     });
 }
 
-function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, user_id, confidence, attempts, attempt_jsons, desc_time, ver_time, selected_example, type) {
+function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, user_id, confidence, attempts, attempt_jsons, attempts_sequence, desc_time, ver_time, selected_example, type, verification_success) {
     return new Promise(function (resolve, reject) {
 
         var batch = db.batch();
@@ -366,6 +372,8 @@ function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, use
         var desc_data = {
             'num_verification_attempts': parseInt(attempts),
             'attempt_jsons': attempt_jsons,
+            'attempts_sequence': attempts_sequence,
+            'verification_success': verification_success,
 
             'uid': user_id,
             'description_time': parseInt(desc_time),
