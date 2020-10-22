@@ -1,0 +1,70 @@
+.btn-group {
+    display: table;
+    margin: 0 auto;
+}
+
+.col-content {
+    width: 100%;
+    margin: 0 auto;
+    display: grid;
+    place-items: center;
+    grid-template-areas: "inners";
+}
+
+.inner {
+    grid-area: inners;
+    height: 100%;
+    width: 100%;
+}
+
+.no-display {
+    display: none;
+}
+
+#choose-task-btn {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    margin: 10px;
+    z-index: 1;
+}
+
+#objective-col {
+    margin-top: 0px !important;
+    padding-top: 0px !important;
+    padding-bottom: 10px;
+}
+
+#objective-title {
+    margin-top: 20px;
+}
+
+.desc_build_row {
+    width: 100%;
+    margin: 0 auto;
+    text-align: left;
+    margin-bottom: 10px;
+}
+
+.attempt_row {
+    width: 70%;
+    margin: 0 auto;
+    text-align: left;
+    margin-bottom: 10px;
+}
+
+.build_name {
+    float: left;
+}
+
+.attempt_preview {
+    float: right;
+}
+
+#output_grid_size {
+    display: none;
+}
+
+.bootstrap-table {
+    overflow: scroll;
+}
