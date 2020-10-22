@@ -14,6 +14,9 @@ var MAX_CELL_SIZE = 100;
 var TASK_ID;
 var SELECTED_EXAMPLE = null;
 
+// for storing user attempts
+var SEQUENCE = [];
+
 function refreshEditionGrid(jqGrid, dataGrid) {
     fillJqGridWithData(jqGrid, dataGrid);
     setUpEditionGridListeners(jqGrid);
@@ -40,6 +43,8 @@ function setUpEditionGridListeners(jqGrid) {
     jqGrid.find('.cell').click(function (event) {
         cell = $(event.target);
         symbol = getSelectedSymbol();
+
+        SEQUENCE.push([$('input[name=tool_switching]:checked').val(), cell.attr('x'), cell.attr('y'), symbol]);
 
         const isStart = !(window.location.href.includes("listener") || window.location.href.includes("speaker"));
         mode = $('input[name=tool_switching]:checked').val();
@@ -120,8 +125,6 @@ function fillPairPreview(pairId, inputGrid, outputGrid) {
 }
 
 function loadJSONTask(train, test) {
-    $('#modal_bg').hide();
-
     const isSpeakerExample = window.location.href.includes("speaker") && DESCRIPTIONS_TYPE.includes("ex");
     if (isSpeakerExample) {
         for (var i = 0; i < train.length; i++) {
@@ -134,7 +137,7 @@ function loadJSONTask(train, test) {
     }
 
     const isListener = window.location.href.includes("listener");
-    const isStart = !(isListener || window.location.href.includes("speaker"));
+    const isStart = !(isListener || window.location.href.includes("speaker") || window.location.href.includes("dev"));
 
     $("#task_preview").html("");
 
@@ -144,7 +147,7 @@ function loadJSONTask(train, test) {
 
     for (var i = 0; i < train.length; i++) {
 
-        // if loading listener task, thn only load the chosen example, if any
+        // if loading listener task, then only load the chosen example, if any
         if ((isListener || isStart) && i != SELECTED_EXAMPLE) {
             continue;
         }
@@ -156,6 +159,8 @@ function loadJSONTask(train, test) {
         output_grid = convertSerializedGridToGridObject(values)
         fillPairPreview(i, input_grid, output_grid);
     }
+
+    TEST_PAIRS = [];
     for (var i = 0; i < test.length; i++) {
         pair = test[i];
         TEST_PAIRS.push(pair);
@@ -220,6 +225,8 @@ function loadTask(task_index) {
 }
 
 function fillTestInput(inputGrid) {
+
+    $("#evaluation_input").empty();
 
     jqInputGrid = $('#evaluation_input');
     fillJqGridWithData(jqInputGrid, inputGrid);
@@ -324,6 +331,7 @@ $(document).ready(function () {
                 COPY_PASTE_DATA.push([x, y, symbol]);
             }
             infoMsg('Successfully copied! Select where you want to paste your copied cells and press "V" to paste.');
+            SEQUENCE.push(["copy", COPY_PASTE_DATA.slice()]);
 
         }
         if (event.which == 86) {
@@ -367,6 +375,8 @@ $(document).ready(function () {
                     setCellSymbol(cell, symbol);
                 }
             }
+
+            SEQUENCE.push(["paste", COPY_PASTE_DATA.slice(), targetx, targety]);
         }
     });
 });
@@ -390,7 +400,7 @@ function parseSizeTuple(size) {
 }
 
 
-function resizeOutputGrid() {
+function resizeOutputGrid(replay=false) {
     size = $('#output_grid_size').val();
     size = parseSizeTuple(size);
     height = parseInt(size[1]);
@@ -401,18 +411,30 @@ function resizeOutputGrid() {
     dataGrid = JSON.parse(JSON.stringify(CURRENT_OUTPUT_GRID.grid));
     CURRENT_OUTPUT_GRID = new Grid(height, width, dataGrid);
     refreshEditionGrid(jqGrid, CURRENT_OUTPUT_GRID);
+
+    if (!replay) {
+        SEQUENCE.push(["resizeOutputGrid", width, height]);
+    }
 }
 
-function resetOutputGrid() {
+function resetOutputGrid(replay=false) {
+    if (!replay) {
+        SEQUENCE.push(["resetOutputGrid"]);
+    }
+
     syncFromEditionGridToDataGrid();
     CURRENT_OUTPUT_GRID = new Grid(3, 3);
     syncFromDataGridToEditionGrid();
-    resizeOutputGrid();
+    resizeOutputGrid(replay=true);
 }
 
-function copyFromInput() {
+function copyFromInput(replay=false) {
     syncFromEditionGridToDataGrid();
     CURRENT_OUTPUT_GRID = convertSerializedGridToGridObject(CURRENT_INPUT_GRID.grid);
     syncFromDataGridToEditionGrid();
     $('#output_grid_size').val(CURRENT_OUTPUT_GRID.width + 'x' + CURRENT_OUTPUT_GRID.height);
+
+    if (!replay) {
+        SEQUENCE.push(["copyFromInput"]);
+    }
 }
