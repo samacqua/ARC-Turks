@@ -229,7 +229,7 @@ function load_tasks_to_browse() {
 
         $('#table').bootstrapTable({
             data: task_list,
-            columns: [ {},{},{},  
+            columns: [ { sortable: true },{ sortable: true },{ sortable: true },  
             {
             field: 'operate',
             title: 'Select',
