@@ -30,6 +30,16 @@ $(window).on('load', function () {
     if (DESCRIPTIONS_TYPE == "nl") {
         $("#select_ex_io").remove();
     }
+
+    $(document).on("click", ".desc_build_row", function(event) {
+        $(".desc_build_row").removeClass("active");
+        $(this).addClass("active");
+    });
+
+    $(document).on("click", ".attempt_row", function(event) {
+        $(".attempt_row").removeClass("active");
+        $(this).addClass("active");
+    });
 });
 
 // ==============
@@ -119,14 +129,13 @@ function showDescEx(i) {
             desc_use_html += row;
         }
 
-        console.log(desc_use_html);
         $("#desc_uses").html(desc_use_html);
     });
 }
 
 function show_desc(cur_desc_i) {
     let cur_desc = PAST_DESCS[cur_desc_i];
-    console.log(cur_desc);
+
     attempts_html = "";
     for (let i=0;i<cur_desc.attempt_jsons.length; i++) {
 
@@ -135,23 +144,30 @@ function show_desc(cur_desc_i) {
             emoji_rep = "✅"
         }
 
-        let row = `
+        let row;
+        if (i != cur_desc.attempt_jsons.length - 1) {
+            row = `
             <button type="button" class="btn btn-secondary attempt_row" onclick='show_attempt_json(${cur_desc.attempt_jsons[i]})'>
                 <span class="build_name">verification attempt ${i+1}</span><span class="attempt_preview">${emoji_rep}</span>
             </button>`
-
+        } else {
+            row = `
+            <button type="button" class="btn btn-secondary attempt_row active" onclick='show_attempt_json(${cur_desc.attempt_jsons[i]})'>
+                <span class="build_name">verification attempt ${i+1}</span><span class="attempt_preview">${emoji_rep}</span>
+            </button>`
+        }
+        
         attempts_html += row;
     }
 
     attempts_html += `<button type="button" class="btn btn-secondary attempt_row" onclick='replay_create(${cur_desc.attempts_sequence})'>Play action sequence</button>`
-
     $("#attempts_row").html(attempts_html);
+
+    show_attempt_json(cur_desc.attempt_jsons[cur_desc.attempt_jsons.length-1]);
 }
 
 // Show some user's attempts
 function show_attempt(desc_type, task, desc_id, attempt_id) {
-    console.log(desc_type, task, desc_id, attempt_id);
-
     let desc_uses = DESC_USES[desc_id];
     let use = null;
     for (let i=0;i<desc_uses.length;i++) {
@@ -169,22 +185,26 @@ function show_attempt(desc_type, task, desc_id, attempt_id) {
             emoji_rep = "✅"
         }
 
-        let btn_func = `show_attempt_json(${use.attempt_jsons[i]})`;
-        if (use.attempts_sequence != undefined) {
-            btn_func = `replay_create(${use.attempts_sequence})`;
-        }
-
-        let row = `
+        let row;
+        if (i != use.num_attempts - 1) {
+            row = `
             <button type="button" class="btn btn-secondary attempt_row" onclick='show_attempt_json(${use.attempt_jsons[i]})'>
                 <span class="build_name">attempt ${i+1}</span><span class="attempt_preview">${emoji_rep}</span>
-            </button>`
+            </button>`;
+        } else {
+            row = `
+            <button type="button" class="btn btn-secondary attempt_row active" onclick='show_attempt_json(${use.attempt_jsons[i]})'>
+                <span class="build_name">attempt ${i+1}</span><span class="attempt_preview">${emoji_rep}</span>
+            </button>`;
+        }
 
         attempts_html += row;
     }
 
     attempts_html += `<button type="button" class="btn btn-secondary attempt_row" onclick='replay_create(${use.attempts_sequence})'>Play action sequence</button>`
-
     $("#attempts_row").html(attempts_html);
+
+    show_attempt_json(use.attempt_jsons[use.attempt_jsons.length-1]);
 }
 
 // show a user's attempt on the output grid
@@ -252,8 +272,6 @@ function load_tasks_to_browse() {
 // load a new task after user selects it
 function load_new_task(task) {
 
-    console.log("Loading task: " + task.toString() + "...");
-
     // reset output grid
     CURRENT_OUTPUT_GRID.width = 3;
     CURRENT_OUTPUT_GRID.height = 3;
@@ -268,8 +286,6 @@ function load_new_task(task) {
     TASK_ID = task;
     $("#objective-title").html(`<b>Task ${task}</b>`);
     get_task_descriptions(task, DESCRIPTIONS_TYPE).then(function (descriptions) {
-        console.log("Loaded descriptions:");
-        console.log(descriptions);
         descriptions.sort(sort_descs_bandit_score());
         PAST_DESCS = descriptions;
 
@@ -283,8 +299,6 @@ function load_new_task(task) {
 
 // replay the steps a user took in creating the output
 function replay_create(sequence, iter=-1, delay=1000) {
-
-    console.log(sequence);
 
     if (sequence == undefined ) {
         errorMsg("This description was collected before we started monitoring action sequences.");
