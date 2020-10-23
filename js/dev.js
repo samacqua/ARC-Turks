@@ -86,30 +86,20 @@ function showDescEx(i) {
     $("#ex_see_desc").text(cur_desc['see_desc']);
     $("#ex_do_desc").text(cur_desc['do_desc']);
     $("#desc_success").html(`<b>${cur_desc['display_num_success']}</b> out of <b>${cur_desc['display_num_attempts']}</b> people succeeded using this description.`);
-    
-    attempts_html = "";
-    for (let i=0;i<cur_desc.attempt_jsons.length; i++) {
 
-        let emoji_rep = "❌";
-        if (cur_desc.verification_success == true && i == cur_desc.attempt_jsons.length-1) {
-            emoji_rep = "✅"
-        }
-
-        let row = `
-            <button type="button" class="btn btn-secondary attempt_row" onclick='show_attempt_json(${cur_desc.attempt_jsons[i]})'>
-                <span class="build_name">verification attempt ${i+1}</span><span class="attempt_preview">${emoji_rep}</span>
-            </button>`
-
-        attempts_html += row;
-    }
-
-    attempts_html += `<button type="button" class="btn btn-secondary attempt_row" onclick='replay_create(${cur_desc.attempts_sequence})'>Play action sequence</button>`
-
-    $("#attempts_row").html(attempts_html);
+    show_desc(CURRENT_DESC_I);
 
     get_desc_builds(DESCRIPTIONS_TYPE, TASK_ID, cur_desc.id).then(builds => {
 
-        let desc_use_html = "";
+        let emoji_rep = "❌";
+        if (cur_desc.succeeded_verification != false && i == cur_desc.attempt_jsons.length-1) {
+            emoji_rep = "✅"
+        }
+
+        let desc_use_html = `
+        <button type="button" class="btn btn-secondary desc_build_row active" onclick="show_desc(${CURRENT_DESC_I});">
+            <span class="build_name">verification</span><span class="attempt_preview">${emoji_rep}</span>
+        </button>`;
 
         for (let i=0;i<builds.length; i++) {
             let build = builds[i];
@@ -132,6 +122,30 @@ function showDescEx(i) {
         console.log(desc_use_html);
         $("#desc_uses").html(desc_use_html);
     });
+}
+
+function show_desc(cur_desc_i) {
+    let cur_desc = PAST_DESCS[cur_desc_i];
+    console.log(cur_desc);
+    attempts_html = "";
+    for (let i=0;i<cur_desc.attempt_jsons.length; i++) {
+
+        let emoji_rep = "❌";
+        if (cur_desc.succeeded_verification != false && i == cur_desc.attempt_jsons.length-1) {
+            emoji_rep = "✅"
+        }
+
+        let row = `
+            <button type="button" class="btn btn-secondary attempt_row" onclick='show_attempt_json(${cur_desc.attempt_jsons[i]})'>
+                <span class="build_name">verification attempt ${i+1}</span><span class="attempt_preview">${emoji_rep}</span>
+            </button>`
+
+        attempts_html += row;
+    }
+
+    attempts_html += `<button type="button" class="btn btn-secondary attempt_row" onclick='replay_create(${cur_desc.attempts_sequence})'>Play action sequence</button>`
+
+    $("#attempts_row").html(attempts_html);
 }
 
 // Show some user's attempts
@@ -180,6 +194,7 @@ function show_attempt_json(json) {
     CURRENT_OUTPUT_GRID.grid = grid;
     CURRENT_OUTPUT_GRID.height = grid.length;
     CURRENT_OUTPUT_GRID.width = grid[0].length;
+    $("#output_grid_size").val(CURRENT_OUTPUT_GRID.width + 'x' + CURRENT_OUTPUT_GRID.height);
     syncFromDataGridToEditionGrid();
 }
 
@@ -271,7 +286,12 @@ function replay_create(sequence, iter=-1, delay=1000) {
 
     console.log(sequence);
 
-    if (sequence == undefined || sequence.length == 0 || iter >= sequence.length) {
+    if (sequence == undefined ) {
+        errorMsg("This description was collected before we started monitoring action sequences.");
+        return;
+    }
+
+    if (sequence.length == 0 || iter >= sequence.length) {
         return;
     } else if (iter == -1) {
         $("#output_grid_size").val('3x3');

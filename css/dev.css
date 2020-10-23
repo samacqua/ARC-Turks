@@ -68,3 +68,7 @@
 .bootstrap-table {
     overflow: scroll;
 }
+
+h2 {
+    padding: 20px;
+}

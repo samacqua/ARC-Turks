@@ -144,7 +144,7 @@ function get_task_descriptions(task_id, type) {
                     'display_num_success': data.display_num_success,
                     'attempt_jsons': data.attempt_jsons,
                     'attempts_sequence': data.attempts_sequence,
-                    'verification_success': data.verification_success,
+                    'succeeded_verification': data.succeeded_verification,
                     'timestamp': data.timestamp,
                     'id': doc.id
                 };
@@ -237,7 +237,7 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confi
             'num_verification_attempts': parseInt(attempts),
             'attempt_jsons': attempt_jsons,
             'attempts_sequence': attempts_sequence,
-            'verification_success': true,
+            'succeeded_verification': true,
             'confidence': confidence,
 
             'uid': user_id,
@@ -360,7 +360,7 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, atte
     });
 }
 
-function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, user_id, confidence, attempts, attempt_jsons, attempts_sequence, desc_time, ver_time, selected_example, type, verification_success) {
+function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, user_id, confidence, attempts, attempt_jsons, attempts_sequence, desc_time, ver_time, selected_example, type) {
     return new Promise(function (resolve, reject) {
 
         var batch = db.batch();
@@ -373,7 +373,6 @@ function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, use
             'num_verification_attempts': parseInt(attempts),
             'attempt_jsons': attempt_jsons,
             'attempts_sequence': attempts_sequence,
-            'verification_success': verification_success,
 
             'uid': user_id,
             'description_time': parseInt(desc_time),
