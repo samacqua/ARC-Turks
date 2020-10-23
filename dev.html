@@ -60,7 +60,10 @@
 
 <body>
 
-    <button type="button" class="btn btn-secondary" id="choose-task-btn" onclick="load_tasks_to_browse();" data-toggle="modal" data-target="#browse-tasks-modal">Choose task</button>
+    <div id="choose-task-btn-wrapper">
+        <button type="button" class="btn btn-secondary" id="choose-task-btn" onclick="load_tasks_to_browse();" data-toggle="modal" data-target="#browse-tasks-modal">Choose task</button>
+    </div>
+    <button type="button" class="btn btn-secondary" data-dismiss="modal" id="walkthrough-layout-btn" onclick="set_tutorial(); continue_tutorial();">Walkthrough layout</button>
 
     <div class="row">
         <div id="objective-col" class="col-md">
@@ -84,15 +87,16 @@
         <div class="row">
             <div class="col-md-4" id="io_ex_col">
                 <div class="col-header">
-                    <h2>Input-Output Pairs</h2>
-                        <div class="btn-group btn-group-toggle" data-toggle="buttons" id="show_grids_radio">
-                            <label class="btn btn-secondary active">
-                                <input type="radio" name="options" id="show_grids_radio_train" autocomplete="off" checked /> IOs
-                            </label>
-                            <label class="btn btn-secondary">
-                                <input type="radio" name="options" id="show_grids_radio_test" autocomplete="off" /> test input
-                            </label>
-                        </div>
+                    <h2 class="col-title">Input-Output Pairs</h2>
+                </div>
+
+                <div class="btn-group btn-group-toggle" data-toggle="buttons" id="show_grids_radio">
+                    <label class="btn btn-secondary active">
+                        <input type="radio" name="options" id="show_grids_radio_train" autocomplete="off" checked /> IOs
+                    </label>
+                    <label class="btn btn-secondary">
+                        <input type="radio" name="options" id="show_grids_radio_test" autocomplete="off" /> test input
+                    </label>
                 </div>
 
                 <!-- https://stackoverflow.com/a/64047736/5416200 -->
@@ -120,14 +124,11 @@
                     <p id="desc_success" class="unselectable"></p>
 
                     <div id="desc_uses" class="desc_uses_group" data-toggle="buttons" role="group"></div>
-
-                    <h4 style="padding-top: 30px;">Description data:</h4>
-                    <ul id="desc_info"></ul>
                 </div>
 
             </div>
 
-            <div class="col-md-4" id="description_col">
+            <div class="col-md-4" id="output_grid_col">
 
                 <div class="col-header">
                     <h2 id="output-title">Output</h2>
@@ -155,42 +156,89 @@
 
                 <input type="text" id="output_grid_size" class="grid_size_field" name="size" value="3x3"> <!-- hack for resizing grid -->
                 <div id="attempts_row"></div>
-
-                <h4 style="padding-top: 30px;">Attempt data:</h4>
-                <ul id="attempt_info"></ul>
             </div>
         </div>
     </div>
 </body>
 
-  <!-- Task browsing modal -->
-  <div class="modal fade" id="browse-tasks-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+<!-- Task browsing modal -->
+<div class="modal fade" id="browse-tasks-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
     <div class="modal-dialog" role="document">
-      <div class="modal-content">
+        <div class="modal-content">
         <div class="modal-header">
-          <h3 class="modal-title" id="exampleModalLongTitle">List of Tasks</h3>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <h3 class="modal-title" id="exampleModalLongTitle">List of Tasks</h3>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
-          </button>
+            </button>
         </div>
 
         <table id="table" data-height="460">
-          <thead>
-              <tr>
-                  <th scope="col" data-field="number">Task #</th>
-                  <th scope="col" data-field="descriptions"># Descriptions</th>
-                  <th scope="col" data-field="interactions"># Interactions</th>
-                  <th scope="col">Select</th>
-              </tr>
-          </thead>
-          <tbody class="table"></tbody>
+            <thead>
+                <tr>
+                    <th scope="col" data-field="number">Task #</th>
+                    <th scope="col" data-field="descriptions"># Descriptions</th>
+                    <th scope="col" data-field="interactions"># Interactions</th>
+                    <th scope="col">Select</th>
+                </tr>
+            </thead>
+            <tbody class="table"></tbody>
         </table>
 
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
         </div>
-      </div>
+        </div>
     </div>
-  </div>
+</div>
+
+<!-- Description/use info modal -->
+<div class="modal fade" id="info-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title" id="info_modal_title">Description data</h3>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+
+        <ul class="list-group list-group-flush" id="build_or_desc_info"></ul>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+        </div>
+    </div>
+</div>
+
+<!-- Welcome modal -->
+<div class="modal fade" id="welcome-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">ARC MTurk Interactive Data Interface</h3>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <p>
+                Welcome to the interactive data interface! Here you will be able to interact with the data we collect as we carry out MTurk experiments.
+            </p>
+    
+            <p>
+                If you want to be walked through the layout, press "Walkthrough layout"
+            </p>
+    
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="continue_tutorial();">Walkthrough layout</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+        </div>
+    </div>
+</div>
 
 </html>

@@ -18,6 +18,11 @@ var STUDY_BATCHES = {
 
 $(window).on('load', function () {
 
+    if(!localStorage.getItem("visted")){
+        $("#welcome-modal").modal("show");
+        localStorage.setItem("visted",true);
+    }
+
     // get speaker task
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
@@ -31,8 +36,8 @@ $(window).on('load', function () {
         $("#select_ex_io").remove();
     }
 
-    $(document).on("click", ".desc_build_row", function(event) {
-        $(".desc_build_row").removeClass("active");
+    $(document).on("click", ".desc_build_row_btn", function(event) {
+        $(".desc_build_row_btn").removeClass("active");
         $(this).addClass("active");
     });
 
@@ -107,9 +112,12 @@ function showDescEx(i) {
         }
 
         let desc_use_html = `
-        <button type="button" class="btn btn-secondary desc_build_row active" onclick="show_desc(${CURRENT_DESC_I});">
-            <span class="build_name">verification</span><span class="attempt_preview">${emoji_rep}</span>
-        </button>`;
+        <div class="desc_build_row">
+            <button type="button" class="btn btn-secondary desc_build_row_btn active" onclick="show_desc(${CURRENT_DESC_I});">
+                <span class="build_name">describer verification</span><span class="attempt_preview">${emoji_rep}</span>
+            </button>
+            <button type="button" class="btn btn-secondary desc_build_row_info" onclick="show_desc_info(${CURRENT_DESC_I});">ⓘ</button>
+        </div>`;
 
         for (let i=0;i<builds.length; i++) {
             let build = builds[i];
@@ -124,29 +132,68 @@ function showDescEx(i) {
             }
 
             let row = `
-                <button type="button" class="btn btn-secondary desc_build_row" onclick="show_attempt('${DESCRIPTIONS_TYPE}', '${TASK_ID}', '${cur_desc.id}', '${build.id}', ${i+1});">
+            <div class="desc_build_row">
+                <button type="button" class="btn btn-secondary desc_build_row_btn" onclick="show_attempt('${DESCRIPTIONS_TYPE}', '${TASK_ID}', '${cur_desc.id}', '${build.id}', ${i+1});">
                     <span class="build_name">builder ${i+1}</span><span class="attempt_preview">${emoji_rep}</span>
-                </button>`
+                </button>
+                <button type="button" class="btn btn-secondary desc_build_row_info" onclick="show_use_info('${cur_desc.id}', '${build.id}');">ⓘ</button>
+            </div>`
 
             desc_use_html += row;
         }
 
         $("#desc_uses").html(desc_use_html);
-
-        let properties = [];
-        console.log(cur_desc);
-        Object.keys(cur_desc).forEach(function(key) {
-            console.log(key);
-            if (['attempt_jsons', 'grid_desc', 'see_desc', 'do_desc'].includes(key)) {
-
-            } else if (key == 'timestamp') {
-                properties.push(`<li><b>${key}</b>: ${timeConverter(cur_desc[key].seconds)}</li>`);
-            } else {
-                properties.push(`<li><b>${key}</b>: ${cur_desc[key]}</li>`);
-            }
-        });
-        $("#desc_info").html(properties.join(''));
     });
+}
+
+function show_use_info(desc_id, attempt_id) {
+    let desc_uses = DESC_USES[desc_id];
+    let use = null;
+    for (let i=0;i<desc_uses.length;i++) {
+        if (desc_uses[i].id == attempt_id) {
+            use = desc_uses[i];
+            break;
+        }
+    }
+
+    let properties = [];
+    Object.keys(use).forEach(function(key) {
+        console.log(key);
+        if (['attempt_jsons', 'grid_desc', 'see_desc', 'do_desc'].includes(key)) {
+
+        } else if (key == 'timestamp') {
+            properties.push(`<li class="list-group-item"><b>${key}</b>: ${timeConverter(use[key].seconds)}</li>`);
+        } else {
+            properties.push(`<li class="list-group-item"><b>${key}</b>: ${use[key]}</li>`);
+        }
+    });
+
+    $("#build_or_desc_info").html(properties.join(''));
+
+    $("#info_modal_title").text("Description build data");
+    $("#info-modal").modal("show");
+}
+
+function show_desc_info(desc_index) {
+    let cur_desc = PAST_DESCS[desc_index];
+
+    let properties = [];
+    console.log(cur_desc);
+    Object.keys(cur_desc).forEach(function(key) {
+        console.log(key);
+        if (['attempt_jsons', 'grid_desc', 'see_desc', 'do_desc'].includes(key)) {
+
+        } else if (key == 'timestamp') {
+            properties.push(`<li class="list-group-item"><b>${key}</b>: ${timeConverter(cur_desc[key].seconds)}</li>`);
+        } else {
+            properties.push(`<li class="list-group-item"><b>${key}</b>: ${cur_desc[key]}</li>`);
+        }
+    });
+
+    $("#build_or_desc_info").html(properties.join(''));
+
+    $("#info_modal_title").text("Description data");
+    $("#info-modal").modal("show");
 }
 
 
@@ -239,19 +286,6 @@ function show_attempt(desc_type, task, desc_id, attempt_id, builder_num) {
     $("#output-title").text("Builder " + builder_num.toString() + " attempts")
 
     show_attempt_json(use.attempt_jsons[use.attempt_jsons.length-1]);
-
-    let properties = [];
-    Object.keys(use).forEach(function(key) {
-        console.log(key);
-        if (['attempt_jsons', 'grid_desc', 'see_desc', 'do_desc'].includes(key)) {
-
-        } else if (key == 'timestamp') {
-            properties.push(`<li><b>${key}</b>: ${timeConverter(use[key].seconds)}</li>`);
-        } else {
-            properties.push(`<li><b>${key}</b>: ${use[key]}</li>`);
-        }
-    });
-    $("#attempt_info").html(properties.join(''));
 }
 
 // show a user's attempt on the output grid
@@ -522,4 +556,94 @@ function sort_descs_bandit_score() {
             return 1
         }
     }
+}
+
+// ==============
+// Tutorial
+// ==============
+
+var TUT_LIST = [
+    ["This is the examples area. You can use the buttons to switch between the test input grid and the grid input-outputs that the describer saw.", ["io_ex_col"], 30, 35, 10],
+    ["This is the descriptions area. You will see all the descriptions for the selected task.", ["description_ex_col"], 30, 5, 65],
+    ["At the bottom of each description, you will see a list of buttons for each builder who tried to use the description. Clicking on a button will show the builder's attempts on the right.", ["desc_uses"], 30, 5, 65],
+    ["You can click any of the buttons to show the submitted attempt. 'Play action sequence' will replay every action the user took.", ["output_grid_col"], 30, 10, 35],
+    ["You can change tasks by selecting here.", ["choose-task-btn-wrapper"], 40, 10, 35],
+];
+var TUT_LIST_BACKUP = TUT_LIST;    // hack bc lazy
+
+var CUR_HIGHLIGHT = null;
+
+$(function () {
+    $("#tut-layer").click(function () {
+        continue_tutorial();
+    });
+});
+
+function set_tutorial() {
+    TUT_LIST = TUT_LIST_BACKUP.slice();
+}
+
+function continue_tutorial() {
+
+    // if last one, then get rid of dark layer
+    if (TUT_LIST.length == 0) {
+        $("#trans-layer").css('z-index', -1);
+        $("#dark-layer").css('z-index', -1);
+        $("#dark-layer").css('background-color', 'white');
+        $("#tut-message").css('z-index', -2);
+        $("#tut-continue-message").css('z-index', -2);
+        $("#tut-continue-message").css('background', 'rgba(0,0,0,0.0)');
+        
+        return;
+    }
+
+    const next_item = TUT_LIST.shift();
+
+    // set last item to be behind dark layer
+    if (CUR_HIGHLIGHT != null) {
+        for (i = 0; i < CUR_HIGHLIGHT.length; i++) {
+            $(`#${CUR_HIGHLIGHT[i]}`).css('position', 'static');
+            $(`#${CUR_HIGHLIGHT[i]}`).css('z-index', 'auto');
+        }
+    }
+
+    // set dark layer and message
+    $("#dark-layer").css('z-index', 500);
+    $("#dark-layer").css('background-color', 'rgba(0,0,0,0.7)');
+    $("#trans-layer").css('z-index', 503);
+    $("#tut-message").css('z-index', 502);
+    $("#tut-message").css('top', `${next_item[2]}%`);
+    $("#tut-message").css('left', `${next_item[3]}%`);
+    $("#tut-message").css('right', `${next_item[4]}%`);
+    $("#tut-message").html(next_item[0]);
+    $("#tut-continue-message").css('z-index', 502);
+    $("#tut-continue-message").css('top', `calc(${next_item[2]}% + ${$("#tut-message").outerHeight() + 10}px)`);
+    $("#tut-continue-message").css('background', 'rgba(0,0,0,0.7)');
+    $("#tut-continue-message").html('Click anywhere to continue');
+    $("#tut-continue-message").css('left', `${next_item[3]}%`);
+
+    if (next_item[1].length > 1) {
+        $("#objective-text").html(next_item[0]);
+        $("#trans-layer").css('z-index', -1);
+        $("#tut-continue-message").html('Follow the Objective to continue');
+    }
+
+    // set highlight div to be above layer
+    for (i = 0; i < next_item[1].length; i++) {
+        const id = next_item[1][i];
+        $(`#${id}`).css('position', 'relative');
+        $(`#${id}`).css('z-index', '501');
+        if (id != "objective-col") {
+            $(`#${id}`).css('background-color', 'gainsboro');
+        }
+    }
+
+    // scroll to highlighted element
+    if (next_item[1].length > 0) {
+        $([document.documentElement, document.body]).animate({
+            scrollTop: $('#' + next_item[1][0]).offset().top-10
+        }, 1000);
+    }
+
+    CUR_HIGHLIGHT = next_item[1];
 }
