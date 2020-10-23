@@ -87,10 +87,10 @@
                     <h2>Input-Output Pairs</h2>
                         <div class="btn-group btn-group-toggle" data-toggle="buttons" id="show_grids_radio">
                             <label class="btn btn-secondary active">
-                                <input type="radio" name="options" id="show_grids_radio_train" autocomplete="off" checked /> train
+                                <input type="radio" name="options" id="show_grids_radio_train" autocomplete="off" checked /> IOs
                             </label>
                             <label class="btn btn-secondary">
-                                <input type="radio" name="options" id="show_grids_radio_test" autocomplete="off" /> test
+                                <input type="radio" name="options" id="show_grids_radio_test" autocomplete="off" /> test input
                             </label>
                         </div>
                 </div>
@@ -120,6 +120,9 @@
                     <p id="desc_success" class="unselectable"></p>
 
                     <div id="desc_uses" class="desc_uses_group" data-toggle="buttons" role="group"></div>
+
+                    <h4 style="padding-top: 30px;">Description data:</h4>
+                    <ul id="desc_info"></ul>
                 </div>
 
             </div>
@@ -127,7 +130,7 @@
             <div class="col-md-4" id="description_col">
 
                 <div class="col-header">
-                    <h2>Output</h2>
+                    <h2 id="output-title">Output</h2>
                 </div>
 
                 <div id="output_grid">
@@ -152,6 +155,9 @@
 
                 <input type="text" id="output_grid_size" class="grid_size_field" name="size" value="3x3"> <!-- hack for resizing grid -->
                 <div id="attempts_row"></div>
+
+                <h4 style="padding-top: 30px;">Attempt data:</h4>
+                <ul id="attempt_info"></ul>
             </div>
         </div>
     </div>

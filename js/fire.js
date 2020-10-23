@@ -144,8 +144,10 @@ function get_task_descriptions(task_id, type) {
                     'display_num_success': data.display_num_success,
                     'attempt_jsons': data.attempt_jsons,
                     'attempts_sequence': data.attempts_sequence,
+                    'num_verification_attempts': data.num_verification_attempts,
                     'succeeded_verification': data.succeeded_verification,
                     'timestamp': data.timestamp,
+                    'uid': data.uid,
                     'id': doc.id
                 };
                 descriptions.push(description);
@@ -178,6 +180,11 @@ function get_description_by_id(task_id, desc_id, type) {
                 'display_num_attempts': data.display_num_attempts,
                 'display_num_success': data.display_num_success,
                 'timestamp': data.timestamp,
+                'description_time': data.description_time,
+                'verification_time': data.verification_time,
+                'num_verification_attempts': data.num_verification_attempts,
+                'succeeded_verification': data.succeed_verification,
+                'uid': data.uid,
                 'id': snapshot.id
             };
 

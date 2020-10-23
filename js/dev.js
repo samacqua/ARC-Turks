@@ -102,8 +102,8 @@ function showDescEx(i) {
     get_desc_builds(DESCRIPTIONS_TYPE, TASK_ID, cur_desc.id).then(builds => {
 
         let emoji_rep = "❌";
-        if (cur_desc.succeeded_verification != false && i == cur_desc.attempt_jsons.length-1) {
-            emoji_rep = "✅"
+        if (cur_desc.succeeded_verification != false) {
+            emoji_rep = "❌ ".repeat(cur_desc.num_verification_attempts - 1) + "✅";
         }
 
         let desc_use_html = `
@@ -114,6 +114,8 @@ function showDescEx(i) {
         for (let i=0;i<builds.length; i++) {
             let build = builds[i];
 
+            console.log(build);
+
             let emoji_rep = "";
             if (build.success == false) {
                 emoji_rep = "❌ ❌ ❌"
@@ -122,7 +124,7 @@ function showDescEx(i) {
             }
 
             let row = `
-                <button type="button" class="btn btn-secondary desc_build_row" onclick="show_attempt('${DESCRIPTIONS_TYPE}', '${TASK_ID}', '${cur_desc.id}', '${build.id}');">
+                <button type="button" class="btn btn-secondary desc_build_row" onclick="show_attempt('${DESCRIPTIONS_TYPE}', '${TASK_ID}', '${cur_desc.id}', '${build.id}', ${i+1});">
                     <span class="build_name">builder ${i+1}</span><span class="attempt_preview">${emoji_rep}</span>
                 </button>`
 
@@ -130,8 +132,36 @@ function showDescEx(i) {
         }
 
         $("#desc_uses").html(desc_use_html);
+
+        let properties = [];
+        console.log(cur_desc);
+        Object.keys(cur_desc).forEach(function(key) {
+            console.log(key);
+            if (['attempt_jsons', 'grid_desc', 'see_desc', 'do_desc'].includes(key)) {
+
+            } else if (key == 'timestamp') {
+                properties.push(`<li><b>${key}</b>: ${timeConverter(cur_desc[key].seconds)}</li>`);
+            } else {
+                properties.push(`<li><b>${key}</b>: ${cur_desc[key]}</li>`);
+            }
+        });
+        $("#desc_info").html(properties.join(''));
     });
 }
+
+
+function timeConverter(UNIX_timestamp){
+    var a = new Date(UNIX_timestamp * 1000);
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var year = a.getFullYear();
+    var month = months[a.getMonth()];
+    var date = a.getDate();
+    var hour = a.getHours();
+    var min = a.getMinutes();
+    var sec = a.getSeconds();
+    var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+    return time;
+  }
 
 function show_desc(cur_desc_i) {
     let cur_desc = PAST_DESCS[cur_desc_i];
@@ -163,11 +193,13 @@ function show_desc(cur_desc_i) {
     attempts_html += `<button type="button" class="btn btn-secondary attempt_row" onclick='replay_create(${cur_desc.attempts_sequence})'>Play action sequence</button>`
     $("#attempts_row").html(attempts_html);
 
+    $("#output-title").text("Description verification attempts");
+
     show_attempt_json(cur_desc.attempt_jsons[cur_desc.attempt_jsons.length-1]);
 }
 
 // Show some user's attempts
-function show_attempt(desc_type, task, desc_id, attempt_id) {
+function show_attempt(desc_type, task, desc_id, attempt_id, builder_num) {
     let desc_uses = DESC_USES[desc_id];
     let use = null;
     for (let i=0;i<desc_uses.length;i++) {
@@ -204,7 +236,22 @@ function show_attempt(desc_type, task, desc_id, attempt_id) {
     attempts_html += `<button type="button" class="btn btn-secondary attempt_row" onclick='replay_create(${use.attempts_sequence})'>Play action sequence</button>`
     $("#attempts_row").html(attempts_html);
 
+    $("#output-title").text("Builder " + builder_num.toString() + " attempts")
+
     show_attempt_json(use.attempt_jsons[use.attempt_jsons.length-1]);
+
+    let properties = [];
+    Object.keys(use).forEach(function(key) {
+        console.log(key);
+        if (['attempt_jsons', 'grid_desc', 'see_desc', 'do_desc'].includes(key)) {
+
+        } else if (key == 'timestamp') {
+            properties.push(`<li><b>${key}</b>: ${timeConverter(use[key].seconds)}</li>`);
+        } else {
+            properties.push(`<li><b>${key}</b>: ${use[key]}</li>`);
+        }
+    });
+    $("#attempt_info").html(properties.join(''));
 }
 
 // show a user's attempt on the output grid
