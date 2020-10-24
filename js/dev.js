@@ -100,7 +100,7 @@ function showDescEx(i) {
     $("#ex_size_desc").text(cur_desc['grid_desc']);
     $("#ex_see_desc").text(cur_desc['see_desc']);
     $("#ex_do_desc").text(cur_desc['do_desc']);
-    $("#desc_success").html(`<b>${cur_desc['display_num_success']}</b> out of <b>${cur_desc['display_num_attempts']}</b> people succeeded using this description.`);
+    $("#desc_success").html(`<b>${cur_desc['display_num_success']}</b> out of <b>${cur_desc['display_num_attempts']}</b> people successfully solved the task using this description.`);
 
     show_desc(CURRENT_DESC_I);
 

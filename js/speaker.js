@@ -253,7 +253,7 @@ function showDescEx(i) {
     $("#ex_size_desc").text(PAST_DESCS[i]['grid_desc']);
     $("#ex_see_desc").text(PAST_DESCS[i]['see_desc']);
     $("#ex_do_desc").text(PAST_DESCS[i]['do_desc']);
-    $("#desc_success").html(`<b>${PAST_DESCS[i]['display_num_success']}</b> out of <b>${PAST_DESCS[i]['display_num_attempts']}</b> people succeeded using this description.`);
+    $("#desc_success").html(`<b>${PAST_DESCS[i]['display_num_success']}</b> out of <b>${PAST_DESCS[i]['display_num_attempts']}</b> people successfully solved the task using this description.`);
 }
 
 // ==============
