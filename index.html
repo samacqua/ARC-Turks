@@ -457,6 +457,27 @@
         </div>
     </div>
 
+    <!-- Ongoing-study-modal -->
+    <div class="modal fade" id="ongoing-study-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Finished Solving Tasks</h3>
+                </div>
+                <div class="modal-body" id="gen-modal-body">
+
+                    <p>We are currently collecting data from MTurk. So, your data will be stored in a seperate database.</p>
+                    <p>If you are an MTurk and this is a mistake, please email <b>samacqua@mit.edu</b><div class=""></div></p>
+
+                </div>
+                <div class="modal-footer">
+                    <button onclick="$('#ongoing-study-modal').one('hidden.bs.modal', function() { $('#consentModal').modal('show'); }).modal('hide');" type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bug Report Modal -->
     <div class="modal fade" id="bug_report_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
         aria-hidden="true">

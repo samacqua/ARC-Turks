@@ -2,8 +2,6 @@ var QUIZ_QUESTIONS;
 
 $(window).on('load', function () {
 
-    // init_firestore(); // uncomment to initialize database
-
     // correctly size the progress bar
     size_progress_bar();
 
@@ -22,19 +20,28 @@ $(window).on('load', function () {
     sessionStorage.setItem("items_complete", "0"); // number of actual tasks (for determining when complete with study)
     sessionStorage.setItem("time_complete", "0"); // for finishing instructions and practice tasks (for updating progress bar)
 
-    // consent --> demographic --> overview --> walkthrough --> practice --> real tasks
-    $('#consentModal').modal('show');
-
-    // assign a random id to the user
-    const uid = uuidv4();
-    sessionStorage.setItem("uid", uid);
-    set_user_complete_time(uid, new Date(), 'start_time');
-
     // get the type of descriptions (nl, nl_ex, ex)
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     DESCRIPTIONS_TYPE = urlParams.get('type') || "nl";
     sessionStorage.setItem('type', DESCRIPTIONS_TYPE);
+
+    // if not part of MTurk study, set firebase to dev
+    const isMturk = urlParams.get('mturk') || "false";
+    sessionStorage.setItem('mturk', isMturk);
+    if (isMturk != 'true') {
+        console.log("Initialized DEV database");
+        use_dev_config();
+        $("#ongoing-study-modal").modal('show');
+    } else {
+        console.log("Initialized MTurk database");
+        $('#consentModal').modal('show');
+    }
+
+    // assign a random id to the user
+    const uid = uuidv4();
+    sessionStorage.setItem("uid", uid);
+    set_user_complete_time(uid, new Date(), 'start_time');
 
     // format walkthrough/tutorial based on description type
     format_walkthrough(DESCRIPTIONS_TYPE);

@@ -29,6 +29,14 @@ $(window).on('load', function () {
     const urlParams = new URLSearchParams(queryString);
     const task = urlParams.get('task') || TASKS[Math.floor(Math.random()*NUM_TASKS)];  // if none provided, give random task (just for when messing around w it, won't actually happen)
 
+    const isMTurk = sessionStorage.getItem('mturk');
+    if (isMTurk == 'false') {
+        console.log('Using DEV Database');
+        use_dev_config();
+    } else {
+        console.log("Using MTURK Database");
+    }
+
     DESCRIPTIONS_TYPE = sessionStorage.getItem('type') || "nl";
     loadTask(task);
     get_task_descriptions(task, DESCRIPTIONS_TYPE).then(function (descriptions) {
@@ -92,7 +100,6 @@ $(window).on('load', function () {
         for (i=0;i<words.length;i++) {
             let word = words[i];
             GOOD_WORDS.push(word.toLowerCase());
-            GOOD_WORDS = GOOD_WORDS.concat(prefix_suffix_permutations(word));
             get_word_vec_cache(word);
         }
         console.log("Length of previously used words:", words.length);
@@ -277,15 +284,13 @@ function prefix_suffix_permutations(word) {
 
 // if the word has already been fetched, then returns its vec
 // otherwise, fetches from database
-CACHED_W2V = {};
-CACHED_WORDS = [];
+var CACHED_W2V = {};
 function get_word_vec_cache(word) {
     return new Promise(function (resolve, reject) {
-        if (CACHED_WORDS.includes(word)) {
+        if (word in CACHED_W2V) {
             return resolve(CACHED_W2V[word]);
         } else {
             get_word_vec(word).then(vec => {
-                CACHED_WORDS.push(word);
                 CACHED_W2V[word] = vec;
                 return resolve(vec);
             });
@@ -308,31 +313,39 @@ function get_closest_words(word, limit=10) {
         // get word vec of first word
         get_word_vec_cache(word).then(vec1 => {
 
-            (async function loop() {
-                // get word vec for every word in GOOD_WORDS
-                for (i=0;i<=GOOD_WORDS.length;i++) {
-                    await new Promise(function (res, rej) {
+            // get word vec for every word in GOOD_WORDS
+            for (i=0;i<=GOOD_WORDS.length;i++) {
 
-                        if (i == GOOD_WORDS.length) {
-                            var closest = dists.sort(compare).slice(0,limit);
-                            return resolve(closest);
+                if (i == GOOD_WORDS.length) {
+                    var closest = dists.sort(compare).slice(0,limit);
+                    return resolve(closest);
+                }
+
+                const comp_word = GOOD_WORDS[i];
+
+                if (comp_word in CACHED_W2V) {
+                    const vec2 = CACHED_W2V[comp_word];
+
+                    if (vec1 == null || vec2 == null) {
+                        dists.push([100, comp_word]);
+                    } else {
+                        const dist = get_dist(vec1, vec2);
+                        dists.push([dist, comp_word]);
+                    }
+
+                } else {
+                    get_word_vec(comp_word).then(vec => {
+                        CACHED_W2V[comp_word] = vec;
+                        
+                        if (vec1 == null || vec == null) {
+                            dists.push([100, comp_word]);
+                        } else {
+                            const dist = get_dist(vec1, vec);
+                            dists.push([dist, comp_word]);
                         }
-
-                        const comp_word = GOOD_WORDS[i];
-                        get_word_vec_cache(comp_word).then(vec2 => {
-
-                            if (vec1 == null || vec2 == null) {
-                                dists.push([100, comp_word]);
-                                res();
-                            } else {
-                                const dist = get_dist(vec1, vec2);
-                                dists.push([dist, comp_word]);
-                                res();
-                            }
-                        });
                     });
                 }
-            })();
+            }
         });
     });
 }
@@ -402,7 +415,6 @@ function confirm_add_word(word) {
 function add_current_candidate_word() {
 
     GOOD_WORDS.push(CUR_WORD_CANDIDATE);
-    GOOD_WORDS = GOOD_WORDS.concat(prefix_suffix_permutations(CUR_WORD_CANDIDATE));
 
     let blank_index = GOOD_WORDS.indexOf("");   // ensure not adding ""
     if (blank_index != -1) {
@@ -429,10 +441,7 @@ $(document).ready(function () {
 
         // so they can't delete prefix
         var value = $(this).val();
-        const prefix_mapping = { 'grid_size_desc': GRID_SIZE_PREFIX, 'what_you_see': SHOULD_SEE_PREFIX, 'what_you_do': HAVE_TO_PREFIX }
         const id = $(this).attr("id");
-        // var prefix = prefix_mapping[id];
-        // $(this).val(prefix + value.substring(prefix.length));
 
         // for each novel word, add a row with buttons to replace word with similar words in database, or add the word
         $('#word-warning-' + id).empty();
@@ -457,10 +466,15 @@ $(document).ready(function () {
             });
 
             $('#word-warning-' + id).append(items.join(''));
-
         }
 
         get_replacement_words(words_to_replace).then(replacements => {
+
+            // if by the time retrieved words, there are new words, then recall self
+            if (!arraysEqual($(this).val().match(get_bad_words()), words_to_replace)) {
+                $(".descriptions").keyup();
+                return;
+            }
 
             if (words_to_replace != null && words_to_replace.length != 0) {
 

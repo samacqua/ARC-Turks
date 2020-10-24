@@ -14,6 +14,8 @@ var MAX_CELL_SIZE = 100;
 var TASK_ID;
 var SELECTED_EXAMPLE = null;
 
+var ATTEMPTS_SEQUENCE = [];
+
 function refreshEditionGrid(jqGrid, dataGrid) {
     fillJqGridWithData(jqGrid, dataGrid);
     setUpEditionGridListeners(jqGrid);

@@ -1,6 +1,5 @@
 var START_DATE;
 var ATTEMPT_JSONS = [];
-var ATTEMPTS_SEQUENCE = [];
 
 var DESC_ID;
 
@@ -11,6 +10,14 @@ $(window).on('load', function () {
     uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
     // get date for making sure they try before giving up
     START_DATE = new Date();
+
+    const isMTurk = sessionStorage.getItem('mturk');
+    if (isMTurk == 'false') {
+        console.log('Using DEV Database');
+        use_dev_config();
+    } else {
+        console.log("Using MTURK Database");
+    }
 
     // show progress bar completion
     size_progress_bar();

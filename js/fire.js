@@ -23,6 +23,17 @@ firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
 var database = firebase.database();
 
+function use_dev_config() {
+    firebase.initializeApp(devFirebaseConfig, 'devApp');
+
+    db = firebase.app('devApp').firestore();
+    database = firebase.app('devApp').database();
+}
+
+function use_study_config() {
+    db = firebase.firestore();
+    database = firebase.database();
+}
 
 // ===================================
 // Retrieve
