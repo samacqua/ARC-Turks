@@ -137,6 +137,7 @@ function check() {
 
     if (reference_output.length != submitted_output.length || reference_output[0].length != submitted_output[0].length) {
         errorMsg(`Wrong answer. Try again. You have ${MAX_ATTEMPTS_BUILDER - ATTEMPT_JSONS.length} attempts left.`);
+        ATTEMPTS_SEQUENCE.push(["check", false]);
             // used all attempts
         if (ATTEMPT_JSONS.length == MAX_ATTEMPTS_BUILDER) {
             SENDING_TO_NEXT = true;
