@@ -14,32 +14,50 @@
 .symbol_0 {
     background-color: #000;
 }
+
 .symbol_1 {
-    background-color: #0074D9; /* blue */
+    background-color: #0074D9;
+    /* blue */
 }
+
 .symbol_2 {
-    background-color: #FF4136; /* red */
+    background-color: #FF4136;
+    /* red */
 }
+
 .symbol_3 {
-    background-color: #2ECC40; /* green */
+    background-color: #2ECC40;
+    /* green */
 }
+
 .symbol_4 {
-    background-color: #FFDC00; /* yellow */
+    background-color: #FFDC00;
+    /* yellow */
 }
+
 .symbol_5 {
-    background-color: #AAAAAA; /* grey */
+    background-color: #AAAAAA;
+    /* grey */
 }
+
 .symbol_6 {
-    background-color: #F012BE; /* fuschia */
+    background-color: #F012BE;
+    /* fuschia */
 }
+
 .symbol_7 {
-    background-color: #FF851B; /* orange */
+    background-color: #FF851B;
+    /* orange */
 }
+
 .symbol_8 {
-    background-color: #7FDBFF; /* teal */
+    background-color: #7FDBFF;
+    /* teal */
 }
+
 .symbol_9 {
-    background-color: #870C25; /* brown */
+    background-color: #870C25;
+    /* brown */
 }
 
 
@@ -65,7 +83,7 @@
 
 .selected-symbol-preview {
     border: 2px solid rgb(255, 255, 255);
-    
+
 }
 
 button {
@@ -78,6 +96,7 @@ button {
 .ui-selected {
     background-image: url(../img/black-twill.png), url(../img/brushed-alum.png);
 }
+
 .ui-selectable-helper {
     border: 1px dotted #ddd;
     position: absolute;

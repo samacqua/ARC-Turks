@@ -37,10 +37,11 @@ function getSelectedSymbol() {
 }
 
 function setUpEditionGridListeners(jqGrid) {
-    jqGrid.find('.cell').click(function(event) {
+    jqGrid.find('.cell').click(function (event) {
         cell = $(event.target);
         symbol = getSelectedSymbol();
 
+        const isStart = !(window.location.href.includes("listener") || window.location.href.includes("speaker"));
         mode = $('input[name=tool_switching]:checked').val();
         if (mode == 'floodfill') {
             // If floodfill: fill all connected cells.
@@ -49,8 +50,8 @@ function setUpEditionGridListeners(jqGrid) {
             floodfillFromLocation(grid, cell.attr('x'), cell.attr('y'), symbol);
             syncFromDataGridToEditionGrid();
 
-
-            if (window.location.href.includes("index")) {
+            // if in tutorial and in challenge to flood fill yellow, check completion
+            if (isStart) {
                 if ($("#objective-text").text().includes("yellow")) {
                     pre_continue();
                 }
@@ -60,8 +61,10 @@ function setUpEditionGridListeners(jqGrid) {
         else if (mode == 'edit') {
             // Else: fill just this cell.
             setCellSymbol(cell, symbol);
-            if (window.location.href.includes("index")) {
-                if ($("#objective-text").text().includes("green")) {
+
+            // if in tutorial and in challenge to draw green squares, check completion
+            if (isStart) {
+                if ($("#objective-text").text().includes("green") || $("#objective-text").text().includes("yellow") || $("#objective-text").text().includes("copy")) {
                     pre_continue();
                 }
             }
@@ -91,10 +94,10 @@ function fillPairPreview(pairId, inputGrid, outputGrid) {
         elem.src = 'img/arrow.png';
         elem.setAttribute("id", "arrow");
 
-        const needsExample = window.location.href.includes("speaker") && window.location.href.includes("ex");
-        if (needsExample) {
+        const isSpeakerExample = window.location.href.includes("speaker") && DESCRIPTIONS_TYPE.includes("ex");
+        if (isSpeakerExample) {
             var text = document.createElement("p");
-            text.innerHTML = pairId+1;
+            text.innerHTML = pairId + 1;
             text.setAttribute("id", "io_id");
             jqArrow.append(text);
         }
@@ -116,31 +119,26 @@ function fillPairPreview(pairId, inputGrid, outputGrid) {
     fitCellsToContainer(jqOutputGrid, outputGrid.height, outputGrid.width, col_width, col_width);
 }
 
-// const LISTENER_TYPES = 
-
-// // if 0, then NL and io example, if 1, then just NL, if 2, then just io example
-// var LISTENER_TYPE = 0;
-
 function loadJSONTask(train, test) {
     $('#modal_bg').hide();
 
-    const isSpeakerEx = window.location.href.includes("speaker") && window.location.href.includes("ex");
-    if (isSpeakerEx) {
+    const isSpeakerExample = window.location.href.includes("speaker") && DESCRIPTIONS_TYPE.includes("ex");
+    if (isSpeakerExample) {
         for (var i = 0; i < train.length; i++) {
 
-            var option = $("<option></option>").val(i+1);
-            option.html(i+1);
+            var option = $("<option></option>").val(i + 1);
+            option.html(i + 1);
 
             $("#selectExampleIO").append(option);
         }
     }
 
     const isListener = window.location.href.includes("listener");
-    const isStart = window.location.href.includes("index");
+    const isStart = !(isListener || window.location.href.includes("speaker"));
 
     $("#task_preview").html("");
 
-    if ((isListener || isStart) && (isNaN(SELECTED_EXAMPLE) || SELECTED_EXAMPLE == null)) {
+    if ((isListener || isStart) && SELECTED_EXAMPLE == -1) {
         $("#task_preview").html("There is no input-output example for this description.")
     }
 
@@ -158,7 +156,7 @@ function loadJSONTask(train, test) {
         output_grid = convertSerializedGridToGridObject(values)
         fillPairPreview(i, input_grid, output_grid);
     }
-    for (var i=0; i < test.length; i++) {
+    for (var i = 0; i < test.length; i++) {
         pair = test[i];
         TEST_PAIRS.push(pair);
     }
@@ -179,7 +177,7 @@ function loadTaskFromFile(e) {
         return;
     }
     var reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
         var contents = e.target.result;
 
         try {
@@ -197,38 +195,16 @@ function loadTaskFromFile(e) {
     reader.readAsText(file);
 }
 
-var TASKS_DESCRIBED = [];
-
-function randomTask() {
-    var subset = "training";
-    $.getJSON("https://api.github.com/repos/samacqua/ARC-Turks/contents/data/" + subset, function(tasks) {
-        var task_index = Math.floor(Math.random() * tasks.length);
-        console.log(task_index);
-        TASKS_DESCRIBED.push(task_index);
-        var task = tasks[task_index];
-        $.getJSON(task["download_url"], function(json) {
-            try {
-                train = json['train'];
-                test = json['test'];
-            } catch (e) {
-                errorMsg('Bad file format');
-                return;
-            }
-            loadJSONTask(train, test);
-            TASK_ID = task_index;
-            //$('#load_task_file_input')[0].value = "";
-        })
-    })
-}
-
 function loadTask(task_index) {
-    console.log(task_index);
+    console.log("Loading task:", task_index);
+    if (task_index == null) {
+        console.warn("Tried to load a null task. Ensure that you are providing a task number.");
+    }
     var subset = "training";
-    $.getJSON("https://api.github.com/repos/samacqua/ARC-Turks/contents/data/" + subset, function(tasks) {
+    $.getJSON("https://api.github.com/repos/samacqua/ARC-Turks/contents/data/" + subset, function (tasks) {
         var task = tasks[task_index];
-        TASKS_DESCRIBED.push(task_index);
 
-        $.getJSON(task["download_url"], function(json) {
+        $.getJSON(task["download_url"], function (json) {
             try {
                 train = json['train'];
                 test = json['test'];
@@ -267,15 +243,13 @@ function initializeSelectable() {
     }
     toolMode = $('input[name=tool_switching]:checked').val();
     if (toolMode == 'select') {
-        infoMsg('Select some cells and click on a color to fill in, or press C to copy');
         $('.selectable_grid').selectable(
             {
                 autoRefresh: false,
                 filter: '> .row > .cell',
-                start: function(event, ui) {
-                    $('.ui-selected').each(function(i, e) {
+                start: function (event, ui) {
+                    $('.ui-selected').each(function (i, e) {
                         $(e).removeClass('ui-selected');
-                        console.log("bb");
                     });
                 }
             }
@@ -286,39 +260,48 @@ function initializeSelectable() {
 // Initial event binding.
 
 $(document).ready(function () {
-    $('#symbol_picker').find('.symbol_preview').click(function(event) {
+    $('#symbol_picker').find('.symbol_preview').click(function (event) {
         symbol_preview = $(event.target);
-        $('#symbol_picker').find('.symbol_preview').each(function(i, preview) {
+        $('#symbol_picker').find('.symbol_preview').each(function (i, preview) {
             $(preview).removeClass('selected-symbol-preview');
         })
         symbol_preview.addClass('selected-symbol-preview');
 
-        toolMode = $('input[name=tool_switching]:checked').val();
-        if (toolMode == 'select') {
-            $('.edition_grid').find('.ui-selected').each(function(i, cell) {
-                symbol = getSelectedSymbol();
-                setCellSymbol($(cell), symbol);
-            });
-        }
+        // let user fill in selected area with a color
+        // toolMode = $('input[name=tool_switching]:checked').val();
+        // if (toolMode == 'select') {
+        //     $('.edition_grid').find('.ui-selected').each(function (i, cell) {
+        //         symbol = getSelectedSymbol();
+        //         setCellSymbol($(cell), symbol);
+        //     });
+        // }
     });
 
-    $('.edition_grid').each(function(i, jqGrid) {
+    $('.edition_grid').each(function (i, jqGrid) {
         setUpEditionGridListeners($(jqGrid));
     });
 
-    $('.load_task').on('change', function(event) {
+    $('.load_task').on('change', function (event) {
         loadTaskFromFile(event);
     });
 
-    $('.load_task').on('click', function(event) {
-      event.target.value = "";
+    $('.load_task').on('click', function (event) {
+        event.target.value = "";
     });
 
-    $('input[type=radio][name=tool_switching]').change(function() {
-        initializeSelectable();
+    $('input[type=radio][name=tool_switching]').change(function () {
+        initializeSelectable(true);
+        toolMode = $('input[name=tool_switching]:checked').val();
+        if (toolMode == 'select') {
+            infoMsg('Drag over an area to select, and press "C" to copy');
+        } else if (toolMode == 'tool_floodfill') {
+            infoMsg('Click anywhere in the output to flood-fill that area with the selected color.');
+        } else if (toolMode == 'edit') {
+            infoMsg('Click anywhere in the output to color that cell with the selected color.');
+        }
     });
 
-    $('body').keydown(function(event) {
+    $('body').keydown(function (event) {
         mode = $('input[name=tool_switching]:checked').val();
 
         if (mode != 'select') {
@@ -327,26 +310,26 @@ $(document).ready(function () {
         // Copy and paste functionality.
         if (event.which == 67) {
             // Press C
-            
+
             selected = $('.ui-selected');
             if (selected.length == 0) {
                 return;
             }
 
             COPY_PASTE_DATA = [];
-            for (var i = 0; i < selected.length; i ++) {
+            for (var i = 0; i < selected.length; i++) {
                 x = parseInt($(selected[i]).attr('x'));
                 y = parseInt($(selected[i]).attr('y'));
                 symbol = parseInt($(selected[i]).attr('symbol'));
                 COPY_PASTE_DATA.push([x, y, symbol]);
             }
-            infoMsg('Cells copied! Select a target cell and press V to paste at location.');
+            infoMsg('Cells copied! Select a target cell and press "V" to paste at location.');
 
         }
         if (event.which == 86) {
             // Press V
             if (COPY_PASTE_DATA.length == 0) {
-                errorMsg('No data to paste.');
+                errorMsg('You must first copy (by selecting an area and pressing "C") to paste.');
                 return;
             }
             selected = $('.edition_grid').find('.ui-selected');
@@ -357,44 +340,41 @@ $(document).ready(function () {
 
             jqGrid = $(selected.parent().parent()[0]);
 
-            if (selected.length == 1) {
-                targetx = parseInt(selected.attr('x'));
-                targety = parseInt(selected.attr('y'));
+            targetx = parseInt(selected.attr('x'));
+            targety = parseInt(selected.attr('y'));
 
-                xs = new Array();
-                ys = new Array();
-                symbols = new Array();
+            xs = new Array();
+            ys = new Array();
+            symbols = new Array();
 
-                for (var i = 0; i < COPY_PASTE_DATA.length; i ++) {
-                    xs.push(COPY_PASTE_DATA[i][0]);
-                    ys.push(COPY_PASTE_DATA[i][1]);
-                    symbols.push(COPY_PASTE_DATA[i][2]);
+            for (var i = 0; i < COPY_PASTE_DATA.length; i++) {
+                xs.push(COPY_PASTE_DATA[i][0]);
+                ys.push(COPY_PASTE_DATA[i][1]);
+                symbols.push(COPY_PASTE_DATA[i][2]);
+            }
+
+            minx = Math.min(...xs);
+            miny = Math.min(...ys);
+            for (var i = 0; i < xs.length; i++) {
+                x = xs[i];
+                y = ys[i];
+                symbol = symbols[i];
+                newx = x - minx + targetx;
+                newy = y - miny + targety;
+                res = jqGrid.find('[x="' + newx + '"][y="' + newy + '"] ');
+                if (res.length == 1) {
+                    cell = $(res[0]);
+                    setCellSymbol(cell, symbol);
                 }
+            }
 
-                minx = Math.min(...xs);
-                miny = Math.min(...ys);
-                for (var i = 0; i < xs.length; i ++) {
-                    x = xs[i];
-                    y = ys[i];
-                    symbol = symbols[i];
-                    newx = x - minx + targetx;
-                    newy = y - miny + targety;
-                    res = jqGrid.find('[x="' + newx + '"][y="' + newy + '"] ');
-                    if (res.length == 1) {
-                        cell = $(res[0]);
-                        setCellSymbol(cell, symbol);
-                    }
+
+            // if in tutorial and in challenge to copy-paste, check completion
+            const isStart = !(window.location.href.includes("listener") || window.location.href.includes("speaker"));
+            if (isStart) {
+                if ($("#objective-text").text().includes("copy")) {
+                    pre_continue('copy-paste');
                 }
-
-
-                if (window.location.href.includes("index")) {
-                    if ($("#objective-text").text().includes("copy")) {
-                        pre_continue();
-                    }
-                }
-
-            } else {
-                errorMsg('Can only paste at a specific location; only select *one* cell as paste destination.');
             }
         }
     });
@@ -443,5 +423,5 @@ function copyFromInput() {
     syncFromEditionGridToDataGrid();
     CURRENT_OUTPUT_GRID = convertSerializedGridToGridObject(CURRENT_INPUT_GRID.grid);
     syncFromDataGridToEditionGrid();
-    $('#output_grid_size').val(CURRENT_OUTPUT_GRID.height + 'x' + CURRENT_OUTPUT_GRID.width);
+    $('#output_grid_size').val(CURRENT_OUTPUT_GRID.width + 'x' + CURRENT_OUTPUT_GRID.height);
 }

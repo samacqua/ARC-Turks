@@ -1,49 +1,28 @@
-const TOTAL_TASKS_TO_COMPLETE = 3;
+const TOTAL_TASKS_TO_COMPLETE = 6;
+const MIN_TASKS_BEFORE_SPEAKER = 2;
 const TOTAL_PRAC_TASKS = 2;
+const NUM_TASKS = 3;   // TODO: Change back to 400
+const MAX_ATTEMPTS_BUILDER = 3;
 
 // easy tasks for demonstration purposes
-// 78 for video demonstration
 const PRAC_TASKS = [
-    // {
-    //     "task": 78,
-    //     "grid_desc": "The grid size... changes to 3x3.",
-    //     "see_desc": "In the input, you should see... a large grid with multiple copies of a few 3x3 shapes.",
-    //     "do_desc": "To make the output, you have to... zoom in on the shape that appears the most in the input."
-    // },
-    
     {
         "task": 341,
-        "grid_desc": "The grid size... does not change.",
+        "grid_desc": "The output grid size... is the same as the input grid size.",
         "see_desc": "In the input, you should see... a light blue 2x2 square with 4 colored cells around it.",
-        "do_desc": "To make the output, you have to... move each colored cell on top of the corner of the light blue square that it is closest to.",
+        "do_desc": "To make the output, you have to... move each colored cell to cover the corner of the light blue square that it is closest to.",
         "selected_example": 0
     },
-        
-    // ,{
-    //     "task": 370,
-    //     "grid_desc": "The grid size... does not change.",
-    //     "see_desc": "In the input, you should see... two blue dots.",
-    //     "do_desc": "To make the output, you have to... place a green plus sign exactly half-way between the two blue dots.",
-    //     "selected_example": 0
-    // },
     {
         "task": 258,
-        "grid_desc": "The grid size... changes to the size of the colored object.",
+        "grid_desc": "The output grid size... changes to the size of the colored object.",
         "see_desc": "In the input, you should see... a colored object on a blue background.",
-        "do_desc": "To make the output, you have to... zoom in on the object, and replace all blue with black."
+        "do_desc": "To make the output, you have to... zoom in on the object, and replace all blue with black.",
+        "selected_example": 0
     }
 ];
 
-const QUIZ_QUESTIONS = [
-    {
-        question: "Your goal is to...",
-        answers: {
-            a: 'create grids that look like other grids',
-            b: 'write a description of the transformation based on grid examples so that another person can create the correct output grid',
-            c: 'use a description of the pattern to create the correct output grid'
-        },
-        correctAnswer: 'c'
-    },
+const GEN_QUIZ_QUESTIONS = [
     {
         question: "It is important to...",
         answers: {
@@ -72,6 +51,37 @@ const QUIZ_QUESTIONS = [
     }
 ];
 
-const GRID_SIZE_PREFIX = "The grid size...";
+const TASK_SPECIFIC_QUESTION = {
+    "nl": {
+        question: "Your goal is to...",
+        answers: {
+            a: 'create grids that look like other grids',
+            b: 'write a description of the transformation based on grid examples so that another person can create the correct output grid',
+            c: 'use a description of the pattern to create the correct output grid'
+        },
+        correctAnswer: 'c'
+    },
+    "nl_ex": {
+        question: "Your goal is to...",
+        answers: {
+            a: 'create grids that look like other grids',
+            b: 'write a description of the transformation based on grid examples so that another person can create the correct output grid',
+            c: 'use a description and example of the pattern andto create the correct output grid'
+        },
+        correctAnswer: 'c'
+    },
+    "ex": {
+        question: "Your goal is to...",
+        answers: {
+            a: 'create grids that look like other grids',
+            b: 'write a description of the transformation based on grid examples so that another person can create the correct output grid',
+            c: 'use an example of the pattern to create the correct output grid'
+        },
+        correctAnswer: 'c'
+    }
+}
+
+
+const GRID_SIZE_PREFIX = "The output grid size...";
 const SHOULD_SEE_PREFIX = "In the input, you should see...";
 const HAVE_TO_PREFIX = "To make the output, you have to...";

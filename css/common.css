@@ -12,12 +12,27 @@ img {
     background-color: rgb(231, 180, 231);
     margin-top: 20px;
     padding-top: 8px;
+    transition: all .5s ease-in-out;
+    -webkit-transition: all .5s ease-in-out;
+    -moz-transition: all .5s ease-in-out;
+    -o-transition: all .5s ease-in-out;
+}
+
+#copy-reset-btns {
+    padding-top: 15px;
+    padding-bottom: 15px;
 }
 
 #arrow {
     width: 90%;
     z-index: 100;
     height: auto;
+}
+
+#feedback_btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
 }
 
 #io_id {
@@ -32,12 +47,13 @@ img {
     float: left;
 }
 
-.tooltip.show {
-    opacity: 1;
+mark {
+    background-color: rgba(70, 221, 248, 0.3);
+    border-radius: 3px;
 }
 
 .col-header {
-    clear:both;
+    clear: both;
     margin-bottom: 15px;
 }
 
@@ -45,22 +61,9 @@ img {
     display: inline-block;
 }
 
-.help-btn {
-    float:right;   
-    padding: 3px;
-    margin-top: 5px;
-    background-color: cornflowerblue;
-    border-radius: 3px;
-    color: white;
-}
-
 video {
-    width: 100%    !important;
-    height: auto   !important;
-}
-
-.tooltip-inner {
-    max-width: 100% !important;
+    width: 100% !important;
+    height: auto !important;
 }
 
 /*Message display*/
@@ -75,15 +78,17 @@ video {
     margin-right: 10%;
     margin-top: 10px;
     display: none;
+    border-radius: 5px;
 }
 
-#dark-layer {
+#dark-layer,
+#trans-layer {
     position: fixed;
-    padding:0;
-    margin:0;
+    padding: 0;
+    margin: 0;
 
-    top:0;
-    left:0;
+    top: 0;
+    left: 0;
 
     width: 100%;
     height: 100%;
@@ -91,16 +96,16 @@ video {
 }
 
 #tut-message {
-    position:fixed;
-    margin:0;
+    position: fixed;
+    margin: 0;
     padding: 0;
 
-    top:50%;
+    top: 50%;
     left: 20%;
     right: 20%;
 
     color: white;
-    background:rgba(0,0,0,0.7);
+    background: rgba(0, 0, 0, 0.7);
     border-radius: 10px;
     z-index: -1;
 
@@ -109,20 +114,21 @@ video {
 }
 
 #tut-continue-message {
-    position:fixed;
-    margin:0;
+    position: fixed;
+    margin: 0;
     padding: 0;
 
-    bottom:5%;
-    left: 5%;
-    right: 40%;
+    /* bottom:5%; */
+    /* left: 5%; */
+    /* right: 40%; */
 
     color: white;
-    background:rgba(0,0,0,0.0);
+    background: rgba(0, 0, 0, 0.0);
     border-radius: 10px;
-    z-index: -1;
+    z-index: -2;
 
     font-size: 30px;
+    text-align: center;
 }
 
 #objective-text {
@@ -139,6 +145,7 @@ video {
     margin-right: 10%;
     margin-top: 10px;
     display: none;
+    border-radius: 5px;
 }
 
 .progress {
@@ -159,14 +166,8 @@ video {
     background-color: white;
 }
 
-/* So that we can animate the progress: https://stackoverflow.com/questions/23575095/animating-bootstrap-progress-bar-width-with-jquery */
-.progress.active .progress-bar {
-    -webkit-transition: none !important;
-    transition: none !important;
-}
-
 .progress-meter {
-	min-height: 15px;
+    min-height: 15px;
     border-bottom: 2px solid rgb(160, 160, 160);
     width: 70%;
     margin-left: 15%;
@@ -174,43 +175,43 @@ video {
     margin-bottom: 20px;
 }
 
-.progress-meter > .meter {
-	position: relative;
-	float: left;
-	min-height: 15px;
-	border-width: 0px;
-	border-style: solid;
-	border-color: rgb(160, 160, 160);
+.progress-meter>.meter {
+    position: relative;
+    float: left;
+    min-height: 15px;
+    border-width: 0px;
+    border-style: solid;
+    border-color: rgb(160, 160, 160);
 }
 
-.progress-meter > .meter-left {
-	border-left-width: 2px;
+.progress-meter>.meter-left {
+    border-left-width: 2px;
 }
 
-.progress-meter > .meter-right {
-	float: right;
-	border-right-width: 2px;
+.progress-meter>.meter-right {
+    float: right;
+    border-right-width: 2px;
 }
 
-.progress-meter > .meter-right:last-child {
-	border-left-width: 2px;
+.progress-meter>.meter-right:last-child {
+    border-left-width: 2px;
 }
 
-.progress-meter > .meter > .meter-text {
-	position: absolute;
+.progress-meter>.meter>.meter-text {
+    position: absolute;
     display: inline-block;
-	bottom: -20px;
+    bottom: -20px;
     width: 100%;
-	font-weight: 700;
-	font-size: 0.85em;
-	color: rgb(160, 160, 160);
+    font-weight: 700;
+    font-size: 0.85em;
+    color: rgb(160, 160, 160);
     text-align: left;
     overflow: visible;
     white-space: nowrap;
 }
 
-.progress-meter > .meter.meter-right > .meter-text {
-	text-align: right;
+.progress-meter>.meter.meter-right>.meter-text {
+    text-align: right;
 }
 
 .task_label {

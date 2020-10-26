@@ -1,23 +1,36 @@
-// makes it so can't exit out modal by pressing outside of it
+var DESCRIPTIONS_TYPE;
+
+// so can't exit modal by pressing outside of it
 $.fn.modal.prototype.constructor.Constructor.Default.backdrop = 'static';
-$.fn.modal.prototype.constructor.Constructor.Default.keyboard =  false;
+$.fn.modal.prototype.constructor.Constructor.Default.keyboard = false;
+
+
+var LAST_MSG_DISMISS_CALL_TIME = new Date();
 
 /**
  * show an error message at the top of the screen.
  * @param {*} msg the message to display
  */
 function errorMsg(msg) {
-    $('#error_display').stop(true, true);
-    $('#info_display').stop(true, true);
+    // $('#error_display').stop(true, true);
+    // $('#info_display').stop(true, true);
     $('#error_display').hide();
     $('#info_display').hide();
 
-    console.log(msg);
+    console.warn(msg);
 
     $('#error_display').html(msg);
-    $('#error_display').css({"visibility": "visible"});
+    $('#error_display').css({ "visibility": "visible" });
     $('#error_display').fadeIn(300);
-    $('#error_display').delay(6000).fadeOut(300);
+
+    const dismiss_call_time = new Date();
+    LAST_MSG_DISMISS_CALL_TIME = dismiss_call_time;
+
+    setTimeout(function () {
+        if (LAST_MSG_DISMISS_CALL_TIME == dismiss_call_time) {
+            $('#error_display').fadeOut(300);
+        }
+    }, 6000);
 }
 
 /**
@@ -33,17 +46,25 @@ function infoMsg(msg) {
     console.log(msg);
 
     $('#info_display').html(msg);
-    $('#info_display').css({"visibility": "visible"});
+    $('#info_display').css({ "visibility": "visible" });
     $('#info_display').fadeIn(300);
-    $('#info_display').delay(6000).fadeOut(300);
+
+    const dismiss_call_time = new Date();
+    LAST_MSG_DISMISS_CALL_TIME = dismiss_call_time;
+
+    setTimeout(function () {
+        if (LAST_MSG_DISMISS_CALL_TIME == dismiss_call_time) {
+            $('#info_display').fadeOut(300);
+        }
+    }, 6000);
 }
 
 /**
  * Checks equality of two arrays
  */
-function arraysEqual(a1,a2) {
+function arraysEqual(a1, a2) {
     /* WARNING: arrays must not contain {objects} or behavior may be undefined */
-    return JSON.stringify(a1)==JSON.stringify(a2);
+    return JSON.stringify(a1) == JSON.stringify(a2);
 }
 
 /**
@@ -62,11 +83,98 @@ function shuffle(a) {
 }
 
 /**
+ * Show the user their id
+ */
+function finish() {
+    const uid = sessionStorage.getItem('uid') || "no uid";
+    $("#finish_modal_uid").text(uid.toString());
+    $("#demographic_modal").modal('show');
+
+    update_progress_bar();
+
+    const end_time = new Date();
+    const delta_time = (parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time') || 0)) / 1000;
+
+    set_user_complete_time(uid, delta_time, 'time_to_complete');
+}
+
+function exit_demographic() {
+    /**
+     * Get info from demographic modal
+     */
+    const gender = $('#gender_form').find("option:selected").text();
+    const age = $('#age_form').val().trim();
+    const uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
+    set_user_demographics(uid, age, gender, DESCRIPTIONS_TYPE);
+
+    const introModalID = DESCRIPTIONS_TYPE + 'IntroModal';
+    $('#demographic_modal').one('hidden.bs.modal', function () { $('#finished_modal').modal('show'); }).modal('hide');
+}
+
+function save_user_feedback() {
+    store_feedback($("#feedback_textarea").val(), new Date(), sessionStorage.getItem('uid') || uuidv4() + "dev").then(function() {
+        infoMsg("Successfully stored feedback. Thank you for your participation!");
+        $("#submit_feedback_btn").prop("disabled", true);
+    }).catch(err => {
+        errorMsg("Error storing feedback.");
+        console.error(err);
+    });
+}
+
+function get_next_task(first_task = false) {
+
+    return new Promise(function (resolve, reject) {
+        var num_tasks_complete = parseInt(sessionStorage.getItem('items_complete') || 0);
+
+        if (!first_task) {
+            // increment number of tasks complete if not loading the first task, bc next task is called after completing a task
+            num_tasks_complete++;
+        }
+
+        if (num_tasks_complete >= TOTAL_TASKS_TO_COMPLETE) {
+            return resolve("finish");
+        }
+
+        get_unused_desc(DESCRIPTIONS_TYPE).then(task_desc => {
+
+            if (task_desc == -1) {
+
+                // force listener if haven't completed enough tasks
+                const force_listener = (num_tasks_complete <= MIN_TASKS_BEFORE_SPEAKER);
+
+                select_casino(force_listener, DESCRIPTIONS_TYPE).then(task => {
+
+                    select_arm(task, DESCRIPTIONS_TYPE).then(desc_id => {
+                        if (desc_id == -1) {
+                            return resolve(`speaker.html?task=${task}`);
+                        } else {
+                            return resolve(`listener.html?task=${task}&id=${desc_id}&ver=false`);
+                        }
+                    }).catch(error => {
+                        console.error(error);
+                    });
+                }).catch(error => {
+                    console.error(error);
+                });
+
+            } else {
+                const task = task_desc[0]
+                const desc_id = task_desc[1]
+                return resolve(`listener.html?task=${task}&id=${desc_id}&ver=false`);
+            }
+
+        }).catch(error => {
+            console.error(error);
+        });
+    });
+}
+
+/**
  * go to next task
  */
-function next_task(first_task=false) {
+function next_task(first_task = false) {
 
-    var num_tasks_complete = parseInt(sessionStorage.getItem('items_complete'));
+    var num_tasks_complete = parseInt(sessionStorage.getItem('items_complete') || 0);
 
     if (!first_task) {
         // increment number of tasks complete if not loading the first task, bc next task is called after completing a task
@@ -74,50 +182,74 @@ function next_task(first_task=false) {
         sessionStorage.setItem('items_complete', num_tasks_complete);
     }
 
-    // if ratio is too big, then give them describer task
-    // if completed enough tasks, finish
-    shouldGiveDescription()
-    .then(function(promiseReturn) { 
+    if (num_tasks_complete >= TOTAL_TASKS_TO_COMPLETE) {
+        finish();
+        return;
+    }
 
-        // 0 == listener, 1 = speaker, 2 = speaker w example io, 3 = speaker just choose io
-        const next_task = promiseReturn[0];
-        const tot_descs = promiseReturn[1];
+    get_unused_desc(DESCRIPTIONS_TYPE).then(task_desc => {
 
-        if (num_tasks_complete >= TOTAL_TASKS_TO_COMPLETE) {
-            // all done!
-            $("#finish_modal_uid").text(uid.toString());
-            $("#finished_modal").modal('show');
+        if (task_desc == -1) {
 
-            const end_time = new Date();
-            const delta_time = (parseInt(end_time.getTime()) - parseInt(sessionStorage.getItem('start_time'))) / 1000;
+            // force listener if haven't completed enough tasks
+            const force_listener = (num_tasks_complete <= MIN_TASKS_BEFORE_SPEAKER);
 
-            set_user_complete_time(uid, delta_time, 'time_to_complete');
-        } 
-        // if final task, and the database needs a description, OR there aren't enough description tasks in the database (first couple users), then give speaker task
-        else if (((next_task != 0) && (num_tasks_complete == TOTAL_TASKS_TO_COMPLETE - 1)) || tot_descs < (TOTAL_TASKS_TO_COMPLETE - num_tasks_complete)) {
-            console.log(next_task);
-            const speaker_urls = ['speaker.html', 'speaker_nl_and_ex.html', 'speaker_ex.html'];
-            window.location.href = speaker_urls[next_task+1];
+            select_casino(force_listener, DESCRIPTIONS_TYPE).then(task => {
+
+                select_arm(task, DESCRIPTIONS_TYPE).then(desc_id => {
+                    if (desc_id == -1) {
+                        console.log("speaker:", task);
+                        window.location.href = `speaker.html?task=${task}`;
+                    } else {
+                        console.log("listener:", task, desc_id);
+                        window.location.href = `listener.html?task=${task}&id=${desc_id}&ver=false`;
+                    }
+                }).catch(error => {
+                    console.error(error);
+                });
+            }).catch(error => {
+                console.error(error);
+            });
+
         } else {
-            // next builder task
-            window.location.href = 'listener.html';
+            const task = task_desc[0]
+            const desc_id = task_desc[1]
+            console.log("unused desc:", task, desc_id);
+            window.location.href = `listener.html?task=${task}&id=${desc_id}&ver=false`;
         }
-    })
-    .catch(function(err) { console.log("Error getting attempts/description ratio: " + err); });
+
+    }).catch(error => {
+        console.error(error);
+    });
+}
+
+function scroll_highlight_objective() {
+    $([document.documentElement, document.body]).animate({
+        scrollTop: $('#objective-col').offset().top - 10
+    }, 1000);
+
+    $('#objective-col').css('-webkit-box-shadow', '0 0 40px purple');
+    $('#objective-col').css('-moz-box-shadow', '0 0 40px purple');
+    $('#objective-col').css('box-shadow', '0 0 40px purple');
+
+    setTimeout(function () {
+        $('#objective-col').css('-webkit-box-shadow', '0 0 0px rgba(0,0,0,0)');
+        $('#objective-col').css('-moz-box-shadow', '0 0 0px rgba(0,0,0,0)');
+        $('#objective-col').css('box-shadow', '0 0 0px rgba(0,0,0,0)');
+    }, 2000);
 }
 
 /**
  * resize the grids if the window size changes
  */
 var globalResizeTimer = null;
-$(window).resize(function() {
-    if(globalResizeTimer != null) window.clearTimeout(globalResizeTimer);
-    globalResizeTimer = window.setTimeout(function() {
-        console.log('resize');
+$(window).resize(function () {
+    if (globalResizeTimer != null) window.clearTimeout(globalResizeTimer);
+    globalResizeTimer = window.setTimeout(function () {
         try {
             resizeOutputGrid();
         } catch (err) {
-            console.log("no output grid");
+            console.warn("Tried to resize the output grid, but there is no output grid to resize.");
         }
         loadTask(TASK_ID);
     }, 500);
@@ -125,17 +257,11 @@ $(window).resize(function() {
 
 /**
  * update the progress bar at the top of the screen
- * @param {*} tasks_inc true if want to increment number of tasks complete
  * @param {*} prac_inc true if want to increment number of practice tasks complete
  */
-function update_progress_bar(tasks_inc=false, prac_inc=false) {
-    var tasks_complete = parseInt(sessionStorage.getItem('items_complete'));
-    var prac_complete = parseInt(sessionStorage.getItem('prac_complete'));
-
-    if (tasks_inc) {
-        tasks_complete++;
-        sessionStorage.setItem('items_complete', tasks_complete);
-    }
+function update_progress_bar(prac_inc = false) {
+    var tasks_complete = parseInt(sessionStorage.getItem('items_complete') || 0);
+    var prac_complete = parseInt(sessionStorage.getItem('prac_complete') || 0);
     if (prac_inc) {
         prac_complete++;
         sessionStorage.setItem('prac_complete', prac_complete);
@@ -145,17 +271,53 @@ function update_progress_bar(tasks_inc=false, prac_inc=false) {
     const tot_tasks = TOTAL_TASKS_TO_COMPLETE + TOTAL_PRAC_TASKS + 1;
     const percent_complete = (tasks_complete + prac_complete) / tot_tasks * 100;
 
-    $(".progress-bar").animate({
+    console.log("called");
+    console.log(percent_complete);
+    $(".progress-bar").css({
         width: `${percent_complete}%`
-    }, 1000);
+    });
 }
 
 /**
- * set up tooltip
+ * Correctly sizes the progress bar for the number of practice tasks and actual tasks
  */
-$(window).on('load',function(){
-    $('a[data-toggle="tooltip"]').tooltip({
-        animated: 'fade',
-        html: true
+function size_progress_bar() {
+    const total = TOTAL_TASKS_TO_COMPLETE + TOTAL_PRAC_TASKS + 1;   // +1 for tutorial
+
+    const instructions_width = 1 / total * 100;
+    const tutorial_width = TOTAL_PRAC_TASKS / total * 100;
+    const tasks_width = 100 - instructions_width - tutorial_width;
+
+    $("#instructions_label").css("width", `${instructions_width}%`);
+    $("#tutorial_label").css("width", `${tutorial_width}%`);
+    $("#done_label").css("width", `${tasks_width}%`);
+}
+
+// create random id so queue and desc have same id
+function uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
     });
-});
+}
+
+// get the user browser type
+function get_browser() {
+    navigator.sayswho = (function(){
+        var ua= navigator.userAgent, tem, 
+        M= ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+        if(/trident/i.test(M[1])){
+            tem=  /\brv[ :]+(\d+)/g.exec(ua) || [];
+            return 'IE '+(tem[1] || '');
+        }
+        if(M[1]=== 'Chrome'){
+            tem= ua.match(/\b(OPR|Edge)\/(\d+)/);
+            if(tem!= null) return tem.slice(1).join(' ').replace('OPR', 'Opera');
+        }
+        M= M[2]? [M[1], M[2]]: [navigator.appName, navigator.appVersion, '-?'];
+        if((tem= ua.match(/version\/(\d+)/i))!= null) M.splice(1, 1, tem[1]);
+        return M.join(' ');
+    })();
+
+    return navigator.sayswho
+}
