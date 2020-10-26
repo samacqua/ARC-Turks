@@ -41,7 +41,7 @@ $(window).on('load', function () {
     // assign a random id to the user
     const uid = uuidv4();
     sessionStorage.setItem("uid", uid);
-    set_user_complete_time(uid, new Date(), 'start_time');
+    set_user_start_time(uid);
 
     // format walkthrough/tutorial based on description type
     format_walkthrough(DESCRIPTIONS_TYPE);

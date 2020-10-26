@@ -261,7 +261,7 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confi
             'uid': user_id,
             'description_time': parseInt(desc_time),
             'verification_time': parseInt(ver_time),
-            'timestamp': new Date(),
+            'timestamp': firebase.firestore.FieldValue.serverTimestamp(),
 
             'bandit_attempts': 0,       // # listeners who used description
             'bandit_success_score': 0,  // # listeners who used description successfully, weighted (2 attempts = +0.5, ...)
@@ -335,7 +335,7 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, atte
             'attempt_jsons': attempt_jsons,
             'attempts_sequence': attempts_sequence,
             'success': success,
-            'timestamp': new Date(),
+            'timestamp': firebase.firestore.FieldValue.serverTimestamp(),
 
             'uid': user_id,
             'time': parseInt(total_time)
@@ -395,7 +395,7 @@ function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, use
             'uid': user_id,
             'description_time': parseInt(desc_time),
             'verification_time': parseInt(ver_time),
-            'timestamp': new Date(),
+            'timestamp': firebase.firestore.FieldValue.serverTimestamp(),
 
             // store fake stats so that it is never selected by bandit,
             // but can be shown to speaker as an example of a bad dsecription
@@ -514,6 +514,23 @@ function set_user_complete_time(user_id, time, task_name) {
     });
 }
 
+function set_user_start_time(user_id) {
+    return new Promise(function (resolve, reject) {
+        let data = {
+            'start_time': firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        db.collection("users").doc(user_id.toString()).set(data, {merge: true})
+            .then(function () {
+                console.log(`set user start time successfully`);
+                return resolve();
+            }).catch(function (err) {
+                console.error(err);
+                return reject(err);
+            });
+    });
+}
+
 /**
  * increment the number of times the user gave up while trying to describe the task
  */
@@ -537,7 +554,7 @@ function store_bug_report() {
     return new Promise(function (resolve, reject) {
         db.collection("bug_reports").add({
             'description': $("#bug_desc_textarea").val(),
-            'timestamp': new Date(),
+            'timestamp': firebase.firestore.FieldValue.serverTimestamp(),
             'uid': sessionStorage.getItem('uid'),
             'url': window.location.href,
             'browser_type': get_browser()
