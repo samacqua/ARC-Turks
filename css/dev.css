@@ -82,8 +82,10 @@
 }
 
 .attempt_row {
+    overflow: visible;
     width: 70%;
-    margin: 0 auto;
+    /* margin: 0 auto; */
+    margin-left: 0;
     text-align: left;
     margin-bottom: 10px;
 }

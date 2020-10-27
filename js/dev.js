@@ -217,6 +217,12 @@ function timeConverter(UNIX_timestamp){
   }
 
 function show_desc(cur_desc_i) {
+
+    CUR_ACTION_I = -1;
+    if (REPLAY_TIMEOUT) {
+        clearTimeout(REPLAY_TIMEOUT);
+    }
+
     let cur_desc = PAST_DESCS[cur_desc_i];
 
     attempts_html = "";
@@ -243,7 +249,12 @@ function show_desc(cur_desc_i) {
         attempts_html += row;
     }
 
-    attempts_html += `<button type="button" class="btn btn-secondary attempt_row" onclick='replay_create(${cur_desc.attempts_sequence})'>Play action sequence</button>`
+    attempts_html += `
+    <div class="replay_create btn-group attempt_row">
+        <button type="button" class="btn btn-secondary" onclick='replay_create(${cur_desc.attempts_sequence})'>▶</button>
+        <button type="button" class="btn btn-secondary" onclick='reset_replay();'>⟲</button>
+        <button type="button" class="btn btn-secondary" onclick='play_action(${cur_desc.attempts_sequence})'>></button>
+    </div>`
     $("#attempts_row").html(attempts_html);
 
     $("#output-title").text("Description verification attempts");
@@ -251,8 +262,16 @@ function show_desc(cur_desc_i) {
     show_attempt_json(cur_desc.attempt_jsons[cur_desc.attempt_jsons.length-1]);
 }
 
+var CUR_ACTION_I = -1;
+
 // Show some user's attempts
 function show_attempt(desc_type, task, desc_id, attempt_id, builder_num) {
+
+    CUR_ACTION_I = -1;
+    if (REPLAY_TIMEOUT) {
+        clearTimeout(REPLAY_TIMEOUT);
+    }
+
     let desc_uses = DESC_USES[desc_id];
     let use = null;
     for (let i=0;i<desc_uses.length;i++) {
@@ -286,7 +305,13 @@ function show_attempt(desc_type, task, desc_id, attempt_id, builder_num) {
         attempts_html += row;
     }
 
-    attempts_html += `<button type="button" class="btn btn-secondary attempt_row" onclick='replay_create(${use.attempts_sequence})'>Play action sequence</button>`
+    
+    attempts_html += `
+    <div class="replay_create btn-group attempt_row">
+        <button type="button" class="btn btn-secondary" onclick='replay_create(${use.attempts_sequence})'>▶</button>
+        <button type="button" class="btn btn-secondary" onclick='reset_replay();'>⟲</button>
+        <button type="button" class="btn btn-secondary" onclick='play_action(${use.attempts_sequence})'>></button>
+    </div>`
     $("#attempts_row").html(attempts_html);
 
     $("#output-title").text("Builder " + builder_num.toString() + " attempts")
@@ -359,6 +384,11 @@ function load_tasks_to_browse() {
 // load a new task after user selects it
 function load_new_task(task) {
 
+    CUR_ACTION_I = -1;
+    if (REPLAY_TIMEOUT) {
+        clearTimeout(REPLAY_TIMEOUT);
+    }
+
     // reset output grid
     CURRENT_OUTPUT_GRID.width = 3;
     CURRENT_OUTPUT_GRID.height = 3;
@@ -384,115 +414,147 @@ function load_new_task(task) {
     });
 }
 
+function reset_replay() {
+    $("#output_grid_size").val('3x3');
+    resizeOutputGrid(replay=true);
+    resetOutputGrid(replay=true);
+    if (REPLAY_TIMEOUT) {
+        clearTimeout(REPLAY_TIMEOUT);
+    }
+    CUR_ACTION_I = 0;
+}
+
+function play_action(sequence) {
+    if (sequence == undefined ) {
+        errorMsg("This description was collected before we started monitoring action sequences.");
+        return;
+    } else if (sequence.length == 0 || CUR_ACTION_I >= sequence.length) {
+        return;
+    } else if (CUR_ACTION_I == -1) {
+        $("#output_grid_size").val('3x3');
+        resizeOutputGrid(replay=true);
+        resetOutputGrid(replay=true);
+        console.log("set to 3x3");
+        CUR_ACTION_I += 1;
+        return;
+    }
+
+    const action = sequence[CUR_ACTION_I];
+    let tool = action[0];
+
+    console.log(action);
+    CUR_ACTION_I += 1;
+
+    switch (tool) {
+        case "edit":
+            [tool, x, y, symbol] = action;
+            let cell = $(`div[x="${x}"][y="${y}"]`);
+            cell.each(function() {  // make sure just output grid, not also input grid
+                if ($(this).parent().parent().parent().attr('id') == 'output_grid') {
+                    cell = $(this);
+                }
+            });
+            setCellSymbol(cell, symbol);
+            break;
+        case "floodfill":
+            [tool, x, y, symbol] = action;
+            syncFromEditionGridToDataGrid();
+            grid = CURRENT_OUTPUT_GRID.grid;
+            floodfillFromLocation(grid, x, y, symbol);
+            syncFromDataGridToEditionGrid();
+            break;
+        case "copy":
+            [tool, copy_paste_data] = action;
+            infoMsg("copied cells.");
+            break;
+        case "paste":
+            [tool, copy_paste_data, targetx, targety] = action;
+
+            let selected = $(`div[x="${targetx}"][y="${targety}"]`);
+            selected.each(function() {  // make sure just output grid, not also input grid
+                if ($(this).parent().parent().parent().attr('id') == 'output_grid') {
+                    selected = $(this);
+                }
+            });
+
+            jqGrid = $(selected.parent().parent()[0]);
+
+            xs = new Array();
+            ys = new Array();
+            symbols = new Array();
+
+            for (var i = 0; i < copy_paste_data.length; i++) {
+                xs.push(copy_paste_data[i][0]);
+                ys.push(copy_paste_data[i][1]);
+                symbols.push(copy_paste_data[i][2]);
+            }
+
+            minx = Math.min(...xs);
+            miny = Math.min(...ys);
+            for (var i = 0; i < xs.length; i++) {
+                x = xs[i];
+                y = ys[i];
+                symbol = symbols[i];
+                newx = x - minx + targetx;
+                newy = y - miny + targety;
+                res = jqGrid.find('[x="' + newx + '"][y="' + newy + '"] ');
+                if (res.length == 1) {
+                    let cell = $(res[0]);
+                    setCellSymbol(cell, symbol);
+                }
+            }
+            break;
+        case "copyFromInput":
+            copyFromInput(replay=true);
+            break;
+        case "resetOutputGrid":
+            resetOutputGrid(replay=true);
+            break;
+        case "resizeOutputGrid":
+            [tool, x, y] = action;
+            $("#output_grid_size").val(x + 'x' + y);
+            resizeOutputGrid(replay=true);
+            break;
+        case "check":
+            if (action[1] == true) {
+                infoMsg("Checked: correct!");
+            } else {
+                errorMsg("Checked: false.");
+            }
+        default:
+            break;
+    }
+}
+
+var REPLAY_TIMEOUT;
 // replay the steps a user took in creating the output
-function replay_create(sequence, iter=-1, delay=1000) {
+function replay_create(sequence, iter=-1, delay=-1) {
+
+    console.log(sequence);
+    console.log(iter, CUR_ACTION_I);
 
     if (sequence == undefined ) {
         errorMsg("This description was collected before we started monitoring action sequences.");
         return;
-    }
-
-    if (sequence.length == 0 || iter >= sequence.length) {
+    } else if (sequence.length == 0 || iter >= sequence.length) {
         return;
     } else if (iter == -1) {
         $("#output_grid_size").val('3x3');
         resizeOutputGrid(replay=true);
         resetOutputGrid(replay=true);
-        replay_create(eval(sequence), iter=iter+1, delay=delay);
         console.log("set to 3x3");
+        CUR_ACTION_I = 0;
+        replay_create(sequence, iter=CUR_ACTION_I, delay=delay);
         return;
     }
 
-    setTimeout(function() {
+    if (delay == -1) {
+        delay = 5000 / sequence.length;
+    }
 
-        const action = sequence[iter];
-        let tool = action[0];
-
-        console.log(action);
-
-        switch (tool) {
-            case "edit":
-                [tool, x, y, symbol] = action;
-                let cell = $(`div[x="${x}"][y="${y}"]`);
-                cell.each(function() {  // make sure just output grid, not also input grid
-                    if ($(this).parent().parent().parent().attr('id') == 'output_grid') {
-                        cell = $(this);
-                    }
-                });
-                setCellSymbol(cell, symbol);
-                break;
-            case "floodfill":
-                [tool, x, y, symbol] = action;
-                syncFromEditionGridToDataGrid();
-                grid = CURRENT_OUTPUT_GRID.grid;
-                floodfillFromLocation(grid, x, y, symbol);
-                syncFromDataGridToEditionGrid();
-                break;
-            case "copy":
-                [tool, copy_paste_data] = action;
-                infoMsg("copied cells.");
-                break;
-            case "paste":
-                [tool, copy_paste_data, targetx, targety] = action;
-
-                let selected = $(`div[x="${targetx}"][y="${targety}"]`);
-                selected.each(function() {  // make sure just output grid, not also input grid
-                    if ($(this).parent().parent().parent().attr('id') == 'output_grid') {
-                        selected = $(this);
-                    }
-                });
-    
-                jqGrid = $(selected.parent().parent()[0]);
-    
-                xs = new Array();
-                ys = new Array();
-                symbols = new Array();
-    
-                for (var i = 0; i < copy_paste_data.length; i++) {
-                    xs.push(copy_paste_data[i][0]);
-                    ys.push(copy_paste_data[i][1]);
-                    symbols.push(copy_paste_data[i][2]);
-                }
-    
-                minx = Math.min(...xs);
-                miny = Math.min(...ys);
-                for (var i = 0; i < xs.length; i++) {
-                    x = xs[i];
-                    y = ys[i];
-                    symbol = symbols[i];
-                    newx = x - minx + targetx;
-                    newy = y - miny + targety;
-                    res = jqGrid.find('[x="' + newx + '"][y="' + newy + '"] ');
-                    if (res.length == 1) {
-                        let cell = $(res[0]);
-                        setCellSymbol(cell, symbol);
-                    }
-                }
-                break;
-            case "copyFromInput":
-                copyFromInput(replay=true);
-                break;
-            case "resetOutputGrid":
-                resetOutputGrid(replay=true);
-                break;
-            case "resizeOutputGrid":
-                [tool, x, y] = action;
-                $("#output_grid_size").val(x + 'x' + y);
-                resizeOutputGrid(replay=true);
-                break;
-            case "check":
-                if (action[1] == true) {
-                    infoMsg("Checked: correct!");
-                } else {
-                    errorMsg("Checked: false.");
-                }
-            default:
-                break;
-        }
-
-        replay_create(sequence, iter=iter+1, delay=delay);
-        return;
-
+    REPLAY_TIMEOUT = setTimeout(function() {
+        play_action(sequence);
+        replay_create(sequence, iter=CUR_ACTION_I, delay=delay);
     }, delay);
 }
 
