@@ -151,6 +151,7 @@ function get_task_descriptions(task_id, type) {
                     'selected_ex': data.selected_example,
                     'bandit_attempts': data.bandit_attempts,
                     'bandit_success_score': data.bandit_success_score,
+                    'confidence': data.confidence,
                     'display_num_attempts': data.display_num_attempts,
                     'display_num_success': data.display_num_success,
                     'attempt_jsons': data.attempt_jsons,

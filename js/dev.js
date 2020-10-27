@@ -100,7 +100,13 @@ function showDescEx(i) {
     $("#ex_size_desc").text(cur_desc['grid_desc']);
     $("#ex_see_desc").text(cur_desc['see_desc']);
     $("#ex_do_desc").text(cur_desc['do_desc']);
-    $("#desc_success").html(`<b>${cur_desc['display_num_success']}</b> out of <b>${cur_desc['display_num_attempts']}</b> people successfully solved the task using this description.`);
+    if (cur_desc.succeeded_verification == false) {
+        $("#desc_success").html(`The describer failed the verification.`);
+    } else if (cur_desc.confidence <= 3) {
+        $("#desc_success").html(`The describer completed the verification, but their confidence was too low (${cur_desc.confidence}/10).`);
+    } else {
+        $("#desc_success").html(`<b>${cur_desc['display_num_success']}</b> out of <b>${cur_desc['display_num_attempts']}</b> people successfully solved the task using this description.`);
+    }
 
     show_desc(CURRENT_DESC_I);
 
