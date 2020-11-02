@@ -40,6 +40,9 @@ $(window).on('load', function () {
     DESCRIPTIONS_TYPE = sessionStorage.getItem('type') || "nl";
     loadTask(task);
     get_task_descriptions(task, DESCRIPTIONS_TYPE).then(function (descriptions) {
+
+        descriptions = descriptions.filter(desc => (desc.succeeded_verification != false));
+
         descriptions.sort(function(a, b) {
 
             if (a.display_num_attempts == 0) {

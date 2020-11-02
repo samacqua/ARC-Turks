@@ -143,6 +143,9 @@ function loadJSONTask(train, test) {
         $("#task_preview").html("There is no input-output example for this description.")
     }
 
+    // randomize training io grids order
+    shuffle(train);
+
     for (var i = 0; i < train.length; i++) {
 
         // if loading listener task, then only load the chosen example, if any

@@ -198,7 +198,7 @@ function submit_description() {
 
     const total_time = verification_time + desc_time;
 
-    var conf = $('#conf_form').val().trim();
+    var conf = parseInt($('#conf_form').val().trim());
 
     if (conf <= MIN_CONFIDENCE) {
         store_failed_ver_description(see_desc, do_desc, grid_desc, TASK_ID, uid, conf, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), desc_time, verification_time, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE)
