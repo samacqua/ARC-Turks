@@ -5,6 +5,7 @@ var DESC_ID;
 
 var IS_VERIFICATION;
 var uid;
+var maxIdleTime = 0;
 
 $(window).on('load', function () {
     uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
@@ -55,6 +56,8 @@ $(window).on('load', function () {
     // if using their own description as a verification for that description, load it from urlparams
     // if not, load from DB and give instructions
     if (IS_VERIFICATION) {
+        maxIdleTime = parseInt(urlParams.get('maxIdle')) || 0;
+
         const grid_desc = urlParams.get('grid') || "";
         const see_desc = urlParams.get('see') || "";
         const do_desc = urlParams.get('do') || "";
@@ -95,6 +98,34 @@ $(window).on('load', function () {
     var tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
     tasks_done.push(TASK_ID);
     sessionStorage.setItem('tasks_completed', tasks_done);
+});
+
+// get the max amount of time doing nothing (to nearest 5 seconds)
+var idleTime = 0;
+$(document).ready(function () {
+    //Increment the idle time counter every 5 seconds.
+    var resolution = 5;
+    var idleInterval = setInterval(function() { idleTime += resolution; console.log(idleTime, maxIdleTime); }, resolution*1000);
+
+    //Zero the idle timer on mouse movement.
+    $(this).mousemove(function (e) {
+        if (idleTime > maxIdleTime) {
+            maxIdleTime = idleTime;
+        }
+        idleTime = 0;
+    });
+    $(this).keypress(function (e) {
+        if (idleTime > maxIdleTime) {
+            maxIdleTime = idleTime;
+        }
+        idleTime = 0;
+    });
+    $(this).click(function (e) {
+        if (idleTime > maxIdleTime) {
+            maxIdleTime = idleTime;
+        }
+        idleTime = 0;
+    });
 });
 
 function set_instructions_modal(desc_type) {
@@ -173,7 +204,7 @@ function check() {
     if (IS_VERIFICATION) {
         $("#speaker_certainty_modal").modal('show');
     } else {
-        store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), build_time, success = true, DESCRIPTIONS_TYPE)
+        store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), build_time, success = true, DESCRIPTIONS_TYPE, maxIdleTime)
             .then(function () { 
                 set_user_complete_time(uid, build_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_listener`).then(function() {
                     next_task('listener'); 
@@ -201,7 +232,7 @@ function submit_description() {
     var conf = parseInt($('#conf_form').val().trim());
 
     if (conf <= MIN_CONFIDENCE) {
-        store_failed_ver_description(see_desc, do_desc, grid_desc, TASK_ID, uid, conf, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), desc_time, verification_time, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE)
+        store_failed_ver_description(see_desc, do_desc, grid_desc, TASK_ID, uid, conf, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), desc_time, verification_time, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE, maxIdleTime)
         .then(function () { 
             set_user_complete_time(uid, total_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker_(low_conf)`).then(function() {
                 next_task('speaker');
@@ -209,7 +240,7 @@ function submit_description() {
         })
         .catch(function (error) { console.error('Error storing response ' + error); });
     } else {
-        store_description(see_desc, do_desc, grid_desc, TASK_ID, uid, conf, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), desc_time, verification_time, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE)
+        store_description(see_desc, do_desc, grid_desc, TASK_ID, uid, conf, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), desc_time, verification_time, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE, maxIdleTime)
         .then(function () {
             set_user_complete_time(uid, total_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker`).then(function() {
                 next_task('speaker');
@@ -234,7 +265,7 @@ function used_all_attempts() {
             const do_desc = urlParams.get('do') || "";
             const desc_time = parseInt(urlParams.get('time') || "0");
         
-            store_failed_ver_description(see_desc, do_desc, grid_desc, TASK_ID, uid, null, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), desc_time, build_time, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE)
+            store_failed_ver_description(see_desc, do_desc, grid_desc, TASK_ID, uid, null, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), desc_time, build_time, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE, maxIdleTime)
             .then(function () { 
                 set_user_complete_time(uid, desc_time+build_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker_(fail)`).then(function() {
                     next_task('speaker');   
@@ -242,7 +273,7 @@ function used_all_attempts() {
             })
         .catch(function (error) { console.error('Error storing response ' + error); });
         } else {
-            store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), build_time, success = false, DESCRIPTIONS_TYPE)
+            store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), build_time, success = false, DESCRIPTIONS_TYPE, maxIdleTime)
             .then(function () { 
                 set_user_complete_time(uid, build_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_listener_(fail)`).then(function() {
                     next_task('listener'); 

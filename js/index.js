@@ -55,6 +55,34 @@ $(window).on('load', function () {
     showQuestions(QUIZ_QUESTIONS, quizContainer);
 });
 
+// get the max amount of time doing nothing (to nearest 5 seconds)
+var idleTime = 0;
+var maxIdleTime = 0;
+$(document).ready(function () {
+    //Increment the idle time counter every 5 seconds.
+    var resolution = 5;
+    var idleInterval = setInterval(function() { idleTime += resolution; console.log(idleTime, maxIdleTime); }, resolution*1000);
+
+    //Zero the idle timer on mouse movement.
+    $(this).mousemove(function (e) {
+        if (idleTime > maxIdleTime) {
+            maxIdleTime = idleTime;
+        }
+        idleTime = 0;
+    });
+    $(this).keypress(function (e) {
+        if (idleTime > maxIdleTime) {
+            maxIdleTime = idleTime;
+        }
+        idleTime = 0;
+    });
+    $(this).click(function (e) {
+        if (idleTime > maxIdleTime) {
+            maxIdleTime = idleTime;
+        }
+        idleTime = 0;
+    });
+});
 
 // =======================
 // Format 
@@ -520,4 +548,11 @@ function check_quiz() {
     resetOutputGrid();
 
     $("#tool_edit").click();
+}
+
+function exit_done_modal() {
+    const uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
+    set_user_complete_time(uid, maxIdleTime, 'max_idle_time');
+    send_user_complete_item('tutorial_total_time', true);
+    next_task(cur_task='tutorial', first_task=true);
 }

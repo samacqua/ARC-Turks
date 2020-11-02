@@ -113,6 +113,34 @@ $(window).on('load', function () {
     });
 });
 
+// get the max amount of time doing nothing (to nearest 5 seconds)
+var idleTime = 0;
+var maxIdleTime = 0;
+$(document).ready(function () {
+    //Increment the idle time counter every 5 seconds.
+    var resolution = 5;
+    var idleInterval = setInterval(function() { idleTime += resolution; console.log(idleTime, maxIdleTime); }, resolution*1000);
+
+    //Zero the idle timer on mouse movement.
+    $(this).mousemove(function (e) {
+        if (idleTime > maxIdleTime) {
+            maxIdleTime = idleTime;
+        }
+        idleTime = 0;
+    });
+    $(this).keypress(function (e) {
+        if (idleTime > maxIdleTime) {
+            maxIdleTime = idleTime;
+        }
+        idleTime = 0;
+    });
+    $(this).click(function (e) {
+        if (idleTime > maxIdleTime) {
+            maxIdleTime = idleTime;
+        }
+        idleTime = 0;
+    });
+});
 
 // ==============
 // Tutorial
@@ -590,7 +618,7 @@ function verify() {
     // Bring the user to the listener page, but show them their own description to ensure they wrote something decent
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    window.location.href = `listener.html?task=${urlParams.get('task') || "0"}&time=${totalTime}&see=${see_desc}&do=${do_desc}&grid=${grid_size_desc}&se=${selected_example}&ver=true`;
+    window.location.href = `listener.html?task=${urlParams.get('task') || "0"}&time=${totalTime}&see=${see_desc}&do=${do_desc}&grid=${grid_size_desc}&se=${selected_example}&ver=true&maxIdle=${maxIdleTime}`;
 }
 
 function give_up() {

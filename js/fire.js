@@ -242,7 +242,7 @@ function get_word_vec(word) {
  * store descriptions, task info and user info and user answers in firebase
  * returns promise so that can transition to next task after storing
  */
-function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confidence, attempts, attempt_jsons, attempts_sequence, desc_time, ver_time, selected_example, type) {
+function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confidence, attempts, attempt_jsons, attempts_sequence, desc_time, ver_time, selected_example, type, max_idle_time) {
 
     return new Promise(function (resolve, reject) {
 
@@ -263,6 +263,7 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confi
             'description_time': parseInt(desc_time),
             'verification_time': parseInt(ver_time),
             'timestamp': firebase.firestore.FieldValue.serverTimestamp(),
+            'max_idle_time': parseInt(max_idle_time),
 
             'bandit_attempts': 0,       // # listeners who used description
             'bandit_success_score': 0,  // # listeners who used description successfully, weighted (2 attempts = +0.5, ...)
@@ -319,7 +320,7 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confi
     });
 }
 
-function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, attempts_sequence, total_time, success = true, type) {
+function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, attempts_sequence, total_time, success = true, type, max_idle_time) {
     /**
      * store info for listener task in firebase
      * returns promise so that can transition to next task after storing
@@ -337,6 +338,7 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, atte
             'attempts_sequence': attempts_sequence,
             'success': success,
             'timestamp': firebase.firestore.FieldValue.serverTimestamp(),
+            'max_idle_time': parseInt(max_idle_time),
 
             'uid': user_id,
             'time': parseInt(total_time)
@@ -379,7 +381,7 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, atte
     });
 }
 
-function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, user_id, confidence, attempts, attempt_jsons, attempts_sequence, desc_time, ver_time, selected_example, type) {
+function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, user_id, confidence, attempts, attempt_jsons, attempts_sequence, desc_time, ver_time, selected_example, type, max_idle_time) {
     return new Promise(function (resolve, reject) {
 
         var batch = db.batch();
@@ -397,6 +399,7 @@ function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, use
             'description_time': parseInt(desc_time),
             'verification_time': parseInt(ver_time),
             'timestamp': firebase.firestore.FieldValue.serverTimestamp(),
+            'max_idle_time': parseInt(max_idle_time),
 
             // store fake stats so that it is never selected by bandit,
             // but can be shown to speaker as an example of a bad dsecription
