@@ -1,3 +1,4 @@
+// expected time for each portion of the interface
 const TOTAL_TIME = 45;
 const INSTRUCTIONS_TIME = 1;
 const PRAC_TIME = 2;
@@ -5,14 +6,14 @@ const TOTAL_PRAC_TASKS = 2;
 const SPEAKER_TIME = 6;
 const BUILDER_TIME = 2;
 
-const MIN_TASKS_BEFORE_SPEAKER = 2;
-const TASKS = [149, 286, 140, 354, 219, 277, 28, 135, 162, 384, 297, 26, 299, 388, 246, 74, 305, 94, 308, 77];
-const NUM_TASKS = TASKS.length;   // TODO: Change back to 400
-const MAX_ATTEMPTS_BUILDER = 3;
+const MIN_TASKS_BEFORE_SPEAKER = 2; // number of tasks where we bias choosing tasks towards those that need a description
+const TASKS = [149, 286, 140, 354, 219, 277, 28, 135, 162, 384, 297, 26, 299, 388, 246, 74, 305, 94, 308, 77];  // the ARC tasks to be used in the study
+const NUM_TASKS = TASKS.length;
+const MAX_ATTEMPTS_BUILDER = 3; // maximum number of attempts a builder has before they "failed"
 
-const MIN_CONFIDENCE = 3;
+const MIN_CONFIDENCE = 3;   // if confidence is at or below this level, do not add the description to the bandit (but use it for showing to future speakers)
 
-// easy tasks for demonstration purposes
+// easy tasks for tutorial
 const PRAC_TASKS = [
     {
         "task": 1,
@@ -30,6 +31,7 @@ const PRAC_TASKS = [
     }
 ];
 
+// quiz to ensure understanding
 const GEN_QUIZ_QUESTIONS = [
     {
         question: "It is important to...",
@@ -59,6 +61,7 @@ const GEN_QUIZ_QUESTIONS = [
     }
 ];
 
+// more quiz questions, specified by task type
 const TASK_SPECIFIC_QUESTION = {
     "nl": {
         question: "Your goal is to...",
@@ -89,6 +92,7 @@ const TASK_SPECIFIC_QUESTION = {
     }
 }
 
+// prefixes for each part of the descriptions
 const GRID_SIZE_PREFIX = "The output grid size...";
 const SHOULD_SEE_PREFIX = "In the input, you should see...";
 const HAVE_TO_PREFIX = "To make the output, you have to...";

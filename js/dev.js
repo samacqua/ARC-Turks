@@ -1,5 +1,5 @@
-var STUDY_BATCH = "pilot";
-var DESC_USES = {};
+var STUDY_BATCH = "pilot"; // the current study batch we are looking at
+var DESC_USES = {};        // stores the attempts for each description
 
 var STUDY_BATCHES = {
     pilot: {
@@ -18,15 +18,15 @@ var STUDY_BATCHES = {
 
 $(window).on('load', function () {
 
-    if(!localStorage.getItem("visted")){
+    if(!localStorage.getItem("visited")){
         $("#welcome-modal").modal("show");
-        localStorage.setItem("visted",true);
+        localStorage.setItem("visited",true);
     }
 
     // get speaker task
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    const task = urlParams.get('task') || TASKS[Math.floor(Math.random()*NUM_TASKS)];  // if none provided, give random task (just for when messing around w it, won't actually happen)
+    const task = urlParams.get('task') || TASKS[Math.floor(Math.random()*NUM_TASKS)];  // if none provided, give random task
 
     DESCRIPTIONS_TYPE = sessionStorage.getItem('type') || "nl";
 

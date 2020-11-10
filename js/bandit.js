@@ -1,6 +1,7 @@
 /**
  * Returns the casino (task) with least # interactions (descriptions + attempts)
- * If force listener is true, it ensures casino that needs pull of existing arm, if any exist
+ * @param {boolean} force_listener if true, returns casino that needs pull of existing arm, if any exist
+ * @param {string} type the type of descriptions ("nl", "ex", or "nl_ex")
  */
 function select_casino(force_listener, type) {
     return new Promise(function (resolve, reject) {
@@ -13,17 +14,16 @@ function select_casino(force_listener, type) {
 
             var task_collisions = 0;
             for (i = 0; i < NUM_TASKS; i++) {
-                // make all tasks with no descs or # arms <= sqrt(# interactions) (so needs new arm) have the max score so
-                //      that they aren't picked once study is actually going, and so at the start
-                //      when there are no descriptions, not constantly pulling from single casino
                 if (force_listener) {
+                    // make all tasks with no descs or # arms <= sqrt(# interactions) (so needs new arm) have the max score so
+                    // that they aren't picked once study is actually going, and so at the start
+                    // when there are no descriptions, not constantly pulling from single casino
                     if (num_descriptions[i] <= Math.sqrt(num_interactions[i]) || num_descriptions[i] == 0) {
                         num_interactions[i] += max + 1;
                     }
                 }
 
                 const ii = TASKS[i];
-
                 // if already done task, make sure it is not chosen again
                 if (tasks_done.includes(ii.toString())) {
                     task_collisions += 1;
@@ -36,22 +36,24 @@ function select_casino(force_listener, type) {
                 }
             }
 
-            // add randomness so many people aren't pulling the same arm
+            // add randomness so many people aren't pulling the same arm in case of a tie
             num_interactions = num_interactions.map(val => {
                 return val + (Math.random() / 10)
             });
-            console.log(num_interactions);
+
             const min = Math.min.apply(Math, num_interactions);
-            return resolve(TASKS[num_interactions.indexOf(min)]);    // return resolve(num_interactions.indexOf(min));
+            return resolve(TASKS[num_interactions.indexOf(min)]);
         })
-            .catch(function (err) {
-                return reject(err);
-            });
+        .catch(function (err) {
+            return reject(err);
+        });
     });
 }
 
 /**
  * Returns the arm (description_id) that should be pulled. If the description_id is -1, that means pull a new arm (create a new description)
+ * @param {number} task the task number, as chosen by select_casino()
+ * @param {string} type the type of descriptions ("nl", "ex", or "nl_ex")
  */
 function select_arm(task, type) {
     return new Promise(function (resolve, reject) {

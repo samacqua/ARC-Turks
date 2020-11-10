@@ -1,19 +1,16 @@
-var DESCRIPTIONS_TYPE;
+var DESCRIPTIONS_TYPE;  // the type of descriptions ("nl", "ex", or "nl_ex")
 
-// so can't exit modal by pressing outside of it
+// universally sets it impossible to exit modal by tapping outside of it
 $.fn.modal.prototype.constructor.Constructor.Default.backdrop = 'static';
 $.fn.modal.prototype.constructor.Constructor.Default.keyboard = false;
 
 
-var LAST_MSG_DISMISS_CALL_TIME = new Date();
-
+var LAST_MSG_DISMISS_CALL_TIME = new Date();    // timestamp to ensure that messages fade out at correct time
 /**
  * show an error message at the top of the screen.
- * @param {*} msg the message to display
+ * @param {string} msg the message to display
  */
 function errorMsg(msg) {
-    // $('#error_display').stop(true, true);
-    // $('#info_display').stop(true, true);
     $('#error_display').hide();
     $('#info_display').hide();
 
@@ -27,6 +24,7 @@ function errorMsg(msg) {
     LAST_MSG_DISMISS_CALL_TIME = dismiss_call_time;
 
     setTimeout(function () {
+        // only fade out if no new message has been shown since since timeout started
         if (LAST_MSG_DISMISS_CALL_TIME == dismiss_call_time) {
             $('#error_display').fadeOut(300);
         }
@@ -35,11 +33,9 @@ function errorMsg(msg) {
 
 /**
  * show an info message at the top of the screen.
- * @param {*} msg the message to display
+ * @param {string} msg the message to display
  */
 function infoMsg(msg) {
-    $('#error_display').stop(true, true);
-    $('#info_display').stop(true, true);
     $('#error_display').hide();
     $('#info_display').hide();
 
@@ -53,6 +49,7 @@ function infoMsg(msg) {
     LAST_MSG_DISMISS_CALL_TIME = dismiss_call_time;
 
     setTimeout(function () {
+        // only fade out if no new message has been shown since since timeout started
         if (LAST_MSG_DISMISS_CALL_TIME == dismiss_call_time) {
             $('#info_display').fadeOut(300);
         }
@@ -62,6 +59,11 @@ function infoMsg(msg) {
 /**
  * Checks equality of two arrays
  */
+/**
+ * Check for equality between two arrays
+ * @param {Array} a1 the first array
+ * @param {Array} a2 the second array
+ */
 function arraysEqual(a1, a2) {
     /* WARNING: arrays must not contain {objects} or behavior may be undefined */
     return JSON.stringify(a1) == JSON.stringify(a2);
@@ -69,7 +71,7 @@ function arraysEqual(a1, a2) {
 
 /**
  * Shuffles array in place. from https://stackoverflow.com/a/6274381/5416200
- * @param {Array} a items An array containing the items.
+ * @param {Array} a the array to shuffle
  */
 function shuffle(a) {
     var j, x, i;
@@ -83,7 +85,7 @@ function shuffle(a) {
 }
 
 /**
- * Show the user their id
+ * Set user complete time and show them the demographics modal
  */
 function finish() {
     const uid = sessionStorage.getItem('uid') || "no uid";
@@ -98,19 +100,21 @@ function finish() {
     set_user_complete_time(uid, delta_time, 'time_to_complete');
 }
 
+/**
+ * scrape info from demographics modal and show user their ID
+ */
 function exit_demographic() {
-    /**
-     * Get info from demographic modal
-     */
     const gender = $('#gender_form').find("option:selected").text();
     const age = $('#age_form').val().trim();
     const uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
     set_user_demographics(uid, age, gender, DESCRIPTIONS_TYPE);
 
-    const introModalID = DESCRIPTIONS_TYPE + 'IntroModal';
     $('#demographic_modal').one('hidden.bs.modal', function () { $('#finished_modal').modal('show'); }).modal('hide');
 }
 
+/**
+ * from final screen, store feedback user has provided
+ */
 function save_user_feedback() {
     store_feedback($("#feedback_textarea").val(), new Date(), sessionStorage.getItem('uid') || uuidv4() + "dev").then(function() {
         infoMsg("Successfully stored feedback. Thank you for your participation!");
@@ -121,6 +125,11 @@ function save_user_feedback() {
     });
 }
 
+/**
+ * get the next task without transitioning, for debug purposes
+ * @param {number} cur_task the user's current task they are transitioning from
+ * @param {boolean} first_task is this the users first task? If so, will not increment number of items complete.
+ */
 function get_next_task(cur_task, first_task=false) {
 
     return new Promise(function (resolve, reject) {
@@ -130,6 +139,7 @@ function get_next_task(cur_task, first_task=false) {
 
         if (!first_task) {
             // increment number of tasks complete if not loading the first task, bc next task is called after completing a task
+            // (not actually using this info bc get_next_task is only called during debugging)
             const task_times = { 'speaker': SPEAKER_TIME, 'tutorial': INSTRUCTIONS_TIME, 'listener': BUILDER_TIME };
             num_tasks_complete++;
             time_complete += task_times[cur_task];
@@ -141,14 +151,15 @@ function get_next_task(cur_task, first_task=false) {
 
         get_unused_desc(DESCRIPTIONS_TYPE).then(task_desc => {
 
+            // if no unused descriptions, then use bandit
             if (task_desc == -1) {
 
-                // force listener if haven't completed enough tasks
+                // bias towards listener task if haven't completed enough tasks
                 const force_listener = (num_tasks_complete <= MIN_TASKS_BEFORE_SPEAKER);
 
                 select_casino(force_listener, DESCRIPTIONS_TYPE).then(task => {
-
                     select_arm(task, DESCRIPTIONS_TYPE).then(desc_id => {
+                        // if desc_id == -1, then task needs new arm
                         if (desc_id == -1) {
                             return resolve(`speaker.html?task=${task}`);
                         } else {
@@ -156,11 +167,14 @@ function get_next_task(cur_task, first_task=false) {
                         }
                     }).catch(error => {
                         console.error(error);
+                        return;
                     });
                 }).catch(error => {
                     console.error(error);
+                    return;
                 });
 
+            // if unused description, immediately use that
             } else {
                 const task = task_desc[0]
                 const desc_id = task_desc[1]
@@ -169,12 +183,15 @@ function get_next_task(cur_task, first_task=false) {
 
         }).catch(error => {
             console.error(error);
+            return;
         });
     });
 }
 
 /**
- * go to next task
+ * go to the next task, as calculated by the bandit
+ * @param {number} cur_task the user's current task they are transitioning from
+ * @param {boolean} first_task is this the users first task? If so, will not increment number of items complete.
  */
 function next_task(cur_task, first_task = false) {
 
@@ -197,14 +214,15 @@ function next_task(cur_task, first_task = false) {
 
     get_unused_desc(DESCRIPTIONS_TYPE).then(task_desc => {
 
+        // if no unused descriptions, then use bandit
         if (task_desc == -1) {
 
             // force listener if haven't completed enough tasks
             const force_listener = (num_tasks_complete <= MIN_TASKS_BEFORE_SPEAKER);
 
             select_casino(force_listener, DESCRIPTIONS_TYPE).then(task => {
-
                 select_arm(task, DESCRIPTIONS_TYPE).then(desc_id => {
+                    // if desc_id == -1, then task needs new arm
                     if (desc_id == -1) {
                         console.log("speaker:", task);
                         window.location.href = `speaker.html?task=${task}`;
@@ -214,11 +232,14 @@ function next_task(cur_task, first_task = false) {
                     }
                 }).catch(error => {
                     console.error(error);
+                    return;
                 });
             }).catch(error => {
                 console.error(error);
+                return;
             });
 
+        // if unused description, immediately use that
         } else {
             const task = task_desc[0]
             const desc_id = task_desc[1]
@@ -228,9 +249,13 @@ function next_task(cur_task, first_task = false) {
 
     }).catch(error => {
         console.error(error);
+        return;
     });
 }
 
+/**
+ * scroll to and highlight the objective bar
+ */
 function scroll_highlight_objective() {
     $([document.documentElement, document.body]).animate({
         scrollTop: $('#objective-col').offset().top - 10
@@ -247,6 +272,11 @@ function scroll_highlight_objective() {
     }, 2000);
 }
 
+/**
+ * highlight an element by its id
+ * @param {string} id the element's id
+ * @param {number} time the amount of time (ms) to keep the element highlighted for
+ */
 function highlight_element(id, time) {
     $(id).css('-webkit-box-shadow', '0 0 40px green');
     $(id).css('-moz-box-shadow', '0 0 40px green');
@@ -277,7 +307,7 @@ $(window).resize(function () {
 
 /**
  * update the progress bar at the top of the screen
- * @param {*} inc amount to increment when updating, default 0
+ * @param {number} inc amount to increment when updating, default 0
  */
 function update_progress_bar(inc=0) {
 
@@ -304,7 +334,9 @@ function size_progress_bar() {
     $("#done_label").css("width", `${tasks}%`);
 }
 
-// create random id so queue and desc have same id
+/**
+ * create random id
+ */
 function uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -312,7 +344,9 @@ function uuidv4() {
     });
 }
 
-// get the user browser type
+/**
+ * get the user's browser type (for bug reports)
+ */
 function get_browser() {
     navigator.sayswho = (function(){
         var ua= navigator.userAgent, tem, 
