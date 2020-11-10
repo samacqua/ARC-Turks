@@ -6,7 +6,6 @@ const TOTAL_PRAC_TASKS = 2;
 const SPEAKER_TIME = 6;
 const BUILDER_TIME = 2;
 
-const MIN_TASKS_BEFORE_SPEAKER = 2; // number of tasks where we bias choosing tasks towards those that need a description
 const TASKS = [149, 286, 140, 354, 219, 277, 28, 135, 162, 384, 297, 26, 299, 388, 246, 74, 305, 94, 308, 77];  // the ARC tasks to be used in the study
 const NUM_TASKS = TASKS.length;
 const MAX_ATTEMPTS_BUILDER = 3; // maximum number of attempts a builder has before they "failed"

@@ -154,10 +154,7 @@ function get_next_task(cur_task, first_task=false) {
             // if no unused descriptions, then use bandit
             if (task_desc == -1) {
 
-                // bias towards listener task if haven't completed enough tasks
-                const force_listener = (num_tasks_complete <= MIN_TASKS_BEFORE_SPEAKER);
-
-                select_casino(force_listener, DESCRIPTIONS_TYPE).then(task => {
+                select_casino(DESCRIPTIONS_TYPE).then(task => {
                     select_arm(task, DESCRIPTIONS_TYPE).then(desc_id => {
                         // if desc_id == -1, then task needs new arm
                         if (desc_id == -1) {
@@ -217,10 +214,7 @@ function next_task(cur_task, first_task = false) {
         // if no unused descriptions, then use bandit
         if (task_desc == -1) {
 
-            // force listener if haven't completed enough tasks
-            const force_listener = (num_tasks_complete <= MIN_TASKS_BEFORE_SPEAKER);
-
-            select_casino(force_listener, DESCRIPTIONS_TYPE).then(task => {
+            select_casino(DESCRIPTIONS_TYPE).then(task => {
                 select_arm(task, DESCRIPTIONS_TYPE).then(desc_id => {
                     // if desc_id == -1, then task needs new arm
                     if (desc_id == -1) {

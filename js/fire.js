@@ -111,6 +111,35 @@ function get_all_descriptions_interactions_count(type) {
 }
 
 /**
+ * Get the number of successful and total communications for the best description for each task
+ * @param {string} type the type of descriptions ("nl", "ex", or "nl_ex")
+ * @return {Promise} a list of lists: [[best desc success score], [best desc total attempts]]
+ */
+function get_all_tasks_best_desc(type) {
+    return new Promise(function (resolve, reject) {
+        const summary_ref = db.collection(type + "_tasks").doc("summary");
+
+        summary_ref.get().then(function (snapshot) {
+
+            const data = snapshot.data()
+            var best_desc_success_score = [];
+            var best_desc_total_attempts = [];
+
+            for (i = 0; i < NUM_TASKS; i++) {
+                const ii = TASKS[i];
+                best_desc_success_score.push(data[`${ii}_best_success_score`] || 0);
+                best_desc_total_attempts.push(data[`${ii}_best_total_attempts`] || 0);
+            }
+
+            return resolve([best_desc_success_score, best_desc_total_attempts]);
+        })
+            .catch(function (err) {
+                return reject(err);
+            });
+    });
+}
+
+/**
  * Get the number of descriptions and total number of interactions for a task
  */
 function get_task_descs_interactions_count(task, type) {
@@ -628,10 +657,13 @@ function init_firestore() {
         console.log("Initialized words in Firestore.")
 
         // store counts of interactions and descriptions for each description type for bandit algorithm
+        // and the success score and the total attempts for the best description for each task
         for (i = 0; i < NUM_TASKS; i++) {
             const ii = TASKS[i];
             summary_data[`${ii}_interactions_count`] = 0;
             summary_data[`${ii}_descriptions_count`] = 0;
+            summary_data[`${ii}_best_success_score`] = 0;
+            summary_data[`${ii}_best_total_attempts`] = 0;
         }
 
         return db.collection("nl_tasks").doc("summary").set(summary_data);
@@ -676,44 +708,5 @@ function init_firestore() {
         console.log("Initialized Firestore!");
     }).catch(error => {
         console.error("Error intializing Firestore: ", error);
-    });
-}
-
-
-// ===================================
-// Download Database as JSON
-// ===================================
-
-function download_file(blob, name) {
-    var url = URL.createObjectURL(blob),
-        div = document.createElement("div"),
-        anch = document.createElement("a");
-    document.body.appendChild(div);
-    div.appendChild(anch);
-    anch.innerHTML = "&nbsp;";
-    div.style.width = "0";
-    div.style.height = "0";
-    anch.href = url;
-    anch.download = name;
-
-    var ev = new MouseEvent("click", {});
-    anch.dispatchEvent(ev);
-    document.body.removeChild(div);
-}
-
-function download_stamps_JSON() {
-    let ref_loc = '/arc-stamp'
-    fbase.ref(ref_loc).once('value').then(function (snapshot) {
-        console.log(snapshot.val());
-        json_stringed = JSON.stringify(snapshot.val());
-        // create the text file as a Blob:
-        var blob = new Blob([json_stringed], {
-            type: "application/json"
-        });
-        // download the file:
-        download_file(blob, "ARC-Stamps.json");
-    }).catch(error => {
-        console.error("Failed getting data.");
-        return reject(error);
     });
 }
