@@ -16,9 +16,8 @@ $(window).on('load', function () {
     $("#do_p").text(task.do_desc);
     SELECTED_EXAMPLE = task.selected_example;
 
-    // initialize the number of items complete, and the number of practice items complete
-    sessionStorage.setItem("items_complete", "0"); // number of actual tasks (for determining when complete with study)
-    sessionStorage.setItem("time_complete", "0"); // for finishing instructions and practice tasks (for updating progress bar)
+    // initialize time spent for credit towards completion
+    sessionStorage.setItem("time_complete", "0");
 
     // get the type of descriptions (nl, nl_ex, ex)
     const queryString = window.location.search;
@@ -425,8 +424,11 @@ function check_grid() {
             }
         }
     }
-
-    update_progress_bar(inc=PRAC_TIME);
+    
+    // don't increment time for walkthrough
+    if (PRAC_TASKS.length == 0) {
+        update_progress_bar(inc=PRAC_TASK_TIME);
+    }
     scroll_highlight_objective();
 
     // if not last practice task
@@ -554,5 +556,5 @@ function exit_done_modal() {
     const uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
     set_user_complete_time(uid, maxIdleTime, 'max_idle_time');
     send_user_complete_item('tutorial_total_time', true);
-    next_task(cur_task='tutorial', first_task=true);
+    next_task(0);
 }

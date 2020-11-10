@@ -207,7 +207,7 @@ function check() {
         store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), build_time, success = true, DESCRIPTIONS_TYPE, maxIdleTime)
             .then(function () { 
                 set_user_complete_time(uid, build_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_listener`).then(function() {
-                    next_task('listener'); 
+                    next_task(BUILDER_TIME); 
                 }).catch(function (error) { console.error('Error storing response ' + error); });
             })
             .catch(function (error) { console.error("Error storing response: " + error); });
@@ -235,7 +235,7 @@ function submit_description() {
         store_failed_ver_description(see_desc, do_desc, grid_desc, TASK_ID, uid, conf, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), desc_time, verification_time, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE, maxIdleTime)
         .then(function () { 
             set_user_complete_time(uid, total_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker_(low_conf)`).then(function() {
-                next_task('speaker');
+                next_task(SPEAKER_TIME);
             }).catch(function (error) { console.error('Error storing response ' + error); });
         })
         .catch(function (error) { console.error('Error storing response ' + error); });
@@ -243,7 +243,7 @@ function submit_description() {
         store_description(see_desc, do_desc, grid_desc, TASK_ID, uid, conf, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), desc_time, verification_time, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE, maxIdleTime)
         .then(function () {
             set_user_complete_time(uid, total_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker`).then(function() {
-                next_task('speaker');
+                next_task(SPEAKER_TIME);
             }).catch(function (error) { console.error('Error storing response ' + error); });
         })
         .catch(function (error) { console.error('Error storing response ' + error); });
@@ -268,7 +268,7 @@ function used_all_attempts() {
             store_failed_ver_description(see_desc, do_desc, grid_desc, TASK_ID, uid, null, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), desc_time, build_time, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE, maxIdleTime)
             .then(function () { 
                 set_user_complete_time(uid, desc_time+build_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker_(fail)`).then(function() {
-                    next_task('speaker');   
+                    next_task(SPEAKER_TIME*SPEAKER_FAIL_PART_CRED);
                 }).catch(function (error) { console.error('Error storing response ' + error); });
             })
         .catch(function (error) { console.error('Error storing response ' + error); });
@@ -276,7 +276,7 @@ function used_all_attempts() {
             store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), build_time, success = false, DESCRIPTIONS_TYPE, maxIdleTime)
             .then(function () { 
                 set_user_complete_time(uid, build_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_listener_(fail)`).then(function() {
-                    next_task('listener'); 
+                    next_task(BUILDER_TIME); 
                 }).catch(function (error) { console.error('Error storing response ' + error); });
             })    // TODO: should we count a failure 3 attempts as a completed task?
             .catch(function (error) { console.error("Error storing response: " + error); });

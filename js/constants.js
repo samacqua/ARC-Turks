@@ -1,10 +1,18 @@
 // expected time for each portion of the interface
 const TOTAL_TIME = 45;
-const INSTRUCTIONS_TIME = 1;
-const PRAC_TIME = 2;
+const WALKTHROUGH_TIME = 146.1/60;
+const CONSENT_INSTRUCT_TIME = 53.9/60;
+const QUIZ_TIME = 39.6/60;
+const INSTRUCTIONS_TIME = WALKTHROUGH_TIME + CONSENT_INSTRUCT_TIME + QUIZ_TIME;
+
+const PRAC_TASK_TIME = 91.6/60;
 const TOTAL_PRAC_TASKS = 2;
-const SPEAKER_TIME = 6;
-const BUILDER_TIME = 2;
+
+const SPEAKER_TIME = 346.4/60;
+const BUILDER_TIME = 103.0/60;
+
+const SKIP_PART_CRED = 0.10;
+const SPEAKER_FAIL_PART_CRED = 0.50;
 
 const TASKS = [149, 286, 140, 354, 219, 277, 28, 135, 162, 384, 297, 26, 299, 388, 246, 74, 305, 94, 308, 77];  // the ARC tasks to be used in the study
 const NUM_TASKS = TASKS.length;

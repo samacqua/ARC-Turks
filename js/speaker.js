@@ -623,7 +623,7 @@ function verify() {
 
 function give_up() {
     /**
-     * if after 1 minute, cannot figure out pattern or get correct output, give them the answer
+     * if after 30 seconds, cannot figure out pattern or get correct output, give them the answer
      */
 
     const newTime = new Date();
@@ -632,15 +632,14 @@ function give_up() {
         return;
     }
 
-    // don't give them credit for completing the task if they have not completed it
+    // give only partial credit if skip task
     give_up_description(TASK_ID, DESCRIPTIONS_TYPE).then(function () {
-
         set_user_complete_time(sessionStorage.getItem("uid"), (newTime - START_DATE) / 1000, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker_(veto)`).then(function() {
             var tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
             tasks_done.push(TASK_ID);
             sessionStorage.setItem('tasks_completed', tasks_done);
     
-            next_task('speaker', first_task = true);
+            next_task(SPEAKER_TIME*SKIP_PART_CRED);
         });
     });
 }

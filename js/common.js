@@ -126,24 +126,15 @@ function save_user_feedback() {
 }
 
 /**
- * get the next task without transitioning, for debug purposes
- * @param {number} cur_task the user's current task they are transitioning from
- * @param {boolean} first_task is this the users first task? If so, will not increment number of items complete.
+ * go to the next task, as calculated by the bandit
+ * @param {number} time_inc the amount of time to increment towards completion for the user completing their last task
  */
-function get_next_task(cur_task, first_task=false) {
+function get_next_task(time_inc) {
 
     return new Promise(function (resolve, reject) {
         
-        var num_tasks_complete = parseInt(sessionStorage.getItem('items_complete') || 0);
-        var time_complete = parseInt(sessionStorage.getItem('time_complete') || 0);
-
-        if (!first_task) {
-            // increment number of tasks complete if not loading the first task, bc next task is called after completing a task
-            // (not actually using this info bc get_next_task is only called during debugging)
-            const task_times = { 'speaker': SPEAKER_TIME, 'tutorial': INSTRUCTIONS_TIME, 'listener': BUILDER_TIME };
-            num_tasks_complete++;
-            time_complete += task_times[cur_task];
-        }
+        var time_complete = parseFloat(sessionStorage.getItem('time_complete') || 0);
+        time_complete += time_inc;
 
         if (time_complete >= TOTAL_TIME) {
             return resolve('finish');
@@ -187,22 +178,13 @@ function get_next_task(cur_task, first_task=false) {
 
 /**
  * go to the next task, as calculated by the bandit
- * @param {number} cur_task the user's current task they are transitioning from
- * @param {boolean} first_task is this the users first task? If so, will not increment number of items complete.
+ * @param {number} time_inc the amount of time to increment towards completion for the user completing their last task
  */
-function next_task(cur_task, first_task = false) {
+function next_task(time_inc) {
 
-    var num_tasks_complete = parseInt(sessionStorage.getItem('items_complete') || 0);
-    var time_complete = parseInt(sessionStorage.getItem('time_complete') || 0);
-
-    if (!first_task) {
-        // increment number of tasks complete if not loading the first task, bc next task is called after completing a task
-        const task_times = { 'speaker': SPEAKER_TIME, 'tutorial': INSTRUCTIONS_TIME, 'listener': BUILDER_TIME };
-        num_tasks_complete++;
-        time_complete += task_times[cur_task];
-        sessionStorage.setItem('items_complete', num_tasks_complete);
-        sessionStorage.setItem('time_complete', time_complete);
-    }
+    var time_complete = parseFloat(sessionStorage.getItem('time_complete') || 0);
+    time_complete += time_inc;
+    sessionStorage.setItem('time_complete', time_complete);
 
     if (time_complete >= TOTAL_TIME) {
         finish();
@@ -305,8 +287,8 @@ $(window).resize(function () {
  */
 function update_progress_bar(inc=0) {
 
-    var time_complete = parseInt(sessionStorage.getItem('time_complete') || 0);
-    time_complete  += inc;
+    var time_complete = parseFloat(sessionStorage.getItem('time_complete') || 0);
+    time_complete += inc;
     sessionStorage.setItem('time_complete', time_complete);
 
     const percent_complete = time_complete / TOTAL_TIME * 100;
@@ -321,7 +303,7 @@ function update_progress_bar(inc=0) {
  */
 function size_progress_bar() {
 
-    const instructions = (INSTRUCTIONS_TIME + TOTAL_PRAC_TASKS*PRAC_TIME)/TOTAL_TIME * 100;
+    const instructions = (INSTRUCTIONS_TIME + PRAC_TASK_TIME)/TOTAL_TIME * 100;
     const tasks = 100 - instructions;
 
     $("#tutorial_label").css("width", `${instructions}%`);
