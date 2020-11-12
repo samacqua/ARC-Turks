@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="Description" content="The interpretation process of descriptions for an MIT study on the efficacy of human communication of abstract patterns.">
+    <title>ARC labeling interface</title>
+
+    <!-- Just to silence warning about not having icon -->
+    <link rel="shortcut icon" href="#" />
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
+
+    <!-- JS Libraries -->
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-firestore.js"></script>
+
+    <!-- jQuery library -->
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <!-- Bootstrap JS (must be listed after jQuery) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <!-- CSS files -->
+    <link rel="stylesheet" type="text/css" href="css/common.css">
+    <link rel="stylesheet" type="text/css" href="css/grids.css">
+    <link rel="stylesheet" type="text/css" href="css/testing_interface.css">
+
+    <!-- JS files -->
+    <script src="js/aaai.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/constants.js"></script>
+    <script src="js/grids.js"></script>
+    <script src="js/more_grids.js"></script>
+    <script src="js/fire.js"></script>
+    <script src="js/bandit.js"></script>
+
+    <!-- Font reference -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet" />
+
+</head>
+
+<body>
+    <div class="row">
+        <div id="objective-col" class="col-md">
+            <h3 class="objective"><b>Objective:</b></h3>
+            <h5 class="objective" id="objective-text">Create the correct output based on the description and input grid.
+            </h5>
+        </div>
+    </div>
+
+    <div id="container-fluid">
+
+        <div class="alert alert-success" id="info_display"></div>
+        <div class="alert alert-danger" id="error_display"></div>
+
+        <div class="row">
+            <div class="col-md-4" id="description-col">
+                <div class="col-header">
+                    <h1 class="col-title">Description</h1>
+                </div>
+
+                <div id="description-text">
+                    <p id="see_p">In the input, you should see...</p>
+                    <p id="grid_size_p">The output grid size...</p>
+                    <p id="do_p">To make the output, you have to...</p>
+                    <hr>
+                </div>
+
+                <div id="examples_area">
+                    <h3>Example Transformation</h3>
+                    <div id="task_preview">
+                        Loading...
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="col-header">
+                    <h1>Input</h1>
+                </div>
+
+                <div id="evaluation_input" class="selectable_grid"></div>
+            </div>
+
+            <div class="col-md-4" id="validation-col">
+
+                <div class="col-header">
+                    <h1>Output</h1>
+                </div>
+
+                <div id="output_grid">
+                    <div class="edition_grid selectable_grid">
+                        <div class="row">
+                            <div class="cell" symbol="0" x="0" y="0"></div>
+                            <div class="cell" symbol="0" x="0" y="1"></div>
+                            <div class="cell" symbol="0" x="0" y="2"></div>
+                        </div>
+                        <div class="row">
+                            <div class="cell" symbol="0" x="1" y="0"></div>
+                            <div class="cell" symbol="0" x="1" y="1"></div>
+                            <div class="cell" symbol="0" x="1" y="2"></div>
+                        </div>
+                        <div class="row">
+                            <div class="cell" symbol="0" x="2" y="0"></div>
+                            <div class="cell" symbol="0" x="2" y="1"></div>
+                            <div class="cell" symbol="0" x="2" y="2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="resize_control_btns">
+                    <label for="output_grid_size">Change grid size: </label>
+                    <input type="text" id="output_grid_size" class="grid_size_field" name="size" value="3x3">
+                    <button type="button" class="btn btn-primary" onclick="resizeOutputGrid()"
+                        id="resize_btn">Resize</button>
+                </div>
+
+                <button type="button" class="btn btn-secondary" onclick="copyFromInput()">Copy input grid</button>
+                <button type="button" class="btn btn-secondary" onclick="resetOutputGrid()">Make output grid black</button>
+                <button type="button" class="btn btn-success" onclick="check()">Check!</button>
+
+                <div id="toolbar">
+                    <div>
+                        <input type="radio" id="tool_edit" name="tool_switching" value="edit" checked>
+                        <label for="tool_edit">Draw</label>
+
+                        <input type="radio" id="tool_floodfill" name="tool_switching" value="floodfill">
+                        <label for="tool_floodfill">Flood fill</label>
+
+                        <input type="radio" id="tool_select" name="tool_switching" value="select">
+                        <label for="tool_select">Copy-Paste</label>
+                    </div>
+                </div>
+
+                <div id="symbol_picker">
+                    <div class="symbol_preview symbol_0 selected-symbol-preview" symbol="0"></div>
+                    <div class="symbol_preview symbol_1" symbol="1"></div>
+                    <div class="symbol_preview symbol_2" symbol="2"></div>
+                    <div class="symbol_preview symbol_3" symbol="3"></div>
+                    <div class="symbol_preview symbol_4" symbol="4"></div>
+                    <div class="symbol_preview symbol_5" symbol="5"></div>
+                    <div class="symbol_preview symbol_6" symbol="6"></div>
+                    <div class="symbol_preview symbol_7" symbol="7"></div>
+                    <div class="symbol_preview symbol_8" symbol="8"></div>
+                    <div class="symbol_preview symbol_9" symbol="9"></div>
+                </div>
+
+                </br>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions Modal -->
+    <div class="modal fade" id="instructionsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
+                </div>
+                <div class="modal-body" id="gen-modal-body">
+                    <p id="instruction_reminder">Welcome AAAI participant to our ARC interface!</p>
+                    <p id="instruction_reminder">
+                        On the left is a description of a pattern.
+                        In the middle is an input grid.
+                        On the right, you will use the tools to apply the described pattern to the input grid.
+                    </p>
+                    <p>If you have any questions, just ask! (In the study, participants were given more thorough instructions)</p>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="scroll_highlight_objective()" type="button" class="btn btn-primary"
+                        data-dismiss="modal">Okay!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verification Instructions Modal -->
+    <div class="modal fade" id="verInstructionsModal" tabindex="-1" role="dialog"
+        aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Instructions</h3>
+                </div>
+                <div class="modal-body" id="gen-modal-body">
+                    <p>Now, you will be shown the description you just wrote and a <b>new input grid</b>.</p>
+                    <p>Use your own description to create the correct output grid.</p>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="scroll_highlight_objective()" type="button" class="btn btn-primary"
+                        data-dismiss="modal">Okay!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demographic Modal -->
+    <div class="modal fade" id="demographic_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+    aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Demographics</h3>
+                </div>
+                <div class="modal-body" id="final-modal-body">
+                    <p>Please enter your age and gender.</p>
+
+                    <div class="form-group">
+                        <label for="gender_form">What is your gender?</label>
+                        <select class="form-control" id="gender_form">
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="age_form">What is your age?</label>
+                        <input class="form-control" type="text" placeholder="Enter your age..." id="age_form">
+                    </div>
+
+                    <div class="modal-footer">
+                        <button onclick="exit_demographic()" type="button" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Speaker Certainty Modal -->
+    <div class="modal fade" id="speaker_certainty_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Success!</h3>
+                </div>
+                <div class="modal-body" id="final-modal-body">
+
+                    <label for="conf_form">
+                        <p>You successfully interpreted one of the descriptions we collected :)</p>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Finished Modal -->
+    <div class="modal fade" id="finished_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Thank You!</h3>
+                </div>
+                <div class="modal-body" id="final-modal-body">
+                    <p id="final_message">Thank you for participating in this study! Your survey code is: </p>
+                    <h5 id="finish_modal_uid"></h5>
+                </div>
+
+                <div class="modal-body" id="gen-modal-body">
+                    <label for="feedback_textarea">(Optional): If you have any feedback on the study interface, or you experienced any issues, please share them here:</label>
+                    <textarea class="form-control" id="feedback_textarea" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="submit_feedback_btn" class="btn btn-primary" onclick="save_user_feedback();">Submit feedback</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bug Report Modal -->
+    <div class="modal fade" id="bug_report_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Bug Report/Feedback</h3>
+                </div>
+                <div class="modal-body" id="gen-modal-body">
+                    <label for="bug_desc_textarea">Please describe the bug:</label>
+                    <textarea class="form-control" id="bug_desc_textarea" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="store_bug_report();" data-dismiss="modal">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
