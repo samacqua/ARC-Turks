@@ -8,7 +8,7 @@ from scipy.stats import truncnorm
 
 # ======== THE ENVIRONMENT MODEL =========
 
-N = 400
+N = 100
 Budget = 16 * N
 
 # sample a point from truncated norm
@@ -164,8 +164,16 @@ class JankPolicy(NaivePolicy):
 class AdaptPolicy(NaivePolicy):
     # select casino rule : pick casino with highest arm var of best arm
     def casino_scores(self, obs):
+        # @sam for you this should be the total minutes spent (adjusted by removing outliers)
+        # for this mock-up, for each casino, get its total number of interactions as efforts 
+        # i.e. each interaction (build or describe) takes 1 minutes effectively
+        total_efforts = [sum([sum(arm_ob) for arm_ob in cas_obs]) + 1 for cas_obs in obs]
+        avg_efforts = np.mean(total_efforts)
+        efforts_ratio = [x / avg_efforts for x in total_efforts]
+
         cas_scores = []
-        for cas_obs in obs:
+        for cas_id, cas_obs in enumerate(obs):
+
             if cas_obs == []:
                 cas_obs = [(0,0)]
 
@@ -181,7 +189,11 @@ class AdaptPolicy(NaivePolicy):
             a = best_a + 1
             b = best_b + 1
             var = a*b / ((a+b)**2 * (a+b+1))
-            cas_scores.append(var)
+
+            # adjust the benefits – the variance – with the current efforts spend
+            # doing so ensures that no single task would be too heavily dependent on
+            the_score = var / efforts_ratio[cas_id]
+            cas_scores.append(the_score)
         return cas_scores
 
     # get casino difficulty : estimated as the mean of the best arm
@@ -197,8 +209,12 @@ class AdaptPolicy(NaivePolicy):
         return max(best_arms)
 
     def act(self, observations):
+        # print (observations)
+        # selecting a casino
         cas_scores = self.casino_scores(observations)
         cas_id = np.argmax(cas_scores)
+
+        # within a specific casino, do something
         cas_ob = observations[cas_id]
         cas_interactions = sum([sum(arm_ob) for arm_ob in cas_ob])
         best_arm_mean = self.best_cas_mean(cas_ob)
@@ -216,8 +232,92 @@ class AdaptPolicy(NaivePolicy):
                 mean = a / (a + b)
                 var = a*b / ((a+b)**2 * (a+b+1))
                 ucbs.append(mean + np.sqrt(var))
-            return (cas_id, np.argmax(ucbs))
+            candidate_arm_id = np.argmax(ucbs)
+            # filter out pulling (0,r) arms, i.e. arm that has only failures inside
+            if cas_ob[candidate_arm_id][0] == 0:
+                candidate_arm_id = -1
+            return cas_id, candidate_arm_id
 
+# ========= A Jank Strategy ==========
+class AdaptPolicy2(NaivePolicy):
+    # select casino rule : pick casino with highest arm var of best arm
+    def casino_scores(self, obs):
+        # @sam for you this should be the total minutes spent (adjusted by removing outliers)
+        # for this mock-up, for each casino, get its total number of interactions as efforts 
+        # i.e. each interaction (build or describe) takes 1 minutes effectively
+        total_efforts = [sum([sum(arm_ob) for arm_ob in cas_obs]) + 1 for cas_obs in obs]
+        avg_efforts = np.mean(total_efforts)
+        efforts_ratio = [x / avg_efforts for x in total_efforts]
+
+        cas_scores = []
+        for cas_id, cas_obs in enumerate(obs):
+
+            if cas_obs == []:
+                cas_obs = [(0,0)]
+
+            best_arms = []
+            for (a,b) in cas_obs:
+                a = a + 1
+                b = b + 1
+                mean = a / (a+b)
+                best_arms.append((mean, a, b))
+
+            sorted_arms = sorted(best_arms)
+            # get the latter half
+            better_half = sorted_arms[len(best_arms) // 2 :]
+            best_a = sum([x[0] for x in better_half])
+            best_b = sum([x[1] for x in better_half])
+            a = best_a + 1
+            b = best_b + 1
+            var = a*b / ((a+b)**2 * (a+b+1))
+
+            # adjust the benefits – the variance – with the current efforts spend
+            # doing so ensures that no single task would be too heavily dependent on
+            the_score = var / efforts_ratio[cas_id]
+            cas_scores.append(the_score)
+        return cas_scores
+
+    # get casino difficulty : estimated as the mean of the best arm
+    def best_cas_mean(self, cas_obs):
+        if cas_obs == []:
+            cas_obs = [(1,1)]
+
+        best_arms = []
+        for (a,b) in cas_obs:
+            mean = a / (a+b)
+            best_arms.append(mean)
+
+        return max(best_arms)
+
+    def act(self, observations):
+        # print (observations)
+        # selecting a casino
+        cas_scores = self.casino_scores(observations)
+        cas_id = np.argmax(cas_scores)
+
+        # within a specific casino, do something
+        cas_ob = observations[cas_id]
+        cas_interactions = sum([sum(arm_ob) for arm_ob in cas_ob])
+        best_arm_mean = self.best_cas_mean(cas_ob)
+
+        difficulty = 1 - best_arm_mean
+
+        # if this inequality holds, increase arm : i.e. more difficult = more arms
+        if len(cas_ob) <= cas_interactions ** difficulty:
+            return (cas_id, -1)
+        else:
+            ucbs = []
+            for (a,b) in cas_ob:
+                a = a + 1
+                b = b + 1
+                mean = a / (a + b)
+                var = a*b / ((a+b)**2 * (a+b+1))
+                ucbs.append(mean + np.sqrt(var))
+            candidate_arm_id = np.argmax(ucbs)
+            # filter out pulling (0,r) arms, i.e. arm that has only failures inside
+            if cas_ob[candidate_arm_id][0] == 0:
+                candidate_arm_id = -1
+            return cas_id, candidate_arm_id
 
 # ========== Interacting Between Env and Policy ===========
 def roll_out(env, policy):
@@ -230,9 +330,9 @@ def roll_out(env, policy):
 
 if __name__ == '__main__':
 
-    policies = [NaivePolicy(), TilePolicy(), JankPolicy(), AdaptPolicy()]
+    policies = [NaivePolicy(), TilePolicy(), JankPolicy(), AdaptPolicy(), AdaptPolicy2()]
     cums = [0 for _ in policies]
-    for i in range(1000):
+    for i in range(100):
         cas_par = make_casino_params()
         env = CasEnv(cas_par)
         for j in range(len(cums)):
