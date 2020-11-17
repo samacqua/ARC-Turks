@@ -4,6 +4,21 @@ var DESCRIPTIONS_TYPE;  // the type of descriptions ("nl", "ex", or "nl_ex")
 $.fn.modal.prototype.constructor.Constructor.Default.backdrop = 'static';
 $.fn.modal.prototype.constructor.Constructor.Default.keyboard = false;
 
+/**
+ * resize the grids if the window size changes
+ */
+var globalResizeTimer = null;
+$(window).resize(function () {
+    if (globalResizeTimer != null) window.clearTimeout(globalResizeTimer);
+    globalResizeTimer = window.setTimeout(function () {
+        try {
+            resizeOutputGrid();
+        } catch (err) {
+            console.warn("Tried to resize the output grid, but there is no output grid to resize.");
+        }
+        loadTask(TASK_ID);
+    }, 500);
+});
 
 var LAST_MSG_DISMISS_CALL_TIME = new Date();    // timestamp to ensure that messages fade out at correct time
 /**
@@ -266,22 +281,6 @@ function highlight_element(id, time) {
 }
 
 /**
- * resize the grids if the window size changes
- */
-var globalResizeTimer = null;
-$(window).resize(function () {
-    if (globalResizeTimer != null) window.clearTimeout(globalResizeTimer);
-    globalResizeTimer = window.setTimeout(function () {
-        try {
-            resizeOutputGrid();
-        } catch (err) {
-            console.warn("Tried to resize the output grid, but there is no output grid to resize.");
-        }
-        loadTask(TASK_ID);
-    }, 500);
-});
-
-/**
  * update the progress bar at the top of the screen
  * @param {number} inc amount to increment when updating, default 0
  */
@@ -341,4 +340,33 @@ function get_browser() {
     })();
 
     return navigator.sayswho
+}
+
+/**
+ * sort the descriptions by their ucb
+ */
+function sort_descs_bandit_score() {
+    return function(a, b) {
+        if (a.display_num_attempts == 0) {
+            return 1
+        } else if (b.display_num_attempts == 0) {
+            return -1
+        }
+    
+        function upperConfBound(x) {
+            const i = x.bandit_success_score + 1;
+            const j = x.bandit_attempts - x.bandit_success_score + 1;
+    
+            const mean = i / (i + j);
+            const variance = i * j / ((i + j) ** 2 * (i + j + 1));
+    
+            return mean + Math.sqrt(variance);
+        }
+    
+        if (upperConfBound(a) > upperConfBound(b)) {
+            return -1
+        } else { 
+            return 1
+        }
+    }
 }

@@ -19,6 +19,10 @@
     /* font-weight: bold; */
 }
 
+button {
+    margin-bottom: 10px;
+}
+
 #word_modal_text {
     font-weight: bold;
     text-align: center;

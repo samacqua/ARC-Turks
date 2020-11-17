@@ -100,6 +100,14 @@ $(window).on('load', function () {
     sessionStorage.setItem('tasks_completed', tasks_done);
 });
 
+$(document).ready(function () {
+    //  Make it so modal with sliders has labels of slider values
+    $("#conf_result").html($("#conf_form").val());
+    $("#conf_form").change(function(){
+        $("#conf_result").html($(this).val());
+    });
+});
+
 // get the max amount of time doing nothing (to nearest 5 seconds)
 var idleTime = 0;
 $(document).ready(function () {
@@ -150,7 +158,7 @@ function check() {
      * check if output grid same as correct answer. if so, store info and move to next task
      */
     if (SENDING_TO_NEXT == true) {
-        return;
+        // return;
     }
     syncFromEditionGridToDataGrid();
     reference_output = TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output'];
@@ -204,13 +212,32 @@ function check() {
     if (IS_VERIFICATION) {
         $("#speaker_certainty_modal").modal('show');
     } else {
-        store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), build_time, success = true, DESCRIPTIONS_TYPE, maxIdleTime)
-            .then(function () { 
-                set_user_complete_time(uid, build_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_listener`).then(function() {
-                    next_task(BUILDER_TIME); 
-                }).catch(function (error) { console.error('Error storing response ' + error); });
-            })
-            .catch(function (error) { console.error("Error storing response: " + error); });
+        get_description_by_id(TASK_ID, DESC_ID, DESCRIPTIONS_TYPE).then(desc_to_update => {
+            get_task_best_desc(TASK_ID, DESCRIPTIONS_TYPE).then(task_best => {
+
+                const priors = [1, 1];
+                let a = task_best.success_score + priors[0];
+                let b = (task_best.attempts - task_best.success_score) + priors[1];
+    
+                let mean = a / (a + b);
+                task_best.mean = mean;
+
+                console.log(a, b);
+                console.log(mean, task_best);
+    
+                store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), build_time, success = true, DESCRIPTIONS_TYPE, maxIdleTime, task_best, desc_to_update)
+                .then(function () { 
+                    set_user_complete_time(uid, build_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_listener`).then(function() {
+                        next_task(BUILDER_TIME); 
+                    }).catch(function (error) { console.error('Error storing response ' + error); });
+                })
+                .catch(function (error) { console.error("Error storing response: " + error); });
+    
+            }).catch(err => {
+                console.error(err);
+            });
+
+        });
     }
 }
 
@@ -266,28 +293,34 @@ function used_all_attempts() {
             const desc_time = parseInt(urlParams.get('time') || "0");
         
             store_failed_ver_description(see_desc, do_desc, grid_desc, TASK_ID, uid, null, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), desc_time, build_time, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE, maxIdleTime)
-            .then(function () { 
+            .then(function () {
                 set_user_complete_time(uid, desc_time+build_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker_(fail)`).then(function() {
                     next_task(SPEAKER_TIME*SPEAKER_FAIL_PART_CRED);
                 }).catch(function (error) { console.error('Error storing response ' + error); });
             })
         .catch(function (error) { console.error('Error storing response ' + error); });
         } else {
-            store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), build_time, success = false, DESCRIPTIONS_TYPE, maxIdleTime)
-            .then(function () { 
-                set_user_complete_time(uid, build_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_listener_(fail)`).then(function() {
-                    next_task(BUILDER_TIME); 
-                }).catch(function (error) { console.error('Error storing response ' + error); });
-            })    // TODO: should we count a failure 3 attempts as a completed task?
-            .catch(function (error) { console.error("Error storing response: " + error); });
+            get_description_by_id(TASK_ID, DESC_ID, DESCRIPTIONS_TYPE).then(desc_to_update => {
+                get_task_best_desc(TASK_ID, DESCRIPTIONS_TYPE).then(task_best => {
+                    const priors = [1, 1];
+                    let a = task_best.success_score + priors[0];
+                    let b = task_best.attempts - task_best.success_score + priors[1];
+        
+                    let mean = a / (a + b);
+                    task_best.mean = mean;
+
+                    store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), build_time, success = false, DESCRIPTIONS_TYPE, maxIdleTime, task_best, desc_to_update)
+                    .then(function () { 
+                        set_user_complete_time(uid, build_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_listener_(fail)`).then(function() {
+                            // next_task(BUILDER_TIME); 
+                        }).catch(function (error) { console.error('Error storing response ' + error); });
+                    })
+                    .catch(function (error) { console.error("Error storing response: " + error); });
+                }).catch(err => {
+                    console.error(err);
+                });
+    
+            });
         }
      }, 1000);
 }
-
-$(document).ready(function () {
-    //  Make it so modal with sliders has labels of slider values
-    $("#conf_result").html($("#conf_form").val());
-    $("#conf_form").change(function(){
-        $("#conf_result").html($(this).val());
-    });
-});

@@ -60,7 +60,7 @@ var maxIdleTime = 0;
 $(document).ready(function () {
     //Increment the idle time counter every 5 seconds.
     var resolution = 5;
-    var idleInterval = setInterval(function() { idleTime += resolution; console.log(idleTime, maxIdleTime); }, resolution*1000);
+    setInterval(function() { idleTime += resolution; }, resolution*1000);
 
     //Zero the idle timer on mouse movement.
     $(this).mousemove(function (e) {
@@ -81,13 +81,20 @@ $(document).ready(function () {
         }
         idleTime = 0;
     });
+
+    // listen for click on tut layer
+    $("#tut-layer").click(function () {
+        pre_continue();
+    });
 });
 
 // =======================
-// Format 
+// Format based on description type
 // =======================
 
-
+/**
+ * show the correct intro modal based on description type
+ */
 function show_intro() {
     const introModalID = DESCRIPTIONS_TYPE + 'IntroModal';
     $('#consentModal').one('hidden.bs.modal', function () { $('#' + introModalID).modal('show'); }).modal('hide');
@@ -95,6 +102,7 @@ function show_intro() {
 
 /**
  * set the objective based on the description type
+ * @param {string} desc_type the type of descriptions ("nl", "ex", or "nl_ex")
  */
 function set_objective(desc_type) {
     switch (desc_type) {
@@ -115,6 +123,7 @@ function set_objective(desc_type) {
 
 /**
  * format the description area based on the description type
+ * @param {string} desc_type the type of descriptions ("nl", "ex", or "nl_ex")
  */
 function format_desc_area(desc_type) {
     if (desc_type == "nl") {
@@ -126,9 +135,9 @@ function format_desc_area(desc_type) {
     }
 }
 
-
 /**
  * Adds the correct walkthrough steps depending on the description type
+ * @param {string} desc_type the type of descriptions ("nl", "ex", or "nl_ex")
  */
 function format_walkthrough(desc_type) {
     for (i = 0; i < TUT_LIST.length; i++) {
@@ -169,7 +178,7 @@ var TUT_LIST = [
     ["This is the input area. You will apply the pattern to this grid.", ["input-col"], 30, 5, 70],
     ["This is the output area. This is where you will create the correct output grid. Let's break it down a little more...", ["output-col"], 30, 10, 35],
     ["This is where you can change the grid size.", ["resize_control_btns"], 50, 5, 35],
-    ["With these buttons, you can copy the entire input grid, make the entire output grid black, check your answer, and give up.", ["edit_control_btns"], 60, 5, 35],
+    ["With these buttons, you can copy the entire input grid or make the entire output grid black.", ["edit_control_btns"], 60, 5, 35],
     ["Since the description says the output grid is the same size as the input grid, use 'Copy input grid' to make the correct output grid size.", ["grid_size_p", "input-col", "copy-from-input", "output_grid", "objective-col"], 30, 100, 100],
     ["These modes are how you change the output grid.", ["toolbar_and_symbol_picker"], 60, 5, 35],
     ["With the draw mode, you can edit individual pixels.", ["draw"], 60, 5, 35],
@@ -178,9 +187,6 @@ var TUT_LIST = [
     ["Use <b>flood fill</b> to fill each 'hole' with yellow.", ["description-text", "toolbar_and_symbol_picker", "output_grid", "objective-col"], 30, 100, 100],
     ["You have now successfully used the description to create the output. Use the green 'Check!' button to check your answer!", ["objective-col", "input-col", "description-col", "output-col"], 500, 100, 100],
 ];
-
-// different feedback based on how they reached a state, these flags give that information
-var flags = { "copied_input": false, 'copy-paste': false };
 
 // after some tasks, slight delay to ease transitions for user
 // this variable ensures they do not skip tutorial steps
@@ -191,7 +197,7 @@ var YELLOW_SUM = 0; // sum of yellow squares filled, informs the error message g
 /**
  * Before continuing the tutorial, checks if there is a task to complete
  * If so, check if completed task/give user incremental feedback
- * flag -- tells what called function, so we know if user reset grid or just colored it black, for example
+ * flag -- if == 'check', know user checked grid / can continue
  */
 function pre_continue(flag = null) {
 
@@ -200,37 +206,27 @@ function pre_continue(flag = null) {
         return;
     }
 
-    // log that the flag has been called
-    if (flag) {
-        flags[flag] = true;
-    }
-
     // if length > 1, then the tutorial is giving them a problem, so don't check if they have completed it before continuing
     if (CUR_HIGHLIGHT.length > 1) {
 
         syncFromEditionGridToDataGrid();
 
+        // challenge to copy from input
         if (arraysEqual(CUR_HIGHLIGHT, ["grid_size_p", "input-col", "copy-from-input", "output_grid", "objective-col"])) {
-            // challenge to copy from input and reset output grid
-
             if (arraysEqual(CURRENT_OUTPUT_GRID.grid, CURRENT_INPUT_GRID.grid)) {
-                if (flags['copy_input'] == true) {
-                    infoMsg("Great job! You have copied from the input grid.");
-                } else {
-                    infoMsg("You have copied the input grid, but you could have done it easier by clicking the \"Copy input grid\" button.");
-                }
+                infoMsg("Great job! You have copied from the input grid.");
                 WAITING_TO_CONTINUE = true;
                 setTimeout(function () { continue_tutorial(); }, 1000);
                 $("#tool_floodfill").click();
                 return;
             }
+        // challenge to flood fill yellow
         } else if (arraysEqual(CUR_HIGHLIGHT, ["description-text", "toolbar_and_symbol_picker", "output_grid", "objective-col"])) {
-            // challenge to flood fill yellow
 
             const ref_grid = TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output'];
 
             let mode = $('input[name=tool_switching]:checked').val();
-            if (mode == 'edit') {
+            if (mode != 'floodfill') {
                 errorMsg("Make sure that you are in 'floodfill' mode.");
                 return;
             }
@@ -244,7 +240,7 @@ function pre_continue(flag = null) {
                             YELLOW_SUM++;
                             continue;
                         }
-
+                        // if cell is incorrect and is not yellow
                         errorMsg("Only fill inside the holes with yellow.");
                         LAST_YELLOW_SUM = YELLOW_SUM;
                         YELLOW_SUM = 0;
@@ -286,7 +282,7 @@ function pre_continue(flag = null) {
     }
 }
 
-var CUR_HIGHLIGHT = null;
+var CUR_HIGHLIGHT = null;   // currently highlighted elements in tutorial
 var FINISHED_TUT = false;
 
 function continue_tutorial() {
@@ -368,9 +364,6 @@ function continue_tutorial() {
             $(`#${id}`).css('position', 'relative');
         }
         $(`#${id}`).css('z-index', '501');
-        if (id != "objective-col" && id != "feedback_btn") {
-            $(`#${id}`).css('background-color', 'gainsboro');
-        }
 
         if ($('#' + id).offset().top < max_top) {
             max_top = $('#' + id).offset().top;
@@ -392,20 +385,14 @@ function continue_tutorial() {
     }
 }
 
-$(function () {
-    $("#tut-layer").click(function () {
-        pre_continue();
-    });
-});
-
 // =======================
 // ARC Completion
 // =======================
 
+/**
+ * checks if output is correct. If so and completed enough tasks, move on to actual task
+ */
 function check_grid() {
-    /**
-     * checks if output is correct. If so and completed enough tasks, move on to actual task
-     */
     syncFromEditionGridToDataGrid();
     reference_output = TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output'];
     submitted_output = CURRENT_OUTPUT_GRID.grid;
@@ -460,7 +447,7 @@ function check_grid() {
 }
 
 // =======================
-// Store user information
+// Store user time information
 // =======================
 
 var SECTION_START_TIME = 0;
@@ -484,6 +471,16 @@ function send_user_complete_item(item, from_start) {
 
     SECTION_START_TIME = end_time;
     set_user_complete_time(uid, delta, item);
+}
+
+/**
+ * store total time and move to next task after closing final modal
+ */
+function exit_done_modal() {
+    const uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
+    set_user_complete_time(uid, maxIdleTime, 'max_idle_time');
+    send_user_complete_item('tutorial_total_time', true);
+    next_task(0);
 }
 
 // =======================
@@ -550,11 +547,4 @@ function check_quiz() {
     resetOutputGrid();
 
     $("#tool_edit").click();
-}
-
-function exit_done_modal() {
-    const uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
-    set_user_complete_time(uid, maxIdleTime, 'max_idle_time');
-    send_user_complete_item('tutorial_total_time', true);
-    next_task(0);
 }

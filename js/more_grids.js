@@ -19,9 +19,7 @@ var ATTEMPTS_SEQUENCE = [];
 function refreshEditionGrid(jqGrid, dataGrid) {
     fillJqGridWithData(jqGrid, dataGrid);
     setUpEditionGridListeners(jqGrid);
-
-    const col_width = $("#container-fluid").width() / 3.2;
-    fitCellsToContainer(jqGrid, dataGrid.height, dataGrid.width, col_width, col_width);
+    fitCellsToContainer(jqGrid, dataGrid.height, dataGrid.width);
     initializeSelectable();
 }
 
@@ -95,7 +93,6 @@ function fillPairPreview(pairId, inputGrid, outputGrid) {
 
         var elem = document.createElement("img");
         elem.src = 'img/arrow.png';
-        elem.setAttribute("id", "arrow");
 
         const isSpeakerExample = window.location.href.includes("speaker") && DESCRIPTIONS_TYPE.includes("ex");
         if (isSpeakerExample) {
@@ -114,12 +111,10 @@ function fillPairPreview(pairId, inputGrid, outputGrid) {
         jqOutputGrid.appendTo(pairSlot);
     }
 
-    const col_width = $("#container-fluid").width() / 6 - 60;
-
-    fillJqGridWithData(jqInputGrid, inputGrid);
-    fitCellsToContainer(jqInputGrid, inputGrid.height, inputGrid.width, col_width, col_width);
-    fillJqGridWithData(jqOutputGrid, outputGrid);
-    fitCellsToContainer(jqOutputGrid, outputGrid.height, outputGrid.width, col_width, col_width);
+    fillJqGridWithData(jqInputGrid, inputGrid, `input ${parseInt(pairId)+1}`);
+    fitCellsToContainer(jqInputGrid, inputGrid.height, inputGrid.width);
+    fillJqGridWithData(jqOutputGrid, outputGrid, `output ${parseInt(pairId)+1}`);
+    fitCellsToContainer(jqOutputGrid, outputGrid.height, outputGrid.width);
 }
 
 function loadJSONTask(train, test) {
@@ -232,8 +227,7 @@ function fillTestInput(inputGrid) {
     jqInputGrid = $('#evaluation_input');
     fillJqGridWithData(jqInputGrid, inputGrid);
 
-    const col_width = $("#container-fluid").width() / 3.1;
-    fitCellsToContainer(jqInputGrid, inputGrid.height, inputGrid.width, col_width, col_width);
+    fitCellsToContainer(jqInputGrid, inputGrid.height, inputGrid.width);
 }
 
 function copyToOutput() {

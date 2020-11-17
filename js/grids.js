@@ -1,4 +1,3 @@
-
 class Grid {
     constructor(height, width, values) {
         this.height = height;
@@ -48,22 +47,22 @@ function convertSerializedGridToGridObject(values) {
     return new Grid(height, width, values)
 }
 
-function fitCellsToContainer(jqGrid, height, width, containerHeight, containerWidth) {
+function fitCellsToContainer(jqGrid, height, width) {
 
-    candidate_height = Math.floor((containerHeight - height) / height);
-    candidate_width = Math.floor((containerWidth - width) / width);
+    let containerWidth = jqGrid.width();
+    let containerHeight = jqGrid.height();
 
-    size = Math.min(candidate_height, candidate_width);
+    let candidate_height = containerHeight / height;
+    let candidate_width = containerWidth / width;
+
+    let size = Math.min(candidate_height, candidate_width);
     size = Math.min(MAX_CELL_SIZE, size);
 
     jqGrid.find('.cell').css('height', size + 'px');
     jqGrid.find('.cell').css('width', size + 'px');
-
-    const col_width = $("#container-fluid").width() / 6;
-    $(".pair_preview").height(col_width);
 }
 
-function fillJqGridWithData(jqGrid, dataGrid) {
+function fillJqGridWithData(jqGrid, dataGrid, label=null) {
     jqGrid.empty();
     height = dataGrid.height;
     width = dataGrid.width;
@@ -81,6 +80,9 @@ function fillJqGridWithData(jqGrid, dataGrid) {
         }
         jqGrid.append(row);
     }
+    // if (label) {
+    //     jqGrid.append($(`<p class="grid_label">${label}</p>`))
+    // }
 }
 
 function copyJqGridToDataGrid(jqGrid, dataGrid) {

@@ -8,7 +8,8 @@
 }
 
 .row {
-    clear: both;
+    /* clear: both; */
+    margin: 0;
 }
 
 .symbol_0 {
@@ -77,8 +78,8 @@
     width: 100%;
 }
 
-.grid_size_field {
-    width: 50px;
+#output_grid_size {
+    max-width: 70px !important;
 }
 
 .selected-symbol-preview {
@@ -86,9 +87,9 @@
 
 }
 
-button {
+/* button {
     margin-bottom: 10px;
-}
+} */
 
 
 /*Selectable*/

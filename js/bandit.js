@@ -15,7 +15,7 @@ function select_casino(type) {
             const priors = [1, 1];
             for (i = 0; i < num_success.length; i++) {
                 const a = num_success[i] + priors[0];
-                const b = num_attempts[i] - a + priors[1];
+                const b = num_attempts[i] - num_success[i] + priors[1];
 
                 const variance = (a * b) / ((a + b)**2 * (a + b + 1));
                 variances.push(variance);
@@ -75,7 +75,7 @@ function select_arm(task, type) {
                 // calculate successfulness mean of best description
                 for (i = 0; i < descriptions.length; i++) {
                     const a = descriptions[i]['bandit_success_score'] + priors[0];
-                    const b = descriptions[i]['bandit_attempts'] - a + priors[1];
+                    const b = descriptions[i]['bandit_attempts'] - descriptions[i]['bandit_success_score'] + priors[1];
                     const mean = a / (a + b);
                     if (mean > best_mean) {
                         best_mean = mean;
@@ -93,7 +93,7 @@ function select_arm(task, type) {
                 for (i = 0; i < descriptions.length; i++) {
 
                     const a = descriptions[i]['bandit_success_score'] + priors[0];
-                    const b = descriptions[i]['bandit_attempts'] - a + priors[1];
+                    const b = descriptions[i]['bandit_attempts'] - descriptions[i]['bandit_success_score'] + priors[1];
 
                     const mean = a / (a + b);
                     const variance = (a * b) / ((a + b)**2 * (a + b + 1));

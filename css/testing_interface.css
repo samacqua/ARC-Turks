@@ -28,9 +28,29 @@ body {
     margin-bottom: 5px;
 }
 
+#toolbar_and_symbol_picker {
+    background-color: rgb(200, 200, 200);
+    border-radius: 5px;
+    padding: 10px;
+    float: left;
+}
+
 #edit_control_btns {
-    background-color: gainsboro;
     width: 100%;
+    float: left;
+    padding-top: 5px;
+    margin-bottom: 5px;
+}
+
+#description-text {
+    background-color: inherit;
+}
+
+#edit_control_btns button {
+    margin-bottom: 8px;
+}
+
+#submit_quit_buttons {
     float: left;
     padding-top: 5px;
     margin-bottom: 5px;
@@ -42,37 +62,39 @@ body {
     padding-bottom: 5px;
 }
 
-#evaluation_input {
-    padding: 2%;
-    /* padding-bottom: 5px; */
-}
-
 #toolbar {
-    background-color: gainsboro;
+    /* background-color: gainsboro; */
     float: left;
     margin-left: 10px;
     width: 100%;
+}
+
+#toolbar div {
+    margin-right: 12px;
+    background-color: rgb(200, 200, 200);
 }
 
 label {
     margin-left: 5px;
 }
 
-input,
-button {
-    margin-left: 10px;
-}
-
-#resize_btn {
-    margin-left: 0;
-}
-
 /*Task demonstration*/
 
 .pair_preview {
-    height: 200px;
-    padding: 0px;
-    border-bottom: solid 1px #a1a1a1;
+    /* height: 200px; */
+    padding: 8px;
+    border-radius: 5px;
+    background-color: rgb(204, 204, 204);
+    overflow:hidden;
+    margin: 0;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+}
+
+#evaluation_input {
+    margin: 0;
+    padding: 0;
 }
 
 .input_preview {
@@ -80,26 +102,26 @@ button {
     float: left;
     margin: 0px;
     padding: 0px;
-    padding-top: 5px;
-    padding-left: 5%;
 }
+
+/* .grid_label {
+    text-align: left;
+    margin-top: auto;
+    margin-bottom: 0;
+} */
 
 .output_preview {
     width: 45%;
     float: left;
     margin: 0px;
     padding: 0px;
-    padding-top: 5px;
-    padding-left: 5%;
 }
 
 .arrow {
     height: 80%;
     width: 10%;
-    padding: 0px;
+    padding: 5px;
     float: left;
-    display: flex;
-    align-items: center;
 }
 
 .text {

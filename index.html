@@ -149,22 +149,18 @@
                     </div>
                 </div>
 
-                <div id="resize_control_btns">
-                    <label for="output_grid_size">Change grid size: </label>
-                    <input type="text" id="output_grid_size" class="grid_size_field" name="size" value="3x3">
-                    <button type="button" class="btn btn-primary" onclick="resizeOutputGrid(); pre_continue();"
-                        id="resize_btn">Resize</button>
-                </div>
-
-                <div id="edit_control_btns">
-                    <span id="copy-from-input"><button type="button" class="btn btn-secondary" onclick="copyFromInput(); pre_continue('copy_input');">Copy input grid</button></span>
-                    <button type="button" class="btn btn-secondary" onclick="resetOutputGrid();">Make output grid black</button>
-                    <button type="button" id="check-btn" class="btn btn-success" onclick="check_grid(); pre_continue('check');">Check!</button>
-                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#giveUpModal">Give
-                        up</button>
+                <div class="input-group mb-3" id="resize_control_btns">
+                    <input type="text" id="output_grid_size" class="form-control" placeholder="3x3" value="3x3">
+                    <div class="input-group-append">
+                      <button class="btn btn-secondary" type="button" onclick="resizeOutputGrid(); pre_continue();">resize output</button>
+                    </div>
                 </div>
 
                 <div id="toolbar_and_symbol_picker">
+                    <div id="edit_control_btns">
+                        <span id="copy-from-input"><button type="button" class="btn btn-secondary" onclick="copyFromInput(); pre_continue();">Copy input grid</button></span>
+                        <button type="button" class="btn btn-secondary" onclick="resetOutputGrid();">Make output grid black</button>
+                    </div>
                     <div id="toolbar">
                         <div>
                             <div id="draw" style="float:left;">
@@ -196,6 +192,12 @@
                         <div class="symbol_preview symbol_8" symbol="8"></div>
                         <div class="symbol_preview symbol_9" symbol="9"></div>
                     </div>
+                </div>
+
+                <div id="submit_quit_buttons">
+                    <button type="button" id="check-btn" class="btn btn-success" onclick="check_grid(); pre_continue('check');">Check!</button>
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#giveUpModal">Give
+                        up</button>
                 </div>
 
             </div>
@@ -245,7 +247,7 @@
 
                     <p>If I gave you this grid:</p>
 
-                    <img class="io" src="img/grid_ex.png">
+                    <img class="io" src="img/grid_ex.jpg">
 
                     <p>And I told you:</p>
                     <p><strong>"You should see a 3x3 grid with a colored dot in the middle. Create a 5x5 grid that is
@@ -253,7 +255,7 @@
                     <p> Would you be able to make this transformation? Would you create the correct output shown below?</p>
 
                     <p><i>(hover over to show answer)</i></p>
-                    <img class="io" id="io_ex" src="img/grid_out_2.png">
+                    <img class="io" id="io_ex" src="img/grid_ex_ans.jpg">
 
                     <p>This is a simple example of the kind of tasks you will solve in this study. You will be given a
                         description of a transformation, and you will have to use that description to create the correct

@@ -42,32 +42,7 @@ $(window).on('load', function () {
     get_task_descriptions(task, DESCRIPTIONS_TYPE).then(function (descriptions) {
 
         descriptions = descriptions.filter(desc => (desc.succeeded_verification != false));
-
-        descriptions.sort(function(a, b) {
-
-            if (a.display_num_attempts == 0) {
-                return 1
-            } else if (b.display_num_attempts == 0) {
-                return -1
-            }
-
-            function upperConfBound(x) {
-                const i = x.bandit_success_score + 1;
-                const j = x.bandit_attempts - i + 1;
-
-                const mean = i / (i + j);
-                const variance = i * j / ((i + j) ** 2 * (i + j + 1));
-
-                return mean + Math.sqrt(variance);
-            }
-
-            if (upperConfBound(a) > upperConfBound(b)) {
-                return -1
-            } else { 
-                return 1
-            }
-        });
-
+        descriptions.sort(sort_descs_bandit_score());
         PAST_DESCS = descriptions;
 
         createExampleDescsPager();
@@ -85,6 +60,7 @@ $(window).on('load', function () {
         errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
     });
 
+    // customize tutorial to fit description type
     if (DESCRIPTIONS_TYPE == "nl") {
         $("#select_ex_io").remove();
     } else if (DESCRIPTIONS_TYPE == "nl_ex") {
@@ -105,11 +81,104 @@ $(window).on('load', function () {
             GOOD_WORDS.push(word.toLowerCase());
             get_word_vec_cache(word);
         }
-        console.log("Length of previously used words:", words.length);
-        console.log("(with permutations): ", GOOD_WORDS.length);
-
     }).catch(error => {
         errorMsg("Could not load words that can been used. Please check your internet connection and reload the page.");
+    });
+});
+
+$(document).ready(function () {
+
+    $('.descriptions').on("input", function() {
+        var value = $(this).val();
+        const prefix_mapping = { 'grid_size_desc': GRID_SIZE_PREFIX, 'what_you_see': SHOULD_SEE_PREFIX, 'what_you_do': HAVE_TO_PREFIX }
+        const id = $(this).attr("id");
+        var prefix = prefix_mapping[id];
+        $(this).val(prefix + value.substring(prefix.length));
+    });
+
+    // when textarea changes
+    $('.descriptions').on("keyup", function () {
+
+        // so they can't delete prefix
+        var value = $(this).val();
+        const id = $(this).attr("id");
+
+        // for each novel word, add a row with buttons to replace word with similar words in database, or add the word
+        $('#word-warning-' + id).empty();
+
+        const words_to_replace = value.match(get_bad_words());
+        if (words_to_replace != null && words_to_replace.length != 0) {
+
+            var items = [];
+            $.each(words_to_replace, function (i, word) {
+
+                // create the html for the list items
+                items.push(
+                    `<li><b>${word}</b>
+                    <span class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Replace with...
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" id=${word}_${i}_dropdown>
+                    </div>
+                    <button type="button" onclick="confirm_add_word(\'${word}\')" id="add_word_${word}" class="btn btn-danger add-word">add word</button></li>
+                    </span>`);
+            });
+
+            $('#word-warning-' + id).append(items.join(''));
+        }
+
+        get_replacement_words(words_to_replace).then(replacements => {
+
+            // if by the time retrieved words, there are new words, then recall self
+            if (!arraysEqual($(this).val().match(get_bad_words()), words_to_replace)) {
+                $(".descriptions").keyup();
+                return;
+            }
+
+            if (words_to_replace != null && words_to_replace.length != 0) {
+
+                replacements.forEach(function(replacement_i, i) {
+
+                    const word = replacement_i[0];
+                    const replacement_words = replacement_i[1].map(function(item) { return item[1] });
+
+                    if($(`#${word}_${i}_dropdown`).length != 0) {
+                        $(`#${word}_${i}_dropdown`).empty();
+                        $(`#${word}_${i}_dropdown`).append(
+                            `${(function () {
+                                var html_text = "";
+                                for (i = 0; i < replacement_words.length; i++) {
+                                    const replacement = replacement_words[i];
+                                    const dropdown_item = `<a onclick="replace_word(\'${word}\',\'${replacement}\', '#${id}')" id="replace_${word}_${replacement}" class="dropdown-item" href="#">${replacement}</a>`;
+                                    html_text += dropdown_item;
+                                }
+                                return html_text
+                            })()}`
+                        );
+                    }
+                });
+            }
+        });
+    });
+
+    // highlight the textareas for words that have not been used yet
+    $('.descriptions').highlightWithinTextarea({
+        highlight: [
+            {
+                highlight: get_bad_words
+            },
+            {
+                highlight: [GRID_SIZE_PREFIX, HAVE_TO_PREFIX, SHOULD_SEE_PREFIX],
+                className: 'prefixes'
+            }
+        ]
+    });
+
+    //  Make it so modal with sliders has labels of slider values
+    $("#conf_result").html($("#conf_form").val());
+    $("#conf_form").change(function () {
+        $("#conf_result").html($(this).val());
     });
 });
 
@@ -329,6 +398,11 @@ function get_word_vec_cache(word) {
     });
 }
 
+/**
+ * sort from least to greatest
+ * @param {item} a comes before b
+ * @param {item} b comes after a
+ */
 function compare(a, b) {
     if (a[0] > b[0]) return 1;
     if (b[0] > a[0]) return -1;
@@ -456,102 +530,6 @@ function add_current_candidate_word() {
     $(".descriptions").trigger('keyup');
     $(".descriptions").highlightWithinTextarea('update');
 }
-
-$(document).ready(function () {
-
-    $('.descriptions').on("input", function() {
-        var value = $(this).val();
-        const prefix_mapping = { 'grid_size_desc': GRID_SIZE_PREFIX, 'what_you_see': SHOULD_SEE_PREFIX, 'what_you_do': HAVE_TO_PREFIX }
-        const id = $(this).attr("id");
-        var prefix = prefix_mapping[id];
-        $(this).val(prefix + value.substring(prefix.length));
-    });
-
-    // when textarea changes
-    $('.descriptions').on("keyup", function () {
-
-        // so they can't delete prefix
-        var value = $(this).val();
-        const id = $(this).attr("id");
-
-        // for each novel word, add a row with buttons to replace word with similar words in database, or add the word
-        $('#word-warning-' + id).empty();
-
-        const words_to_replace = value.match(get_bad_words());
-        if (words_to_replace != null && words_to_replace.length != 0) {
-
-            var items = [];
-            $.each(words_to_replace, function (i, word) {
-
-                // create the html for the list items
-                items.push(
-                    `<li><b>${word}</b>
-                    <span class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Replace with...
-                    </button>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" id=${word}_${i}_dropdown>
-                    </div>
-                    <button type="button" onclick="confirm_add_word(\'${word}\')" id="add_word_${word}" class="btn btn-danger add-word">add word</button></li>
-                    </span>`);
-            });
-
-            $('#word-warning-' + id).append(items.join(''));
-        }
-
-        get_replacement_words(words_to_replace).then(replacements => {
-
-            // if by the time retrieved words, there are new words, then recall self
-            if (!arraysEqual($(this).val().match(get_bad_words()), words_to_replace)) {
-                $(".descriptions").keyup();
-                return;
-            }
-
-            if (words_to_replace != null && words_to_replace.length != 0) {
-
-                replacements.forEach(function(replacement_i, i) {
-
-                    const word = replacement_i[0];
-                    const replacement_words = replacement_i[1].map(function(item) { return item[1] });
-
-                    if($(`#${word}_${i}_dropdown`).length != 0) {
-                        $(`#${word}_${i}_dropdown`).empty();
-                        $(`#${word}_${i}_dropdown`).append(
-                            `${(function () {
-                                var html_text = "";
-                                for (i = 0; i < replacement_words.length; i++) {
-                                    const replacement = replacement_words[i];
-                                    const dropdown_item = `<a onclick="replace_word(\'${word}\',\'${replacement}\', '#${id}')" id="replace_${word}_${replacement}" class="dropdown-item" href="#">${replacement}</a>`;
-                                    html_text += dropdown_item;
-                                }
-                                return html_text
-                            })()}`
-                        );
-                    }
-                });
-            }
-        });
-    });
-
-    // highlight the textareas for words that have not been used yet
-    $('.descriptions').highlightWithinTextarea({
-        highlight: [
-            {
-                highlight: get_bad_words
-            },
-            {
-                highlight: [GRID_SIZE_PREFIX, HAVE_TO_PREFIX, SHOULD_SEE_PREFIX],
-                className: 'prefixes'
-            }
-        ]
-    });
-
-    //  Make it so modal with sliders has labels of slider values
-    $("#conf_result").html($("#conf_form").val());
-    $("#conf_form").change(function () {
-        $("#conf_result").html($(this).val());
-    });
-});
 
 // ==============
 // Other Page Logic

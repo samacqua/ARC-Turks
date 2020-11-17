@@ -139,44 +139,54 @@
                     </div>
                 </div>
 
-                <div id="resize_control_btns">
-                    <label for="output_grid_size">Change grid size: </label>
-                    <input type="text" id="output_grid_size" class="grid_size_field" name="size" value="3x3">
-                    <button type="button" class="btn btn-primary" onclick="resizeOutputGrid()"
-                        id="resize_btn">Resize</button>
-                </div>
-
-                <button type="button" class="btn btn-secondary" onclick="copyFromInput()">Copy input grid</button>
-                <button type="button" class="btn btn-secondary" onclick="resetOutputGrid()">Make output grid black</button>
-                <button type="button" class="btn btn-success" onclick="check()">Check!</button>
-
-                <div id="toolbar">
-                    <div>
-                        <input type="radio" id="tool_edit" name="tool_switching" value="edit" checked>
-                        <label for="tool_edit">Draw</label>
-
-                        <input type="radio" id="tool_floodfill" name="tool_switching" value="floodfill">
-                        <label for="tool_floodfill">Flood fill</label>
-
-                        <input type="radio" id="tool_select" name="tool_switching" value="select">
-                        <label for="tool_select">Copy-Paste</label>
+                <div class="input-group mb-3" id="resize_control_btns">
+                    <input type="text" id="output_grid_size" class="form-control" placeholder="3x3" value="3x3">
+                    <div class="input-group-append">
+                      <button class="btn btn-secondary" type="button" onclick="resizeOutputGrid();">resize output</button>
                     </div>
                 </div>
 
-                <div id="symbol_picker">
-                    <div class="symbol_preview symbol_0 selected-symbol-preview" symbol="0"></div>
-                    <div class="symbol_preview symbol_1" symbol="1"></div>
-                    <div class="symbol_preview symbol_2" symbol="2"></div>
-                    <div class="symbol_preview symbol_3" symbol="3"></div>
-                    <div class="symbol_preview symbol_4" symbol="4"></div>
-                    <div class="symbol_preview symbol_5" symbol="5"></div>
-                    <div class="symbol_preview symbol_6" symbol="6"></div>
-                    <div class="symbol_preview symbol_7" symbol="7"></div>
-                    <div class="symbol_preview symbol_8" symbol="8"></div>
-                    <div class="symbol_preview symbol_9" symbol="9"></div>
+                <div id="toolbar_and_symbol_picker">
+                    <div id="edit_control_btns">
+                        <button type="button" class="btn btn-secondary" onclick="copyFromInput();">Copy input grid</button>
+                        <button type="button" class="btn btn-secondary" onclick="resetOutputGrid();">Make output grid black</button>
+                    </div>
+                    <div id="toolbar">
+                        <div>
+                            <div id="draw" style="float:left;">
+                                <input type="radio" id="tool_edit" name="tool_switching" value="edit" checked>
+                                <label for="tool_edit">Draw</label>
+                            </div>
+
+                            <div id="floodfill" style="float:left;">
+                                <input type="radio" id="tool_floodfill" name="tool_switching" value="floodfill">
+                                <label for="tool_floodfill">Flood fill</label>
+                            </div>
+
+                            <div id="copypaste" style="float:left;">
+                                <input type="radio" id="tool_select" name="tool_switching" value="select">
+                                <label for="tool_select">Copy-Paste</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="symbol_picker">
+                        <div class="symbol_preview symbol_0 selected-symbol-preview" symbol="0"></div>
+                        <div class="symbol_preview symbol_1" symbol="1"></div>
+                        <div class="symbol_preview symbol_2" symbol="2"></div>
+                        <div class="symbol_preview symbol_3" symbol="3"></div>
+                        <div class="symbol_preview symbol_4" symbol="4"></div>
+                        <div class="symbol_preview symbol_5" symbol="5"></div>
+                        <div class="symbol_preview symbol_6" symbol="6"></div>
+                        <div class="symbol_preview symbol_7" symbol="7"></div>
+                        <div class="symbol_preview symbol_8" symbol="8"></div>
+                        <div class="symbol_preview symbol_9" symbol="9"></div>
+                    </div>
                 </div>
 
-                </br>
+                <div id="submit_quit_buttons">
+                    <button type="button" id="check-btn" class="btn btn-success" onclick="check();">Check!</button>
+                </div>
             </div>
         </div>
     </div>
