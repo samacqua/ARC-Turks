@@ -579,6 +579,8 @@ function verify() {
      * store submitted values and go to next task
      */
 
+    show_loader();
+
     // get entered values
     const see_desc = $.trim($("#what_you_see").val());
     const do_desc = $.trim($("#what_you_do").val());
@@ -609,6 +611,8 @@ function give_up() {
         errorMsg("Please try to figure out the pattern for at least thirty seconds before you give up.");
         return;
     }
+
+    show_loader();
 
     // give only partial credit if skip task
     give_up_description(TASK_ID, DESCRIPTIONS_TYPE).then(function () {

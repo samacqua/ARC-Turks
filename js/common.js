@@ -103,6 +103,9 @@ function shuffle(a) {
  * Set user complete time and show them the demographics modal
  */
 function finish() {
+
+    $("#loader").fadeOut();
+
     const uid = sessionStorage.getItem('uid') || "no uid";
     $("#finish_modal_uid").text(uid.toString());
     $("#demographic_modal").modal('show');
@@ -369,4 +372,9 @@ function sort_descs_bandit_score() {
             return 1
         }
     }
+}
+
+function show_loader() {
+    console.log("showing loader...");
+    $("#loader").fadeIn();
 }

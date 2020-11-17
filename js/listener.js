@@ -212,6 +212,9 @@ function check() {
     if (IS_VERIFICATION) {
         $("#speaker_certainty_modal").modal('show');
     } else {
+
+        show_loader();
+
         get_description_by_id(TASK_ID, DESC_ID, DESCRIPTIONS_TYPE).then(desc_to_update => {
             get_task_best_desc(TASK_ID, DESCRIPTIONS_TYPE).then(task_best => {
 
@@ -258,6 +261,8 @@ function submit_description() {
 
     var conf = parseInt($('#conf_form').val().trim());
 
+    show_loader();
+
     if (conf <= MIN_CONFIDENCE) {
         store_failed_ver_description(see_desc, do_desc, grid_desc, TASK_ID, uid, conf, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), desc_time, verification_time, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE, maxIdleTime)
         .then(function () { 
@@ -281,46 +286,46 @@ function used_all_attempts() {
     const build_time = ((new Date()) - START_DATE) / 1000;
     errorMsg("Wrong answer. You have used all of your attempts. Bringing you to your next task...");
 
-    setTimeout(function() { 
-        if (IS_VERIFICATION) {
-                    
-            const queryString = window.location.search;
-            const urlParams = new URLSearchParams(queryString);
-        
-            const grid_desc = urlParams.get('grid') || "";
-            const see_desc = urlParams.get('see') || "";
-            const do_desc = urlParams.get('do') || "";
-            const desc_time = parseInt(urlParams.get('time') || "0");
-        
-            store_failed_ver_description(see_desc, do_desc, grid_desc, TASK_ID, uid, null, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), desc_time, build_time, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE, maxIdleTime)
-            .then(function () {
-                set_user_complete_time(uid, desc_time+build_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker_(fail)`).then(function() {
-                    next_task(SPEAKER_TIME*SPEAKER_FAIL_PART_CRED);
-                }).catch(function (error) { console.error('Error storing response ' + error); });
-            })
-        .catch(function (error) { console.error('Error storing response ' + error); });
-        } else {
-            get_description_by_id(TASK_ID, DESC_ID, DESCRIPTIONS_TYPE).then(desc_to_update => {
-                get_task_best_desc(TASK_ID, DESCRIPTIONS_TYPE).then(task_best => {
-                    const priors = [1, 1];
-                    let a = task_best.success_score + priors[0];
-                    let b = task_best.attempts - task_best.success_score + priors[1];
-        
-                    let mean = a / (a + b);
-                    task_best.mean = mean;
+    show_loader();
 
-                    store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), build_time, success = false, DESCRIPTIONS_TYPE, maxIdleTime, task_best, desc_to_update)
-                    .then(function () { 
-                        set_user_complete_time(uid, build_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_listener_(fail)`).then(function() {
-                            // next_task(BUILDER_TIME); 
-                        }).catch(function (error) { console.error('Error storing response ' + error); });
-                    })
-                    .catch(function (error) { console.error("Error storing response: " + error); });
-                }).catch(err => {
-                    console.error(err);
-                });
+    if (IS_VERIFICATION) {
+                    
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
     
+        const grid_desc = urlParams.get('grid') || "";
+        const see_desc = urlParams.get('see') || "";
+        const do_desc = urlParams.get('do') || "";
+        const desc_time = parseInt(urlParams.get('time') || "0");
+    
+        store_failed_ver_description(see_desc, do_desc, grid_desc, TASK_ID, uid, null, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), desc_time, build_time, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE, maxIdleTime)
+        .then(function () {
+            set_user_complete_time(uid, desc_time+build_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker_(fail)`).then(function() {
+                next_task(SPEAKER_TIME*SPEAKER_FAIL_PART_CRED);
+            }).catch(function (error) { console.error('Error storing response ' + error); });
+        })
+    .catch(function (error) { console.error('Error storing response ' + error); });
+    } else {
+        get_description_by_id(TASK_ID, DESC_ID, DESCRIPTIONS_TYPE).then(desc_to_update => {
+            get_task_best_desc(TASK_ID, DESCRIPTIONS_TYPE).then(task_best => {
+                const priors = [1, 1];
+                let a = task_best.success_score + priors[0];
+                let b = task_best.attempts - task_best.success_score + priors[1];
+    
+                let mean = a / (a + b);
+                task_best.mean = mean;
+
+                store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), build_time, success = false, DESCRIPTIONS_TYPE, maxIdleTime, task_best, desc_to_update)
+                .then(function () { 
+                    set_user_complete_time(uid, build_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_listener_(fail)`).then(function() {
+                        next_task(BUILDER_TIME); 
+                    }).catch(function (error) { console.error('Error storing response ' + error); });
+                })
+                .catch(function (error) { console.error("Error storing response: " + error); });
+            }).catch(err => {
+                console.error(err);
             });
-        }
-     }, 1000);
+
+        });
+    }
 }

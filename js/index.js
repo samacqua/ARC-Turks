@@ -421,7 +421,7 @@ function check_grid() {
     // if not last practice task
     if (PRAC_TASKS.length != 0) {
 
-        $("#give_up_vid").attr('src', `img/give_up_${TOTAL_PRAC_TASKS - PRAC_TASKS.length + 1}.mp4`);
+        $("#give_up_vid").attr('src', `img/give_up.mp4`);
 
         infoMsg("Correct! Solve " + (PRAC_TASKS.length).toString() + " more problem(s).");
 
@@ -480,6 +480,7 @@ function exit_done_modal() {
     const uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
     set_user_complete_time(uid, maxIdleTime, 'max_idle_time');
     send_user_complete_item('tutorial_total_time', true);
+    show_loader();
     next_task(0);
 }
 

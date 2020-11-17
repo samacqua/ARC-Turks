@@ -93,6 +93,7 @@ function get_all_descriptions_interactions_count(type) {
         const summary_ref = db.collection(type + "_tasks").doc("summary");
 
         summary_ref.get().then(function (snapshot) {
+            console.log(`read 1 document`);
 
             const data = snapshot.data()
             var interactions_count = [];
@@ -123,6 +124,7 @@ function get_task_best_desc(task, type) {
         const summary_ref = db.collection(type + "_tasks").doc("summary");
 
         summary_ref.get().then(function (snapshot) {
+            console.log(`read 1 documents`);
             const data = snapshot.data();
             return resolve({id: data[`${task}_best_id`], success_score: data[`${task}_best_success_score`] || 0, attempts: data[`${task}_best_total_attempts`] || 0});
         })
@@ -142,6 +144,8 @@ function get_all_tasks_best_desc(type) {
         const summary_ref = db.collection(type + "_tasks").doc("summary");
 
         summary_ref.get().then(function (snapshot) {
+
+            console.log(`read 1 documents`);
 
             const data = snapshot.data()
             var best_desc_success_score = [];
@@ -171,6 +175,7 @@ function get_task_descs_interactions_count(task, type) {
         const task_ref = db.collection(type + "_tasks").doc(`${task}`);
 
         task_ref.get().then(function (snapshot) {
+            console.log(`read 1 documents`);
             const data = snapshot.data()
             return resolve([data.num_descriptions, data.num_interactions]);
         })
@@ -234,6 +239,7 @@ function get_description_by_id(task_id, desc_id, type) {
         const desc_ref = db.collection(type + "_tasks").doc(`${task_id}`).collection("descriptions").doc(desc_id);
 
         desc_ref.get().then(function (snapshot) {
+            console.log(`read 1 document`);
 
             const data = snapshot.data();
             // if does not contain field, just returns undefined, so works for all desc kinds
@@ -273,6 +279,7 @@ function get_words() {
         const summary_ref = db.collection("total").doc("summary");
 
         summary_ref.get().then(function (snapshot) {
+            console.log(`read 1 document`);
             return resolve(snapshot.data().words)
         })
         .catch(function (err) {
