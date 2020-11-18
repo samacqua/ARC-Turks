@@ -50,7 +50,8 @@ function convertSerializedGridToGridObject(values) {
 function fitCellsToContainer(jqGrid, height, width) {
 
     let containerWidth = jqGrid.width();
-    let containerHeight = jqGrid.height();
+    let MAX_GRID_HEIGHT = 500;
+    let containerHeight = MAX_GRID_HEIGHT;
 
     let candidate_height = containerHeight / height;
     let candidate_width = containerWidth / width;

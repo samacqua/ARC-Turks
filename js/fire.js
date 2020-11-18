@@ -272,6 +272,42 @@ function get_description_by_id(task_id, desc_id, type) {
 }
 
 /**
+ * Get the doc which store's a and b for all descriptions
+ * @param {string} type the type of descriptions ("nl", "ex", or "nl_ex")
+ */
+function get_bandit_doc(type) {
+    return new Promise(function (resolve, reject) {
+        const summary_ref = db.collection(type + "_tasks").doc("descs_bandit");
+
+        summary_ref.get().then(function (snapshot) {
+            console.log(`read 1 document`);
+            return resolve(snapshot.data());
+        })
+        .catch(function (err) {
+            return reject(err);
+        });
+    });
+}
+
+/**
+ * Get timing doc which store's the times for all descriptions and desc uses
+ * @param {string} type the type of descriptions ("nl", "ex", or "nl_ex")
+ */
+function get_timing_doc(type) {
+    return new Promise(function (resolve, reject) {
+        const timing_ref = db.collection(type + "_tasks").doc("timing");
+
+        timing_ref.get().then(function (snapshot) {
+            console.log(`read 1 document`);
+            return resolve(snapshot.data());
+        })
+        .catch(function (err) {
+            return reject(err);
+        });
+    });
+}
+
+/**
  * Get all words that have been used in previous descriptions.
  */
 function get_words() {
@@ -376,6 +412,19 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confi
             task: task_id.toString()
         });
 
+        // add desc a & b to task desc summary document
+        const descs_summary_ref = db.collection(type + "_tasks").doc("descs_bandit");
+        let bandit_data = {};
+        let priors = [1, 1];
+        bandit_data[`${task_id}_${desc_id}`] = priors;
+        batch.set(descs_summary_ref, bandit_data, {merge: true});
+
+        // set timing in doc
+        const timing_ref = db.collection(type + "_tasks").doc("timing");
+        let timing_data = {};
+        timing_data[`${task_id}_${desc_id}_desc`] = parseInt(desc_time) + parseInt(ver_time);
+        batch.set(timing_ref, timing_data, {merge: true});
+
         batch.commit().then(function () {
             return resolve();
         }).catch(function (err) {
@@ -458,6 +507,18 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, atte
         // remove the description from the list of unused descriptions
         const unused_ref = db.collection(type + "_unused_descs").doc(desc_id);
         batch.delete(unused_ref);
+
+        // update a and b in bandit summary
+        const descs_summary_ref = db.collection(type + "_tasks").doc("descs_bandit");
+        let bandit_data = {};
+        bandit_data[`${task_id}_${desc_id}`] = [a, b];
+        batch.update(descs_summary_ref, bandit_data);
+
+        // add timing
+        const timing_ref = db.collection(type + "_tasks").doc("timing");
+        let timing_data = {};
+        timing_data[`${task_id}_${desc_id}_attempts`] = firebase.firestore.FieldValue.arrayUnion(parseInt(total_time) + Math.random()); // add random so unlikely for collisions
+        batch.update(timing_ref, timing_data);
 
         batch.commit().then(function () {
             return resolve();
@@ -709,7 +770,6 @@ function init_firestore() {
     
     db.collection('total').doc('summary').set({
         'words': top_1000_words
-
     }).then(function () {
         console.log("Initialized words in Firestore.")
 

@@ -163,7 +163,12 @@ function get_next_task(time_inc) {
             // if no unused descriptions, then use bandit
             if (task_desc == -1) {
 
-                select_casino(DESCRIPTIONS_TYPE).then(task => {
+                new_select_casino(DESCRIPTIONS_TYPE).then(task => {
+
+                    if (task == -1) {
+                        return resolve('finish');
+                    }
+
                     select_arm(task, DESCRIPTIONS_TYPE).then(desc_id => {
                         // if desc_id == -1, then task needs new arm
                         if (desc_id == -1) {
@@ -214,7 +219,13 @@ function next_task(time_inc) {
         // if no unused descriptions, then use bandit
         if (task_desc == -1) {
 
-            select_casino(DESCRIPTIONS_TYPE).then(task => {
+            new_select_casino(DESCRIPTIONS_TYPE).then(task => {
+
+                if (task == -1) {
+                    finish();
+                    return;
+                }
+
                 select_arm(task, DESCRIPTIONS_TYPE).then(desc_id => {
                     // if desc_id == -1, then task needs new arm
                     if (desc_id == -1) {
@@ -377,4 +388,91 @@ function sort_descs_bandit_score() {
 function show_loader() {
     console.log("showing loader...");
     $("#loader").fadeIn();
+}
+
+/**
+ * Remove any outliers > Q3+1.5IQR or < Q1-1.5IQR
+ * https://stackoverflow.com/a/20811670/5416200
+ * @param {Array} someArray 
+ * @param {Number} absMax if any value is above this, remove/replace it
+ * @param {Number?} replace if not null, then do not remove outliers, but replace with this default value
+ */
+function filterOutliers(someArray, absMax=null, replace=null) {  
+
+    // Copy the values, rather than operating on references to existing values
+    var values = someArray.concat();
+
+    // Then sort
+    values.sort( function(a, b) {
+            return a - b;
+         });
+
+    /* Then find a conservative IQR. This is generous because if (values.length / 4) 
+     * is not an int, then really you should average the two elements on either 
+     * side to find q1.
+     */     
+    var q1 = values[Math.ceil((values.length / 4))];
+    // Likewise for q3. 
+    var q3 = values[Math.floor((values.length * (3 / 4)))];
+    var iqr = q3 - q1;
+
+    // Then find min and max values
+    var maxValue = q3 + iqr*1.5;
+    var minValue = q1 - iqr*1.5;
+
+    var filteredValues;
+    if (replace) {
+        filteredValues = values.map(x => ((x <= maxValue) && (x >= minValue)) ? replace : x);
+    } else {
+        // Then filter anything beyond or beneath these values.
+        filteredValues = values.filter(function(x) {
+            return (x <= maxValue) && (x >= minValue);
+        });
+    }
+
+    // constant upper bound
+    if (absMax) {
+        filteredValues = filteredValues.filter(function(x) {
+            return x <= absMax;
+        });
+    }
+
+    // Then return
+    return filteredValues;
+}
+
+/**
+ * Get a weighted average based on general avg from pilot and task time data, with a heavier weight on task times the more data we collect
+ * @param {Array} times all the task times collected
+ * @param {Number} avg The average time across all tasks in the pilot (either for speaker or builder tasks)
+ * @param {boolean} summed if true, then return the summed timing, not the avg
+ */
+function weight_timing(times, avg, summed=true) {
+
+    let lambda = Math.exp(-times.length/5); // very arbitrary, vals seemed to line up with intuition: https://www.desmos.com/calculator/u78jjqkhfm
+
+    let avgd = lambda * avg + (1 - lambda) * avg_array(times);
+
+    console.log(lambda, avg, avg_array(times), times, avgd);
+
+    if (summed) {
+        return avgd * times.length;
+    }
+    return avgd;
+}
+
+/**
+ * Sum all the elements in an array
+ * @param {Array} arr the array to sum
+ */
+function sum_array(arr) {
+    return arr.reduce((a, b) => a + b, 0);
+}
+
+/**
+ * Average all the elements in an array
+ * @param {Array} arr the array to average
+ */
+function avg_array(arr) {
+    return arr.reduce((a, b) => a + b, 0) / arr.length;
 }

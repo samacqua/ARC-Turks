@@ -113,7 +113,7 @@ var idleTime = 0;
 $(document).ready(function () {
     //Increment the idle time counter every 5 seconds.
     var resolution = 5;
-    var idleInterval = setInterval(function() { idleTime += resolution; console.log(idleTime, maxIdleTime); }, resolution*1000);
+    var idleInterval = setInterval(function() { idleTime += resolution; }, resolution*1000);
 
     //Zero the idle timer on mouse movement.
     $(this).mousemove(function (e) {

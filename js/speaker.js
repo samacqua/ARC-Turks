@@ -188,7 +188,7 @@ var maxIdleTime = 0;
 $(document).ready(function () {
     //Increment the idle time counter every 5 seconds.
     var resolution = 5;
-    var idleInterval = setInterval(function() { idleTime += resolution; console.log(idleTime, maxIdleTime); }, resolution*1000);
+    var idleInterval = setInterval(function() { idleTime += resolution; }, resolution*1000);
 
     //Zero the idle timer on mouse movement.
     $(this).mousemove(function (e) {
@@ -598,7 +598,7 @@ function verify() {
     // Bring the user to the listener page, but show them their own description to ensure they wrote something decent
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    window.location.href = `listener.html?task=${urlParams.get('task') || "0"}&time=${totalTime}&see=${see_desc}&do=${do_desc}&grid=${grid_size_desc}&se=${selected_example}&ver=true&maxIdle=${maxIdleTime}`;
+    window.location.href = `listener.html?task=${TASK_ID}&time=${totalTime}&see=${see_desc}&do=${do_desc}&grid=${grid_size_desc}&se=${selected_example}&ver=true&maxIdle=${maxIdleTime}`;
 }
 
 function give_up() {

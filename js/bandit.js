@@ -34,8 +34,7 @@ function select_casino(type) {
                     variances[i] -= raw_max+1;
                     if (task_collisions == NUM_TASKS) {
                         console.log("done bc no tasks left that they have not already interacted with");
-                        finish();
-                        return;
+                        return resolve(-1);
                     }
                 }
             }
@@ -53,6 +52,210 @@ function select_casino(type) {
             return reject(err);
         });
     });
+}
+
+/**
+ * Returns the casino (task) with least # interactions (descriptions + attempts)
+ * @param {boolean} force_listener if true, returns casino that needs pull of existing arm, if any exist
+ * @param {string} type the type of descriptions ("nl", "ex", or "nl_ex")
+ */
+function new_select_casino(type) {
+    return new Promise(function (resolve, reject) {
+        get_bandit_doc(type).then(bandit_doc => {
+            get_timing_doc(type).then(timing => {
+
+                console.log("BANDIT:");
+                console.log(bandit_doc);
+
+                console.log("TIMING:");
+                console.log(timing);
+
+                // calculate effort ratios
+                let all_efforts = parse_timing_doc(timing);
+                console.log("PARSED TIMING:");
+                console.log(all_efforts);
+                
+                let avg_efforts = sum_array(Object.values(all_efforts));
+                let efforts_ratio = {};
+                $.each(all_efforts, function(task_id, task_effort_sum) {
+                    efforts_ratio[task_id] = (task_effort_sum/avg_efforts);
+                });
+                console.log("EFFORT_RATIOS:");
+                console.log(efforts_ratio);
+
+                let cas_scores = {};
+                let casinos = parse_bandit_doc(bandit_doc);
+                console.log("PARSED BANDIT DOC:");
+                console.log(casinos);
+
+                const tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
+
+                $.each(casinos, function(task_id, desc_obj) {
+                    let task_best_arms = [];
+
+                    $.each(desc_obj, function(desc_id, bandit_vals) {
+                        task_best_arms.push(bandit_vals);
+                    });
+
+                    let priors = [1, 1];
+                    if (task_best_arms.length == 0) {
+                        task_best_arms = [{a: priors[0], b: priors[1]}];
+                    }
+
+                    task_best_arms.sort((c,d) => c.mean < d.mean);
+
+                    let half_i = Math.ceil(task_best_arms.length / 2);
+                    let best_half = task_best_arms.splice(0, half_i);
+
+                    // TODO: when should add priors? For each desc? Or to sum? (right now doing both)
+                    let super_a = priors[0];
+                    let super_b = priors[1];
+
+                    for (i=0;i<best_half.length;i++) {
+                        let arm = best_half[i];
+                        super_a += arm.a;
+                        super_b += arm.b;
+                    }
+
+                    let variance = super_a*super_b / ((super_a+super_b)**2 * (super_a+super_b+1));
+                    if (tasks_done.includes(task_id)) {
+                        console.log("DONE TASK " + task_id.toString());
+                        variance = -1;
+                    }
+                    if (efforts_ratio.hasOwnProperty(task_id)) {
+                        variance /= efforts_ratio[task_id];
+                    } else {
+                        variance = Infinity;
+                    }
+                    cas_scores[task_id] = variance;
+                });
+
+                let max = -Infinity;
+                let argmax = [];
+                // calculate argmax, return random choice if tie to prevent a bunch of users pulling same arm
+                $.each(cas_scores, function(key, value) {
+                    if (value > max) {
+                        max = value;
+                        argmax = [key];
+                    } else if (value == max) {
+                        argmax.push(key);
+                    }
+                });
+                console.log("CASINO SCORES:");
+                console.log(cas_scores);
+                console.log(max);
+                console.log(argmax);
+
+                // all tasks have been done by user
+                if (max < 0) {
+                    console.log("done bc no tasks left that they have not already interacted with");
+                    return resolve(-1);
+                }
+
+                const chosen_arg_max = argmax[Math.floor(Math.random() * argmax.length)];
+                return resolve(chosen_arg_max);
+            });
+        })
+        .catch(function (err) {
+            return reject(err);
+        });
+    });
+}
+
+/**
+ * Takes the firestore timing doc, which has form
+ * {task_desc_id_desc: desc_time, task_desc_id_build: [build_time]} for all tasks' descriptions and builds
+ * Parses the doc into an object with the sum of all the times for a task (weighted to take into account pilot avg), with outliers for each task removed
+ * @param {Object} doc the firestore document for timing
+ * @returns {Object} an object of the sum of all the times for a task with no outliers
+ */
+function parse_timing_doc(doc, ABS_MAX_TIME=60*15) {
+// noone should spend 15  minutes on a task. TODO: discuss this val
+    let all_desc_times = {};
+    let all_build_times = {};
+
+    // doc = JSON.parse('{"305_b500af4c-38dc-46bb-a412-a3da209df0e2_attempts":[40.10028079620448],"149_8651e240-ded9-4f95-b2c3-4e8d9a9b2572_desc":76,"305_b500af4c-38dc-46bb-a412-a3da209df0e2_desc":116,"149_8651e240-ded9-4f95-b2c3-4e8d9a9b2572_attempts":[17.329552752762513]}');
+    // console.log(doc);
+    // organize all times by task and type (speak or build)
+    $.each(doc, function(key, value) {
+        let split_key = key.split('_');
+        let task = split_key[0];
+
+        if (split_key[2] == 'desc') {
+            if (all_desc_times.hasOwnProperty(task)) {
+                all_desc_times[task].push(value);
+            } else {
+                all_desc_times[task] = [value];
+            }
+        } else {
+            for (i=0;i<value.length;i++) {
+                if (all_build_times.hasOwnProperty(task)) {
+                    all_build_times[task].push(value[i]);
+                } else {
+                    all_build_times[task] = [value[i]];
+                }
+            }
+        }
+    });
+
+    console.log(all_desc_times);
+    console.log(all_build_times);
+
+    let task_times = {};
+
+    // Filter outliers and sum
+    $.each(all_desc_times, function(task, times) {
+
+        let filtered_times = filterOutliers(times, ABS_MAX_TIME, SPEAKER_TIME*60);
+        console.log(filtered_times);
+        if (task_times.hasOwnProperty(task)) {
+            task_times[task] += weight_timing(filtered_times, SPEAKER_TIME*60);
+        } else {
+            task_times[task] = weight_timing(filtered_times, SPEAKER_TIME*60);
+        }
+    });
+    console.log("BUILD");
+    $.each(all_build_times, function(task, times) {
+
+        let filtered_times = filterOutliers(times, ABS_MAX_TIME, BUILDER_TIME*60);
+        console.log(filtered_times);
+        if (task_times.hasOwnProperty(task)) {
+            task_times[task] += weight_timing(filtered_times, BUILDER_TIME*60);
+        } else {
+            task_times[task] = weight_timing(filtered_times, BUILDER_TIME*60);
+        }
+    });
+
+    return task_times;
+}
+
+/**
+ * parses the firestore bandit doc and returns a casinos object which has a and b values for all descs by task
+ * @param {Object} doc the firestore bandit doc
+ * @returns {Object} casinos object which has a and b values for all descs by task
+ */
+function parse_bandit_doc(doc) {
+    let casinos = {};
+
+    // loop thru all tasks so that each task has an a and b value
+    for (i=0;i<TASKS.length;i++) {
+        casinos[TASKS[i]] = {};
+    }
+
+    $.each(doc, function(key, value) {
+        let task = key.split('_')[0];
+        let desc_id = key.split('_')[1];
+        let a = value[0];
+        let b = value[1];
+
+        if (casinos.hasOwnProperty(task)) {
+            casinos[task][desc_id] = {'a': a, 'b': b};
+        } else {
+            casinos[task] = {};
+            casinos[task][desc_id] = {'a': a, 'b': b};
+        }
+    });
+    return casinos;
 }
 
 /**
