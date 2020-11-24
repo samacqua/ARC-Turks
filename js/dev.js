@@ -32,7 +32,7 @@ $(window).on('load', function () {
 
     load_new_task(task);
 
-    // $("#evaluation_input").addClass("no-display");
+    $("#evaluation_input").addClass("no-display");
 
     if (DESCRIPTIONS_TYPE == "nl") {
         $("#select_ex_io").remove();

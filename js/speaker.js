@@ -621,6 +621,7 @@ function give_up() {
             tasks_done.push(TASK_ID);
             sessionStorage.setItem('tasks_completed', tasks_done);
     
+            // TODO: not using variable timing here... is that alright?
             next_task(SPEAKER_TIME*SKIP_PART_CRED);
         });
     });

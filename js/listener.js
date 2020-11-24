@@ -7,6 +7,8 @@ var IS_VERIFICATION;
 var uid;
 var maxIdleTime = 0;
 
+var TIMING_CREDIT;
+
 $(window).on('load', function () {
     uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
     // get date for making sure they try before giving up
@@ -98,6 +100,28 @@ $(window).on('load', function () {
     var tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
     tasks_done.push(TASK_ID);
     sessionStorage.setItem('tasks_completed', tasks_done);
+
+    // get timing data for the task to determine amount towards completion
+    TIMING_CREDIT = IS_VERIFICATION ? SPEAKER_TIME : BUILDER_TIME;
+    let all_past_times = [];
+    get_timing_doc(DESCRIPTIONS_TYPE).then(timing_doc => {
+        $.timing_doc(timing_doc, function(key, value) {
+            if (IS_VERIFICATION) {
+                if (key.includes(TASK_ID.toString() && key.includes("desc"))) {
+                    all_past_times.push(value);
+                }
+            } else {
+                if (key.includes(TASK_ID.toString() && key.includes("attempts"))) {
+                    all_past_times.push(...value);
+                }
+            }
+        });
+
+        TIMING_CREDIT = weight_timing(all_past_times, TIMING_CREDIT, summed=false);
+    }).catch(error => {
+        console.error("Error getting past description timing: ", error);
+    });
+
 });
 
 $(document).ready(function () {
@@ -158,7 +182,7 @@ function check() {
      * check if output grid same as correct answer. if so, store info and move to next task
      */
     if (SENDING_TO_NEXT == true) {
-        // return;
+        return;
     }
     syncFromEditionGridToDataGrid();
     reference_output = TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output'];
@@ -231,7 +255,7 @@ function check() {
                 store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), build_time, success = true, DESCRIPTIONS_TYPE, maxIdleTime, task_best, desc_to_update)
                 .then(function () { 
                     set_user_complete_time(uid, build_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_listener`).then(function() {
-                        next_task(BUILDER_TIME); 
+                        next_task(TIMING_CREDIT); 
                     }).catch(function (error) { console.error('Error storing response ' + error); });
                 })
                 .catch(function (error) { console.error("Error storing response: " + error); });
@@ -267,7 +291,7 @@ function submit_description() {
         store_failed_ver_description(see_desc, do_desc, grid_desc, TASK_ID, uid, conf, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), desc_time, verification_time, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE, maxIdleTime)
         .then(function () { 
             set_user_complete_time(uid, total_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker_(low_conf)`).then(function() {
-                next_task(SPEAKER_TIME);
+                next_task(TIMING_CREDIT);
             }).catch(function (error) { console.error('Error storing response ' + error); });
         })
         .catch(function (error) { console.error('Error storing response ' + error); });
@@ -275,7 +299,7 @@ function submit_description() {
         store_description(see_desc, do_desc, grid_desc, TASK_ID, uid, conf, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), desc_time, verification_time, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE, maxIdleTime)
         .then(function () {
             set_user_complete_time(uid, total_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker`).then(function() {
-                next_task(SPEAKER_TIME);
+                next_task(TIMING_CREDIT);
             }).catch(function (error) { console.error('Error storing response ' + error); });
         })
         .catch(function (error) { console.error('Error storing response ' + error); });
@@ -301,7 +325,7 @@ function used_all_attempts() {
         store_failed_ver_description(see_desc, do_desc, grid_desc, TASK_ID, uid, null, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), desc_time, build_time, SELECTED_EXAMPLE, DESCRIPTIONS_TYPE, maxIdleTime)
         .then(function () {
             set_user_complete_time(uid, desc_time+build_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker_(fail)`).then(function() {
-                next_task(SPEAKER_TIME*SPEAKER_FAIL_PART_CRED);
+                next_task(TIMING_CREDIT*SPEAKER_FAIL_PART_CRED);
             }).catch(function (error) { console.error('Error storing response ' + error); });
         })
     .catch(function (error) { console.error('Error storing response ' + error); });
@@ -318,7 +342,7 @@ function used_all_attempts() {
                 store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), build_time, success = false, DESCRIPTIONS_TYPE, maxIdleTime, task_best, desc_to_update)
                 .then(function () { 
                     set_user_complete_time(uid, build_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_listener_(fail)`).then(function() {
-                        next_task(BUILDER_TIME); 
+                        next_task(TIMING_CREDIT); 
                     }).catch(function (error) { console.error('Error storing response ' + error); });
                 })
                 .catch(function (error) { console.error("Error storing response: " + error); });

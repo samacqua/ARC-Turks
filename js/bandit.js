@@ -107,7 +107,6 @@ function new_select_casino(type) {
                     let half_i = Math.ceil(task_best_arms.length / 2);
                     let best_half = task_best_arms.splice(0, half_i);
 
-                    // TODO: when should add priors? For each desc? Or to sum? (right now doing both)
                     let super_a = priors[0];
                     let super_b = priors[1];
 

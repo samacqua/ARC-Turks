@@ -415,8 +415,7 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confi
         // add desc a & b to task desc summary document
         const descs_summary_ref = db.collection(type + "_tasks").doc("descs_bandit");
         let bandit_data = {};
-        let priors = [1, 1];
-        bandit_data[`${task_id}_${desc_id}`] = priors;
+        bandit_data[`${task_id}_${desc_id}`] = [0, 0];
         batch.set(descs_summary_ref, bandit_data, {merge: true});
 
         // set timing in doc
@@ -511,7 +510,7 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, atte
         // update a and b in bandit summary
         const descs_summary_ref = db.collection(type + "_tasks").doc("descs_bandit");
         let bandit_data = {};
-        bandit_data[`${task_id}_${desc_id}`] = [a, b];
+        bandit_data[`${task_id}_${desc_id}`] = [a-priors[0], b-priors[0]];
         batch.update(descs_summary_ref, bandit_data);
 
         // add timing
@@ -585,6 +584,12 @@ function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, use
             desc_failure_count: increment,
         };
         batch.update(task_ref, task_update_data);
+
+        // set timing in doc
+        const timing_ref = db.collection(type + "_tasks").doc("timing");
+        let timing_data = {};
+        timing_data[`${task_id}_${desc_id}_desc`] = parseInt(desc_time) + parseInt(ver_time);
+        batch.set(timing_ref, timing_data, {merge: true});
 
         batch.commit().then(function () {
             return resolve();
