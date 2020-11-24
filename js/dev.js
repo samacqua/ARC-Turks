@@ -32,6 +32,8 @@ $(window).on('load', function () {
 
     load_new_task(task);
 
+    // $("#evaluation_input").addClass("no-display");
+
     if (DESCRIPTIONS_TYPE == "nl") {
         $("#select_ex_io").remove();
     }
@@ -442,7 +444,10 @@ function load_new_task(task) {
     $("#attempts_row").empty();
     $("#desc_uses").empty();
 
-    loadTask(task);
+    loadTask(task).then(() => {
+        add_grid_hover_listeners();
+    });
+
     TASK_ID = task;
     $("#objective-title").html(`<b>Task ${task}</b>`);
     get_task_descriptions(task, DESCRIPTIONS_TYPE).then(function (descriptions) {

@@ -81,10 +81,12 @@ function fillPairPreview(pairId, inputGrid, outputGrid) {
         pairSlot.appendTo('#task_preview');
     }
     var jqInputGrid = pairSlot.find('.input_preview');
+    let input_container = $('<div class="input_container"></div>');
     if (!jqInputGrid.length) {
         jqInputGrid = $('<div class="input_preview"></div>');
-        jqInputGrid.appendTo(pairSlot);
+        jqInputGrid.appendTo(input_container);
     }
+    input_container.appendTo(pairSlot);
 
     var jqArrow = pairSlot.find('.arrow');
     if (!jqArrow.length) {
@@ -106,10 +108,12 @@ function fillPairPreview(pairId, inputGrid, outputGrid) {
     }
 
     var jqOutputGrid = pairSlot.find('.output_preview');
+    let output_container = $('<div class="output_container"></div>');
     if (!jqOutputGrid.length) {
         jqOutputGrid = $('<div class="output_preview"></div>');
-        jqOutputGrid.appendTo(pairSlot);
+        jqOutputGrid.appendTo(output_container);
     }
+    output_container.appendTo(pairSlot);
 
     fillJqGridWithData(jqInputGrid, inputGrid, `input ${parseInt(pairId)+1}`);
     fitCellsToContainer(jqInputGrid, inputGrid.height, inputGrid.width);
@@ -197,27 +201,31 @@ function loadTaskFromFile(e) {
 }
 
 function loadTask(task_index) {
-    console.log("Loading task:", task_index);
-    if (task_index == null) {
-        console.warn("Tried to load a null task. Ensure that you are providing a task number.");
-    }
-    var subset = "training";
-    $.getJSON("https://api.github.com/repos/samacqua/ARC-Turks/contents/data/" + subset, function (tasks) {
-        var task = tasks[task_index];
+    return new Promise(function (resolve, reject) {
+        console.log("Loading task:", task_index);
+        if (task_index == null) {
+            console.warn("Tried to load a null task. Ensure that you are providing a task number.");
+        }
+        var subset = "training";
+        $.getJSON("https://api.github.com/repos/samacqua/ARC-Turks/contents/data/" + subset, function (tasks) {
+            var task = tasks[task_index];
+    
+            $.getJSON(task["download_url"], function (json) {
+                try {
+                    train = json['train'];
+                    test = json['test'];
+                } catch (e) {
+                    errorMsg('Bad file format');
+                    return;
+                }
+                loadJSONTask(train, test);
+                TASK_ID = task_index;
 
-        $.getJSON(task["download_url"], function (json) {
-            try {
-                train = json['train'];
-                test = json['test'];
-            } catch (e) {
-                errorMsg('Bad file format');
-                return;
-            }
-            loadJSONTask(train, test);
-            TASK_ID = task_index;
-            //$('#load_task_file_input')[0].value = "";
-        })
-    })
+                return resolve();
+                //$('#load_task_file_input')[0].value = "";
+            })
+        }) 
+    });
 }
 
 function fillTestInput(inputGrid) {
@@ -248,7 +256,7 @@ function initializeSelectable() {
         $('.selectable_grid').selectable(
             {
                 autoRefresh: false,
-                filter: '> .row > .cell',
+                filter: '> .grid_row > .cell',
                 start: function (event, ui) {
                     $('.ui-selected').each(function (i, e) {
                         $(e).removeClass('ui-selected');

@@ -57,10 +57,12 @@ body {
 }
 
 #output_grid {
-    margin: 0 auto;
+    margin: 10px auto;
     padding: 8px;
     border-radius: 5px;
     background-color: rgb(204, 204, 204);
+    overflow: auto;
+    text-align: center;
 }
 
 #toolbar {
@@ -100,31 +102,34 @@ label {
     background-color: rgb(204, 204, 204);
 }
 
-.input_preview {
+.input_container {
     width: 45%;
-    float: left;
-    margin: 0px;
-    padding: 0px;
+    margin: 0;
+    padding: 5px;
+    text-align: center;
 }
 
-/* .grid_label {
+.input_preview {
     text-align: left;
-    margin-top: auto;
-    margin-bottom: 0;
-} */
+    display: inline-block;
+}
+
+.output_container {
+    width: 45%;
+    margin: 0;
+    padding: 5px;
+    text-align: center;
+}
 
 .output_preview {
-    width: 45%;
-    float: left;
-    margin: 0px;
-    padding: 0px;
+    text-align: left;
+    display: inline-block;
 }
 
 .arrow {
-    height: 80%;
+    height: 100%;
     width: 10%;
     padding: 5px;
-    float: left;
 }
 
 .text {

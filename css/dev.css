@@ -8,34 +8,57 @@
     margin: 0 auto;
     display: grid;
     place-items: center;
-    grid-template-areas: "inners";
-}
-
-.inner {
-    grid-area: inners;
-    height: 100%;
-    width: 100%;
 }
 
 .no-display {
     display: none;
 }
 
-#choose-task-btn {
+#header-btns {
     position: fixed;
     top: 10px;
     left: 10px;
-    width: 130px;
+    z-index: 1000;
+    background-color: #fff;
+    overflow: auto;
+    border-radius: 5px;
+}
+
+#grid-focus {
+    width: 50%;
+    margin: 50px;
+    overflow: auto;
+    max-width: 1000px;
+    background-color: #fff;
+    z-index: 100;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 15px;
+    overflow: auto;
+    display: none;
+    text-align: center;
+}
+
+#grid-focus p {
+    color: gray;
+    font-size: 20px;
+}
+
+#grid-focus-container {
+    width: 100%;
+    overflow: auto;
+    align-items: center;
+    display: flex;
+}
+
+#choose-task-btn {
     margin: 10px;
-    z-index: 1;
 }
 
 #walkthrough-layout-btn {
-    position: fixed;
-    top: 10px;
-    left: 150px;
     margin: 10px;
-    z-index: 1;
 }
 
 #objective-col {

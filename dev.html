@@ -60,10 +60,12 @@
 
 <body>
 
-    <div id="choose-task-btn-wrapper">
-        <button type="button" class="btn btn-secondary" id="choose-task-btn" onclick="load_tasks_to_browse();" data-toggle="modal" data-target="#browse-tasks-modal">Choose task</button>
+    <div id="header-btns">
+        <span id="choose-task-btn-wrapper">
+            <button type="button" class="btn btn-secondary" id="choose-task-btn" onclick="load_tasks_to_browse();" data-toggle="modal" data-target="#browse-tasks-modal">Choose task</button>
+        </span>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" id="walkthrough-layout-btn" onclick="set_tutorial(); continue_tutorial();">Walkthrough layout</button>
     </div>
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" id="walkthrough-layout-btn" onclick="set_tutorial(); continue_tutorial();">Walkthrough layout</button>
 
     <div class="row">
         <div id="objective-col" class="col-md">
@@ -82,6 +84,11 @@
             <div id="tut-message"></div>
             <div id="tut-continue-message">Click to continue</div>
             <div id="trans-layer"></div>
+        </div>
+
+        <div id="grid-focus">
+            <div id="grid-focus-container"></div>
+            <div><p>(click anywhere to exit)</p></div>
         </div>
 
         <div class="row">
@@ -104,7 +111,7 @@
                     <div id="task_preview" class="inner">
                         Loading...
                     </div>
-                    <div id="evaluation_input" class="selectable_grid inner no-display"></div>
+                    <div id="evaluation_input" class="selectable_grid"></div>
                 </div>
 
             </div>
@@ -136,17 +143,17 @@
 
                 <div id="output_grid">
                     <div class="edition_grid selectable_grid">
-                        <div class="row">
+                        <div class="grid_row">
                             <div class="cell" symbol="0" x="0" y="0"></div>
                             <div class="cell" symbol="0" x="0" y="1"></div>
                             <div class="cell" symbol="0" x="0" y="2"></div>
                         </div>
-                        <div class="row">
+                        <div class="grid_row">
                             <div class="cell" symbol="0" x="1" y="0"></div>
                             <div class="cell" symbol="0" x="1" y="1"></div>
                             <div class="cell" symbol="0" x="1" y="2"></div>
                         </div>
-                        <div class="row">
+                        <div class="grid_row">
                             <div class="cell" symbol="0" x="2" y="0"></div>
                             <div class="cell" symbol="0" x="2" y="1"></div>
                             <div class="cell" symbol="0" x="2" y="2"></div>

@@ -49,8 +49,17 @@ function convertSerializedGridToGridObject(values) {
 
 function fitCellsToContainer(jqGrid, height, width) {
 
-    let containerWidth = jqGrid.width();
-    let MAX_GRID_HEIGHT = 500;
+    console.log("=====");
+
+    let hiddenElement = null;
+
+    if ($(jqGrid).is(":hidden")) {
+        hiddenElement = $(jqGrid).closest('.no-display');
+        hiddenElement.removeClass("no-display");
+    }
+
+    let containerWidth = $(jqGrid).width();
+    let MAX_GRID_HEIGHT = containerWidth * 1.5;
     let containerHeight = MAX_GRID_HEIGHT;
 
     let candidate_height = containerHeight / height;
@@ -61,6 +70,10 @@ function fitCellsToContainer(jqGrid, height, width) {
 
     jqGrid.find('.cell').css('height', size + 'px');
     jqGrid.find('.cell').css('width', size + 'px');
+
+    if (hiddenElement) {
+        $(hiddenElement).addClass("no-display");
+    }
 }
 
 function fillJqGridWithData(jqGrid, dataGrid, label=null) {
@@ -70,7 +83,7 @@ function fillJqGridWithData(jqGrid, dataGrid, label=null) {
 
     for (var i = 0; i < height; i++) {
         var row = $(document.createElement('div'));
-        row.addClass('row');
+        row.addClass('grid_row');
         for (var j = 0; j < width; j++) {
             var cell = $(document.createElement('div'));
             cell.addClass('cell');
@@ -87,7 +100,7 @@ function fillJqGridWithData(jqGrid, dataGrid, label=null) {
 }
 
 function copyJqGridToDataGrid(jqGrid, dataGrid) {
-    row_count = jqGrid.find('.row').length
+    row_count = jqGrid.find('.grid_row').length
     if (dataGrid.height != row_count) {
         return
     }
@@ -95,7 +108,7 @@ function copyJqGridToDataGrid(jqGrid, dataGrid) {
     if (dataGrid.width != col_count) {
         return
     }
-    jqGrid.find('.row').each(function (i, row) {
+    jqGrid.find('.grid_row').each(function (i, row) {
         $(row).find('.cell').each(function (j, cell) {
             dataGrid.grid[i][j] = parseInt($(cell).attr('symbol'));
         });

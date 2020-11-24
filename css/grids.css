@@ -13,6 +13,11 @@
     justify-content: center;
 }
 
+.grid_row {
+    clear: both;
+    margin: 0 auto;
+}
+
 .symbol_0 {
     background-color: #000;
 }

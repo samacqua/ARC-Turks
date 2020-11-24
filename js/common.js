@@ -16,9 +16,31 @@ $(window).resize(function () {
         } catch (err) {
             console.warn("Tried to resize the output grid, but there is no output grid to resize.");
         }
-        loadTask(TASK_ID);
+        loadTask(TASK_ID).then(() => {
+            add_grid_hover_listeners();
+        });
     }, 500);
 });
+
+function add_grid_hover_listeners() {
+    $(".pair_preview").hover(function() {
+        $(this).css("background-color", "rgb(160, 160, 160)");
+    }, function(){
+        $(this).css("background-color", "rgb(200, 200, 200)");
+    });
+
+    $(".pair_preview").click(function(e) {
+        if ($("#grid-focus").is(":hidden")) {
+            e.stopPropagation();
+        }
+        $("#grid-focus").fadeIn();
+        $("#grid-focus-container").html(this.innerHTML);
+    });
+
+    $(document).click(function(e) {
+        $('#grid-focus').fadeOut();
+     });
+}
 
 var LAST_MSG_DISMISS_CALL_TIME = new Date();    // timestamp to ensure that messages fade out at correct time
 /**

@@ -32,6 +32,16 @@ img {
     padding: 15px;
 }
 
+.edition_grid {
+    text-align: left;
+    display: inline-block;
+}
+
+#container-fluid {
+    margin: auto;
+    max-width: 2000px;
+}
+
 #loader {
     max-width: 90%;
     max-height: 70%;
