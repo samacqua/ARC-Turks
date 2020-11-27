@@ -188,7 +188,6 @@ function show_use_info(desc_id, attempt_id) {
     // loop through use object and get all properties
     let properties = [];
     Object.keys(use).forEach(function(key) {
-        console.log(key);
         if (['attempt_jsons', 'grid_desc', 'see_desc', 'do_desc'].includes(key)) {
 
         } else if (key == 'timestamp') {
@@ -214,7 +213,7 @@ function show_desc_info(desc_index) {
     // loop through use object and get all properties
     let properties = [];
     Object.keys(cur_desc).forEach(function(key) {
-        console.log(key);
+
         if (['attempt_jsons', 'grid_desc', 'see_desc', 'do_desc'].includes(key)) {
             // pass
         } else if (key == 'timestamp') {
@@ -300,6 +299,71 @@ function show_desc(cur_desc_i) {
     show_attempt_json(cur_desc.attempt_jsons[cur_desc.attempt_jsons.length-1]);
 }
 
+function reformat_action_sequence(sequence) {
+
+    let new_seq = JSON.parse(JSON.stringify(sequence));
+
+    // reset everything
+    $("#output_grid_size").val('3x3');
+    resizeOutputGrid(replay=true);
+    resetOutputGrid(replay=true);
+    CUR_ACTION_I = 0;
+
+    $.each(new_seq, (i, action) => {
+
+        let tool = action[0];
+        switch (tool) {
+            case "edit":
+                [tool, x, y, symbol] = action;
+                new_seq[i] = {"action": {"tool": tool, "x": x, "y": y, "symbol": symbol}};
+
+                break;
+            case "floodfill":
+                [tool, x, y, symbol] = action;
+                new_seq[i] = {"action": {"tool": tool, "x": x, "y": y, "symbol": symbol}};
+                
+                break;
+            case "copy":
+                [tool, copy_paste_data] = action;
+                new_seq[i] = {"action": {"tool": tool, "copy_paste_data": copy_paste_data}};
+                
+                break;
+            case "paste":
+                [tool, copy_paste_data, targetx, targety] = action;
+                new_seq[i] = {"action": {"tool": tool, "copy_paste_data": copy_paste_data, "x": targetx, "y": targety}};
+                
+                break;
+            case "copyFromInput":
+                new_seq[i] = {"action": {"tool": tool}};
+            
+                break;
+            case "resetOutputGrid":
+                new_seq[i] = {"action": {"tool": tool}};
+
+                break;
+            case "resizeOutputGrid":
+                [tool, x, y] = action;
+                new_seq[i] = {"action": {"tool": tool, "width": x, "height": y}};
+                
+                break;
+            case "check":
+                let correct = action[1];
+                new_seq[i] = {"action": {"tool": tool, "correct": correct}};
+                break;
+            default:
+                console.error("Unknown tool: ", tool);
+                break;
+        }
+
+        play_action(sequence); // simulate action
+        update_grid_from_div($(`#output_grid .editable_grid`), CURRENT_OUTPUT_GRID); // sync ui -> state
+        new_seq[i].grid = array_copy(CURRENT_OUTPUT_GRID.grid); // use simulation to get correct grid
+        new_seq[i].time = null; // old data has no time data
+    });
+
+    return new_seq;
+}
+
 var CUR_ACTION_I = -1;
 
 /**
@@ -365,7 +429,7 @@ function show_attempt_json(json) {
     CURRENT_OUTPUT_GRID.height = grid.length;
     CURRENT_OUTPUT_GRID.width = grid[0].length;
     $("#output_grid_size").val(CURRENT_OUTPUT_GRID.width + 'x' + CURRENT_OUTPUT_GRID.height);
-    syncFromDataGridToEditionGrid();
+    update_div_from_grid_state($(`#output_grid .editable_grid`), CURRENT_OUTPUT_GRID);
 }
 
 /**
@@ -438,7 +502,7 @@ function load_new_task(task) {
     CURRENT_OUTPUT_GRID.width = 3;
     CURRENT_OUTPUT_GRID.height = 3;
     CURRENT_OUTPUT_GRID.grid = [[0,0,0], [0,0,0], [0,0,0]];
-    syncFromDataGridToEditionGrid();
+    update_div_from_grid_state($(`#output_grid .editable_grid`), CURRENT_OUTPUT_GRID);
 
     // empty rows of uses and attempts
     $("#attempts_row").empty();
@@ -456,9 +520,90 @@ function load_new_task(task) {
 
         createExampleDescsPager();
         showDescEx(0);
+
     }).catch(error => {
         errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
         console.error(error);
+    });
+}
+
+function reformat_task_action_sequences(task) {
+
+    return new Promise((resolve, reject) => {
+        loadTask(task).then(() => {
+            get_task_descriptions(task, DESCRIPTIONS_TYPE).then(descriptions => {
+                (async function loop() {
+                    for (let i=0;i<=descriptions.length; i++) {
+                        await new Promise((loop_res, reject) => {
+
+
+                            if (i == descriptions.length) {
+                                return resolve();
+                            }
+
+                            let desc = descriptions[i];
+                            console.log("=== " +  i.toString() + " ===");
+    
+                            if (!desc.attempts_sequence) {
+                                console.log("Desc:", desc.id);
+                                console.log("No action sequence for this description");
+                                console.log(timeConverter(desc.timestamp));
+            
+                                get_desc_builds(desc.type, desc.task, desc.id).then(builds => {
+                                    reformat_builds_action_sequences(builds).then(() => {
+                                        loop_res();
+                                    });
+                                });
+                            } else {
+                                let action_sequence = JSON.parse(desc.attempts_sequence);
+                                let new_seq = reformat_action_sequence(action_sequence);
+                                console.log("Desc:", new_seq, desc.id, desc.task, desc.type);
+                                reformat_desc_action_sequence(new_seq, desc.id, desc.task, desc.type).then(() => {
+            
+                                    get_desc_builds(desc.type, desc.task, desc.id).then(builds => {
+                                        reformat_builds_action_sequences(builds).then(() => {
+                                            loop_res();
+                                        });
+                                    });
+            
+                                });
+                            }
+                        });
+                    }
+                })();
+            });
+        });
+    });
+}
+
+function reformat_builds_action_sequences(builds) { 
+    return new Promise((resolve, reject) => {
+        (async function loop() {
+            for (let i=0;i<=builds.length; i++) {
+                await new Promise((resolve_loop, reject_inner) => {
+
+                    if (i == builds.length) {
+                        return resolve();
+                    }
+
+                    let build = builds[i];
+
+                    if (!build.attempts_sequence) {
+                        console.log("Build: " + build.id);
+                        console.log("No action sequence for this build");
+                        resolve_loop();
+                    } else {
+                        let build_action_sequence = JSON.parse(build.attempts_sequence);
+                        let build_new_seq = reformat_action_sequence(build_action_sequence);
+                        console.log("Build:", build_new_seq, build.id, build.desc_id, build.task, build.desc_type);
+
+                        reformat_build_action_sequence(build_new_seq, build.id, build.desc_id, build.task, build.desc_type).then(() => {
+                            resolve_loop();
+                        });
+                    }
+                });
+            }
+        })();
     });
 }
 
@@ -489,7 +634,6 @@ function play_action(sequence) {
         $("#output_grid_size").val('3x3');
         resizeOutputGrid(replay=true);
         resetOutputGrid(replay=true);
-        console.log("set to 3x3");
         CUR_ACTION_I += 1;
         return;
     }
@@ -497,7 +641,11 @@ function play_action(sequence) {
     const action = sequence[CUR_ACTION_I];
     let tool = action[0];
 
-    console.log(action);
+    // let grid = array_to_grid(action.grid);
+    // console.log(grid);
+    // console.log(action.action);
+    // update_div_from_grid_state($(`#output_grid .editable_grid`), grid);
+
     CUR_ACTION_I += 1;
 
     switch (tool) {
@@ -509,14 +657,14 @@ function play_action(sequence) {
                     cell = $(this);
                 }
             });
-            setCellSymbol(cell, symbol);
+            set_cell_color(cell, symbol);
             break;
         case "floodfill":
             [tool, x, y, symbol] = action;
-            syncFromEditionGridToDataGrid();
+            update_grid_from_div($(`#output_grid .editable_grid`), CURRENT_OUTPUT_GRID);
             grid = CURRENT_OUTPUT_GRID.grid;
-            floodfillFromLocation(grid, x, y, symbol);
-            syncFromDataGridToEditionGrid();
+            flood_fill(grid, x, y, symbol);
+            update_div_from_grid_state($(`#output_grid .editable_grid`), CURRENT_OUTPUT_GRID);
             break;
         case "copy":
             [tool, copy_paste_data] = action;
@@ -555,7 +703,7 @@ function play_action(sequence) {
                 res = jqGrid.find('[x="' + newx + '"][y="' + newy + '"] ');
                 if (res.length == 1) {
                     let cell = $(res[0]);
-                    setCellSymbol(cell, symbol);
+                    set_cell_color(cell, symbol);
                 }
             }
             break;
@@ -591,9 +739,6 @@ var REPLAY_TIMEOUT;
  */
 function replay_create(sequence, iter=-1, delay=-1) {
 
-    console.log(sequence);
-    console.log(iter, CUR_ACTION_I);
-
     if (sequence == undefined ) {
         errorMsg("This description was collected before we started monitoring action sequences.");
         return;
@@ -603,7 +748,6 @@ function replay_create(sequence, iter=-1, delay=-1) {
         $("#output_grid_size").val('3x3');
         resizeOutputGrid(replay=true);
         resetOutputGrid(replay=true);
-        console.log("set to 3x3");
         CUR_ACTION_I = 0;
         replay_create(sequence, iter=CUR_ACTION_I, delay=delay);
         return;
@@ -639,6 +783,7 @@ function get_desc_builds(description_type, task, desc_id) {
                     'num_attempts': data.num_attempts,
                     'attempt_jsons': data.attempt_jsons,
                     'attempts_sequence': data.attempts_sequence,
+                    'action_sequence': data.action_sequence,
                     'success': data.success,
                     'time': data.time,
                     'timestamp': data.timestamp,

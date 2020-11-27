@@ -2,6 +2,8 @@ var QUIZ_QUESTIONS;
 
 $(window).on('load', function () {
 
+    PAGE = Pages.Intro
+
     // correctly size the progress bar
     size_progress_bar();
 
@@ -14,7 +16,6 @@ $(window).on('load', function () {
     $("#grid_size_p").text(task.grid_desc);
     $("#see_p").text(task.see_desc);
     $("#do_p").text(task.do_desc);
-    SELECTED_EXAMPLE = task.selected_example;
 
     // initialize time spent for credit towards completion
     sessionStorage.setItem("time_complete", "0");
@@ -49,7 +50,6 @@ $(window).on('load', function () {
 
     // set up quiz
     QUIZ_QUESTIONS = GEN_QUIZ_QUESTIONS;
-    QUIZ_QUESTIONS.unshift(TASK_SPECIFIC_QUESTION[DESCRIPTIONS_TYPE]);
     var quizContainer = document.getElementById('quiz');
     showQuestions(QUIZ_QUESTIONS, quizContainer);
 });
@@ -96,7 +96,7 @@ $(document).ready(function () {
  * show the correct intro modal based on description type
  */
 function show_intro() {
-    const introModalID = DESCRIPTIONS_TYPE + 'IntroModal';
+    const introModalID = 'IntroModal';
     $('#consentModal').one('hidden.bs.modal', function () { $('#' + introModalID).modal('show'); }).modal('hide');
 }
 
@@ -188,6 +188,9 @@ var TUT_LIST = [
     ["You have now successfully used the description to create the output. Use the green 'Check!' button to check your answer!", ["objective-col", "input-col", "description-col", "output-col"], 500, 100, 100],
 ];
 
+// set up grid listeners
+
+
 // after some tasks, slight delay to ease transitions for user
 // this variable ensures they do not skip tutorial steps
 var WAITING_TO_CONTINUE = false;
@@ -209,11 +212,11 @@ function pre_continue(flag = null) {
     // if length > 1, then the tutorial is giving them a problem, so don't check if they have completed it before continuing
     if (CUR_HIGHLIGHT.length > 1) {
 
-        syncFromEditionGridToDataGrid();
+        update_grid_from_div($(`#output_grid .editable_grid`), CURRENT_OUTPUT_GRID);
 
         // challenge to copy from input
         if (arraysEqual(CUR_HIGHLIGHT, ["grid_size_p", "input-col", "copy-from-input", "output_grid", "objective-col"])) {
-            if (arraysEqual(CURRENT_OUTPUT_GRID.grid, CURRENT_INPUT_GRID.grid)) {
+            if (arraysEqual(CURRENT_OUTPUT_GRID.grid, TEST_PAIR.input.grid)) {
                 infoMsg("Great job! You have copied from the input grid.");
                 WAITING_TO_CONTINUE = true;
                 setTimeout(function () { continue_tutorial(); }, 1000);
@@ -223,7 +226,7 @@ function pre_continue(flag = null) {
         // challenge to flood fill yellow
         } else if (arraysEqual(CUR_HIGHLIGHT, ["description-text", "toolbar_and_symbol_picker", "output_grid", "objective-col"])) {
 
-            const ref_grid = TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output'];
+            const ref_grid = TEST_PAIR.output.grid;
 
             let mode = $('input[name=tool_switching]:checked').val();
             if (mode != 'floodfill') {
@@ -393,8 +396,8 @@ function continue_tutorial() {
  * checks if output is correct. If so and completed enough tasks, move on to actual task
  */
 function check_grid() {
-    syncFromEditionGridToDataGrid();
-    reference_output = TEST_PAIRS[CURRENT_TEST_PAIR_INDEX]['output'];
+    update_grid_from_div($(`#output_grid .editable_grid`), CURRENT_OUTPUT_GRID);
+    reference_output = TEST_PAIR.output.grid;
     submitted_output = CURRENT_OUTPUT_GRID.grid;
 
     if (reference_output.length != submitted_output.length) {
@@ -427,7 +430,7 @@ function check_grid() {
 
         // reset values
         resetOutputGrid();
-        TEST_PAIRS = new Array();
+        TEST_PAIR = {"input": new Grid(3, 3), "output": new Grid(3, 3)};
 
         // load task
         const task = PRAC_TASKS.shift();
@@ -435,7 +438,6 @@ function check_grid() {
         $("#grid_size_p").text(task.grid_desc);
         $("#see_p").text(task.see_desc);
         $("#do_p").text(task.do_desc);
-        SELECTED_EXAMPLE = task.selected_example;
 
         return;
     }

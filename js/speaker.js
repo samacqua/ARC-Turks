@@ -1,4 +1,3 @@
-var START_DATE;
 var ATTEMPT_JSONS = [];
 var GOOD_WORDS = [];
 var PAST_DESCS = [];

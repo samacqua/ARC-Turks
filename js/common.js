@@ -1,4 +1,6 @@
-var DESCRIPTIONS_TYPE;  // the type of descriptions ("nl", "ex", or "nl_ex")
+var DESCRIPTIONS_TYPE = "nl";  // the type of descriptions ("nl", "ex", or "nl_ex")
+var PAGE;
+var START_DATE;
 
 // universally sets it impossible to exit modal by tapping outside of it
 $.fn.modal.prototype.constructor.Constructor.Default.backdrop = 'static';
@@ -51,7 +53,7 @@ function errorMsg(msg) {
     $('#error_display').hide();
     $('#info_display').hide();
 
-    console.warn(msg);
+    // console.warn(msg);
 
     $('#error_display').html(msg);
     $('#error_display').css({ "visibility": "visible" });
@@ -76,7 +78,7 @@ function infoMsg(msg) {
     $('#error_display').hide();
     $('#info_display').hide();
 
-    console.log(msg);
+    // console.log(msg);
 
     $('#info_display').html(msg);
     $('#info_display').css({ "visibility": "visible" });
@@ -251,10 +253,8 @@ function next_task(time_inc) {
                 select_arm(task, DESCRIPTIONS_TYPE).then(desc_id => {
                     // if desc_id == -1, then task needs new arm
                     if (desc_id == -1) {
-                        console.log("speaker:", task);
                         window.location.href = `speaker.html?task=${task}`;
                     } else {
-                        console.log("listener:", task, desc_id);
                         window.location.href = `listener.html?task=${task}&id=${desc_id}&ver=false`;
                     }
                 }).catch(error => {
@@ -270,7 +270,6 @@ function next_task(time_inc) {
         } else {
             const task = task_desc[0]
             const desc_id = task_desc[1]
-            console.log("unused desc:", task, desc_id);
             window.location.href = `listener.html?task=${task}&id=${desc_id}&ver=false`;
         }
 
@@ -408,7 +407,6 @@ function sort_descs_bandit_score() {
 }
 
 function show_loader() {
-    console.log("showing loader...");
     $("#loader").fadeIn();
 }
 
@@ -465,17 +463,15 @@ function filterOutliers(someArray, absMax=null, replace=null) {
 
 /**
  * Get a weighted average based on general avg from pilot and task time data, with a heavier weight on task times the more data we collect
- * @param {Array} times all the task times collected
- * @param {Number} avg The average time across all tasks in the pilot (either for speaker or builder tasks)
+ * @param {Array} times all the task times collected (in seconds)
+ * @param {Number} avg The average time across all tasks in the pilot (either for speaker or builder tasks) (in seconds)
  * @param {boolean} summed if true, then return the summed timing, not the avg
  */
 function weight_timing(times, avg, summed=true) {
 
     let lambda = Math.exp(-times.length/5); // very arbitrary, vals seemed to line up with intuition: https://www.desmos.com/calculator/u78jjqkhfm
 
-    let avgd = lambda * avg + (1 - lambda) * avg_array(times);
-
-    console.log(lambda, avg, avg_array(times), times, avgd);
+    let avgd = lambda * avg + (1 - lambda) * avg_array(times, avg);
 
     if (summed) {
         return avgd * times.length;
@@ -495,6 +491,17 @@ function sum_array(arr) {
  * Average all the elements in an array
  * @param {Array} arr the array to average
  */
-function avg_array(arr) {
+function avg_array(arr, def=0) {
+    if (arr.length == 0) {
+        return def;
+    }
     return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
+
+function array_copy(arr) {
+    return JSON.parse(JSON.stringify(arr));
+}
+
+function object_copy(obj) {
+    return JSON.parse(JSON.stringify(obj));
 }

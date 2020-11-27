@@ -14,6 +14,18 @@
     display: none;
 }
 
+#io_id {
+    z-index: 110;
+    position: absolute;
+    padding-bottom: 80px;
+    font-size: 36px;
+    font-family: "Arial Rounded MT Bold", "Helvetica Rounded", Arial, sans-serif;
+    color: black;
+    font-weight: bold;
+    text-shadow: -1px -1px 0 rgb(255, 255, 255), 1px -1px 0 rgb(255, 255, 255), -1px 1px 0 rgb(255, 255, 255), 1px 1px 0 rgb(255, 255, 255);
+    float: left;
+}
+
 #header-btns {
     position: fixed;
     top: 10px;
@@ -22,6 +34,50 @@
     background-color: #fff;
     overflow: auto;
     border-radius: 5px;
+}
+
+.modal-lg {
+    margin: 1.75em auto !important;
+}
+
+#verification-grid {
+    margin: 10px auto;
+    padding: 8px;
+    border-radius: 5px;
+    background-color: rgb(238, 238, 238);
+    overflow: auto;
+    text-align: center;
+}
+
+.attempt-label {
+    left: 50%;
+    transform: translate(-50%, 0);
+    bottom: -45px;
+    height: 16px;
+    position: absolute;
+    padding: 0px 25px 25px 25px;
+    background-color: #fff;
+    border-radius: 5px;
+    white-space: nowrap;
+}
+
+.test-io {
+    padding: 8px;
+    border-radius: 5px;
+    background-color: rgb(238, 238, 238);
+    overflow: hidden;
+    margin: 0;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.ver-attempts {
+    display: inline-block;
+    padding: 5px;
+    border-radius: 5px;
+    background-color: rgb(238, 238, 238);
+    margin-bottom: 25px;
 }
 
 #grid-focus {
@@ -41,8 +97,12 @@
     text-align: center;
 }
 
+.pair_preview {
+    background-color: rgb(238, 238, 238) !important;
+}
+
 #grid-focus p {
-    color: gray;
+    color: lightgray;
     font-size: 20px;
 }
 
@@ -118,7 +178,7 @@
 }
 
 .bootstrap-table {
-    overflow-y: scroll;
+    overflow: scroll;
 }
 
 h2 {
@@ -127,4 +187,11 @@ h2 {
 
 #show_grids_radio {
     margin-bottom: 15px;
+}
+
+.action-type-badge {
+    position: absolute;
+    bottom: 0px;
+    left: 50%;
+    transform: translate(-50%, 0);
 }

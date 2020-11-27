@@ -10,7 +10,6 @@ hr {
 
 body {
     font-family: 'Open Sans', sans-serif;
-    /* min-width: 1410px; */
 }
 
 .col-md-4 {
@@ -66,7 +65,6 @@ body {
 }
 
 #toolbar {
-    /* background-color: gainsboro; */
     float: left;
     margin-left: 10px;
     width: 100%;
@@ -84,7 +82,6 @@ label {
 /*Task demonstration*/
 
 .pair_preview {
-    /* height: 200px; */
     padding: 8px;
     border-radius: 5px;
     background-color: rgb(204, 204, 204);
@@ -100,12 +97,12 @@ label {
     padding: 8px;
     border-radius: 5px;
     background-color: rgb(204, 204, 204);
+    overflow: auto;
 }
 
 .input_container {
     width: 45%;
     margin: 0;
-    padding: 5px;
     text-align: center;
 }
 
@@ -117,7 +114,6 @@ label {
 .output_container {
     width: 45%;
     margin: 0;
-    padding: 5px;
     text-align: center;
 }
 
@@ -132,37 +128,6 @@ label {
     padding: 5px;
 }
 
-.text {
-    text-align: center;
-    background: white;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    margin-bottom: 10px;
-}
-
-#modal_bg {
-    background-color: black;
-    width: 100%;
-    min-height: 10000px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    overflow: hidden;
-}
-
-#modal {
-    margin: auto;
-    background-color: white;
-    text-align: center;
-    padding: 100px;
-    width: 500px;
-    margin-top: 100px;
-}
-
-#modal input {
-    margin-left: 70px;
-}
-
 .alert {
     position: fixed;
     top: 0px;
@@ -175,4 +140,97 @@ label {
 
 #task_preview {
     width: 100%;
+}
+
+.objective {
+    text-align: center;
+}
+
+.editable_grid {
+    text-align: left;
+    display: inline-block;
+}
+
+#objective-col {
+    background-color: rgb(231, 180, 231);
+    margin-top: 20px;
+    padding-top: 8px;
+    transition: all .5s ease-in-out;
+    -webkit-transition: all .5s ease-in-out;
+    -moz-transition: all .5s ease-in-out;
+    -o-transition: all .5s ease-in-out;
+}
+
+#feedback_btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+/* Progress bar */
+
+.progress {
+    color: green;
+    width: 70%;
+    height: 25px;
+    margin-left: 15%;
+    margin-right: 15%;
+    margin-top: 5px;
+}
+
+.progress-bar {
+    width: 0%;
+    height: 25px;
+}
+
+#progress-bar-complete {
+    background-color: white;
+}
+
+.progress-meter {
+    min-height: 15px;
+    border-bottom: 2px solid rgb(160, 160, 160);
+    width: 70%;
+    margin-left: 15%;
+    margin-right: 15%;
+    margin-bottom: 20px;
+}
+
+.progress-meter>.meter {
+    position: relative;
+    float: left;
+    min-height: 15px;
+    border-width: 0px;
+    border-style: solid;
+    border-color: rgb(160, 160, 160);
+}
+
+.progress-meter>.meter-left {
+    border-left-width: 2px;
+}
+
+.progress-meter>.meter-right {
+    float: right;
+    border-right-width: 2px;
+}
+
+.progress-meter>.meter-right:last-child {
+    border-left-width: 2px;
+}
+
+.progress-meter>.meter>.meter-text {
+    position: absolute;
+    display: inline-block;
+    bottom: -20px;
+    width: 100%;
+    font-weight: 700;
+    font-size: 0.85em;
+    color: rgb(160, 160, 160);
+    text-align: left;
+    overflow: visible;
+    white-space: nowrap;
+}
+
+.progress-meter>.meter.meter-right>.meter-text {
+    text-align: right;
 }

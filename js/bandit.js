@@ -33,7 +33,7 @@ function select_casino(type) {
                     task_collisions += 1;
                     variances[i] -= raw_max+1;
                     if (task_collisions == NUM_TASKS) {
-                        console.log("done bc no tasks left that they have not already interacted with");
+                        console.log("Done (interacted with all available tasks)");
                         return resolve(-1);
                     }
                 }
@@ -64,29 +64,17 @@ function new_select_casino(type) {
         get_bandit_doc(type).then(bandit_doc => {
             get_timing_doc(type).then(timing => {
 
-                console.log("BANDIT:");
-                console.log(bandit_doc);
-
-                console.log("TIMING:");
-                console.log(timing);
-
                 // calculate effort ratios
                 let all_efforts = parse_timing_doc(timing);
-                console.log("PARSED TIMING:");
-                console.log(all_efforts);
                 
                 let avg_efforts = sum_array(Object.values(all_efforts));
                 let efforts_ratio = {};
                 $.each(all_efforts, function(task_id, task_effort_sum) {
                     efforts_ratio[task_id] = (task_effort_sum/avg_efforts);
                 });
-                console.log("EFFORT_RATIOS:");
-                console.log(efforts_ratio);
 
                 let cas_scores = {};
                 let casinos = parse_bandit_doc(bandit_doc);
-                console.log("PARSED BANDIT DOC:");
-                console.log(casinos);
 
                 const tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
 
@@ -118,7 +106,6 @@ function new_select_casino(type) {
 
                     let variance = super_a*super_b / ((super_a+super_b)**2 * (super_a+super_b+1));
                     if (tasks_done.includes(task_id)) {
-                        console.log("DONE TASK " + task_id.toString());
                         variance = -1;
                     }
                     if (efforts_ratio.hasOwnProperty(task_id)) {
@@ -140,14 +127,10 @@ function new_select_casino(type) {
                         argmax.push(key);
                     }
                 });
-                console.log("CASINO SCORES:");
-                console.log(cas_scores);
-                console.log(max);
-                console.log(argmax);
 
                 // all tasks have been done by user
                 if (max < 0) {
-                    console.log("done bc no tasks left that they have not already interacted with");
+                    console.log("Done (interacted with all available tasks)");
                     return resolve(-1);
                 }
 
@@ -173,8 +156,6 @@ function parse_timing_doc(doc, ABS_MAX_TIME=60*15) {
     let all_desc_times = {};
     let all_build_times = {};
 
-    // doc = JSON.parse('{"305_b500af4c-38dc-46bb-a412-a3da209df0e2_attempts":[40.10028079620448],"149_8651e240-ded9-4f95-b2c3-4e8d9a9b2572_desc":76,"305_b500af4c-38dc-46bb-a412-a3da209df0e2_desc":116,"149_8651e240-ded9-4f95-b2c3-4e8d9a9b2572_attempts":[17.329552752762513]}');
-    // console.log(doc);
     // organize all times by task and type (speak or build)
     $.each(doc, function(key, value) {
         let split_key = key.split('_');
@@ -197,27 +178,24 @@ function parse_timing_doc(doc, ABS_MAX_TIME=60*15) {
         }
     });
 
-    console.log(all_desc_times);
-    console.log(all_build_times);
-
     let task_times = {};
 
     // Filter outliers and sum
     $.each(all_desc_times, function(task, times) {
 
         let filtered_times = filterOutliers(times, ABS_MAX_TIME, SPEAKER_TIME*60);
-        console.log(filtered_times);
+
         if (task_times.hasOwnProperty(task)) {
             task_times[task] += weight_timing(filtered_times, SPEAKER_TIME*60);
         } else {
             task_times[task] = weight_timing(filtered_times, SPEAKER_TIME*60);
         }
     });
-    console.log("BUILD");
+
     $.each(all_build_times, function(task, times) {
 
         let filtered_times = filterOutliers(times, ABS_MAX_TIME, BUILDER_TIME*60);
-        console.log(filtered_times);
+
         if (task_times.hasOwnProperty(task)) {
             task_times[task] += weight_timing(filtered_times, BUILDER_TIME*60);
         } else {

@@ -214,6 +214,7 @@ function get_task_descriptions(task_id, type) {
                     'display_num_success': data.display_num_success,
                     'attempt_jsons': data.attempt_jsons,
                     'attempts_sequence': data.attempts_sequence,
+                    'action_sequence': data.action_sequence,
                     'num_verification_attempts': data.num_verification_attempts,
                     'succeeded_verification': data.succeeded_verification,
                     'timestamp': data.timestamp,
@@ -342,7 +343,7 @@ function get_word_vec(word) {
  * store descriptions, task info and user info and user answers in firebase
  * returns promise so that can transition to next task after storing
  */
-function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confidence, attempts, attempt_jsons, attempts_sequence, desc_time, ver_time, selected_example, type, max_idle_time) {
+function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confidence, attempts, attempt_jsons, action_sequence, desc_time, ver_time, selected_example, type, max_idle_time) {
 
     return new Promise(function (resolve, reject) {
 
@@ -355,7 +356,7 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confi
         var desc_data = {
             'num_verification_attempts': parseInt(attempts),
             'attempt_jsons': attempt_jsons,
-            'attempts_sequence': attempts_sequence,
+            'action_sequence': action_sequence,
             'succeeded_verification': true,
             'confidence': confidence,
 
@@ -432,7 +433,7 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confi
     });
 }
 
-function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, attempts_sequence, total_time, success = true, type, max_idle_time, best_desc, past_desc) {
+function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, action_sequence, total_time, success = true, type, max_idle_time, best_desc, past_desc) {
     /**
      * store info for listener task in firebase
      * returns promise so that can transition to next task after storing
@@ -447,7 +448,7 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, atte
         batch.set(desc_use_ref, {
             'num_attempts': attempts,
             'attempt_jsons': attempt_jsons,
-            'attempts_sequence': attempts_sequence,
+            'action_sequence': action_sequence,
             'success': success,
             'timestamp': firebase.firestore.FieldValue.serverTimestamp(),
             'max_idle_time': parseInt(max_idle_time),
@@ -489,9 +490,6 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, atte
         let b = new_attempts - new_suc_score + priors[1];
         let desc_new_mean = a / (a + b);
 
-        console.log(a, b, desc_new_mean, best_desc.mean);
-        console.log(best_desc);
-
         if (desc_new_mean >= best_desc.mean || best_desc.id == desc_id) {
             console.log("updating best...");
             summary_data[`${task_id}_best_success_score`] = past_desc['bandit_success_score'] + 1/attempts;
@@ -527,7 +525,7 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, atte
     });
 }
 
-function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, user_id, confidence, attempts, attempt_jsons, attempts_sequence, desc_time, ver_time, selected_example, type, max_idle_time) {
+function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, user_id, confidence, attempts, attempt_jsons, action_sequence, desc_time, ver_time, selected_example, type, max_idle_time) {
     return new Promise(function (resolve, reject) {
 
         var batch = db.batch();
@@ -539,7 +537,7 @@ function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, use
         var desc_data = {
             'num_verification_attempts': parseInt(attempts),
             'attempt_jsons': attempt_jsons,
-            'attempts_sequence': attempts_sequence,
+            'action_sequence': action_sequence,
 
             'uid': user_id,
             'description_time': parseInt(desc_time),
@@ -831,5 +829,33 @@ function init_firestore() {
         console.log("Initialized Firestore!");
     }).catch(error => {
         console.error("Error intializing Firestore: ", error);
+    });
+}
+
+function reformat_desc_action_sequence(new_sequence, desc_id, task, type) {
+    return new Promise(function (resolve, reject) {
+        db.collection(`${type}_tasks`).doc(task.toString()).collection("descriptions").doc(desc_id).update({
+            'action_sequence': JSON.stringify(new_sequence)
+        }).then(function () {
+            console.log("successfully set new action sequence for description " + desc_id + "of task" + task.toString());
+            return resolve();
+        }).catch(function (err) {
+            console.error(err);
+            return reject(err);
+        });
+    });
+}
+
+function reformat_build_action_sequence(new_sequence, build_id, desc_id, task, type) {
+    return new Promise(function (resolve, reject) {
+        db.collection(`${type}_tasks`).doc(task.toString()).collection("descriptions").doc(desc_id).collection("uses").doc(build_id).update({
+            'action_sequence': JSON.stringify(new_sequence)
+        }).then(function () {
+            console.log("successfully set new action sequence for build " + build_id + " for desc " + desc_id + " of task " + task.toString());
+            return resolve();
+        }).catch(function (err) {
+            console.error(err);
+            return reject(err);
+        });
     });
 }
