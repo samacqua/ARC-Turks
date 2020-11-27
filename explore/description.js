@@ -18,6 +18,7 @@ var STUDY_BATCHES = {
 var CUR_I;
 
 $(window).on('load', function () {
+    PAGE = Pages.ExploreDescs;
     const url_obj = parseUrl(window.location.search);
     load_new_desc(url_obj.task, url_obj.desc_id);
 });
@@ -218,12 +219,16 @@ function show_attempts(attempts_json, container) {
     $.each(attempts_json, (i, attempt) => {
         attempt = JSON.parse(attempt);
         let grid = array_to_grid(attempt);
-        let id = "verification_attempt_" + i.toString();
-        let grid_div = $(`<div class="col-sm-4 ver-attempts" id=${id}></div>`);
+        let grid_div = $(`<div class="col-sm-4 ver-attempts"></div>`);
         grid_div.appendTo(container);
-        let label = $(`<p class="attempt-label">attempt ${i+1}</p>`);
         fill_div_with_grid(grid_div, grid);
         fit_cells_to_container(grid_div, grid.height, grid.width);
+
+        let badge_type = 'badge-danger';
+        if ( arraysEqual(attempt, TEST_PAIR.output.grid) ) {
+            badge_type = 'badge-success';
+        }
+        let label = $(`<h4><span class="badge ${badge_type} action-type-badge">attempt ${i+1}</span></h4>`);
         label.appendTo(grid_div);
     });
 }
@@ -328,9 +333,19 @@ function repeat_action_sequence_in_div(sequence, container_div) {
     function play_action_sequence_item(action_sequence, container, i=0) {
 
         let tool_display = container.find('.action-type-badge:first');
+
+        if (!tool_display.hasClass('badge-secondary')) {
+            tool_display.removeClass('badge-warning');
+            tool_display.removeClass('badge-success');
+            tool_display.addClass('badge-secondary');
+        }
+
         let tool = action_sequence[i].action.tool;
         if (tool == "check") {
             tool = action_sequence[i].action.correct ? "check: correct" : "check: incorrect";
+            let new_class = action_sequence[i].action.correct ? "badge-success" : "badge-warning";
+            tool_display.removeClass('badge-secondary');
+            tool_display.addClass(new_class);
         }
         tool_display.text(tool);
 

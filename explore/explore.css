@@ -191,7 +191,7 @@ h2 {
 
 .action-type-badge {
     position: absolute;
-    bottom: 0px;
+    bottom: -30px;
     left: 50%;
     transform: translate(-50%, 0);
 }

@@ -5,11 +5,15 @@
     border-top: 1px solid #555;
     float: left;
     background-color: #000;
+    overflow: hidden;
 }
 
 .grid_row {
     clear: both;
     margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    flex-wrap: nowrap;
 }
 
 /* Colors */

@@ -29,29 +29,14 @@ function array_to_grid(arr) {
 // hack ish to manually set pixel values bc can't figure out css
 function fit_cells_to_container(container, height, width) {
 
-    let hiddenElement = null;
-
-    // can't detect width if hidden, so temporarily unhide
-    if ($(container).is(":hidden")) {
-        hiddenElement = $(container).closest('.no-display');
-        hiddenElement.removeClass("no-display");
-    }
-
-    let containerWidth = $(container).width();
-    let MAX_GRID_HEIGHT = containerWidth * 1.5;
-    let containerHeight = MAX_GRID_HEIGHT;
-
-    let candidate_height = containerHeight / height;
-    let candidate_width = containerWidth / width;
-
-    let size = Math.min(candidate_height, candidate_width);
-    size = Math.min(MAX_CELL_SIZE, size);
-
-    container.find('.cell').css('height', size + 'px');
-    container.find('.cell').css('width', size + 'px');
-
-    if (hiddenElement) {
-        $(hiddenElement).addClass("no-display");
+    if (height > 1.5*width) {
+        container.find('.cell').css('height', '0px');
+        container.find('.cell').css('padding-top', 1/height*100 + '%');
+        container.find('.cell').css('width', 1/height*100 + '%');   
+    } else {
+        container.find('.cell').css('height', '0px');
+        container.find('.cell').css('padding-top', 1/width*100 + '%');
+        container.find('.cell').css('width', 1/width*100 + '%');    
     }
 }
 

@@ -44,7 +44,8 @@ const Pages = {
     Describer: "describer",
     Listener: "listener",
     Dev: "dev",
-    Explore: "dev"
+    ExploreTasks: "explore_tasks",
+    ExploreDescs: "explore_descs"
 };
 
 // ========

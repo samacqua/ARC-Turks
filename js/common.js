@@ -6,23 +6,7 @@ var START_DATE;
 $.fn.modal.prototype.constructor.Constructor.Default.backdrop = 'static';
 $.fn.modal.prototype.constructor.Constructor.Default.keyboard = false;
 
-/**
- * resize the grids if the window size changes
- */
-var globalResizeTimer = null;
-$(window).resize(function () {
-    if (globalResizeTimer != null) window.clearTimeout(globalResizeTimer);
-    globalResizeTimer = window.setTimeout(function () {
-        try {
-            resizeOutputGrid();
-        } catch (err) {
-            console.warn("Tried to resize the output grid, but there is no output grid to resize.");
-        }
-        loadTask(TASK_ID).then(() => {
-            add_grid_hover_listeners();
-        });
-    }, 500);
-});
+
 
 function add_grid_hover_listeners() {
     $(".pair_preview").hover(function() {
