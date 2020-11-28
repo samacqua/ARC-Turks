@@ -152,19 +152,28 @@ function load_new_desc(task, desc_id) {
                 $("#builds-header").text("Builds (" + builds.length.toString() + ")");
                 $.each(builds, (i, build) => {
                     $(`<h4>Builder ${i}</br></h4>`).appendTo($("#description-builds"));
+                    create_build_row(build);
+                });
 
-                    let row = $("<div class='row' style='justify-content: left'></div>");
-                    row.appendTo($("#description-builds"));
-                    $("</br>").appendTo($("#description-builds"));
-                    show_attempts(build.attempt_jsons, row);
+                let g = create_action_sequence_graph_from_builds(builds);
 
-                    // let action_sequence_grid = $("<div class='woop'></div>");
-                    // fill_div_with_grid(action_sequence_grid, new Grid(1, 1, [[0]]));
-                    // action_sequence_grid.appendTo($("#description-builds"));
-
-                    // if (build.action_sequence) {
-                    //     repeat_action_sequence_in_div(JSON.parse(build.action_sequence), action_sequence_grid);
-                    // }
+                $('#graph-container').empty();
+                let s = new sigma({
+                    graph: g,
+                    container: 'graph-container',
+                    settings: {
+                        borderSize: 1.5,
+                        enableCamera: false,
+                        enableHovering: true,
+                        edgeHoverSizeRatio: 1,
+                        nodeHoverPrecision: 10,
+                        defaultEdgeColor: 'grey',
+                        minNodeSize: 0.3,
+                        maxNodeSize: 12,
+                        minEdgeSize: 0.1,
+                        maxEdgeSize: 8,
+                        edgesPowRatio: 0.5,
+                    }
                 });
             });
     
@@ -173,6 +182,156 @@ function load_new_desc(task, desc_id) {
             console.error(error);
         });
     });
+}
+
+function create_build_row(build) {
+    let row = $("<div class='row' style='justify-content: left'></div>");
+    row.appendTo($("#description-builds"));
+
+    const attempts_col = $("<div class='col-md-9'></div>");
+    const attempts_row = $("<div class='row' style='justify-content: left'></div>");
+    attempts_row.appendTo(attempts_col);
+    attempts_col.appendTo(row);
+    show_attempts(build.attempt_jsons, attempts_row);
+
+    const action_sequence_col = $("<div class='col-md-3'></div>");
+    const action_sequence_row = $("<div class='row' style='justify-content: left'></div>");
+    const action_sequence_container = $("<div class='single_grid'></div>");
+    const grid_cont = $('<div class="editable_grid selectable_grid">');
+    const action_sequence_label = $('<h5><span class="badge badge-secondary action-type-badge">action sequence</span></h5>')
+    grid_cont.appendTo(action_sequence_container);
+    action_sequence_label.appendTo(action_sequence_container);
+    action_sequence_container.appendTo(action_sequence_row);
+    action_sequence_row.appendTo(action_sequence_col);
+    action_sequence_col.appendTo(row);
+
+    let last_attempt = array_to_grid(JSON.parse(build.attempt_jsons[build.attempt_jsons.length-1]));
+    console.log(last_attempt);
+    update_uneditable_div_from_grid_state(grid_cont, last_attempt);
+    if (build.action_sequence) {
+        const sequence_interval = repeat_action_sequence_in_div(JSON.parse(build.action_sequence), action_sequence_container);
+        ACTION_SEQUENCE_INTERVALS.push(sequence_interval);
+    }
+
+    $("</br>").appendTo($("#description-builds"));
+}
+
+function create_action_sequence_graph_from_builds(builds) {
+
+    var g = {
+        nodes: [],
+        edges: []
+    };
+
+    let init_state_id = JSON.stringify([[0, 0, 0], [0, 0, 0], [0, 0, 0]]);
+    g.nodes.push({
+        id: init_state_id,
+        label: 'Start state',
+        x: 0.5,
+        y: 0.5,
+        size: 1,
+        color: '#0000ff'
+    });
+
+    // https://coolors.co/31393c-2176ff-33a1fd-fdca40-f79824-95964a-32936f-26a96c
+    const ACTION_COLOR_MAP = {
+        'edit': '#CCC',
+        'floodfill': '#FDCA40',
+        'copy': '#2176FF',
+        'paste': '#33A1FD',
+        'copyFromInput': '#F79824',
+        'resetOutputGrid': '#31393C',
+        'resizeOutputGrid': '#95964A',
+        'check': {
+            'correct': '#26A96C',
+            'incorrect': '#FF595E',
+        }
+    };
+    const NODE_ATOMIC = 0.3;
+    const EDGE_ATOMIC = 0.1;
+
+    $.each(builds, (_, build) => {
+        let action_sequence = build.action_sequence;
+        if (action_sequence) {
+            action_sequence = JSON.parse(action_sequence);
+
+            let last_node_id = init_state_id;
+            let last_node_pos = [0.5, 0.5];
+            $.each(action_sequence, (i, action) => {
+                
+                // add resulting grid node if does not exist
+                let node_id = JSON.stringify(action.grid);
+                let existing_node = g.nodes.find(node => node.id == node_id);
+                const node_color = node_id == JSON.stringify(TEST_PAIR.output.grid) ? "#32CD32" : "#666";
+                last_node_pos[0] = last_node_pos[0] + Math.random()/5;
+                last_node_pos[1] = last_node_pos[1] + Math.random()/5;
+                if (existing_node == null) {
+                    g.nodes.push({
+                        id: node_id,
+                        label: 'Grid state',
+                        x: last_node_pos[0],
+                        y: last_node_pos[1],
+                        size: NODE_ATOMIC,
+                        color: node_color
+                    });
+                } else {
+                    existing_node.size += NODE_ATOMIC;
+                }
+
+                // add edge from previous state to current
+                let edge_id = last_node_id + "_" + node_id;
+                let exisiting_edge = g.edges.find(edge => edge.id == edge_id);
+                let edge_color = ACTION_COLOR_MAP[action.action.tool];
+                if (action.action.tool == 'check') {
+                    edge_color = action.action.correct ? ACTION_COLOR_MAP[action.action.tool.correct] : ACTION_COLOR_MAP[action.action.tool.incorrect];
+                }
+                if (exisiting_edge == null) {
+                    g.edges.push({
+                        id: edge_id,
+                        source: last_node_id,
+                        target: node_id,
+                        size: EDGE_ATOMIC,
+                        color: edge_color
+                    });
+                } else {
+                    exisiting_edge.size += EDGE_ATOMIC;
+                }
+
+                last_node_id = node_id;
+            });
+        }
+    });
+
+//     var i,
+//     s,
+//     N = 100,
+//     E = 500,
+//     g = {
+//       nodes: [],
+//       edges: []
+//     };
+
+// // Generate a random graph:
+// for (i = 0; i < N; i++)
+//   g.nodes.push({
+//     id: 'n' + i,
+//     label: 'Node ' + i,
+//     x: Math.random(),
+//     y: Math.random(),
+//     size: Math.random(),
+//     color: '#666'
+//   });
+
+// for (i = 0; i < E; i++)
+//   g.edges.push({
+//     id: 'e' + i,
+//     source: 'n' + (Math.random() * N | 0),
+//     target: 'n' + (Math.random() * N | 0),
+//     size: Math.random(),
+//     color: '#ccc'
+//   });
+
+    return g;
 }
 
 function load_desc_builds(task, desc_id, desc_type) {
@@ -329,6 +488,10 @@ function load_tasks_to_browse() {
 }
 
 function repeat_action_sequence_in_div(sequence, container_div) {
+
+    console.log("called make as");
+    console.log(sequence);
+    console.log(container_div);
 
     function play_action_sequence_item(action_sequence, container, i=0) {
 

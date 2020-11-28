@@ -16,6 +16,7 @@ var STUDY_BATCHES = {
 }
 
 $(window).on('load', function () {
+    PAGE = Pages.ExploreTasks;
     const task = parseUrl(window.location.search);
     load_new_task(task);
 });
@@ -105,10 +106,143 @@ function load_new_task(task) {
         descriptions.sort(sort_descs_bandit_score());
         PAST_DESCS = descriptions;
         createDescsPager(descriptions);
+
+        summarize_descriptions(descriptions);
+
     }).catch(error => {
         errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
         console.error(error);
     });
+}
+
+function merge_word_counts(word_count_1, word_count_2) {
+    let wc = object_copy(word_count_1);
+    $.each(word_count_2, (key, count) => {
+        if (key in wc) {
+            wc[key] += count;
+        } else {
+            wc[key] = count;
+        }
+    });
+    return wc;
+}
+
+function summarize_descriptions(descriptions) {
+    console.log(descriptions);
+    $("#stats-list").empty();
+    $("#stats-list").append("<li>Number of descriptions: " + descriptions.length.toString() + "</li>");
+
+
+    // most common unigrams
+    let see_desc_word_count = {};
+    let grid_word_count = {};
+    let do_desc_word_count = {};
+
+    $.each(descriptions, (i, desc) => {
+        const see_desc_no_prefix = desc.see_desc.replace(SHOULD_SEE_PREFIX, '');
+        see_desc_word_count = merge_word_counts(see_desc_word_count, get_word_counts(see_desc_no_prefix));
+
+        const grid_desc_no_prefix = desc.grid_desc.replace(GRID_SIZE_PREFIX, '');
+        grid_word_count = merge_word_counts(grid_word_count, get_word_counts(grid_desc_no_prefix));
+
+        const do_desc_no_prefix = desc.do_desc.replace(HAVE_TO_PREFIX, '');
+        do_desc_word_count = merge_word_counts(do_desc_word_count, get_word_counts(do_desc_no_prefix));
+    });
+
+    const most_common_see = get_n_highest_frequency(see_desc_word_count);
+    const most_common_grid = get_n_highest_frequency(grid_word_count);
+    const most_common_do = get_n_highest_frequency(do_desc_word_count);
+
+    $("#stats-list").append("<li>Most common words describing input: " + most_common_see.join(", ") + "</li>");
+    $("#stats-list").append("<li>Most common words describing pattern: " + most_common_do.join(", ") + "</li>");
+
+    create_desc_success_bar(descriptions);
+
+}
+
+var desc_succ_chart;
+function create_desc_success_bar(descs) {
+    var ctx = document.getElementById('desc-success-chart').getContext('2d');
+
+    let labels = [];
+    let data_points = [];
+
+    $.each(descs, (i, desc) => {
+        labels.push("Description " + i.toString());
+        data_points.push(desc.display_num_success / desc.display_num_attempts);
+    });
+
+
+    if (desc_succ_chart) {
+        desc_succ_chart.destroy();
+    }
+
+    let data = {
+        labels: labels,
+        datasets: [{
+            label: '3-shot',
+            backgroundColor: 'rgb(255, 99, 132)',
+            borderColor: 'rgb(255, 99, 132)',
+            data: data_points,
+            suggestedMax: 1,
+        }]
+    };
+    let options = {
+        title: {
+            display: true,
+            text: 'Communication Success Ratio'
+        },
+        scales: {
+            xAxes: [{
+                ticks: {
+                    suggestedMin: 0,
+                    suggestedMax: 1
+                }
+            }]
+        }
+    };
+
+    desc_succ_chart = new Chart(ctx, {
+        type: 'horizontalBar',
+        data: data,
+        options: options
+    });
+}
+
+function get_n_highest_frequency(word_count, n=5) {
+    let word_count_array = [];
+
+    $.each(word_count, (word, count) => {
+        word_count_array.push([word, count]);
+    });
+
+    word_count_array.sort((a, b) => { return b[1] - a[1] });
+    return word_count_array.slice(0, n).map(x => x[0]);
+}
+
+function get_word_counts(str) {
+    let word_counts = {};
+    const stop_words = ["i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself", "yourselves", "he", "him", "his", "himself", "she", "her", "hers", "herself", "it", "its", "itself", "they", "them", "their", "theirs", "themselves", "what", "which", "who", "whom", "this", "that", "these", "those", "am", "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "having", "do", "does", "did", "doing", "a", "an", "the", "and", "but", "if", "or", "because", "as", "until", "while", "of", "at", "by", "for", "with", "about", "against", "between", "into", "through", "during", "before", "after", "above", "below", "to", "from", "up", "down", "in", "out", "on", "off", "over", "under", "again", "further", "then", "once", "here", "there", "when", "where", "why", "how", "all", "any", "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", "too", "very", "s", "t", "can", "will", "just", "don", "should", "now"];
+
+    let words = str.replace("'", '').match(/(\w+)/g);
+
+    $.each(words, (_, word) => {
+        let stripped_word = word.replace(/[^0-9a-z]/gi, '').toLowerCase();
+
+        if (stripped_word.length > 0) {
+            if (stripped_word in word_counts) {
+                word_counts[stripped_word] += 1;
+            } else {
+                word_counts[stripped_word] = 1;
+            }
+        }
+    });
+
+    $.each(stop_words, (_, word) => {
+        delete word_counts[word];
+    });
+
+    return word_counts;
 }
 
 /**

@@ -31,11 +31,11 @@ function fit_cells_to_container(container, height, width) {
 
     if (height > 1.5*width) {
         container.find('.cell').css('height', '0px');
-        container.find('.cell').css('padding-top', 1/height*100 + '%');
+        container.find('.cell').css('padding-top', `${1/height*100}%`);
         container.find('.cell').css('width', 1/height*100 + '%');   
     } else {
         container.find('.cell').css('height', '0px');
-        container.find('.cell').css('padding-top', 1/width*100 + '%');
+        container.find('.cell').css('padding-top', `${1/width*100}%`);
         container.find('.cell').css('width', 1/width*100 + '%');    
     }
 }
