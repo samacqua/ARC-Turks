@@ -345,19 +345,17 @@ function load_tasks_to_browse() {
                 valign: 'middle',
                 clickToSelect: true,
                 formatter : function(value,row,index) {
-                    return '<button class="btn btn-secondary load-task-btn" task="'+row.number+'" data-dismiss="modal">Select</button> ';
+                    return '<button class="btn btn-secondary load-task-btn" onclick="send_to_new_task(' + row.number + ')" task="'+row.number+'" data-dismiss="modal">Select</button> ';
                 }
                 }
             ]      
             });
-    
-            $(".load-task-btn").click(function() {
-                let task = $(this).attr('task');
-                document.location.href = `../explore?task=${task}`;
-            });
-
         });
     });
+}
+
+function send_to_new_task(task) {
+    document.location.href = `../explore?task=${task}`;
 }
 
 function load_tasks_test_pairs(tasks) {

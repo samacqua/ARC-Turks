@@ -183,25 +183,33 @@ function load_new_desc(task, desc_id) {
                     create_build_row(build);
                 });
 
-                let g = create_action_sequence_graph_from_builds(builds);
+                let g = create_action_sequence_graph_from_builds(cur_desc, builds);
 
                 $('#graph-container').empty();
                 let s = new sigma({
                     graph: g,
                     container: 'graph-container',
+                    // https://github.com/jacomyal/sigma.js/wiki/Settings
                     settings: {
-                        borderSize: 1.5,
-                        enableCamera: false,
-                        enableHovering: true,
-                        edgeHoverSizeRatio: 1,
+                        enableCamera: true,
+                        enableHovering: false,
                         nodeHoverPrecision: 10,
-                        defaultEdgeColor: 'grey',
-                        minNodeSize: 0.3,
+                        drawLabels: true,
+                        labelThreshold: 100, // so doesn't draw labels, turning off drawLabels turns off hover events
+                        minNodeSize: 1,
                         maxNodeSize: 12,
-                        minEdgeSize: 0.1,
-                        maxEdgeSize: 8,
+                        minEdgeSize: 1,
+                        maxEdgeSize: 3,
                         edgesPowRatio: 0.5,
                     }
+                });
+
+                s.bind('overNode outNode clickNode doubleClickNode rightClickNode', function(e) {
+                    let node_grid = JSON.parse(e.data.node.id);
+                    node_grid = array_to_grid(node_grid);
+                    update_uneditable_div_from_grid_state($("#action-sequence-cur-grid .grid_inner_container"), node_grid);
+                    console.log(node_grid);
+                    console.log(e.type, e.data.node.label, e.data.captor);
                 });
             });
     
@@ -246,22 +254,7 @@ function create_build_row(build) {
     $("</br>").appendTo($("#description-builds"));
 }
 
-function create_action_sequence_graph_from_builds(builds) {
-
-    var g = {
-        nodes: [],
-        edges: []
-    };
-
-    let init_state_id = JSON.stringify([[0, 0, 0], [0, 0, 0], [0, 0, 0]]);
-    g.nodes.push({
-        id: init_state_id,
-        label: 'Start state',
-        x: 0.5,
-        y: 0.5,
-        size: 1,
-        color: '#0000ff'
-    });
+function create_action_sequence_graph_from_builds(desc, builds) {
 
     // https://coolors.co/31393c-2176ff-33a1fd-fdca40-f79824-95964a-32936f-26a96c
     const ACTION_COLOR_MAP = {
@@ -277,35 +270,118 @@ function create_action_sequence_graph_from_builds(builds) {
             'incorrect': '#FF595E',
         }
     };
-    const NODE_ATOMIC = 0.3;
-    const EDGE_ATOMIC = 0.1;
 
+    let init_state_id = JSON.stringify([[0, 0, 0], [0, 0, 0], [0, 0, 0]]);
+    let final_state_id = JSON.stringify(TEST_PAIR.output.grid);
+
+    // initialize with start and end states
+    var g = {
+        nodes: [
+            {
+                id: init_state_id,
+                label: 'Start state',
+                x: 0,
+                y: 0,
+                size: 1,
+                color: '#0000ff'
+            },
+            {
+                id: final_state_id,
+                label: 'Final state',
+                x: Math.sqrt(2)/2,
+                y: Math.sqrt(2)/2,
+                size: 1,
+                color: ACTION_COLOR_MAP.check.correct
+            }
+        ],
+        edges: []
+    };
+
+    // draw graph for description verification attempts
+    let desc_as = desc.action_sequence;
+    if (desc_as) {
+        desc_as = JSON.parse(desc_as);
+        var direction = Math.PI/4;
+
+        let dx = Math.cos(direction);
+        let dy = Math.sin(direction);
+
+        let magnitude = 1 / desc_as.length;
+
+        let last_node_id = init_state_id;
+        $.each(desc_as, (i, action) => {
+                
+            // add resulting grid node if does not exist
+            let node_id = JSON.stringify(action.grid);
+            let existing_node = g.nodes.find(node => node.id == node_id);
+            const node_color = node_id == JSON.stringify(TEST_PAIR.output.grid) ? "#32CD32" : "#666";
+
+            if (existing_node == null) {
+                g.nodes.push({
+                    id: node_id,
+                    label: i.toString(),
+                    x: dx*magnitude*(i+1),
+                    y: dy*magnitude*(i+1),
+                    size: 1,
+                    color: node_color
+                });
+            } else {
+                existing_node.size += 1;
+            }
+
+            // add edge from previous state to current
+            let edge_id = last_node_id + "_" + node_id;
+            let exisiting_edge = g.edges.find(edge => edge.id == edge_id);
+            let edge_color = ACTION_COLOR_MAP[action.action.tool];
+            if (action.action.tool == 'check') {
+                edge_color = action.action.correct ? ACTION_COLOR_MAP[action.action.tool.correct] : ACTION_COLOR_MAP[action.action.tool.incorrect];
+            }
+            if (exisiting_edge == null) {
+                g.edges.push({
+                    id: edge_id,
+                    source: last_node_id,
+                    target: node_id,
+                    size: 1,
+                    color: edge_color
+                });
+            } else {
+                exisiting_edge.size += 1;
+            }
+
+            last_node_id = node_id;
+        });
+    }
+
+    // draw graph for builder attempts
     $.each(builds, (_, build) => {
         let action_sequence = build.action_sequence;
+
         if (action_sequence) {
             action_sequence = JSON.parse(action_sequence);
 
+            let direction = Math.random() * Math.PI / 6 + Math.PI / 6;
+            let dx = Math.cos(direction);
+            let dy = Math.sin(direction);
+            let magnitude = 1 / action_sequence.length;
+
             let last_node_id = init_state_id;
-            let last_node_pos = [0.5, 0.5];
             $.each(action_sequence, (i, action) => {
                 
                 // add resulting grid node if does not exist
                 let node_id = JSON.stringify(action.grid);
                 let existing_node = g.nodes.find(node => node.id == node_id);
                 const node_color = node_id == JSON.stringify(TEST_PAIR.output.grid) ? "#32CD32" : "#666";
-                last_node_pos[0] = last_node_pos[0] + Math.random()/5;
-                last_node_pos[1] = last_node_pos[1] + Math.random()/5;
                 if (existing_node == null) {
                     g.nodes.push({
                         id: node_id,
                         label: 'Grid state',
-                        x: last_node_pos[0],
-                        y: last_node_pos[1],
-                        size: NODE_ATOMIC,
+                        x: dx*magnitude*(i+1),
+                        y: dy*magnitude*(i+1),
+                        size: 1,
                         color: node_color
                     });
                 } else {
-                    existing_node.size += NODE_ATOMIC;
+                    existing_node.size += 1;
                 }
 
                 // add edge from previous state to current
@@ -320,11 +396,11 @@ function create_action_sequence_graph_from_builds(builds) {
                         id: edge_id,
                         source: last_node_id,
                         target: node_id,
-                        size: EDGE_ATOMIC,
+                        size: 1,
                         color: edge_color
                     });
                 } else {
-                    exisiting_edge.size += EDGE_ATOMIC;
+                    exisiting_edge.size += 1;
                 }
 
                 last_node_id = node_id;
@@ -479,19 +555,17 @@ function load_tasks_to_browse() {
                 valign: 'middle',
                 clickToSelect: true,
                 formatter : function(value,row,index) {
-                    return '<button class="btn btn-secondary load-task-btn" task="'+row.number+'" data-dismiss="modal">Select</button> ';
+                    return '<button class="btn btn-secondary load-task-btn" onclick="send_to_new_task(' + row.number + ')" task="'+row.number+'" data-dismiss="modal">Select</button> ';
                 }
                 }
             ]      
             });
-    
-            $(".load-task-btn").click(function() {
-                let task = $(this).attr('task');
-                document.location.href = `../explore?task=${task}`;
-            });
-
         });
     });
+}
+
+function send_to_new_task(task) {
+    document.location.href = `../explore?task=${task}`;
 }
 
 function repeat_action_sequence_in_div(sequence, container_div) {
