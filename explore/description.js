@@ -23,6 +23,37 @@ $(window).on('load', function () {
     load_new_desc(url_obj.task, url_obj.desc_id);
 });
 
+function load_tasks_test_pairs(tasks) {
+
+    return new Promise((resolve, reject) => {
+        get_task_paths().then(paths => {
+
+            let promises = [];
+
+            $.each(tasks, (_, task) => {
+                let path = paths[task];
+                let promise = new Promise((res, rej) => {
+                    $.getJSON('../' + path, json => {
+                        res({"task": task, "json": json.test[0]});
+                    });
+                });
+                promises.push(promise);
+            });
+
+            Promise.all(promises).then(data => {
+                let data_obj = {};
+                $.each(data, (_, val) => {
+                    const task = val.task;
+                    const json = val.json;
+                    data_obj[task] = json;
+                });
+
+                return resolve(data_obj);
+            });
+        });
+    });
+} 
+
 /**
  * Handle back and forth navigation
  * from https://stackoverflow.com/a/3354511/5416200 (but url stored in query params)
@@ -84,7 +115,6 @@ function find_obj(arr, prop, val) {
 function get_task_descs_cache(task, desc_type) {
     return new Promise(function (resolve, reject) {
         let cached = get_cache(task);
-        console.log(cached);
         if (cached) {
             return resolve(cached);
         } else {
@@ -136,7 +166,6 @@ function load_new_desc(task, desc_id) {
             show_attempts(cur_desc.attempt_jsons, $("#verification-attempts"));
 
             let last_attempt = JSON.parse(cur_desc.attempt_jsons[cur_desc.attempt_jsons.length-1]);
-            console.log(last_attempt);
             update_div_from_grid_state($("#verification-grid .editable_grid"), array_to_grid(last_attempt));
 
             if (cur_desc.action_sequence != null) {
@@ -148,7 +177,6 @@ function load_new_desc(task, desc_id) {
             }
     
             load_desc_builds(task, desc_id, DESCRIPTIONS_TYPE).then(builds => {
-                console.log(builds);
                 $("#builds-header").text("Builds (" + builds.length.toString() + ")");
                 $.each(builds, (i, build) => {
                     $(`<h4>Builder ${i}</br></h4>`).appendTo($("#description-builds"));
@@ -206,11 +234,13 @@ function create_build_row(build) {
     action_sequence_col.appendTo(row);
 
     let last_attempt = array_to_grid(JSON.parse(build.attempt_jsons[build.attempt_jsons.length-1]));
-    console.log(last_attempt);
     update_uneditable_div_from_grid_state(grid_cont, last_attempt);
+
     if (build.action_sequence) {
         const sequence_interval = repeat_action_sequence_in_div(JSON.parse(build.action_sequence), action_sequence_container);
         ACTION_SEQUENCE_INTERVALS.push(sequence_interval);
+    } else {
+        action_sequence_container.find(".action-type-badge:first").text("No action sequence for this build.");
     }
 
     $("</br>").appendTo($("#description-builds"));
@@ -301,35 +331,6 @@ function create_action_sequence_graph_from_builds(builds) {
             });
         }
     });
-
-//     var i,
-//     s,
-//     N = 100,
-//     E = 500,
-//     g = {
-//       nodes: [],
-//       edges: []
-//     };
-
-// // Generate a random graph:
-// for (i = 0; i < N; i++)
-//   g.nodes.push({
-//     id: 'n' + i,
-//     label: 'Node ' + i,
-//     x: Math.random(),
-//     y: Math.random(),
-//     size: Math.random(),
-//     color: '#666'
-//   });
-
-// for (i = 0; i < E; i++)
-//   g.edges.push({
-//     id: 'e' + i,
-//     source: 'n' + (Math.random() * N | 0),
-//     target: 'n' + (Math.random() * N | 0),
-//     size: Math.random(),
-//     color: '#ccc'
-//   });
 
     return g;
 }
@@ -424,12 +425,10 @@ function createDescsPager(task, descriptions, desc_id) {
         }
 
         let url = $(this).attr('href');
-        console.log(url);
         let task = getParam(url, "task", TASK_ID)[1];
         let desc = getParam(url, "id", desc_id)[1];
         
         let resp = {"task": task, "desc_id": desc};
-        console.log(resp);
         updateUrl(resp);
     });
 
@@ -447,51 +446,55 @@ function load_tasks_to_browse() {
     let study = STUDY_BATCHES[STUDY_BATCH];
 
     get_all_descriptions_interactions_count(DESCRIPTIONS_TYPE).then(counts => {
-        var num_descriptions_list = counts[0];
-        var num_interactions_list = counts[1];
 
-        task_list = [];
-        for (i=0;i<study.tasks.length;i++) {
-            let task_num = study.tasks[i];
-            let num_descs = num_descriptions_list[i];
-            let num_interactions = num_interactions_list[i];
+        load_tasks_test_pairs(STUDY_BATCHES[STUDY_BATCH].tasks).then(pairs => {
 
-            task_list.push({'number': task_num, 'descriptions': num_descs, 'interactions': num_interactions});
-        }
-
-        $('#table').bootstrapTable({
-            data: task_list,
-            columns: [ { 
-                // formatter : function(value,row,index) {
-                //     get_task(tas)
-                //     return '<button class="btn btn-secondary load-task-btn" task="'+row.number+'" data-dismiss="modal">Select</button> ';
-                // }
-            }, { sortable: true },{ sortable: true },{ sortable: true },  
-            {
-            field: 'operate',
-            title: 'Select',
-            align: 'center',
-            valign: 'middle',
-            clickToSelect: true,
-            formatter : function(value,row,index) {
-                return '<button class="btn btn-secondary load-task-btn" task="'+row.number+'" data-dismiss="modal">Select</button> ';
+            var num_descriptions_list = counts[0];
+            var num_interactions_list = counts[1];
+    
+            task_list = [];
+            for (i=0;i<study.tasks.length;i++) {
+                let task_num = study.tasks[i];
+                let num_descs = num_descriptions_list[i];
+                let num_interactions = num_interactions_list[i];
+    
+                task_list.push({'number': task_num, 'descriptions': num_descs, 'interactions': num_interactions});
             }
-            }
-        ]      
-        });
+    
+            $('#table').bootstrapTable({
+                data: task_list,
+                columns: [ { 
+                    formatter : function(value,row,index) {
+                        let test_pair = pairs[row.number];
+                        let div = $("<div></div>");
+                        fill_div_with_IO(div, array_to_grid(test_pair.input), array_to_grid(test_pair.output));
 
-        $(".load-task-btn").click(function() {
-            let task = $(this).attr('task');
-            document.location.href = `../explore?task=${task}`;
+                        return div.wrap('<p/>').parent().html();;
+                    }
+                }, { sortable: true },{ sortable: true },{ sortable: true },  
+                {
+                field: 'operate',
+                title: 'Select',
+                align: 'center',
+                valign: 'middle',
+                clickToSelect: true,
+                formatter : function(value,row,index) {
+                    return '<button class="btn btn-secondary load-task-btn" task="'+row.number+'" data-dismiss="modal">Select</button> ';
+                }
+                }
+            ]      
+            });
+    
+            $(".load-task-btn").click(function() {
+                let task = $(this).attr('task');
+                document.location.href = `../explore?task=${task}`;
+            });
+
         });
     });
 }
 
 function repeat_action_sequence_in_div(sequence, container_div) {
-
-    console.log("called make as");
-    console.log(sequence);
-    console.log(container_div);
 
     function play_action_sequence_item(action_sequence, container, i=0) {
 

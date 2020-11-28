@@ -135,6 +135,15 @@ function get_task(task_index) {
     });
 }
 
+function get_task_paths() {
+    return new Promise(function (resolve, reject) {
+        var subset = "training";
+        $.getJSON("https://api.github.com/repos/samacqua/ARC-Turks/contents/data/" + subset, function (tasks) {
+            return resolve(tasks.map(x => x.path));
+        }); 
+    });
+}
+
 function loadTask(task_index) {
     return new Promise(function (resolve, reject) {
         console.log("Loading task:", task_index);

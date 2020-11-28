@@ -73,7 +73,6 @@ function get_cache(key) {
 function get_task_descs_cache(task, desc_type) {
     return new Promise(function (resolve, reject) {
         let cached = get_cache(task);
-        console.log(cached);
         if (cached) {
             return resolve(cached);
         } else {
@@ -128,10 +127,7 @@ function merge_word_counts(word_count_1, word_count_2) {
 }
 
 function summarize_descriptions(descriptions) {
-    console.log(descriptions);
-    $("#stats-list").empty();
-    $("#stats-list").append("<li>Number of descriptions: " + descriptions.length.toString() + "</li>");
-
+    $("#desc-count").text("Descriptions count: " + descriptions.length.toString());
 
     // most common unigrams
     let see_desc_word_count = {};
@@ -153,15 +149,67 @@ function summarize_descriptions(descriptions) {
     const most_common_grid = get_n_highest_frequency(grid_word_count);
     const most_common_do = get_n_highest_frequency(do_desc_word_count);
 
-    $("#stats-list").append("<li>Most common words describing input: " + most_common_see.join(", ") + "</li>");
-    $("#stats-list").append("<li>Most common words describing pattern: " + most_common_do.join(", ") + "</li>");
-
+    create_word_count_graph('see-desc-wc-chart', most_common_see, "Most Common Words Describing Input");
+    create_word_count_graph('do-desc-wc-chart', most_common_do, "Most Common Words Describing Transformation");
     create_desc_success_bar(descriptions);
 
 }
 
-var desc_succ_chart;
+function create_word_count_graph(canvas_id, word_count, graph_title) {
+
+    // to remove listeners (https://stackoverflow.com/a/45342629/5416200)
+    const parent = $("#" + canvas_id).parent();
+    $("#" + canvas_id).remove();
+    parent.append($('<canvas class="chart" id="' + canvas_id + '"></canvas>'));
+
+    var ctx = document.getElementById(canvas_id).getContext('2d');
+
+    let labels = word_count.map(x => x[0]);
+    let data_points = word_count.map(x => x[1]);
+
+    let data = {
+        labels: labels,
+        datasets: [{
+            label: 'frequency',
+            backgroundColor: 'rgb(255, 99, 132)',
+            borderColor: 'rgb(255, 99, 132)',
+            data: data_points,
+        }]
+    };
+    let options = {
+        title: {
+            display: true,
+            text: graph_title
+        },
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true,
+                    callback: function(value, index, values) {
+                        // remove all decimal tick values
+                        if (Math.floor(value) === value) {
+                            return value;
+                        }
+                    }
+                }
+            }]
+        }
+    };
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: data,
+        options: options
+    });
+}
+
 function create_desc_success_bar(descs) {
+
+    // to remove listeners (https://stackoverflow.com/a/45342629/5416200)
+    const parent = $("#desc-success-chart").parent();
+    $("#desc-success-chart").remove();
+    parent.append($('<canvas class="chart" id="desc-success-chart"></canvas>'));
+
     var ctx = document.getElementById('desc-success-chart').getContext('2d');
 
     let labels = [];
@@ -171,11 +219,6 @@ function create_desc_success_bar(descs) {
         labels.push("Description " + i.toString());
         data_points.push(desc.display_num_success / desc.display_num_attempts);
     });
-
-
-    if (desc_succ_chart) {
-        desc_succ_chart.destroy();
-    }
 
     let data = {
         labels: labels,
@@ -202,7 +245,7 @@ function create_desc_success_bar(descs) {
         }
     };
 
-    desc_succ_chart = new Chart(ctx, {
+     new Chart(ctx, {
         type: 'horizontalBar',
         data: data,
         options: options
@@ -217,7 +260,7 @@ function get_n_highest_frequency(word_count, n=5) {
     });
 
     word_count_array.sort((a, b) => { return b[1] - a[1] });
-    return word_count_array.slice(0, n).map(x => x[0]);
+    return word_count_array.slice(0, n);
 }
 
 function get_word_counts(str) {
@@ -269,37 +312,81 @@ function load_tasks_to_browse() {
     let study = STUDY_BATCHES[STUDY_BATCH];
 
     get_all_descriptions_interactions_count(DESCRIPTIONS_TYPE).then(counts => {
-        var num_descriptions_list = counts[0];
-        var num_interactions_list = counts[1];
 
-        task_list = [];
-        for (i=0;i<study.tasks.length;i++) {
-            let task_num = study.tasks[i];
-            let num_descs = num_descriptions_list[i];
-            let num_interactions = num_interactions_list[i];
+        load_tasks_test_pairs(STUDY_BATCHES[STUDY_BATCH].tasks).then(pairs => {
 
-            task_list.push({'number': task_num, 'descriptions': num_descs, 'interactions': num_interactions});
-        }
-
-        $('#table').bootstrapTable({
-            data: task_list,
-            columns: [ { sortable: true },{ sortable: true },{ sortable: true },  
-            {
-            field: 'operate',
-            title: 'Select',
-            align: 'center',
-            valign: 'middle',
-            clickToSelect: false,
-            formatter : function(value,row,index) {
-                return '<button class="btn btn-secondary load-task-btn" task="'+row.number+'" data-dismiss="modal">Select</button> ';
+            var num_descriptions_list = counts[0];
+            var num_interactions_list = counts[1];
+    
+            task_list = [];
+            for (i=0;i<study.tasks.length;i++) {
+                let task_num = study.tasks[i];
+                let num_descs = num_descriptions_list[i];
+                let num_interactions = num_interactions_list[i];
+    
+                task_list.push({'number': task_num, 'descriptions': num_descs, 'interactions': num_interactions});
             }
-            }
-        ]      
-        });
+    
+            $('#table').bootstrapTable({
+                data: task_list,
+                columns: [ { 
+                    formatter : function(value,row,index) {
+                        let test_pair = pairs[row.number];
+                        let div = $("<div></div>");
+                        fill_div_with_IO(div, array_to_grid(test_pair.input), array_to_grid(test_pair.output));
 
-        $(".load-task-btn").click(function() {
-            let task = $(this).attr('task');
-            updateUrl({"task": task});
+                        return div.wrap('<p/>').parent().html();;
+                    }
+                }, { sortable: true },{ sortable: true },{ sortable: true },  
+                {
+                field: 'operate',
+                title: 'Select',
+                align: 'center',
+                valign: 'middle',
+                clickToSelect: true,
+                formatter : function(value,row,index) {
+                    return '<button class="btn btn-secondary load-task-btn" task="'+row.number+'" data-dismiss="modal">Select</button> ';
+                }
+                }
+            ]      
+            });
+    
+            $(".load-task-btn").click(function() {
+                let task = $(this).attr('task');
+                document.location.href = `../explore?task=${task}`;
+            });
+
         });
     });
 }
+
+function load_tasks_test_pairs(tasks) {
+
+    return new Promise((resolve, reject) => {
+        get_task_paths().then(paths => {
+
+            let promises = [];
+
+            $.each(tasks, (_, task) => {
+                let path = paths[task];
+                let promise = new Promise((res, rej) => {
+                    $.getJSON('../' + path, json => {
+                        res({"task": task, "json": json.test[0]});
+                    });
+                });
+                promises.push(promise);
+            });
+
+            Promise.all(promises).then(data => {
+                let data_obj = {};
+                $.each(data, (_, val) => {
+                    const task = val.task;
+                    const json = val.json;
+                    data_obj[task] = json;
+                });
+
+                return resolve(data_obj);
+            });
+        });
+    });
+} 

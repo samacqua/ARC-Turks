@@ -97,41 +97,57 @@
                 </div>
 
                 </br>
-                <h2>Statistics</h2>
+                <h2>Descriptions Overview</h2>
                 <div class="row">
-                    <ul id="stats-list"></ul>
-                    <canvas id="desc-success-chart"></canvas>
+                    <h4 id="desc-count">Descriptions count: 0</h4>
+                    <canvas class="chart" id="desc-success-chart"></canvas>
+                </div>
+
+                <h2>Vocabulary</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="row">
+                            <canvas class="chart" id="see-desc-wc-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="row">
+                            <canvas class="chart" id="do-desc-wc-chart"></canvas>
+                        </div>
+                    </div>
                 </div>
 
             </div>
         </div>
     </div> 
 
-    <div class="modal fade" id="browse-tasks-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+    <div class="modal modal-lg fade" id="browse-tasks-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title" id="exampleModalLongTitle">List of Tasks</h3>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-    
-            <table id="table" data-height="460">
-                <thead>
-                    <tr>
-                        <th scope="col" data-field="number">Task #</th>
-                        <th scope="col" data-field="descriptions"># Descriptions</th>
-                        <th scope="col" data-field="interactions"># Interactions</th>
-                        <th scope="col">Select</th>
-                    </tr>
-                </thead>
-                <tbody class="table"></tbody>
-            </table>
-    
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
+                <div class="modal-header">
+                    <h3 class="modal-title" id="exampleModalLongTitle">List of Tasks</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+        
+                <table id="table" data-height="460">
+                    <thead>
+                        <tr>
+                            <th scope="col" data-field="preview">Test preview</th>
+                            <th scope="col" data-field="number">Task #</th>
+                            <th scope="col" data-field="descriptions"># Descriptions</th>
+                            <th scope="col" data-field="interactions"># Interactions</th>
+                            <th scope="col">Select</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table"></tbody>
+                </table>
+        
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
