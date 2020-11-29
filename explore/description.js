@@ -186,6 +186,7 @@ function load_new_desc(task, desc_id) {
                 let g = create_action_sequence_graph_from_builds(cur_desc, builds);
 
                 $('#graph-container').empty();
+
                 let s = new sigma({
                     graph: g,
                     container: 'graph-container',
@@ -197,7 +198,7 @@ function load_new_desc(task, desc_id) {
                         drawLabels: true,
                         labelThreshold: 100, // so doesn't draw labels, turning off drawLabels turns off hover events
                         minNodeSize: 1,
-                        maxNodeSize: 12,
+                        maxNodeSize: 10,
                         minEdgeSize: 1,
                         maxEdgeSize: 3,
                         edgesPowRatio: 0.5,
@@ -208,9 +209,10 @@ function load_new_desc(task, desc_id) {
                     let node_grid = JSON.parse(e.data.node.id);
                     node_grid = array_to_grid(node_grid);
                     update_uneditable_div_from_grid_state($("#action-sequence-cur-grid .grid_inner_container"), node_grid);
-                    console.log(node_grid);
-                    console.log(e.type, e.data.node.label, e.data.captor);
                 });
+                
+                s.startForceAtlas2({worker: true, barnesHutOptimize: false, slowDown: 0.25, gravity: 0.25, strongGravityMode: true, scalingRatio: 100000000});
+                setTimeout(function() { s.stopForceAtlas2(); }, 5000)
             });
     
         }).catch(error => {
@@ -282,7 +284,7 @@ function create_action_sequence_graph_from_builds(desc, builds) {
                 label: 'Start state',
                 x: 0,
                 y: 0,
-                size: 1,
+                size: 5,
                 color: '#0000ff'
             },
             {
@@ -290,7 +292,7 @@ function create_action_sequence_graph_from_builds(desc, builds) {
                 label: 'Final state',
                 x: Math.sqrt(2)/2,
                 y: Math.sqrt(2)/2,
-                size: 1,
+                size: 5,
                 color: ACTION_COLOR_MAP.check.correct
             }
         ],
@@ -320,13 +322,11 @@ function create_action_sequence_graph_from_builds(desc, builds) {
                 g.nodes.push({
                     id: node_id,
                     label: i.toString(),
-                    x: dx*magnitude*(i+1),
-                    y: dy*magnitude*(i+1),
+                    x: dx*magnitude*(i+1)+Math.random()/100,
+                    y: dy*magnitude*(i+1)+Math.random()/100,
                     size: 1,
                     color: node_color
                 });
-            } else {
-                existing_node.size += 1;
             }
 
             // add edge from previous state to current
@@ -380,8 +380,6 @@ function create_action_sequence_graph_from_builds(desc, builds) {
                         size: 1,
                         color: node_color
                     });
-                } else {
-                    existing_node.size += 1;
                 }
 
                 // add edge from previous state to current
