@@ -197,7 +197,7 @@ function load_new_desc(task, desc_id) {
                         nodeHoverPrecision: 10,
                         drawLabels: true,
                         labelThreshold: 100, // so doesn't draw labels, turning off drawLabels turns off hover events
-                        minNodeSize: 1,
+                        minNodeSize: 2,
                         maxNodeSize: 10,
                         minEdgeSize: 1,
                         maxEdgeSize: 3,
@@ -205,14 +205,22 @@ function load_new_desc(task, desc_id) {
                     }
                 });
 
+                update_uneditable_div_from_grid_state($("#action-sequence-cur-grid .grid_inner_container"), new Grid(3, 3));
                 s.bind('overNode outNode clickNode doubleClickNode rightClickNode', function(e) {
                     let node_grid = JSON.parse(e.data.node.id);
                     node_grid = array_to_grid(node_grid);
                     update_uneditable_div_from_grid_state($("#action-sequence-cur-grid .grid_inner_container"), node_grid);
                 });
                 
-                s.startForceAtlas2({worker: true, barnesHutOptimize: false, slowDown: 0.25, gravity: 0.25, strongGravityMode: true, scalingRatio: 100000000});
-                setTimeout(function() { s.stopForceAtlas2(); }, 5000)
+                const force_settings = {
+                    scalingRatio: 1e5,
+                    strongGravityMode: true,
+                    gravity: 0.2,
+                    slowDown: 1,
+                    startingIterations: 500,
+                  };
+                s.startForceAtlas2(force_settings);
+                setTimeout(function() { s.stopForceAtlas2(); }, 2000);
             });
     
         }).catch(error => {
@@ -267,10 +275,7 @@ function create_action_sequence_graph_from_builds(desc, builds) {
         'copyFromInput': '#F79824',
         'resetOutputGrid': '#31393C',
         'resizeOutputGrid': '#95964A',
-        'check': {
-            'correct': '#26A96C',
-            'incorrect': '#FF595E',
-        }
+        'check': '#CCC'
     };
 
     let init_state_id = JSON.stringify([[0, 0, 0], [0, 0, 0], [0, 0, 0]]);
@@ -284,7 +289,7 @@ function create_action_sequence_graph_from_builds(desc, builds) {
                 label: 'Start state',
                 x: 0,
                 y: 0,
-                size: 5,
+                size: 6,
                 color: '#0000ff'
             },
             {
@@ -292,8 +297,9 @@ function create_action_sequence_graph_from_builds(desc, builds) {
                 label: 'Final state',
                 x: Math.sqrt(2)/2,
                 y: Math.sqrt(2)/2,
-                size: 5,
-                color: ACTION_COLOR_MAP.check.correct
+                size: 6,
+                type: 'arrow',
+                color: '#26A96C'
             }
         ],
         edges: []
@@ -309,14 +315,15 @@ function create_action_sequence_graph_from_builds(desc, builds) {
         let dy = Math.sin(direction);
 
         let magnitude = 1 / desc_as.length;
-
         let last_node_id = init_state_id;
+
+        let visited_nodes = [];
+
         $.each(desc_as, (i, action) => {
                 
             // add resulting grid node if does not exist
             let node_id = JSON.stringify(action.grid);
             let existing_node = g.nodes.find(node => node.id == node_id);
-            const node_color = node_id == JSON.stringify(TEST_PAIR.output.grid) ? "#32CD32" : "#666";
 
             if (existing_node == null) {
                 g.nodes.push({
@@ -325,36 +332,51 @@ function create_action_sequence_graph_from_builds(desc, builds) {
                     x: dx*magnitude*(i+1)+Math.random()/100,
                     y: dy*magnitude*(i+1)+Math.random()/100,
                     size: 1,
-                    color: node_color
+                    color: '#666',
                 });
+            } else {
+                // only increase size if not final or start state, size is < 4, and has not been visited by this user yet
+                if (existing_node.id != final_state_id && existing_node.id != init_state_id && existing_node.size <= 4 && !visited_nodes.includes(node_id)) {
+                    console.log(visited_nodes);
+                    existing_node.size += 1;
+                }
+            }
+
+            // make red if checked incorrectly
+            if (action.action.correct == false && existing_node.id != init_state_id ) {
+                console.log("Changing color!");
+                existing_node.color = '#FF595E';
             }
 
             // add edge from previous state to current
             let edge_id = last_node_id + "_" + node_id;
             let exisiting_edge = g.edges.find(edge => edge.id == edge_id);
             let edge_color = ACTION_COLOR_MAP[action.action.tool];
-            if (action.action.tool == 'check') {
-                edge_color = action.action.correct ? ACTION_COLOR_MAP[action.action.tool.correct] : ACTION_COLOR_MAP[action.action.tool.incorrect];
-            }
             if (exisiting_edge == null) {
                 g.edges.push({
                     id: edge_id,
                     source: last_node_id,
                     target: node_id,
+                    type: 'arrow',
                     size: 1,
                     color: edge_color
                 });
             } else {
-                exisiting_edge.size += 1;
+                if (!visited_nodes.includes(node_id)) {
+                    exisiting_edge.size += 1;
+                }
             }
 
+            visited_nodes.push(node_id);
             last_node_id = node_id;
         });
     }
 
     // draw graph for builder attempts
     $.each(builds, (_, build) => {
+
         let action_sequence = build.action_sequence;
+        visited_nodes = [];
 
         if (action_sequence) {
             action_sequence = JSON.parse(action_sequence);
@@ -370,37 +392,50 @@ function create_action_sequence_graph_from_builds(desc, builds) {
                 // add resulting grid node if does not exist
                 let node_id = JSON.stringify(action.grid);
                 let existing_node = g.nodes.find(node => node.id == node_id);
-                const node_color = node_id == JSON.stringify(TEST_PAIR.output.grid) ? "#32CD32" : "#666";
+
                 if (existing_node == null) {
                     g.nodes.push({
                         id: node_id,
-                        label: 'Grid state',
+                        label: i.toString(),
                         x: dx*magnitude*(i+1),
                         y: dy*magnitude*(i+1),
                         size: 1,
-                        color: node_color
+                        color: '#666',
                     });
+                } else {
+                    // only increase size if not final or start state, size is < 4, and has not been visited by this user yet
+                    if (existing_node.id != final_state_id && existing_node.size <= 4 && !visited_nodes.includes(node_id)) {
+                        existing_node.size += 1;
+                    }
                 }
+
+                            // make red if checked incorrectly
+            if (action.action.correct == false && existing_node.id != init_state_id) {
+                console.log("Changing color!");
+                existing_node.color = '#FF595E';
+            }
 
                 // add edge from previous state to current
                 let edge_id = last_node_id + "_" + node_id;
                 let exisiting_edge = g.edges.find(edge => edge.id == edge_id);
                 let edge_color = ACTION_COLOR_MAP[action.action.tool];
-                if (action.action.tool == 'check') {
-                    edge_color = action.action.correct ? ACTION_COLOR_MAP[action.action.tool.correct] : ACTION_COLOR_MAP[action.action.tool.incorrect];
-                }
                 if (exisiting_edge == null) {
                     g.edges.push({
                         id: edge_id,
                         source: last_node_id,
                         target: node_id,
                         size: 1,
-                        color: edge_color
+                        color: edge_color,
+                        type: 'arrow',
                     });
                 } else {
-                    exisiting_edge.size += 1;
+                    // only increase thickness if new user
+                    if (!visited_nodes.includes(node_id)) {
+                        exisiting_edge.size += 1;
+                    }
                 }
 
+                visited_nodes.push(node_id);
                 last_node_id = node_id;
             });
         }
