@@ -272,9 +272,9 @@ function create_action_sequence_graph_from_builds(desc, builds) {
         'floodfill': '#FDCA40',
         'copy': '#2176FF',
         'paste': '#33A1FD',
-        'copyFromInput': '#F79824',
+        'copyFromInput': '#eb8b15',
         'resetOutputGrid': '#31393C',
-        'resizeOutputGrid': '#95964A',
+        'resizeOutputGrid': '#b239d6',
         'check': '#CCC'
     };
 

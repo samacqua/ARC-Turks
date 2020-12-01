@@ -234,8 +234,9 @@ h2 {
 
 .legend .edit_color { background-color: #CCC; }
 .legend .flood_fill_color { background-color: #FDCA40; }
-.legend .copy_color { background-color: #2176FF; }
 .legend .paste_color { background-color: #33A1FD; }
-.legend .copy_from_input_color { background-color: #F79824; }
-.legend .resize_output_grid_color { background-color: #95964A; }
+.legend .copy_from_input_color { background-color: #eb8b15; }
+.legend .resize_output_grid_color { background-color: #b239d6; }
 .legend .reset_output_grid_color { background-color: #31393C; }
+
+.legend .copy_color { background-color: #2176FF; }
