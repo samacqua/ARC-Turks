@@ -21,6 +21,7 @@ var firebaseConfigPilot = {
 var firebaseConfigPilot2 = {
     apiKey: "AIzaSyBg9yynastMoRA1fGore-sgjygpVhcoLA8",
     authDomain: "arc-pilot-2.firebaseapp.com",
+    databaseURL: "https://arc-pilot-2-default-rtdb.firebaseio.com",
     projectId: "arc-pilot-2",
     storageBucket: "arc-pilot-2.appspot.com",
     messagingSenderId: "99669730043",
