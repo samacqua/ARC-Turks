@@ -1,4 +1,3 @@
-var ATTEMPT_JSONS = [];
 var GOOD_WORDS = [];
 var PAST_DESCS = [];
 
@@ -536,7 +535,7 @@ function add_current_candidate_word() {
 
 function submit() {
     /**
-     * If starting with right phrase, actually entered text, and has used all known words or added the unknown words, then unhide validation
+     * If starting with right phrase, actually entered text, and has used all known words or added the unknown words, then continue
      */
 
     if ($("#grid_size_desc").val().trim().length - GRID_SIZE_PREFIX.length < 5) {

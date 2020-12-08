@@ -198,7 +198,7 @@ function check() {
         errorMsg(`Wrong answer. Try again. You have ${MAX_ATTEMPTS_BUILDER - ATTEMPT_JSONS.length} attempts left.`);
         ATTEMPTS_SEQUENCE.push({
             "action": {"tool": "check", "correct": false},
-            "grid": CURRENT_OUTPUT_GRID.grid,
+            "grid": array_copy(CURRENT_OUTPUT_GRID.grid),
             "time": (new Date() - START_DATE) / 1000
         });
             // used all attempts
@@ -216,7 +216,7 @@ function check() {
                 errorMsg(`Wrong answer. Try again. You have ${MAX_ATTEMPTS_BUILDER - ATTEMPT_JSONS.length} attempts left.`);
                 ATTEMPTS_SEQUENCE.push({
                     "action": {"tool": "check", "correct": false},
-                    "grid": CURRENT_OUTPUT_GRID.grid,
+                    "grid": array_copy(CURRENT_OUTPUT_GRID.grid),
                     "time": (new Date() - START_DATE) / 1000
                 });
                     // used all attempts
@@ -231,7 +231,7 @@ function check() {
 
     ATTEMPTS_SEQUENCE.push({
         "action": {"tool": "check", "correct": true},
-        "grid": CURRENT_OUTPUT_GRID.grid,
+        "grid": array_copy(CURRENT_OUTPUT_GRID.grid),
         "time": (new Date() - START_DATE) / 1000
     });
 

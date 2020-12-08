@@ -266,7 +266,6 @@ function create_build_row(build) {
 
 function create_action_sequence_graph_from_builds(desc, builds) {
 
-    // https://coolors.co/31393c-2176ff-33a1fd-fdca40-f79824-95964a-32936f-26a96c
     const ACTION_COLOR_MAP = {
         'edit': '#CCC',
         'floodfill': '#FDCA40',
@@ -628,7 +627,8 @@ function repeat_action_sequence_in_div(sequence, container_div) {
     }
 
     let i = 0;
-    const interval_length = 5000 / sequence.length;
+    let interval_length = 5000 / sequence.length;
+
     return setInterval(() => {
         play_action_sequence_item(sequence, container_div, i++%sequence.length);
     }, interval_length);

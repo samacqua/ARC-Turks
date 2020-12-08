@@ -159,25 +159,23 @@ function resizeOutputGrid(replay=false) {
     if (!replay) {
         ATTEMPTS_SEQUENCE.push({
             "action": {"tool": "resizeOutputGrid", "width": width, "height": height},
-            "grid": CURRENT_OUTPUT_GRID.grid,
+            "grid": array_copy(CURRENT_OUTPUT_GRID.grid),
             "time": (new Date() - START_DATE) / 1000
         });
     }
 }
 
 function resetOutputGrid(replay=false) {
+    CURRENT_OUTPUT_GRID = new Grid(3, 3);
+    resizeOutputGrid(replay=true);
+
     if (!replay) {
         ATTEMPTS_SEQUENCE.push({
             "action": {"tool": "resetOutputGrid"},
-            "grid": CURRENT_OUTPUT_GRID.grid,
+            "grid": array_copy(CURRENT_OUTPUT_GRID.grid),
             "time": (new Date() - START_DATE) / 1000
         });
     }
-
-    update_grid_from_div($(`#output_grid .editable_grid`), CURRENT_OUTPUT_GRID);
-    CURRENT_OUTPUT_GRID = new Grid(3, 3);
-    update_div_from_grid_state($(`#output_grid .editable_grid`), CURRENT_OUTPUT_GRID);
-    resizeOutputGrid(replay=true);
 }
 
 function copyFromInput(replay=false, output_grid_id="output_grid") {
@@ -189,7 +187,7 @@ function copyFromInput(replay=false, output_grid_id="output_grid") {
     if (!replay) {
         ATTEMPTS_SEQUENCE.push({
             "action": {"tool": "copyFromInput"},
-            "grid": CURRENT_OUTPUT_GRID.grid,
+            "grid": array_copy(CURRENT_OUTPUT_GRID.grid),
             "time": (new Date() - START_DATE) / 1000
         });
     }

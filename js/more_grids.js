@@ -42,12 +42,13 @@ function set_div_grid_listeners(div) {
         } else if (mode == 'edit') {
             // Else: fill just this cell.
             set_cell_color(cell, symbol);
+            update_grid_from_div($(`#output_grid .editable_grid`), CURRENT_OUTPUT_GRID);
         }
 
         // add to sequence of attempts
         ATTEMPTS_SEQUENCE.push({
             "action": {"tool": mode, "x": cell.attr('x'), "y": cell.attr('y'), "symbol": symbol},
-            "grid": CURRENT_OUTPUT_GRID.grid,
+            "grid": array_copy(CURRENT_OUTPUT_GRID.grid),
             "time": (new Date() - START_DATE) / 1000
         });
 
@@ -246,7 +247,7 @@ $(document).ready(function () {
             // add to sequence of attempts
             ATTEMPTS_SEQUENCE.push({
                 "action": {"tool": "copy", "copy_paste_data": COPY_PASTE_DATA.slice()},
-                "grid": CURRENT_OUTPUT_GRID.grid,
+                "grid": array_copy(CURRENT_OUTPUT_GRID.grid),
                 "time": (new Date() - START_DATE) / 1000
             });
 
@@ -294,9 +295,11 @@ $(document).ready(function () {
                 }
             }
 
+            update_grid_from_div($(`#output_grid .editable_grid`), CURRENT_OUTPUT_GRID);
+
             ATTEMPTS_SEQUENCE.push({
                 "action": {"tool": "paste", "copy_paste_data": COPY_PASTE_DATA.slice(), "x": targetx, "y": targety},
-                "grid": CURRENT_OUTPUT_GRID.grid,
+                "grid": array_copy(CURRENT_OUTPUT_GRID.grid),
                 "time": (new Date() - START_DATE) / 1000
             });
         }
