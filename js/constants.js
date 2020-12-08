@@ -1,16 +1,65 @@
-const TOTAL_TASKS_TO_COMPLETE = 6;
-const MIN_TASKS_BEFORE_SPEAKER = 2;
-const TOTAL_PRAC_TASKS = 2;
-const NUM_TASKS = 3;   // TODO: Change back to 400
-const MAX_ATTEMPTS_BUILDER = 3;
+// ========
+// Timing
+// ========
 
-// easy tasks for demonstration purposes
+// expected time for each portion of the interface
+const TOTAL_TIME = 45;
+const WALKTHROUGH_TIME = 146.1/60;
+const CONSENT_INSTRUCT_TIME = 53.9/60;
+const QUIZ_TIME = 39.6/60;
+const INSTRUCTIONS_TIME = WALKTHROUGH_TIME + CONSENT_INSTRUCT_TIME + QUIZ_TIME;
+
+const PRAC_TASK_TIME = 91.6/60;
+
+const SPEAKER_TIME = 346.4/60;
+const BUILDER_TIME = 103.0/60;
+
+
+// ========
+// Partial Credit
+// ========
+
+const SKIP_PART_CRED = 0.10;
+const SPEAKER_FAIL_PART_CRED = 0.50;
+
+// ========
+// Tasks
+// ========
+
+// Pilot tasks: [149, 286, 140, 354, 219, 277, 28, 135, 162, 384, 297, 26, 299, 388, 246, 74, 305, 94, 308, 77]
+// Pilot 2 tasks: [211, 124, 89, 141, 91, 20, 7, 201, 285, 111, 294, 249, 69, 81, 239, 16, 363, 92, 303, 269]
+const TASKS = [211, 124, 89, 141, 91, 20, 7, 201, 285, 111, 294, 249, 69, 81, 239, 16, 363, 92, 303, 269];  // the ARC tasks to be used in the study
+const NUM_TASKS = TASKS.length;
+
+// ========
+// Common Values
+// ========
+
+const MAX_ATTEMPTS_BUILDER = 3; // maximum number of attempts a builder has before they "failed"
+const MIN_CONFIDENCE = 3;   // if confidence is at or below this level, do not add the description to the bandit (but use it for showing to future speakers)
+const GRID_SIZE_PREFIX = "The output grid size...";
+const SHOULD_SEE_PREFIX = "In the input, you should see...";
+const HAVE_TO_PREFIX = "To make the output, you have to...";
+
+const Pages = {
+    Intro: "intro",
+    Describer: "describer",
+    Listener: "listener",
+    Dev: "dev",
+    ExploreTasks: "explore_tasks",
+    ExploreDescs: "explore_descs"
+};
+
+// ========
+// Tutorial
+// ========
+
 const PRAC_TASKS = [
     {
-        "task": 341,
+        "task": 1,
         "grid_desc": "The output grid size... is the same as the input grid size.",
-        "see_desc": "In the input, you should see... a light blue 2x2 square with 4 colored cells around it.",
-        "do_desc": "To make the output, you have to... move each colored cell to cover the corner of the light blue square that it is closest to.",
+        "see_desc": "In the input, you should see... at least 1 green shape with holes.",
+        "do_desc": "To make the output, you have to... completely fill each hole with yellow.",
         "selected_example": 0
     },
     {
@@ -22,7 +71,17 @@ const PRAC_TASKS = [
     }
 ];
 
+// quiz to ensure understanding
 const GEN_QUIZ_QUESTIONS = [
+    {
+        question: "Your goal is to...",
+        answers: {
+            a: 'create grids that look like other grids',
+            b: 'write a description of the transformation based on grid examples so that another person can create the correct output grid',
+            c: 'use a description of the pattern to create the correct output grid'
+        },
+        correctAnswer: 'c'
+    },
     {
         question: "It is important to...",
         answers: {
@@ -50,38 +109,3 @@ const GEN_QUIZ_QUESTIONS = [
         correctAnswer: 'b'
     }
 ];
-
-const TASK_SPECIFIC_QUESTION = {
-    "nl": {
-        question: "Your goal is to...",
-        answers: {
-            a: 'create grids that look like other grids',
-            b: 'write a description of the transformation based on grid examples so that another person can create the correct output grid',
-            c: 'use a description of the pattern to create the correct output grid'
-        },
-        correctAnswer: 'c'
-    },
-    "nl_ex": {
-        question: "Your goal is to...",
-        answers: {
-            a: 'create grids that look like other grids',
-            b: 'write a description of the transformation based on grid examples so that another person can create the correct output grid',
-            c: 'use a description and example of the pattern andto create the correct output grid'
-        },
-        correctAnswer: 'c'
-    },
-    "ex": {
-        question: "Your goal is to...",
-        answers: {
-            a: 'create grids that look like other grids',
-            b: 'write a description of the transformation based on grid examples so that another person can create the correct output grid',
-            c: 'use an example of the pattern to create the correct output grid'
-        },
-        correctAnswer: 'c'
-    }
-}
-
-
-const GRID_SIZE_PREFIX = "The output grid size...";
-const SHOULD_SEE_PREFIX = "In the input, you should see...";
-const HAVE_TO_PREFIX = "To make the output, you have to...";

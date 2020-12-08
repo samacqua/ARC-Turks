@@ -62,17 +62,20 @@
         </div>
 
         <div class="progress-meter">
-            <div class="meter meter-right" style="width: 50%;" id="done_label"><span class="meter-text">All Done!</span>
+            <div class="meter meter-right" style="width: 80%;" id="done_label"><span class="meter-text">All Done!</span>
             </div>
-            <div class="meter meter-right" style="width: 25%;" id="tutorial_label"><span class="meter-text">Practice</span>
-            </div>
-            <div class="meter meter-right" style="width: 25%;" id="instructions_label"><span class="meter-text">Instructions</span>
+            <div class="meter meter-right" style="width: 20%;" id="tutorial_label"><span class="meter-text">Finished Practice and Instructions</span>
             </div>
         </div>
     </div>
 
     <!-- Actual Body -->
     <div id="container-fluid">
+
+        <div id="loader">
+            <h5 id="loading_next_title">Loading your next task</h5>
+            <div class="spinner-border text-primary"></div>
+        </div>
 
         <div class="alert alert-success" id="info_display"></div>
         <div class="alert alert-danger" id="error_display"></div>
@@ -132,18 +135,18 @@
                 </div>
 
                 <div id="output_grid">
-                    <div class="edition_grid selectable_grid">
-                        <div class="row">
+                    <div class="editable_grid selectable_grid">
+                        <div class="grid_row">
                             <div class="cell" symbol="0" x="0" y="0"></div>
                             <div class="cell" symbol="0" x="0" y="1"></div>
                             <div class="cell" symbol="0" x="0" y="2"></div>
                         </div>
-                        <div class="row">
+                        <div class="grid_row">
                             <div class="cell" symbol="0" x="1" y="0"></div>
                             <div class="cell" symbol="0" x="1" y="1"></div>
                             <div class="cell" symbol="0" x="1" y="2"></div>
                         </div>
-                        <div class="row">
+                        <div class="grid_row">
                             <div class="cell" symbol="0" x="2" y="0"></div>
                             <div class="cell" symbol="0" x="2" y="1"></div>
                             <div class="cell" symbol="0" x="2" y="2"></div>
@@ -151,26 +154,18 @@
                     </div>
                 </div>
 
-                <div id="resize_control_btns">
-                    <label for="output_grid_size">Change grid size: </label>
-                    <input type="text" id="output_grid_size" class="grid_size_field" name="size" value="3x3">
-                    <button type="button" class="btn btn-primary" onclick="resizeOutputGrid(); pre_continue();"
-                        id="resize_btn">Resize</button>
-                </div>
-
-                <div id="edit_control_btns">
-                    <span id="copy-reset-btns">
-                        <button type="button" class="btn btn-secondary"
-                        onclick="copyFromInput(); pre_continue('copy_input');">Copy input grid</button>
-                        <button type="button" class="btn btn-secondary" onclick="resetOutputGrid(); pre_continue();">Reset
-                        grid</button>
-                    </span>
-                    <button type="button" class="btn btn-success" onclick="check_grid()">Check!</button>
-                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#giveUpModal">Give
-                        up</button>
+                <div class="input-group mb-3" id="resize_control_btns">
+                    <input type="text" id="output_grid_size" class="form-control" placeholder="3x3" value="3x3">
+                    <div class="input-group-append">
+                      <button class="btn btn-secondary" type="button" onclick="resizeOutputGrid(); pre_continue();">resize output</button>
+                    </div>
                 </div>
 
                 <div id="toolbar_and_symbol_picker">
+                    <div id="edit_control_btns">
+                        <span id="copy-from-input"><button type="button" class="btn btn-secondary" onclick="copyFromInput(); pre_continue();">Copy input grid</button></span>
+                        <button type="button" class="btn btn-secondary" onclick="resetOutputGrid();">Make output grid black</button>
+                    </div>
                     <div id="toolbar">
                         <div>
                             <div id="draw" style="float:left;">
@@ -204,6 +199,12 @@
                     </div>
                 </div>
 
+                <div id="submit_quit_buttons">
+                    <button type="button" id="check-btn" class="btn btn-success" onclick="check_grid(); pre_continue('check');">Check!</button>
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#giveUpModal">Give
+                        up</button>
+                </div>
+
             </div>
         </div>
     </div>
@@ -218,9 +219,7 @@
                     <h3 class="modal-title" id="gen-modal-title">Informed Consent</h3>
                 </div>
                 <div class="modal-body" id="gen-modal-body">
-                    <p>In this study, you will interpret descriptions of an abstract pattern that you observe in grids.
-                    </p>
-                    </br>
+                    <p>In this study, you will interpret descriptions of an abstract pattern that you observe in grids.</p>
                     <p>By answering the following questions, you are participating in a study performed by cognitive
                         scientists in the MIT Department of Brain and Cognitive Science. If you have questions about
                         this research, please contact Sam Acquaviva at samacqua@mit.edu. Your participation in this
@@ -242,7 +241,7 @@
     </div>
 
     <!-- NL Introduction Modal -->
-    <div class="modal fade" id="nlIntroModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+    <div class="modal fade" id="IntroModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -251,139 +250,29 @@
                 </div>
                 <div class="modal-body" id="gen-modal-body">
 
-                    <p>If I showed you this grid:</p>
+                    <p>If I gave you this grid:</p>
 
-                    <img class="io" src="img/grid_inp_1.png">
-
-                    <p>And I told you: </p>
-                    <p><strong>"Make this grid blue"</strong></p>
-                    <p>Would you be able to make this transformation? Would you create the correct output shown below
-                        (hover over to show)?</p>
-
-                    <img class="io" id="io_ex" src="img/grid_out_1.png">
-
-                    <hr>
-                    <p>Great! If I gave you this grid:</p>
-
-                    <img class="io" src="img/grid_inp_2.png">
+                    <img src="img/grid_ex.jpg">
 
                     <p>And I told you:</p>
                     <p><strong>"You should see a 3x3 grid with a colored dot in the middle. Create a 5x5 grid that is
                             filled with the middle color."</strong></p>
-                    <p> Would you be able to make this transformation? Would you create the correct output shown below
-                        (hover over to show)?</p>
+                    <p> Would you be able to make this transformation? Would you create the correct output shown below?</p>
 
-                    <img class="io" id="io_ex" src="img/grid_out_2.png">
+                    <p><i>(hover over to show answer)</i></p>
+                    <img class="hidden_blurred" src="img/grid_ex_ans.jpg">
 
-                    <p>These are simple examples of the tasks you will solve in this study. You will be given a
+                    <p>This is a simple example of the kind of tasks you will solve in this study. You will be given a
                         description of a transformation, and you will have to use that description to create the correct
                         output.</p>
                     <p><b>It is important that you use as few attempts as possible. The more tasks you complete, and the
                             fewer attempts you take on each, the bigger reward you will get.</b></p>
-                    <p>You can always give up on a task, but you will not be given a bonus for that task.</p>
+
+                    <p>This study will take <b>45 minutes</b>. You will be paid <b>$6.00</b> for completing the session, and you will be paid an <b>additional $0.10</b> for every task you get correct.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-dismiss="modal"
-                        onclick="START_TIME = new Date(); continue_tutorial()">Continue to Examples</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- NL+example Introduction Modal -->
-    <div class="modal fade" id="nl_exIntroModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title" id="gen-modal-title">Overview of Your Role</h3>
-                </div>
-                <div class="modal-body" id="gen-modal-body">
-
-                    <p>If I showed you this grid:</p>
-
-                    <img class="io" src="img/grid_inp_1.png">
-
-                    <p>And I told you: </p>
-                    <p><strong>"Make this grid blue"</strong></p>
-                    <p>Would you be able to make this transformation? Would you create the correct output shown below
-                        (hover over to show)?</p>
-
-                    <img class="io" id="io_ex" src="img/grid_out_1.png">
-
-                    <hr>
-                    <p>Great! If I gave you this grid:</p>
-
-                    <img class="io" src="img/grid_inp_2.png">
-
-                    <p>And I told you:</p>
-                    <p><strong>"You should see a 3x3 grid with a colored dot in the middle. Create a 5x5 grid that is
-                            filled with the middle color."</strong></p>
-                    <p> Would you be able to make this transformation? Would you create the correct output shown below
-                        (hover over to show)?</p>
-
-                    <img class="io" id="io_ex" src="img/grid_out_2.png">
-
-                    <p>These are simple examples of the tasks you will solve in this study. You will be given a
-                        description of a transformation, and you will have to use that description to create the correct
-                        output. You will also be given an example of the transformation.</p>
-                    <p><b>It is important that you use as few attempts as possible. The more tasks you complete, and the
-                            fewer attempts you take on each, the bigger reward you will get.</b></p>
-                    <p>You can always give up on a task, but you will not be given a bonus for that task.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal"
-                        onclick="START_TIME = new Date(); continue_tutorial()">Continue to Examples</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- TODO: Fill with decent explanation-->
-    <!-- example Introduction Modal -->
-    <div class="modal fade" id="exIntroModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title" id="gen-modal-title">Overview of Your Role</h3>
-                </div>
-                <div class="modal-body" id="gen-modal-body">
-
-                    <p>If I showed you this grid:</p>
-
-                    <img class="io" src="img/grid_inp_1.png">
-
-                    <p>And I told you: </p>
-                    <p><strong>"Make this grid blue"</strong></p>
-                    <p>Would you be able to make this transformation? Would you create the correct output shown below
-                        (hover over to show)?</p>
-
-                    <img class="io" id="io_ex" src="img/grid_out_1.png">
-
-                    <hr>
-                    <p>Great! If I gave you this grid:</p>
-
-                    <img class="io" src="img/grid_inp_2.png">
-
-                    <p>And I told you:</p>
-                    <p><strong>"You should see a 3x3 grid with a colored dot in the middle. Create a 5x5 grid that is
-                            filled with the middle color."</strong></p>
-                    <p> Would you be able to make this transformation? Would you create the correct output shown below
-                        (hover over to show)?</p>
-
-                    <img class="io" id="io_ex" src="img/grid_out_2.png">
-
-                    <p>These are simple examples of the tasks you will solve in this study. You will be given a
-                        description of a transformation, and you will have to use that description to create the correct
-                        output. You will also be given an example of the transformation.</p>
-                    <p><b>It is important that you use as few attempts as possible. The more tasks you complete, and the
-                            fewer attempts you take on each, the bigger reward you will get.</b></p>
-                    <p>You can always give up on a task, but you will not be given a bonus for that task.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal"
-                        onclick="START_TIME = new Date(); continue_tutorial()">Continue to Examples</button>
+                        onclick="send_user_complete_item('consent_instructions_time', true);continue_tutorial();">Continue</button>
                 </div>
             </div>
         </div>
@@ -421,13 +310,12 @@
                     <h3 class="modal-title" id="gen-modal-title">Practice</h3>
                 </div>
                 <div class="modal-body" id="gen-modal-body">
-                    <p>Great! You successfully completed the quiz. Now, you will be given two example descriptions as
-                        practice.</p>
-                    <p><b>In order to continue, you must solve them both.</b></p>
+                    <p>Great! You successfully completed the quiz. Now, you will be given a description to solve on your own.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary"
-                        onclick="update_progress_bar(prac_inc=true); send_user_complete_instructions_time(); scroll_highlight_objective();"
+                        onclick="update_progress_bar(inc=INSTRUCTIONS_TIME); send_user_complete_item('quiz_time', false); scroll_highlight_objective();
+                            GIVE_UP_HINT = setTimeout(function() { infoMsg('If you cannot figure out the pattern, press \'give up\' to see the solution.') }, 60000);"
                         data-dismiss="modal">Okay!</button>
                 </div>
             </div>
@@ -444,7 +332,7 @@
                 </div>
                 <div class="modal-body" id="gen-modal-body">
                     <video id="give_up_vid" autoplay loop muted playsinline>  
-                        <source src="img/give_up_1.mp4" type="video/mp4">  
+                        <source src="img/give_up.mp4" type="video/mp4">  
                     </video> 
                 </div>
                 <div class="modal-footer">
@@ -464,17 +352,36 @@
                 </div>
                 <div class="modal-body" id="gen-modal-body">
 
-                    <!-- TODO: Fill in amounts and number of tasks to solve -->
                     <p>Great job finishing the tutorial.</p>
-                    <p>You will complete a total of 3 tasks. You will recieve <strong>AMOUNT</strong> for completing the
-                        study, and a bonus of <strong>AMOUNT</strong> for each task that you complete correctly.</p>
-                    <p>There is a chance that you will have the opportunity to describe a task on your own, for a bonus
-                        amount of <strong>AMOUNT</strong>. If so, you will be given another tutorial.</p>
+                    <p>You will now be given tasks until you do 45 minutes of work. For each task, you will be given credit towards completion.
+                        If we expect a task to take 5 minutes, you will get 5 minutes of credit, no matter how long you take.</p>
+                    <p>You will be paid <b>$6.00</b> for completing the session, and you will be paid an <b>additional $0.10</b> for every task you get correct.</p>
 
                 </div>
                 <div class="modal-footer">
-                    <button onclick="next_task(first_task=true)" type="button" class="btn btn-primary"
+                    <button onclick="exit_done_modal()" type="button" class="btn btn-primary"
                         data-dismiss="modal">Okay</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ongoing-study-modal -->
+    <div class="modal fade" id="ongoing-study-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="gen-modal-title">Ongoing MTurk Experiment</h3>
+                </div>
+                <div class="modal-body" id="gen-modal-body">
+
+                    <p>We are currently collecting data from MTurk. So, your responses will be recorded to a seperate database because you are not an MTurk.</p>
+                    <p>If you are an MTurk and this is a mistake, please email <b>samacqua@mit.edu</b><div class=""></div></p>
+
+                </div>
+                <div class="modal-footer">
+                    <button onclick="$('#ongoing-study-modal').one('hidden.bs.modal', function() { $('#consentModal').modal('show'); }).modal('hide');" type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
                 </div>
             </div>
         </div>

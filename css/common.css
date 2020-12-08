@@ -1,64 +1,12 @@
-img {
-    width: 100%;
-    padding-bottom: 15px;
-    height: auto;
-}
-
-.objective {
-    text-align: center;
-}
-
-#objective-col {
-    background-color: rgb(231, 180, 231);
-    margin-top: 20px;
-    padding-top: 8px;
-    transition: all .5s ease-in-out;
-    -webkit-transition: all .5s ease-in-out;
-    -moz-transition: all .5s ease-in-out;
-    -o-transition: all .5s ease-in-out;
-}
-
-#copy-reset-btns {
-    padding-top: 15px;
-    padding-bottom: 15px;
-}
-
-#arrow {
-    width: 90%;
-    z-index: 100;
-    height: auto;
-}
-
-#feedback_btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-}
-
-#io_id {
-    z-index: 110;
-    position: absolute;
-    padding-bottom: 80px;
-    font-size: 36px;
-    font-family: "Arial Rounded MT Bold", "Helvetica Rounded", Arial, sans-serif;
-    color: black;
-    font-weight: bold;
-    text-shadow: -1px -1px 0 rgb(255, 255, 255), 1px -1px 0 rgb(255, 255, 255), -1px 1px 0 rgb(255, 255, 255), 1px 1px 0 rgb(255, 255, 255);
-    float: left;
-}
-
 mark {
     background-color: rgba(70, 221, 248, 0.3);
     border-radius: 3px;
 }
 
-.col-header {
-    clear: both;
-    margin-bottom: 15px;
-}
-
-.col-title {
-    display: inline-block;
+img {
+    width: 100%;
+    padding-bottom: 15px;
+    height: auto;
 }
 
 video {
@@ -66,7 +14,56 @@ video {
     height: auto !important;
 }
 
-/*Message display*/
+.row {
+    margin: 0;
+}
+
+/* Loading Animation */
+
+@keyframes spinner-border {
+    to { transform: rotate(360deg); }
+} 
+.spinner-border{
+    display: inline-block;
+    width: 2rem;
+    height: 2rem;
+    vertical-align: text-bottom;
+    border: .25em solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    -webkit-animation: spinner-border .75s linear infinite;
+    animation: spinner-border .75s linear infinite;
+}
+.spinner-border-sm{
+    height: 1rem;
+    border-width: .2em;
+}
+#loader {
+    max-width: 90%;
+    max-height: 70%;
+    width: 300px;
+	height: 200px;
+    background-color: rgb(255, 255, 255);
+    border-radius: 10px;
+    text-align: center;
+    display: none;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	
+	position: absolute;
+	top:0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+  	
+    margin: auto;
+    z-index: 5000;
+}
+#loading_next_title {
+    margin-top: 35px;
+    padding: 15px;
+}
+
+/* Message display */
 
 #error_display {
     background-color: rgb(255, 100, 100);
@@ -80,6 +77,19 @@ video {
     display: none;
     border-radius: 5px;
 }
+#info_display {
+    color: black;
+    width: 80%;
+    float: left;
+    font-size: 20px;
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-top: 10px;
+    display: none;
+    border-radius: 5px;
+}
+
+/* Tutorial */
 
 #dark-layer,
 #trans-layer {
@@ -118,10 +128,6 @@ video {
     margin: 0;
     padding: 0;
 
-    /* bottom:5%; */
-    /* left: 5%; */
-    /* right: 40%; */
-
     color: white;
     background: rgba(0, 0, 0, 0.0);
     border-radius: 10px;
@@ -134,88 +140,4 @@ video {
 #objective-text {
     margin-left: 5px;
     margin-right: 5px;
-}
-
-#info_display {
-    color: black;
-    width: 80%;
-    float: left;
-    font-size: 20px;
-    margin-left: 10%;
-    margin-right: 10%;
-    margin-top: 10px;
-    display: none;
-    border-radius: 5px;
-}
-
-.progress {
-    color: green;
-    width: 70%;
-    height: 25px;
-    margin-left: 15%;
-    margin-right: 15%;
-    margin-top: 5px;
-}
-
-.progress-bar {
-    width: 0%;
-    height: 25px;
-}
-
-#progress-bar-complete {
-    background-color: white;
-}
-
-.progress-meter {
-    min-height: 15px;
-    border-bottom: 2px solid rgb(160, 160, 160);
-    width: 70%;
-    margin-left: 15%;
-    margin-right: 15%;
-    margin-bottom: 20px;
-}
-
-.progress-meter>.meter {
-    position: relative;
-    float: left;
-    min-height: 15px;
-    border-width: 0px;
-    border-style: solid;
-    border-color: rgb(160, 160, 160);
-}
-
-.progress-meter>.meter-left {
-    border-left-width: 2px;
-}
-
-.progress-meter>.meter-right {
-    float: right;
-    border-right-width: 2px;
-}
-
-.progress-meter>.meter-right:last-child {
-    border-left-width: 2px;
-}
-
-.progress-meter>.meter>.meter-text {
-    position: absolute;
-    display: inline-block;
-    bottom: -20px;
-    width: 100%;
-    font-weight: 700;
-    font-size: 0.85em;
-    color: rgb(160, 160, 160);
-    text-align: left;
-    overflow: visible;
-    white-space: nowrap;
-}
-
-.progress-meter>.meter.meter-right>.meter-text {
-    text-align: right;
-}
-
-.task_label {
-    text-align: center;
-    margin: 10px;
-    font-weight: bold;
 }

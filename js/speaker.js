@@ -1,5 +1,3 @@
-var START_DATE;
-var ATTEMPT_JSONS = [];
 var GOOD_WORDS = [];
 var PAST_DESCS = [];
 
@@ -15,6 +13,7 @@ $(window).on('load', function () {
     $("#grid_size_desc").val(GRID_SIZE_PREFIX);
     $("#what_you_see").val(SHOULD_SEE_PREFIX);
     $("#what_you_do").val(HAVE_TO_PREFIX);
+    $('.descriptions').highlightWithinTextarea('update');
 
     // show initial instructions
     if (sessionStorage.getItem('done_speaker_task') == 'true') {
@@ -23,55 +22,28 @@ $(window).on('load', function () {
         $('#instructionsModal').modal('show');
     }
 
-    // get words that have already been used and their word vecs
-    get_words().then(words => {
-        GOOD_WORDS = words.map(function (value) { return value.toLowerCase() });
-        console.log("Length of previously used words:", GOOD_WORDS.length);
-
-        // get word vecs from db and cache them
-        for (i=0;i<GOOD_WORDS.length;i++) {
-            get_word_vec_cache(GOOD_WORDS[i]);
-        }
-    }).catch(error => {
-        errorMsg("Could not load words that can been used. Please check your internet connection and reload the page.");
-    });
-
     // get speaker task
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    const task = urlParams.get('task') || Math.floor(Math.random()*NUM_TASKS);  // if none provided, give random task (just for when messing around w it, won't actually happen)
+    const task = urlParams.get('task') || TASKS[Math.floor(Math.random()*NUM_TASKS)];  // if none provided, give random task (just for when messing around w it, won't actually happen)
+
+    const isMTurk = sessionStorage.getItem('mturk');
+    if (isMTurk == 'false') {
+        console.log('Using DEV Database');
+        use_dev_config();
+    } else {
+        console.log("Using MTURK Database");
+    }
 
     DESCRIPTIONS_TYPE = sessionStorage.getItem('type') || "nl";
     loadTask(task);
     get_task_descriptions(task, DESCRIPTIONS_TYPE).then(function (descriptions) {
-        descriptions.sort(function(a, b) {
 
-            if (a.display_num_attempts == 0) {
-                return 1
-            } else if (b.display_num_attempts == 0) {
-                return -1
-            }
-
-            function upperConfBound(x) {
-                const i = x.bandit_success_score + 1;
-                const j = x.bandit_attempts - i + 1;
-
-                const mean = i / (i + j);
-                const variance = i * j / ((i + j) ** 2 * (i + j + 1));
-
-                return mean + Math.sqrt(variance);
-            }
-
-            if (upperConfBound(a) > upperConfBound(b)) {
-                return -1
-            } else { 
-                return 1
-            }
-        });
-
+        descriptions = descriptions.filter(desc => (desc.succeeded_verification != false));
+        descriptions.sort(sort_descs_bandit_score());
         PAST_DESCS = descriptions;
 
-        createExampleDescsPager(descriptions);
+        createExampleDescsPager();
         showDescEx(0);
 
         // if no descriptions, do not tell them about the anatomy of descriptions
@@ -86,6 +58,7 @@ $(window).on('load', function () {
         errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
     });
 
+    // customize tutorial to fit description type
     if (DESCRIPTIONS_TYPE == "nl") {
         $("#select_ex_io").remove();
     } else if (DESCRIPTIONS_TYPE == "nl_ex") {
@@ -97,8 +70,144 @@ $(window).on('load', function () {
     } else if (DESCRIPTIONS_TYPE == "ex") {
         console.error("Description type for speaker task should be natural language or natural language+example, not just example.");
     }
+
+    // get words that have already been used and their word vecs
+    get_words().then(words => {
+        // get word vecs from db and cache them
+        for (i=0;i<words.length;i++) {
+            let word = words[i];
+            GOOD_WORDS.push(word.toLowerCase());
+            get_word_vec_cache(word);
+        }
+    }).catch(error => {
+        errorMsg("Could not load words that can been used. Please check your internet connection and reload the page.");
+    });
 });
 
+$(document).ready(function () {
+
+    $('.descriptions').on("input", function() {
+        var value = $(this).val();
+        const prefix_mapping = { 'grid_size_desc': GRID_SIZE_PREFIX, 'what_you_see': SHOULD_SEE_PREFIX, 'what_you_do': HAVE_TO_PREFIX }
+        const id = $(this).attr("id");
+        var prefix = prefix_mapping[id];
+        $(this).val(prefix + value.substring(prefix.length));
+    });
+
+    // when textarea changes
+    $('.descriptions').on("keyup", function () {
+
+        // so they can't delete prefix
+        var value = $(this).val();
+        const id = $(this).attr("id");
+
+        // for each novel word, add a row with buttons to replace word with similar words in database, or add the word
+        $('#word-warning-' + id).empty();
+
+        const words_to_replace = value.match(get_bad_words());
+        if (words_to_replace != null && words_to_replace.length != 0) {
+
+            var items = [];
+            $.each(words_to_replace, function (i, word) {
+
+                // create the html for the list items
+                items.push(
+                    `<li><b>${word}</b>
+                    <span class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Replace with...
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" id=${word}_${i}_dropdown>
+                    </div>
+                    <button type="button" onclick="confirm_add_word(\'${word}\')" id="add_word_${word}" class="btn btn-danger add-word">add word</button></li>
+                    </span>`);
+            });
+
+            $('#word-warning-' + id).append(items.join(''));
+        }
+
+        get_replacement_words(words_to_replace).then(replacements => {
+
+            // if by the time retrieved words, there are new words, then recall self
+            if (!arraysEqual($(this).val().match(get_bad_words()), words_to_replace)) {
+                $(".descriptions").keyup();
+                return;
+            }
+
+            if (words_to_replace != null && words_to_replace.length != 0) {
+
+                replacements.forEach(function(replacement_i, i) {
+
+                    const word = replacement_i[0];
+                    const replacement_words = replacement_i[1].map(function(item) { return item[1] });
+
+                    if($(`#${word}_${i}_dropdown`).length != 0) {
+                        $(`#${word}_${i}_dropdown`).empty();
+                        $(`#${word}_${i}_dropdown`).append(
+                            `${(function () {
+                                var html_text = "";
+                                for (i = 0; i < replacement_words.length; i++) {
+                                    const replacement = replacement_words[i];
+                                    const dropdown_item = `<a onclick="replace_word(\'${word}\',\'${replacement}\', '#${id}')" id="replace_${word}_${replacement}" class="dropdown-item" href="#">${replacement}</a>`;
+                                    html_text += dropdown_item;
+                                }
+                                return html_text
+                            })()}`
+                        );
+                    }
+                });
+            }
+        });
+    });
+
+    // highlight the textareas for words that have not been used yet
+    $('.descriptions').highlightWithinTextarea({
+        highlight: [
+            {
+                highlight: get_bad_words
+            },
+            {
+                highlight: [GRID_SIZE_PREFIX, HAVE_TO_PREFIX, SHOULD_SEE_PREFIX],
+                className: 'prefixes'
+            }
+        ]
+    });
+
+    //  Make it so modal with sliders has labels of slider values
+    $("#conf_result").html($("#conf_form").val());
+    $("#conf_form").change(function () {
+        $("#conf_result").html($(this).val());
+    });
+});
+
+// get the max amount of time doing nothing (to nearest 5 seconds)
+var idleTime = 0;
+var maxIdleTime = 0;
+$(document).ready(function () {
+    //Increment the idle time counter every 5 seconds.
+    var resolution = 5;
+    var idleInterval = setInterval(function() { idleTime += resolution; }, resolution*1000);
+
+    //Zero the idle timer on mouse movement.
+    $(this).mousemove(function (e) {
+        if (idleTime > maxIdleTime) {
+            maxIdleTime = idleTime;
+        }
+        idleTime = 0;
+    });
+    $(this).keypress(function (e) {
+        if (idleTime > maxIdleTime) {
+            maxIdleTime = idleTime;
+        }
+        idleTime = 0;
+    });
+    $(this).click(function (e) {
+        if (idleTime > maxIdleTime) {
+            maxIdleTime = idleTime;
+        }
+        idleTime = 0;
+    });
+});
 
 // ==============
 // Tutorial
@@ -108,12 +217,12 @@ var TUT_LIST = [
     ["You will now be walked through the layout. Click any of the un-highlighted area to continue.", [], 30, 20, 20],
     ["This is the examples area. As you can see, there are multiple input-output examples. There is a single pattern that changes each input grid to its respective output grid.", ["io_ex_col"], 30, 35, 10],
     ["This is the old descriptions area. Any past attempts to describe the pattern will be shown here.", ["description_ex_col"], 30, 5, 65],
-    ["At the bottom of each description, you will see how well people did using the description. So, if the description did pretty well, you may want to slightly change it. But, if it did badly, you should rewrite the entire description.", ["description_ex_col"], 30, 5, 65],
+    ["At the bottom of each description, you will see how well people did using the description. So, if the description did pretty well, you may want to only slightly change it. But, if it did poorly, you should rewrite the entire description.", ["desc_success"], 30, 5, 65],
     ["This is the description area. This is where you will describe the pattern you recognized in the examples area. You will break your description into 3 sections:", ["description_col"], 30, 10, 35],
-    ["First, describe how the grid size changes. If it does not change, then make a note of that.", ["grid_size_form"], 40, 10, 35],
-    ["Then describe what you should expect to see in the input.", ["see_desc_form"], 40, 10, 35],
+    ["First, describe what you should expect to see in the input.", ["see_desc_form"], 40, 10, 35],
+    ["Then, describe how the grid size changes. If it does not change, then make a note of that.", ["grid_size_form"], 40, 10, 35],
     ["Then, describe what you need to do to create the correct output. Keep in mind that the person using your description will see a different input grid than you are seeing.", ["do_desc_form"], 40, 5, 35],
-    ["If you use a word in your description that has not been used, it will be highlighted red. To submit your description, you must replace every red word, or manually add it.", ["description_col"], 40, 5, 35],
+    ["If you use a word in your description that has not been used, it will be <mark id='red_highlight'>highlighted red.</mark> To submit your description, you must replace every red word, or manually add it.", ["description_col"], 40, 5, 35],
     ["If you realize you do not know the pattern, or you cannot describe the pattern, you can give up. If you give up, you will be given a new task to solve instead.", ["give_up_btn"], 40, 5, 35],
     ["Once you are happy with your description, press the Submit button.", ["submit_btn"], 40, 5, 35],
 ];
@@ -204,14 +313,32 @@ function continue_tutorial() {
 
 var CURRENT_DESC = 0;
 
-function createExampleDescsPager() {
+function createExampleDescsPager(cur_ex=0) {
 
     if (PAST_DESCS.length >= 1) {
-        $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${Math.max(CURRENT_DESC - 1, 0)})">Previous</a></li>`);
-        for (i = 0; i < PAST_DESCS.length; i++) {
-            $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${i});">${i + 1}</a></li>`);
+        $("#paginator").empty();
+        $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${Math.max(CURRENT_DESC - 1, 0)}); createExampleDescsPager(${Math.max(CURRENT_DESC-1, 0)});">Previous</a></li>`);
+
+        if (PAST_DESCS.length <= 4) {
+            for (i = 0; i < PAST_DESCS.length; i++) {
+                if (i == cur_ex) {
+                    $("#paginator").append(`<li class="page-item active"><a class="page-link" href="#" onclick="showDescEx(${i});createExampleDescsPager(${i});">${i + 1}</a></li>`);
+                } else {
+                    $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${i});createExampleDescsPager(${i});">${i + 1}</a></li>`);
+                }
+            }
+        } else {
+            if (cur_ex != 0) {
+                $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(0);createExampleDescsPager(0);">1</a></li>`);
+                $("#paginator").append(`<li class="page-item disabled"><a class="page-link">...</a></li>`);
+            }
+            $("#paginator").append(`<li class="page-item active"><a class="page-link" href="#" onclick="showDescEx(${cur_ex});createExampleDescsPager(${cur_ex});">${cur_ex + 1}</a></li>`);
+            if (cur_ex != PAST_DESCS.length - 1) {
+                $("#paginator").append(`<li class="page-item disabled"><a class="page-link">...</a></li>`);
+                $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${PAST_DESCS.length-1});createExampleDescsPager(${PAST_DESCS.length-1});">${PAST_DESCS.length}</a></li>`);
+            }
         }
-        $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${Math.min(CURRENT_DESC + 1, PAST_DESCS.length - 1)})">Next</a></li>`);
+        $("#paginator").append(`<li class="page-item"><a class="page-link" href="#" onclick="showDescEx(${Math.min(CURRENT_DESC + 1, PAST_DESCS.length - 1)}); createExampleDescsPager(${Math.min(CURRENT_DESC+1, PAST_DESCS.length - 1)}); ">Next</a></li>`);
     }
 }
 
@@ -220,10 +347,11 @@ function showDescEx(i) {
         $("#ex_size_desc").text("There are no descriptions for this task yet.");
         return;
     }
+    CURRENT_DESC = i;
     $("#ex_size_desc").text(PAST_DESCS[i]['grid_desc']);
     $("#ex_see_desc").text(PAST_DESCS[i]['see_desc']);
     $("#ex_do_desc").text(PAST_DESCS[i]['do_desc']);
-    $("#desc_success").html(`<b>${PAST_DESCS[i]['display_num_success']}</b> out of <b>${PAST_DESCS[i]['display_num_attempts']}</b> people succeeded using this description.`);
+    $("#desc_success").html(`<b>${PAST_DESCS[i]['display_num_success']}</b> out of <b>${PAST_DESCS[i]['display_num_attempts']}</b> people successfully solved the task using this description.`);
 }
 
 // ==============
@@ -235,17 +363,32 @@ function get_bad_words(input) {
     return new RegExp('\\b(?!(' + GOOD_WORDS.join("|") + ')\\b)[a-zA-Z]+', 'gmi')
 }
 
+// add common permutations of word
+function prefix_suffix_permutations(word) {
+    let permutations = [];
+
+    if (word == "s") {  // if we add "", then nothing will match regex
+        return []
+    }
+
+    if (word.slice(-1) == "s") {
+        permutations.push(word.slice(0,-1));
+    } else {
+        permutations.push(word + "s");
+    }
+
+    return permutations;
+}
+
 // if the word has already been fetched, then returns its vec
 // otherwise, fetches from database
-CACHED_W2V = {};
-CACHED_WORDS = [];
+var CACHED_W2V = {};
 function get_word_vec_cache(word) {
     return new Promise(function (resolve, reject) {
-        if (CACHED_WORDS.includes(word)) {
+        if (word in CACHED_W2V) {
             return resolve(CACHED_W2V[word]);
         } else {
             get_word_vec(word).then(vec => {
-                CACHED_WORDS.push(word);
                 CACHED_W2V[word] = vec;
                 return resolve(vec);
             });
@@ -253,6 +396,11 @@ function get_word_vec_cache(word) {
     });
 }
 
+/**
+ * sort from least to greatest
+ * @param {item} a comes before b
+ * @param {item} b comes after a
+ */
 function compare(a, b) {
     if (a[0] > b[0]) return 1;
     if (b[0] > a[0]) return -1;
@@ -268,31 +416,39 @@ function get_closest_words(word, limit=10) {
         // get word vec of first word
         get_word_vec_cache(word).then(vec1 => {
 
-            (async function loop() {
-                // get word vec for every word in GOOD_WORDS
-                for (i=0;i<=GOOD_WORDS.length;i++) {
-                    await new Promise(function (res, rej) {
+            // get word vec for every word in GOOD_WORDS
+            for (i=0;i<=GOOD_WORDS.length;i++) {
 
-                        if (i == GOOD_WORDS.length) {
-                            var closest = dists.sort(compare).slice(0,limit);
-                            return resolve(closest);
+                if (i == GOOD_WORDS.length) {
+                    var closest = dists.sort(compare).slice(0,limit);
+                    return resolve(closest);
+                }
+
+                const comp_word = GOOD_WORDS[i];
+
+                if (comp_word in CACHED_W2V) {
+                    const vec2 = CACHED_W2V[comp_word];
+
+                    if (vec1 == null || vec2 == null) {
+                        dists.push([100, comp_word]);
+                    } else {
+                        const dist = get_dist(vec1, vec2);
+                        dists.push([dist, comp_word]);
+                    }
+
+                } else {
+                    get_word_vec(comp_word).then(vec => {
+                        CACHED_W2V[comp_word] = vec;
+                        
+                        if (vec1 == null || vec == null) {
+                            dists.push([100, comp_word]);
+                        } else {
+                            const dist = get_dist(vec1, vec);
+                            dists.push([dist, comp_word]);
                         }
-
-                        const comp_word = GOOD_WORDS[i];
-                        get_word_vec_cache(comp_word).then(vec2 => {
-
-                            if (vec1 == null || vec2 == null) {
-                                dists.push([100, comp_word]);
-                                res();
-                            } else {
-                                const dist = get_dist(vec1, vec2);
-                                dists.push([dist, comp_word]);
-                                res();
-                            }
-                        });
                     });
                 }
-            })();
+            }
         });
     });
 }
@@ -363,92 +519,15 @@ function add_current_candidate_word() {
 
     GOOD_WORDS.push(CUR_WORD_CANDIDATE);
 
+    let blank_index = GOOD_WORDS.indexOf("");   // ensure not adding ""
+    if (blank_index != -1) {
+        GOOD_WORDS.splice(GOOD_WORDS.indexOf(""), 1);    // remove "" from list if it exists
+    }
+
     // so that functions called on textarea changes are called, and so highlights resize
     $(".descriptions").trigger('keyup');
     $(".descriptions").highlightWithinTextarea('update');
 }
-
-$(document).ready(function () {
-
-    // when textarea changes
-    $('.descriptions').on("keyup", function () {
-
-        // so they can't delete prefix
-        var value = $(this).val();
-        const prefix_mapping = { 'grid_size_desc': GRID_SIZE_PREFIX, 'what_you_see': SHOULD_SEE_PREFIX, 'what_you_do': HAVE_TO_PREFIX }
-        const id = $(this).attr("id");
-        var prefix = prefix_mapping[id];
-        $(this).val(prefix + value.substring(prefix.length));
-
-        // for each novel word, add a row with buttons to replace word with similar words in database, or add the word
-        $('#word-warning-' + id).empty();
-
-        const words_to_replace = value.match(get_bad_words());
-        if (words_to_replace != null && words_to_replace.length != 0) {
-
-            var items = [];
-            $.each(words_to_replace, function (i, word) {
-
-                // create the html for the list items
-                items.push(
-                    `<li><b>${word}</b>
-                    <span class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Replace with...
-                    </button>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" id=${word}_${i}_dropdown>
-                    </div>
-                    <button type="button" onclick="confirm_add_word(\'${word}\')" id="add_word_${word}" class="btn btn-danger add-word">add word</button></li>
-                    </span>`);
-            });
-
-            $('#word-warning-' + id).append(items.join(''));
-
-        }
-
-        get_replacement_words(words_to_replace).then(replacements => {
-
-            if (words_to_replace != null && words_to_replace.length != 0) {
-
-                replacements.forEach(function(replacement_i, i) {
-
-                    const word = replacement_i[0];
-                    const replacement_words = replacement_i[1].map(function(item) { return item[1] });
-
-                    if($(`#${word}_${i}_dropdown`).length != 0) {
-                        $(`#${word}_${i}_dropdown`).empty();
-                        $(`#${word}_${i}_dropdown`).append(
-                            `${(function () {
-                                var html_text = "";
-                                for (i = 0; i < replacement_words.length; i++) {
-                                    const replacement = replacement_words[i];
-                                    const dropdown_item = `<a onclick="replace_word(\'${word}\',\'${replacement}\', '#${id}')" id="replace_${word}_${replacement}" class="dropdown-item" href="#">${replacement}</a>`;
-                                    html_text += dropdown_item;
-                                }
-                                return html_text
-                            })()}`
-                        );
-                    }
-                });
-            }
-        });
-    });
-
-    // highlight the textareas for words that have not been used yet
-    $('.descriptions').highlightWithinTextarea({
-        highlight: [
-            {
-                highlight: get_bad_words
-            }
-        ]
-    });
-
-    //  Make it so modal with sliders has labels of slider values
-    $("#conf_result").html($("#conf_form").val());
-    $("#conf_form").change(function () {
-        $("#conf_result").html($(this).val());
-    });
-});
 
 // ==============
 // Other Page Logic
@@ -456,7 +535,7 @@ $(document).ready(function () {
 
 function submit() {
     /**
-     * If starting with right phrase, actually entered text, and has used all known words or added the unknown words, then unhide validation
+     * If starting with right phrase, actually entered text, and has used all known words or added the unknown words, then continue
      */
 
     if ($("#grid_size_desc").val().trim().length - GRID_SIZE_PREFIX.length < 5) {
@@ -498,6 +577,8 @@ function verify() {
      * store submitted values and go to next task
      */
 
+    show_loader();
+
     // get entered values
     const see_desc = $.trim($("#what_you_see").val());
     const do_desc = $.trim($("#what_you_do").val());
@@ -515,12 +596,12 @@ function verify() {
     // Bring the user to the listener page, but show them their own description to ensure they wrote something decent
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    window.location.href = `listener.html?task=${urlParams.get('task') || "0"}&time=${totalTime}&see=${see_desc}&do=${do_desc}&grid=${grid_size_desc}&se=${selected_example}&ver=true`;
+    window.location.href = `listener.html?task=${TASK_ID}&time=${totalTime}&see=${see_desc}&do=${do_desc}&grid=${grid_size_desc}&se=${selected_example}&ver=true&maxIdle=${maxIdleTime}`;
 }
 
 function give_up() {
     /**
-     * if after 1 minute, cannot figure out pattern or get correct output, give them the answer
+     * if after 30 seconds, cannot figure out pattern or get correct output, give them the answer
      */
 
     const newTime = new Date();
@@ -529,15 +610,17 @@ function give_up() {
         return;
     }
 
-    // don't give them credit for completing the task if they have not completed it
-    give_up_description(TASK_ID, DESCRIPTIONS_TYPE).then(function () {
+    show_loader();
 
+    // give only partial credit if skip task
+    give_up_description(TASK_ID, DESCRIPTIONS_TYPE).then(function () {
         set_user_complete_time(sessionStorage.getItem("uid"), (newTime - START_DATE) / 1000, `${TASK_ID}_${DESCRIPTIONS_TYPE}_speaker_(veto)`).then(function() {
             var tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
             tasks_done.push(TASK_ID);
             sessionStorage.setItem('tasks_completed', tasks_done);
     
-            next_task(first_task = true);
+            // TODO: not using variable timing here... is that alright?
+            next_task(SPEAKER_TIME*SKIP_PART_CRED);
         });
     });
 }

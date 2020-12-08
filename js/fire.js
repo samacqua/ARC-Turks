@@ -9,20 +9,31 @@ var devFirebaseConfig = {
 };
 
 var firebaseConfig = {
-    apiKey: "AIzaSyBT4huUvuS3_zxmQ9TTSbWfQGVl-UaqmYE",
-    authDomain: "arc-pilot-pilot-v2.firebaseapp.com",
-    databaseURL: "https://arc-pilot-pilot-v2.firebaseio.com",
-    projectId: "arc-pilot-pilot-v2",
-    storageBucket: "arc-pilot-pilot-v2.appspot.com",
-    messagingSenderId: "714534944811",
-    appId: "1:714534944811:web:1e7641ad7ff39e1af16a6e"
+    apiKey: "AIzaSyDDDTu85WtFnqwJlwZdon1accivFQzOKFw",
+    authDomain: "arc-pilot.firebaseapp.com",
+    databaseURL: "https://arc-pilot.firebaseio.com",
+    projectId: "arc-pilot",
+    storageBucket: "arc-pilot.appspot.com",
+    messagingSenderId: "16504691809",
+    appId: "1:16504691809:web:e847b8e2fd07580e6e1e20"
   };
 
 // Initialize Firebase
-firebase.initializeApp(devFirebaseConfig);
+firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
 var database = firebase.database();
 
+function use_dev_config() {
+    firebase.initializeApp(devFirebaseConfig, 'devApp');
+
+    db = firebase.app('devApp').firestore();
+    database = firebase.app('devApp').database();
+}
+
+function use_study_config() {
+    db = firebase.firestore();
+    database = firebase.database();
+}
 
 // ===================================
 // Retrieve
@@ -30,6 +41,7 @@ var database = firebase.database();
 
 /**
  * Returns the task and desc_id of an unused description that the user has not already done the task of, if any (otherwise return -1)
+ * @param {string} type the type of descriptions ("nl", "ex", or "nl_ex")
  */
 function get_unused_desc(type) {
     return new Promise(function (resolve, reject) {
@@ -74,20 +86,23 @@ function get_unused_desc(type) {
 
 /**
  * Get count of interactions and descriptions for all tasks.
+ * @param {string} type the type of descriptions ("nl", "ex", or "nl_ex")
  */
 function get_all_descriptions_interactions_count(type) {
     return new Promise(function (resolve, reject) {
         const summary_ref = db.collection(type + "_tasks").doc("summary");
 
         summary_ref.get().then(function (snapshot) {
+            console.log(`read 1 document`);
 
             const data = snapshot.data()
             var interactions_count = [];
             var descriptions_count = [];
 
             for (i = 0; i < NUM_TASKS; i++) {
-                interactions_count.push(data[`${i}_interactions_count`]);
-                descriptions_count.push(data[`${i}_descriptions_count`]);
+                const ii = TASKS[i];
+                interactions_count.push(data[`${ii}_interactions_count`]);
+                descriptions_count.push(data[`${ii}_descriptions_count`]);
             }
 
             return resolve([descriptions_count, interactions_count]);
@@ -99,13 +114,68 @@ function get_all_descriptions_interactions_count(type) {
 }
 
 /**
+ * Get the number of successful and total communications for the best description for the given task
+ * @param {number} task the task to get the best description for
+ * @param {string} type the type of descriptions ("nl", "ex", or "nl_ex")
+ * @return {Promise} a list of lists: [[best desc success score], [best desc total attempts]]
+ */
+function get_task_best_desc(task, type) {
+    return new Promise(function (resolve, reject) {
+        const summary_ref = db.collection(type + "_tasks").doc("summary");
+
+        summary_ref.get().then(function (snapshot) {
+            console.log(`read 1 documents`);
+            const data = snapshot.data();
+            return resolve({id: data[`${task}_best_id`], success_score: data[`${task}_best_success_score`] || 0, attempts: data[`${task}_best_total_attempts`] || 0});
+        })
+        .catch(function (err) {
+            return reject(err);
+        });
+    });
+}
+
+/**
+ * Get the number of successful and total communications for the best description for each task
+ * @param {string} type the type of descriptions ("nl", "ex", or "nl_ex")
+ * @return {Promise} a list of lists: [[best desc success score], [best desc total attempts]]
+ */
+function get_all_tasks_best_desc(type) {
+    return new Promise(function (resolve, reject) {
+        const summary_ref = db.collection(type + "_tasks").doc("summary");
+
+        summary_ref.get().then(function (snapshot) {
+
+            console.log(`read 1 documents`);
+
+            const data = snapshot.data()
+            var best_desc_success_score = [];
+            var best_desc_total_attempts = [];
+
+            for (i = 0; i < NUM_TASKS; i++) {
+                const ii = TASKS[i];
+                best_desc_success_score.push(data[`${ii}_best_success_score`] || 0);
+                best_desc_total_attempts.push(data[`${ii}_best_total_attempts`] || 0);
+            }
+
+            return resolve([best_desc_success_score, best_desc_total_attempts]);
+        })
+            .catch(function (err) {
+                return reject(err);
+            });
+    });
+}
+
+/**
  * Get the number of descriptions and total number of interactions for a task
+ * @param {number} task the task to get all the interaction counts for
+ * @param {string} type the type of descriptions ("nl", "ex", or "nl_ex")
  */
 function get_task_descs_interactions_count(task, type) {
     return new Promise(function (resolve, reject) {
         const task_ref = db.collection(type + "_tasks").doc(`${task}`);
 
         task_ref.get().then(function (snapshot) {
+            console.log(`read 1 documents`);
             const data = snapshot.data()
             return resolve([data.num_descriptions, data.num_interactions]);
         })
@@ -139,9 +209,18 @@ function get_task_descriptions(task_id, type) {
                     'selected_ex': data.selected_example,
                     'bandit_attempts': data.bandit_attempts,
                     'bandit_success_score': data.bandit_success_score,
+                    'confidence': data.confidence,
                     'display_num_attempts': data.display_num_attempts,
                     'display_num_success': data.display_num_success,
+                    'attempt_jsons': data.attempt_jsons,
+                    'attempts_sequence': data.attempts_sequence,
+                    'action_sequence': data.action_sequence,
+                    'num_verification_attempts': data.num_verification_attempts,
+                    'succeeded_verification': data.succeeded_verification,
                     'timestamp': data.timestamp,
+                    'uid': data.uid,
+                    'type': type,
+                    'task': task_id,
                     'id': doc.id
                 };
                 descriptions.push(description);
@@ -161,6 +240,7 @@ function get_description_by_id(task_id, desc_id, type) {
         const desc_ref = db.collection(type + "_tasks").doc(`${task_id}`).collection("descriptions").doc(desc_id);
 
         desc_ref.get().then(function (snapshot) {
+            console.log(`read 1 document`);
 
             const data = snapshot.data();
             // if does not contain field, just returns undefined, so works for all desc kinds
@@ -174,6 +254,13 @@ function get_description_by_id(task_id, desc_id, type) {
                 'display_num_attempts': data.display_num_attempts,
                 'display_num_success': data.display_num_success,
                 'timestamp': data.timestamp,
+                'description_time': data.description_time,
+                'verification_time': data.verification_time,
+                'num_verification_attempts': data.num_verification_attempts,
+                'succeeded_verification': data.succeed_verification,
+                'type': type,
+                'task': task_id,
+                'uid': data.uid,
                 'id': snapshot.id
             };
 
@@ -186,6 +273,42 @@ function get_description_by_id(task_id, desc_id, type) {
 }
 
 /**
+ * Get the doc which store's a and b for all descriptions
+ * @param {string} type the type of descriptions ("nl", "ex", or "nl_ex")
+ */
+function get_bandit_doc(type) {
+    return new Promise(function (resolve, reject) {
+        const summary_ref = db.collection(type + "_tasks").doc("descs_bandit");
+
+        summary_ref.get().then(function (snapshot) {
+            console.log(`read 1 document`);
+            return resolve(snapshot.data());
+        })
+        .catch(function (err) {
+            return reject(err);
+        });
+    });
+}
+
+/**
+ * Get timing doc which store's the times for all descriptions and desc uses
+ * @param {string} type the type of descriptions ("nl", "ex", or "nl_ex")
+ */
+function get_timing_doc(type) {
+    return new Promise(function (resolve, reject) {
+        const timing_ref = db.collection(type + "_tasks").doc("timing");
+
+        timing_ref.get().then(function (snapshot) {
+            console.log(`read 1 document`);
+            return resolve(snapshot.data());
+        })
+        .catch(function (err) {
+            return reject(err);
+        });
+    });
+}
+
+/**
  * Get all words that have been used in previous descriptions.
  */
 function get_words() {
@@ -193,6 +316,7 @@ function get_words() {
         const summary_ref = db.collection("total").doc("summary");
 
         summary_ref.get().then(function (snapshot) {
+            console.log(`read 1 document`);
             return resolve(snapshot.data().words)
         })
         .catch(function (err) {
@@ -219,7 +343,7 @@ function get_word_vec(word) {
  * store descriptions, task info and user info and user answers in firebase
  * returns promise so that can transition to next task after storing
  */
-function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confidence, attempts, attempt_jsons, desc_time, ver_time, selected_example, type) {
+function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confidence, attempts, attempt_jsons, action_sequence, desc_time, ver_time, selected_example, type, max_idle_time) {
 
     return new Promise(function (resolve, reject) {
 
@@ -232,12 +356,15 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confi
         var desc_data = {
             'num_verification_attempts': parseInt(attempts),
             'attempt_jsons': attempt_jsons,
+            'action_sequence': action_sequence,
+            'succeeded_verification': true,
             'confidence': confidence,
 
             'uid': user_id,
             'description_time': parseInt(desc_time),
             'verification_time': parseInt(ver_time),
-            'timestamp': new Date(),
+            'timestamp': firebase.firestore.FieldValue.serverTimestamp(),
+            'max_idle_time': parseInt(max_idle_time),
 
             'bandit_attempts': 0,       // # listeners who used description
             'bandit_success_score': 0,  // # listeners who used description successfully, weighted (2 attempts = +0.5, ...)
@@ -286,6 +413,18 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confi
             task: task_id.toString()
         });
 
+        // add desc a & b to task desc summary document
+        const descs_summary_ref = db.collection(type + "_tasks").doc("descs_bandit");
+        let bandit_data = {};
+        bandit_data[`${task_id}_${desc_id}`] = [0, 0];
+        batch.set(descs_summary_ref, bandit_data, {merge: true});
+
+        // set timing in doc
+        const timing_ref = db.collection(type + "_tasks").doc("timing");
+        let timing_data = {};
+        timing_data[`${task_id}_${desc_id}_desc`] = parseInt(desc_time) + parseInt(ver_time);
+        batch.set(timing_ref, timing_data, {merge: true});
+
         batch.commit().then(function () {
             return resolve();
         }).catch(function (err) {
@@ -294,7 +433,7 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confi
     });
 }
 
-function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, total_time, success = true, type) {
+function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, action_sequence, total_time, success = true, type, max_idle_time, best_desc, past_desc) {
     /**
      * store info for listener task in firebase
      * returns promise so that can transition to next task after storing
@@ -309,8 +448,10 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, tota
         batch.set(desc_use_ref, {
             'num_attempts': attempts,
             'attempt_jsons': attempt_jsons,
+            'action_sequence': action_sequence,
             'success': success,
-            'timestamp': new Date(),
+            'timestamp': firebase.firestore.FieldValue.serverTimestamp(),
+            'max_idle_time': parseInt(max_idle_time),
 
             'uid': user_id,
             'time': parseInt(total_time)
@@ -339,11 +480,42 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, tota
         const summary_doc = db.collection(type + "_tasks").doc("summary");
         var summary_data = {};
         summary_data[`${task_id}_interactions_count`] = increment;
+
+        // if desc is now task's best desc, update it in summary doc
+        const priors = [1, 1];
+        let new_suc_score = past_desc['bandit_success_score'] + 1/attempts;
+        let new_attempts = past_desc['bandit_attempts'] + 1;
+
+        let a = new_suc_score + priors[0];
+        let b = new_attempts - new_suc_score + priors[1];
+        let desc_new_mean = a / (a + b);
+
+        if (desc_new_mean >= best_desc.mean || best_desc.id == desc_id) {
+            console.log("updating best...");
+            summary_data[`${task_id}_best_success_score`] = past_desc['bandit_success_score'] + 1/attempts;
+            summary_data[`${task_id}_best_total_attempts`] = past_desc['bandit_attempts'] + 1;
+            summary_data[`${task_id}_best_id`] = desc_id;
+        } else {
+            console.log("not updating best...");
+        }
+
         batch.update(summary_doc, summary_data);
 
         // remove the description from the list of unused descriptions
         const unused_ref = db.collection(type + "_unused_descs").doc(desc_id);
         batch.delete(unused_ref);
+
+        // update a and b in bandit summary
+        const descs_summary_ref = db.collection(type + "_tasks").doc("descs_bandit");
+        let bandit_data = {};
+        bandit_data[`${task_id}_${desc_id}`] = [a-priors[0], b-priors[0]];
+        batch.update(descs_summary_ref, bandit_data);
+
+        // add timing
+        const timing_ref = db.collection(type + "_tasks").doc("timing");
+        let timing_data = {};
+        timing_data[`${task_id}_${desc_id}_attempts`] = firebase.firestore.FieldValue.arrayUnion(parseInt(total_time) + Math.random()); // add random so unlikely for collisions
+        batch.update(timing_ref, timing_data);
 
         batch.commit().then(function () {
             return resolve();
@@ -353,7 +525,7 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, tota
     });
 }
 
-function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, user_id, confidence, attempts, attempt_jsons, desc_time, ver_time, selected_example, type) {
+function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, user_id, confidence, attempts, attempt_jsons, action_sequence, desc_time, ver_time, selected_example, type, max_idle_time) {
     return new Promise(function (resolve, reject) {
 
         var batch = db.batch();
@@ -365,11 +537,13 @@ function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, use
         var desc_data = {
             'num_verification_attempts': parseInt(attempts),
             'attempt_jsons': attempt_jsons,
+            'action_sequence': action_sequence,
 
             'uid': user_id,
             'description_time': parseInt(desc_time),
             'verification_time': parseInt(ver_time),
-            'timestamp': new Date(),
+            'timestamp': firebase.firestore.FieldValue.serverTimestamp(),
+            'max_idle_time': parseInt(max_idle_time),
 
             // store fake stats so that it is never selected by bandit,
             // but can be shown to speaker as an example of a bad dsecription
@@ -408,6 +582,12 @@ function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, use
             desc_failure_count: increment,
         };
         batch.update(task_ref, task_update_data);
+
+        // set timing in doc
+        const timing_ref = db.collection(type + "_tasks").doc("timing");
+        let timing_data = {};
+        timing_data[`${task_id}_${desc_id}_desc`] = parseInt(desc_time) + parseInt(ver_time);
+        batch.set(timing_ref, timing_data, {merge: true});
 
         batch.commit().then(function () {
             return resolve();
@@ -488,6 +668,23 @@ function set_user_complete_time(user_id, time, task_name) {
     });
 }
 
+function set_user_start_time(user_id) {
+    return new Promise(function (resolve, reject) {
+        let data = {
+            'start_time': firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        db.collection("users").doc(user_id.toString()).set(data, {merge: true})
+            .then(function () {
+                console.log(`set user start time successfully`);
+                return resolve();
+            }).catch(function (err) {
+                console.error(err);
+                return reject(err);
+            });
+    });
+}
+
 /**
  * increment the number of times the user gave up while trying to describe the task
  */
@@ -511,7 +708,7 @@ function store_bug_report() {
     return new Promise(function (resolve, reject) {
         db.collection("bug_reports").add({
             'description': $("#bug_desc_textarea").val(),
-            'timestamp': new Date(),
+            'timestamp': firebase.firestore.FieldValue.serverTimestamp(),
             'uid': sessionStorage.getItem('uid'),
             'url': window.location.href,
             'browser_type': get_browser()
@@ -564,22 +761,30 @@ function init_firestore() {
         'desc_failure_count': 0     // number of times someone submitted description, then failed verfication or gave low confidence score (<5)
     }
 
-    const top_100_words = ['the', 'of', 'to', 'and', 'a', 'in', 'is', 'it', 'you', 'that', 'he', 'was', 'for', 'on', 'are', 'with', 'as', 'I', 'his', 'they', 
+    let top_100_words = ['the', 'of', 'to', 'and', 'a', 'in', 'is', 'it', 'you', 'that', 'he', 'was', 'for', 'on', 'are', 'with', 'as', 'I', 'his', 'they', 
         'be', 'at', 'one', 'have', 'this', 'from', 'or', 'had', 'by', 'hot', 'but', 'some', 'what', 'there', 'we', 'can', 'out', 'other', 'were', 
         'all', 'your', 'when', 'up', 'use', 'word', 'how', 'said', 'an', 'each', 'she', 'which', 'do', 'their', 'time', 'if', 'will', 'way', 'about',
         'many', 'then', 'them', 'would', 'write', 'like', 'so', 'these', 'her', 'long', 'make', 'thing', 'see', 'him', 'two', 'has', 'look', 'more', 
         'day', 'could', 'go', 'come', 'did', 'my', 'sound', 'no', 'most', 'number', 'who', 'over', 'know', 'water', 'than', 'call', 'first', 'people', 
         'may', 'down', 'side', 'been', 'now', 'find', "output", "grid", "size", "input", "should"];
-    db.collection('total').doc('summary').set({
-        'words': top_100_words
 
+    let top_1000_words = ['is', 'a', 'ability', 'able', 'about', 'above', 'accept', 'according', 'account', 'across', 'act', 'action', 'activity', 'actually', 'add', 'address', 'administration', 'admit', 'adult', 'affect', 'after', 'again', 'against', 'age', 'agency', 'agent', 'ago', 'agree', 'agreement', 'ahead', 'air', 'all', 'allow', 'almost', 'alone', 'along', 'already', 'also', 'although', 'always', 'American', 'among', 'amount', 'analysis', 'and', 'animal', 'another', 'answer', 'any', 'anyone', 'anything', 'appear', 'apply', 'approach', 'area', 'argue', 'arm', 'around', 'arrive', 'art', 'article', 'artist', 'as', 'ask', 'assume', 'at', 'attack', 'attention', 'attorney', 'audience', 'author', 'authority', 'available', 'avoid', 'away', 'baby', 'back', 'bad', 'bag', 'ball', 'bank', 'bar', 'base', 'be', 'beat', 'beautiful', 'because', 'become', 'bed', 'before', 'begin', 'behavior', 'behind', 'believe', 'benefit', 'best', 'better', 'between', 'beyond', 'big', 'bill', 'billion', 'bit', 'black', 'blood', 'blue', 'board', 'body', 'book', 'born', 'both', 'box', 'boy', 'break', 'bring', 'brother', 'budget', 'build', 'building', 'business', 'but', 'buy', 'by', 'call', 'camera', 'campaign', 'can', 'cancer', 'candidate', 'capital', 'car', 'card', 'care', 'career', 'carry', 'case', 'catch', 'cause', 'cell', 'center', 'central', 'century', 'certain', 'certainly', 'chair', 'challenge', 'chance', 'change', 'character', 'charge', 'check', 'child', 'choice', 'choose', 'church', 'citizen', 'city', 'civil', 'claim', 'class', 'clear', 'clearly', 'close', 'coach', 'cold', 'collection', 'college', 'color', 'come', 'commercial', 'common', 'community', 'company', 'compare', 'computer', 'concern', 'condition', 'conference', 'Congress', 'consider', 'consumer', 'contain', 'continue', 'control', 'cost', 'could', 'country', 'couple', 'course', 'court', 'cover', 'create', 'crime', 'cultural', 'culture', 'cup', 'current', 'customer', 'cut', 'dark', 'data', 'daughter', 'day', 'dead', 'deal', 'death', 'debate', 'decade', 'decide', 'decision', 'deep', 'defense', 'degree', 'Democrat', 'democratic', 'describe', 'design', 'despite', 'detail', 'determine', 'develop', 'development', 'die', 'difference', 'different', 'difficult', 'dinner', 'direction', 'director', 'discover', 'discuss', 'discussion', 'disease', 'do', 'doctor', 'dog', 'door', 'down', 'draw', 'dream', 'drive', 'drop', 'drug', 'during', 'each', 'early', 'east', 'easy', 'eat', 'economic', 'economy', 'edge', 'education', 'effect', 'effort', 'eight', 'either', 'election', 'else', 'employee', 'end', 'energy', 'enjoy', 'enough', 'enter', 'entire', 'environment', 'environmental', 'especially', 'establish', 'even', 'evening', 'event', 'ever', 'every', 'everybody', 'everyone', 'everything', 'evidence', 'exactly', 'example', 'executive', 'exist', 'expect', 'experience', 'expert', 'explain', 'eye', 'face', 'fact', 'factor', 'fail', 'fall', 'family', 'far', 'fast', 'father', 'fear', 'federal', 'feel', 'feeling', 'few', 'field', 'fight', 'figure', 'fill', 'film', 'final', 'finally', 'financial', 'find', 'fine', 'finger', 'finish', 'fire', 'firm', 'first', 'fish', 'five', 'floor', 'fly', 'focus', 'follow', 'food', 'foot', 'for', 'force', 'foreign', 'forget', 'form', 'former', 'forward', 'four', 'free', 'friend', 'from', 'front', 'full', 'fund', 'future', 'game', 'garden', 'gas', 'general', 'generation', 'get', 'girl', 'give', 'glass', 'go', 'goal', 'good', 'government', 'great', 'green', 'ground', 'group', 'grow', 'growth', 'guess', 'gun', 'guy', 'hair', 'half', 'hand', 'hang', 'happen', 'happy', 'hard', 'have', 'he', 'head', 'health', 'hear', 'heart', 'heat', 'heavy', 'help', 'her', 'here', 'herself', 'high', 'him', 'himself', 'his', 'history', 'hit', 'hold', 'home', 'hope', 'hospital', 'hot', 'hotel', 'hour', 'house', 'how', 'however', 'huge', 'human', 'hundred', 'husband', 'I', 'idea', 'identify', 'if', 'image', 'imagine', 'impact', 'important', 'improve', 'in', 'include', 'including', 'increase', 'indeed', 'indicate', 'individual', 'industry', 'information', 'inside', 'instead', 'institution', 'interest', 'interesting', 'international', 'interview', 'into', 'investment', 'involve', 'issue', 'it', 'item', 'its', 'itself', 'job', 'join', 'just', 'keep', 'key', 'kid', 'kill', 'kind', 'kitchen', 'know', 'knowledge', 'land', 'language', 'large', 'last', 'late', 'later', 'laugh', 'law', 'lawyer', 'lay', 'lead', 'leader', 'learn', 'least', 'leave', 'left', 'leg', 'legal', 'less', 'let', 'letter', 'level', 'lie', 'life', 'light', 'like', 'likely', 'line', 'list', 'listen', 'little', 'live', 'local', 'long', 'look', 'lose', 'loss', 'lot', 'love', 'low', 'machine', 'magazine', 'main', 'maintain', 'major', 'majority', 'make', 'man', 'manage', 'management', 'manager', 'many', 'market', 'marriage', 'material', 'matter', 'may', 'maybe', 'me', 'mean', 'measure', 'media', 'medical', 'meet', 'meeting', 'member', 'memory', 'mention', 'message', 'method', 'middle', 'might', 'military', 'million', 'mind', 'minute', 'miss', 'mission', 'model', 'modern', 'moment', 'money', 'month', 'more', 'morning', 'most', 'mother', 'mouth', 'move', 'movement', 'movie', 'Mr', 'Mrs', 'much', 'music', 'must', 'my', 'myself', 'name', 'nation', 'national', 'natural', 'nature', 'near', 'nearly', 'necessary', 'need', 'network', 'never', 'new', 'news', 'newspaper', 'next', 'nice', 'night', 'no', 'none', 'nor', 'north', 'not', 'note', 'nothing', 'notice', 'now', "n't", 'number', 'occur', 'of', 'off', 'offer', 'office', 'officer', 'official', 'often', 'oh', 'oil', 'ok', 'old', 'on', 'once', 'one', 'only', 'onto', 'open', 'operation', 'opportunity', 'option', 'or', 'order', 'organization', 'other', 'others', 'our', 'out', 'outside', 'over', 'own', 'owner', 'page', 'pain', 'painting', 'paper', 'parent', 'part', 'participant', 'particular', 'particularly', 'partner', 'party', 'pass', 'past', 'patient', 'pattern', 'pay', 'peace', 'people', 'per', 'perform', 'performance', 'perhaps', 'period', 'person', 'personal', 'phone', 'physical', 'pick', 'picture', 'piece', 'place', 'plan', 'plant', 'play', 'player', 'PM', 'point', 'police', 'policy', 'political', 'politics', 'poor', 'popular', 'population', 'position', 'positive', 'possible', 'power', 'practice', 'prepare', 'present', 'president', 'pressure', 'pretty', 'prevent', 'price', 'private', 'probably', 'problem', 'process', 'produce', 'product', 'production', 'professional', 'professor', 'program', 'project', 'property', 'protect', 'prove', 'provide', 'public', 'pull', 'purpose', 'push', 'put', 'quality', 'question', 'quickly', 'quite', 'race', 'radio', 'raise', 'range', 'rate', 'rather', 'reach', 'read', 'ready', 'real', 'reality', 'realize', 'really', 'reason', 'receive', 'recent', 'recently', 'recognize', 'record', 'red', 'reduce', 'reflect', 'region', 'relate', 'relationship', 'religious', 'remain', 'remember', 'remove', 'report', 'represent', 'Republican', 'require', 'research', 'resource', 'respond', 'response', 'responsibility', 'rest', 'result', 'return', 'reveal', 'rich', 'right', 'rise', 'risk', 'road', 'rock', 'role', 'room', 'rule', 'run', 'safe', 'same', 'save', 'say', 'scene', 'school', 'science', 'scientist', 'score', 'sea', 'season', 'seat', 'second', 'section', 'security', 'see', 'seek', 'seem', 'sell', 'send', 'senior', 'sense', 'series', 'serious', 'serve', 'service', 'set', 'seven', 'several', 'sex', 'sexual', 'shake', 'share', 'she', 'shoot', 'short', 'shot', 'should', 'shoulder', 'show', 'side', 'sign', 'significant', 'similar', 'simple', 'simply', 'since', 'sing', 'single', 'sister', 'sit', 'site', 'situation', 'six', 'size', 'skill', 'skin', 'small', 'smile', 'so', 'social', 'society', 'soldier', 'some', 'somebody', 'someone', 'something', 'sometimes', 'son', 'song', 'soon', 'sort', 'sound', 'source', 'south', 'southern', 'space', 'speak', 'special', 'specific', 'speech', 'spend', 'sport', 'spring', 'staff', 'stage', 'stand', 'standard', 'star', 'start', 'state', 'statement', 'station', 'stay', 'step', 'still', 'stock', 'stop', 'store', 'story', 'strategy', 'street', 'strong', 'structure', 'student', 'study', 'stuff', 'style', 'subject', 'success', 'successful', 'such', 'suddenly', 'suffer', 'suggest', 'summer', 'support', 'sure', 'surface', 'system', 'table', 'take', 'talk', 'task', 'tax', 'teach', 'teacher', 'team', 'technology', 'television', 'tell', 'ten', 'tend', 'term', 'test', 'than', 'thank', 'that', 'the', 'their', 'them', 'themselves', 'then', 'theory', 'there', 'these', 'they', 'thing', 'think', 'third', 'this', 'those', 'though', 'thought', 'thousand', 'threat', 'three', 'through', 'throughout', 'throw', 'thus', 'time', 'to', 'today', 'together', 'tonight', 'too', 'top', 'total', 'tough', 'toward', 'town', 'trade', 'traditional', 'training', 'travel', 'treat', 'treatment', 'tree', 'trial', 'trip', 'trouble', 'true', 'truth', 'try', 'turn', 'TV', 'two', 'type', 'under', 'understand', 'unit', 'until', 'up', 'upon', 'us', 'use', 'usually', 'value', 'various', 'very', 'victim', 'view', 'violence', 'visit', 'voice', 'vote', 'wait', 'walk', 'wall', 'want', 'war', 'watch', 'water', 'way', 'we', 'weapon', 'wear', 'week', 'weight', 'well', 'west', 'western', 'what', 'whatever', 'when', 'where', 'whether', 'which', 'while', 'white', 'who', 'whole', 'whom', 'whose', 'why', 'wide', 'wife', 'will', 'win', 'wind', 'window', 'wish', 'with', 'within', 'without', 'woman', 'wonder', 'word', 'work', 'worker', 'world', 'worry', 'would', 'write', 'writer', 'wrong', 'yard', 'yeah', 'year', 'yes', 'yet', 'you', 'young', 'your'];
+    top_1000_words = top_1000_words.concat(["output", "grid", "size", "input", "should"]);
+    
+    db.collection('total').doc('summary').set({
+        'words': top_1000_words
     }).then(function () {
         console.log("Initialized words in Firestore.")
 
         // store counts of interactions and descriptions for each description type for bandit algorithm
+        // and the success score and the total attempts for the best description for each task
         for (i = 0; i < NUM_TASKS; i++) {
-            summary_data[`${i}_interactions_count`] = 0;
-            summary_data[`${i}_descriptions_count`] = 0;
+            const ii = TASKS[i];
+            summary_data[`${ii}_interactions_count`] = 0;
+            summary_data[`${ii}_descriptions_count`] = 0;
+            summary_data[`${ii}_best_success_score`] = 0;
+            summary_data[`${ii}_best_total_attempts`] = 0;
+            summary_data[`${ii}_best_id`] = "0";
         }
 
         return db.collection("nl_tasks").doc("summary").set(summary_data);
@@ -594,7 +799,8 @@ function init_firestore() {
 
         var batch = db.batch();
         for (task_num = 0; task_num < NUM_TASKS; task_num++) {
-            batch.set(db.collection("nl_tasks").doc(task_num.toString()), task_data);
+            const ii = TASKS[task_num];
+            batch.set(db.collection("nl_tasks").doc(ii.toString()), task_data);
         }
         return batch.commit();
 
@@ -603,7 +809,8 @@ function init_firestore() {
 
         var batch = db.batch();
         for (task_num = 0; task_num < NUM_TASKS; task_num++) {
-            batch.set(db.collection("nl_ex_tasks").doc(task_num.toString()), task_data);
+            const ii = TASKS[task_num];
+            batch.set(db.collection("nl_ex_tasks").doc(ii.toString()), task_data);
         }
         return batch.commit();
 
@@ -612,7 +819,8 @@ function init_firestore() {
 
         var batch = db.batch();
         for (task_num = 0; task_num < NUM_TASKS; task_num++) {
-            batch.set(db.collection("ex_tasks").doc(task_num.toString()), task_data);
+            const ii = TASKS[task_num];
+            batch.set(db.collection("ex_tasks").doc(ii.toString()), task_data);
         }
         return batch.commit();
 
@@ -624,41 +832,30 @@ function init_firestore() {
     });
 }
 
-
-// ===================================
-// Download Database as JSON
-// ===================================
-
-function download_file(blob, name) {
-    var url = URL.createObjectURL(blob),
-        div = document.createElement("div"),
-        anch = document.createElement("a");
-    document.body.appendChild(div);
-    div.appendChild(anch);
-    anch.innerHTML = "&nbsp;";
-    div.style.width = "0";
-    div.style.height = "0";
-    anch.href = url;
-    anch.download = name;
-
-    var ev = new MouseEvent("click", {});
-    anch.dispatchEvent(ev);
-    document.body.removeChild(div);
+function reformat_desc_action_sequence(new_sequence, desc_id, task, type) {
+    return new Promise(function (resolve, reject) {
+        db.collection(`${type}_tasks`).doc(task.toString()).collection("descriptions").doc(desc_id).update({
+            'action_sequence': JSON.stringify(new_sequence)
+        }).then(function () {
+            console.log("successfully set new action sequence for description " + desc_id + "of task" + task.toString());
+            return resolve();
+        }).catch(function (err) {
+            console.error(err);
+            return reject(err);
+        });
+    });
 }
 
-function download_stamps_JSON() {
-    let ref_loc = '/arc-stamp'
-    fbase.ref(ref_loc).once('value').then(function (snapshot) {
-        console.log(snapshot.val());
-        json_stringed = JSON.stringify(snapshot.val());
-        // create the text file as a Blob:
-        var blob = new Blob([json_stringed], {
-            type: "application/json"
+function reformat_build_action_sequence(new_sequence, build_id, desc_id, task, type) {
+    return new Promise(function (resolve, reject) {
+        db.collection(`${type}_tasks`).doc(task.toString()).collection("descriptions").doc(desc_id).collection("uses").doc(build_id).update({
+            'action_sequence': JSON.stringify(new_sequence)
+        }).then(function () {
+            console.log("successfully set new action sequence for build " + build_id + " for desc " + desc_id + " of task " + task.toString());
+            return resolve();
+        }).catch(function (err) {
+            console.error(err);
+            return reject(err);
         });
-        // download the file:
-        download_file(blob, "ARC-Stamps.json");
-    }).catch(error => {
-        console.error("Failed getting data.");
-        return reject(error);
     });
 }

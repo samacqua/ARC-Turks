@@ -71,8 +71,6 @@
             </div>
             <div class="meter meter-right" style="width: 25%;" id="tutorial_label"><span class="meter-text">Practice</span>
             </div>
-            <div class="meter meter-right" style="width: 25%;" id="instructions_label"><span class="meter-text">Instructions</span>
-            </div>
         </div>
     </div>
 
@@ -85,6 +83,12 @@
     </div>
 
     <div id="container-fluid">
+
+        <div id="loader">
+            <h5 id="loading_next_title">Loading your next task</h5>
+            <div class="spinner-border text-primary"></div>
+        </div>
+
 
         <div class="alert alert-success" id="info_display"></div>
         <div class="alert alert-danger" id="error_display"></div>
@@ -102,7 +106,6 @@
             <div class="col-md-4" id="io_ex_col">
                 <div class="col-header">
                     <h1>Input-Output Pairs</h1>
-                    <h5>Scroll down to see all examples</h5>
                 </div>
 
                 <div id="task_preview">
@@ -135,11 +138,9 @@
                 </div>
 
                 <div class="form-group" id="see_desc_form">
-                    <label for="what_you_see">What should you expect to see in the input grid?</label>
+                    <label for="what_you_see"><b>What should you expect to see in the input grid?</b> <i>(continue the sentence)</i></label>
                     <textarea class="form-control descriptions" id="what_you_see" rows="2"
                         placeholder="In the input, you should see..."></textarea>
-                    <small id="emailHelp" class="form-text text-muted">Start with "In the input, you should
-                        see..."</small>
                 </div>
 
                 <div>
@@ -147,10 +148,9 @@
                 </div>
 
                 <div class="form-group" id="grid_size_form">
-                    <label for="grid_size_desc">How does the grid size change?</label>
+                    <label for="grid_size_desc"><b>How does the grid size change?</b> <i>(continue the sentence)</i></label>
                     <textarea class="form-control descriptions" id="grid_size_desc" rows="1"
                         placeholder="The output grid size..."></textarea>
-                    <small id="emailHelp" class="form-text text-muted">Start with "The output grid size..."</small>
                 </div>
 
                 <div>
@@ -158,11 +158,9 @@
                 </div>
 
                 <div class="form-group" id="do_desc_form">
-                    <label for="what_you_do">What do you do to create the output grid?</label>
+                    <label for="what_you_do"><b>What do you do to create the output grid?</b> <i>(continue the sentence)</i></label>
                     <textarea class="form-control descriptions" id="what_you_do" rows="2"
                         placeholder="To make the output, you have to..."></textarea>
-                    <small id="emailHelp" class="form-text text-muted">Start with "To make the output, you have
-                        to..."</small>
                 </div>
 
                 <div>
@@ -181,7 +179,6 @@
                     <span id="give_up_btn"><button type="button" class="btn btn-danger desc-buttons" data-toggle="modal"
                         data-target="#giveUpModal">Give up</button></span>
                 </div>
-                </br>
                 <button onclick="$('#instructionsModal').modal('show')" type="button" class="btn btn-secondary">Show
                     Instructions</button>
             </div>
@@ -202,8 +199,10 @@
                     <p>You are shown a few examples of the pattern on the left. <mark>Every input-output pair shares a common pattern</mark>.
                         You have to recognize the pattern, then describe the pattern so that someone, given a new input grid, 
                         can create the correct output grid.</p>
-                    <p>You can give up after some time, but you will <b>not be eligible for a bonus for this task.</b>
+                    <p>This task should take around <b>6 minutes</b>.</p>
+                    <p>You will get a <b>$0.10</b> bonus for each person who uses your description correctly. <mark>So, if 10 people use your description correctly, you will get a $1.00 bonus.</mark></p>
                     </p>
+                    <p>Ater you submit your description, you will have to demonstrate you understand the pattern. If you fail here, you will be given <mark>no bonus and only partial credit towards completion.</mark></p>
                 </div>
                 <div class="modal-footer">
                     <button onclick="continue_tutorial()" type="button" class="btn btn-primary"
@@ -226,8 +225,10 @@
                     <p>You are shown a few examples of the pattern on the left. <mark>Every input-output pair shares a common pattern</mark>. You have to recognize the pattern, then
                         describe the pattern so that someone, given a new input grid, can create the
                         correct output grid.</p>
-                    <p>You can give up after some time, but you will <b>not be eligible for a bonus for this task.</b>
-                    </p>
+                    <p>This task should take around <b>6 minutes</b>.</p>
+                    <p>You will get a <b>$0.10</b> bonus for each person who uses your description correctly. <mark>So, if 10 people use your description correctly, you will get a $1.00 bonus.</mark></p>
+                    <p>Ater you submit your description, you will have to demonstrate you understand the pattern. If you fail here, you will be given <mark>no bonus and only partial credit towards completion.</mark></p>
+                </p>
                 </div>
                 <div class="modal-footer">
                     <button onclick="scroll_highlight_objective();" type="button" class="btn btn-primary"
@@ -288,8 +289,7 @@
                     <h3 class="modal-title" id="gen-modal-title">Give Up</h3>
                 </div>
                 <div class="modal-body" id="gen-modal-body">
-                    <p>Are you sure that you can't determine the pattern? <strong>If you give up, you will be given a new problem to replace
-                            this problem.</strong></p>
+                    <p>Are you sure that you can't determine the pattern? <strong>If you give up, you will not recieve credit towards completion for this task.</strong></p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">No, I'll try some more</button>
