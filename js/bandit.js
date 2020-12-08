@@ -1,62 +1,5 @@
 /**
- * Returns the casino (task) with least # interactions (descriptions + attempts)
- * @param {boolean} force_listener if true, returns casino that needs pull of existing arm, if any exist
- * @param {string} type the type of descriptions ("nl", "ex", or "nl_ex")
- */
-function select_casino(type) {
-    return new Promise(function (resolve, reject) {
-        get_all_tasks_best_desc(type).then(counts => {
-
-            var num_success = counts[0];
-            var num_attempts = counts[1];
-            var variances = [];
-
-            // calculate variances for each task
-            const priors = [1, 1];
-            for (i = 0; i < num_success.length; i++) {
-                const a = num_success[i] + priors[0];
-                const b = num_attempts[i] - num_success[i] + priors[1];
-
-                const variance = (a * b) / ((a + b)**2 * (a + b + 1));
-                variances.push(variance);
-            }
-            
-            // get the max variance and list of tasks done
-            const raw_max = Math.max.apply(Math, variances);
-            const tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
-
-            // if already done task, make sure it is not chosen again
-            var task_collisions = 0;
-            for (i = 0; i < NUM_TASKS; i++) {
-                const ii = TASKS[i];
-                if (tasks_done.includes(ii.toString())) {
-                    task_collisions += 1;
-                    variances[i] -= raw_max+1;
-                    if (task_collisions == NUM_TASKS) {
-                        console.log("Done (interacted with all available tasks)");
-                        return resolve(-1);
-                    }
-                }
-            }
-
-            // add slight randomness so many people aren't pulling the same arm in case of a tie
-            variances = variances.map(val => {
-                return val + (Math.random() / 100)
-            });
-
-            // return task with max variance
-            const max = Math.max.apply(Math, variances);
-            return resolve(TASKS[variances.indexOf(max)]);
-        })
-        .catch(function (err) {
-            return reject(err);
-        });
-    });
-}
-
-/**
- * Returns the casino (task) with least # interactions (descriptions + attempts)
- * @param {boolean} force_listener if true, returns casino that needs pull of existing arm, if any exist
+ * Returns the casino (task) with the most variance in success of the best description scaled by the effort already put into that casino
  * @param {string} type the type of descriptions ("nl", "ex", or "nl_ex")
  */
 function new_select_casino(type) {
@@ -64,7 +7,7 @@ function new_select_casino(type) {
         get_bandit_doc(type).then(bandit_doc => {
             get_timing_doc(type).then(timing => {
 
-                // calculate effort ratios
+                // calculate effort ratios (ratio of time spent on task to total time)
                 let all_efforts = parse_timing_doc(timing);
                 
                 let avg_efforts = sum_array(Object.values(all_efforts));
@@ -73,9 +16,9 @@ function new_select_casino(type) {
                     efforts_ratio[task_id] = (task_effort_sum/avg_efforts);
                 });
 
+                // calculate variance (scaled by effort ratio) of best description of each task, ignoring tasks already done
                 let cas_scores = {};
                 let casinos = parse_bandit_doc(bandit_doc);
-
                 const tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
 
                 $.each(casinos, function(task_id, desc_obj) {
@@ -133,7 +76,6 @@ function new_select_casino(type) {
                     console.log("Done (interacted with all available tasks)");
                     return resolve(-1);
                 }
-
                 const chosen_arg_max = argmax[Math.floor(Math.random() * argmax.length)];
                 return resolve(chosen_arg_max);
             });
@@ -191,7 +133,6 @@ function parse_timing_doc(doc, ABS_MAX_TIME=60*15) {
             task_times[task] = weight_timing(filtered_times, SPEAKER_TIME*60);
         }
     });
-
     $.each(all_build_times, function(task, times) {
 
         let filtered_times = filterOutliers(times, ABS_MAX_TIME, BUILDER_TIME*60);
@@ -268,7 +209,7 @@ function select_arm(task, type) {
                     return resolve(-1);
                 }
 
-                // calculate UCB, using the best_mean as a proxy for description difficulty
+                // calculate UCB and return max
                 var ucbs = [];
                 for (i = 0; i < descriptions.length; i++) {
 
