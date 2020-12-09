@@ -7,54 +7,21 @@
     <meta name="Description" content="The creation process of descriptions for an MIT study on the efficacy of human communication of abstract patterns.">
     <title>ARC labeling interface</title>
 
-    <!-- Just to silence warning about not having icon -->
-    <link rel="shortcut icon" href="#" />
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
-
-    <!-- JS Libraries -->
-    <!-- The core Firebase JS SDK is always required and must be listed first -->
-    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-firestore.js"></script>
-
     <!-- jQuery library -->
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
-
-    <!-- Bootstrap JS (must be listed after jQuery) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-        crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-        crossorigin="anonymous"></script>
 
     <!-- CSS files -->
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
+
     <link rel="stylesheet" type="text/css" href="../css/common.css">
     <link rel="stylesheet" type="text/css" href="explore.css">
     <link rel="stylesheet" type="text/css" href="../css/grids.css">
     <link rel="stylesheet" type="text/css" href="../css/testing_interface.css">
 
-    <!-- JS files -->
-    <script src="sigma.min.js"></script>
-    <script src="supervisor.js"></script>
-    <script src="worker.js"></script>
-    <script src="description.js"></script>
-    <script src="../js/common.js"></script>
-    <script src="../js/constants.js"></script>
-    <script src="../js/grids.js"></script>
-    <script src="../js/more_grids.js"></script>
-    <script src="../js/fire.js"></script>
-    <script src="../js/bandit.js"></script>
-    <script src="../js/word_similarity.js"></script>
 
-    <!-- Font reference -->
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet" />
 </head>
 
 <body>
@@ -64,20 +31,14 @@
                 <div class="sticky-top">
                     </br>
 
-                    <div>
-                        <h2 id="study-title">Pilot</h2>
-                        <button class="btn btn-light" id="change-study-btn" onclick="toggle_study();">change</button>
-                       </div>
-                    
-                       <div>
-                        <h2 id="task-title">Task</h2>
-                        <button class="btn btn-light" id="change-task-btn" onclick="load_tasks_to_browse();" data-toggle="modal" data-target="#browse-tasks-modal">change</button>
-                       </div>
+                    <button class="neumorphic-btn" id="study-title" onclick="toggle_study();">Pilot</button>
+                    <button class="neumorphic-btn" id="task-title" onclick="load_tasks_to_browse();" data-toggle="modal" data-target="#browse-tasks-modal">Task</button>
+
                     <div id="test-io-preview" class="test-io"></div>
                     </br>
 
                     <ul class="list-group" id="overview-group">
-                        <a class="list-group-item list-group-item-action" id="task-overview" data-toggle="list" role="tab" href="../explore/">Overview</a>
+                        <a class="list-group-item list-group-item-action neumorphic-btn active" id="task-overview" data-toggle="list" role="tab" href="../explore/">Overview</a>
                     </ul>
                     </br>
                     <ul class="list-group" id="descriptions-pager" role="tablist"></ul>
@@ -89,13 +50,13 @@
                 </br>
                 <div class="row">
                     <div class="col">
-                        <h2>Description</h2>
-                        <p id="ex_see_desc"></p>
-                        <p id="ex_size_desc"></p>
-                        <p id="ex_do_desc"></p>
+                        <h2 class="neumorphic-text">Description</h2>
+                        <p class="description" id="ex_see_desc"></p>
+                        <p class="description" id="ex_size_desc"></p>
+                        <p class="description" id="ex_do_desc"></p>
                     </div>
                     <div class="col">
-                        <h2>Describer Attempts</h2>
+                        <h2 class="neumorphic-text">Describer Attempts</h2>
                         <div id="verification-attempts"></div>
                         <div id="verification-grid">
                             <div class="editable_grid selectable_grid">
@@ -122,10 +83,10 @@
                 </div>
 
                 </br>
-                <h2 id="builds-header">Builds</h2>
+                <h2 class="neumorphic-text" id="builds-header">Builds</h2>
                 <div id="description-builds"></div>
 
-                <h2>Action Sequence Graph</h2>
+                <h2 class="neumorphic-text">Action Sequence Graph</h2>
                 <div class="row">
                     <ul class="legend">
                         <li><span class="start_state_color node"></span> starting grid</li>
@@ -180,6 +141,34 @@
             </div>
         </div>
     </div>
+
+    <!-- JS files -->
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-firestore.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
+
+    <!-- Bootstrap JS (must be listed after jQuery) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    
+    <script src="../js/fire.js"></script>
+    <script src="sigma.min.js"></script>
+    <script src="supervisor.js"></script>
+    <script src="worker.js"></script>
+    <script src="description.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/constants.js"></script>
+    <script src="../js/grids.js"></script>
+    <script src="../js/more_grids.js"></script>
+    <script src="../js/bandit.js"></script>
+    <script src="../js/word_similarity.js"></script>
 </body>
 
 </html>

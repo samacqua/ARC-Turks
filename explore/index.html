@@ -11,15 +11,15 @@
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 
     <!-- CSS files -->
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
+
     <link rel="stylesheet" type="text/css" href="../css/common.css">
     <link rel="stylesheet" type="text/css" href="explore.css">
     <link rel="stylesheet" type="text/css" href="../css/grids.css">
     <link rel="stylesheet" type="text/css" href="../css/testing_interface.css">
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
 </head>
 
 <body>
@@ -28,15 +28,9 @@
             <div class="col-md-3">
                <div class="sticky-top">
                </br>
-               <div>
-                <h2 id="study-title">Pilot</h2>
-                <button class="btn btn-light" id="change-study-btn" onclick="toggle_study();">change</button>
-               </div>
-            
-               <div>
-                <h2 id="task-title">Task</h2>
-                <button class="btn btn-light" id="change-task-btn" onclick="load_tasks_to_browse();" data-toggle="modal" data-target="#browse-tasks-modal">change</button>
-               </div>
+
+                <button class="neumorphic-btn" id="study-title" onclick="toggle_study();">Pilot</button>
+                <button class="neumorphic-btn" id="task-title" onclick="load_tasks_to_browse();" data-toggle="modal" data-target="#browse-tasks-modal">Task</button>
 
             </br> 
 
@@ -44,7 +38,7 @@
                 </br>
 
                 <ul class="list-group">
-                    <a class="list-group-item list-group-item-action active" data-toggle="list" role="tab" href="#overview">Overview</a>
+                    <a class="list-group-item list-group-item-action neumorphic-btn active" data-toggle="list" role="tab" href="#overview">Overview</a>
                 </ul>
                 </br>
                 <ul class="list-group" id="descriptions-pager" role="tablist"></ul>
@@ -56,24 +50,24 @@
                 </br>
                 <div class="row">
                     <div class="col">
-                        <h3>Train</h3>
+                        <h3 class="neumorphic-text">Train</h3>
                         <div id="task_preview" class="inner"></div>
                     </div>
                     <div class="col">
-                        <h3>Test</h3>
+                        <h3 class="neumorphic-text">Test</h3>
                         <div id="test-io" class="test-io"></div>
 
                     </div>
                 </div>
 
                 </br>
-                <h2>Descriptions Overview</h2>
+                <h2 class="neumorphic-text">Descriptions Overview</h2>
                 <div class="row">
                     <h4 id="desc-count">Descriptions count: 0</h4>
                     <canvas class="chart" id="desc-success-chart"></canvas>
                 </div>
 
-                <h2>Vocabulary</h2>
+                <h2 class="neumorphic-text">Vocabulary</h2>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="row">
@@ -127,8 +121,9 @@
     <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-firestore.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
         integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
@@ -138,12 +133,12 @@
         crossorigin="anonymous"></script>
 
     <!-- JS files -->
+    <script src="../js/fire.js"></script>
     <script src="overview.js"></script>
     <script src="../js/common.js"></script>
     <script src="../js/constants.js"></script>
     <script src="../js/grids.js"></script>
     <script src="../js/more_grids.js"></script>
-    <script src="../js/fire.js"></script>
 
 </body>
 

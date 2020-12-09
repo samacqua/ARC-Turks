@@ -120,7 +120,7 @@ function get_task_descs_cache(task, desc_type) {
             return resolve(cached);
         } else {
             get_task_descriptions(task, desc_type).then(function (descriptions) {
-                // cache_object(task, descriptions);
+                cache_object(task+"_"+STUDY_BATCH, descriptions);
                 return resolve(descriptions);
             }).catch(error => {
                 errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
@@ -140,10 +140,11 @@ function load_new_task(task) {
         $(".test-io").empty();
         fill_div_with_IO($("#test-io"), TEST_PAIR.input, TEST_PAIR.output);
         fill_div_with_IO($("#test-io-preview"), TEST_PAIR.input, TEST_PAIR.output);
+        $('.pair_preview').addClass('neumorphic');
     });
 
     TASK_ID = task;
-    $("#task-title").html(`Task ${task}`);
+    $("#task-title").text(`Task ${task}`);
     get_task_descs_cache(task, DESCRIPTIONS_TYPE).then(function (descriptions) {
         descriptions.sort(sort_descs_bandit_score());
         PAST_DESCS = descriptions;
@@ -214,8 +215,8 @@ function create_word_count_graph(canvas_id, word_count, graph_title) {
         labels: labels,
         datasets: [{
             label: 'frequency',
-            backgroundColor: 'rgb(255, 99, 132)',
-            borderColor: 'rgb(255, 99, 132)',
+            backgroundColor: '#83aee9',
+            borderColor: '#83aee9',
             data: data_points,
         }]
     };
@@ -236,7 +237,10 @@ function create_word_count_graph(canvas_id, word_count, graph_title) {
                     }
                 }
             }]
-        }
+        },
+        legend: {
+            display: false
+         },
     };
 
     new Chart(ctx, {
@@ -267,8 +271,8 @@ function create_desc_success_bar(descs) {
         labels: labels,
         datasets: [{
             label: '3-shot',
-            backgroundColor: 'rgb(255, 99, 132)',
-            borderColor: 'rgb(255, 99, 132)',
+            backgroundColor: '#83aee9',
+            borderColor: '#83aee9',
             data: data_points,
             suggestedMax: 1,
         }]
@@ -285,7 +289,10 @@ function create_desc_success_bar(descs) {
                     suggestedMax: 1
                 }
             }]
-        }
+        },
+        legend: {
+            display: false
+         },
     };
 
      new Chart(ctx, {
@@ -346,6 +353,8 @@ function createDescsPager(descriptions) {
     $('#descriptions-pager a').click(function(){
         document.location.href = $(this).attr('href');
     });
+
+
 }
 
 var LAST_MODAL_LOADED_STUDY;
@@ -353,6 +362,7 @@ var LAST_MODAL_LOADED_STUDY;
  * load tasks into table so user can browse and choose a task
  */
 function load_tasks_to_browse() {
+
     let study = STUDY_BATCHES[STUDY_BATCH];
     if (LAST_MODAL_LOADED_STUDY == study) {
         return;

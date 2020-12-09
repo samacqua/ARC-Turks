@@ -112,6 +112,7 @@
     margin-bottom: 20px;
     background-color: rgb(238, 238, 238);
     border-radius: 20px;
+    box-shadow: 9px 9px 16px rgb(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.5);
   }
 
 #grid-focus {
@@ -252,3 +253,144 @@ h2 {
 .legend .reset_output_grid_color { background-color: #31393C; }
 
 .legend .copy_color { background-color: #2176FF; }
+
+body {
+    background-color: #E0E5EC;
+    height: 100vh;
+    margin: 0;
+    display: grid;
+    place-items: center;
+  }
+
+.list-group-item {
+    border: none;
+}
+
+#descriptions-pager {
+    background-color:#F2F2F2;
+    border: none;
+    border-radius: 6px;
+    box-shadow: 9px 9px 16px rgb(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.5) !important;
+    color: #4D3252;
+    font-weight: 700;
+    margin-bottom: 10px;
+    margin-right: 10px;
+    overflow: hidden;
+    position: relative;
+    text-transform: uppercase;
+}
+
+#descriptions-pager a {
+    background-color:#F2F2F2;
+    background: rgba(0, 0, 0, .05);
+    background-blend-mode: darken;
+}
+
+#descriptions-pager a:hover {
+    background-color: #dad8d8;
+}
+
+#descriptions-pager a.active {
+    background-color: #d3d3d3;
+}
+
+.neumorphic-text {
+    text-transform: uppercase;
+    color: #4D3252;
+    font-weight: 600;
+}
+
+.description {
+    box-shadow: inset 3px 3px 7px rgba(136, 165, 191, 0.48), inset -3px -3px 7px #FFFFFF;
+    border-radius: 10px;
+    padding:10px;
+}
+
+.neumorphic {
+    background-color:#F2F2F2;
+    border: none;
+    border-radius: 6px;
+    box-shadow: 9px 9px 16px rgb(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.5) !important;
+    color: #4D3252;
+    font-weight: 700;
+    margin-bottom: 48px;
+    margin-right: 48px;
+    overflow: hidden;
+    position: relative;
+    text-transform: uppercase;
+    transition: transform .3s ease-out;
+}
+
+.neumorphic:hover {
+    transform: translateY(-2px);
+    transform: scale(1.05);
+}
+
+#study-title, #task-title {
+    font-size: 2.2vw;
+    max-width: 100%;
+}
+
+.neumorphic-btn {
+    background-color:#E0E5EC;
+    border: none;
+    border-radius: 6px;
+    box-shadow: 9px 9px 16px rgb(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.5);
+    color: #4D3252;
+    font-weight: 700;
+    margin-bottom: 20px;
+    margin-right: 20px;
+    overflow: hidden;
+    position: relative;
+    text-transform: uppercase;
+}
+
+.neumorphic-btn.active {
+    background-color:#83aee9;
+    border: none;
+    border-radius: 6px;
+    box-shadow: 9px 9px 16px rgb(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.5);
+    color: #4D3252;
+    font-weight: 700;
+    margin-bottom: 48px;
+    margin-right: 48px;
+    overflow: hidden;
+    position: relative;
+    text-transform: uppercase;
+}
+
+.neumorphic-btn:after, .neumorphic-btn.active:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+    opacity: 0;
+    transform: translateX(-100%);
+
+    background: rgba(255, 255, 255, 0.13);
+    background: linear-gradient(
+        to right, 
+        rgba(255, 255, 255, 0.13) 0%,
+        rgba(255, 255, 255, 0.13) 77%,
+        rgba(255, 255, 255, 0.5) 92%,
+        rgba(255, 255, 255, 0.3) 100%
+    );
+}
+
+.neumorphic-btn:hover:after, .neumorphic-btn.active:hover:after {
+    background-color: rgba(0, 0, 0, 0.1);
+
+    opacity: 1;
+    top: 0;
+    left: 0;
+    transform: translateX(0);
+    transition-property: transform, opacity;
+    transition-duration: 0.7s, 0.15s;
+    transition-timing-function: ease;
+}
+
+.neumorphic-btn:active:after, .neumorphic-btn.active:active:after{
+    opacity: 0;
+  }

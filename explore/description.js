@@ -137,7 +137,7 @@ function get_task_descs_cache(task, desc_type) {
             return resolve(cached);
         } else {
             get_task_descriptions(task, desc_type).then(function (descriptions) {
-                // cache_object(task, descriptions);
+                cache_object(task+"_"+STUDY_BATCH, descriptions);
                 return resolve(descriptions);
             }).catch(error => {
                 errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
@@ -164,6 +164,7 @@ function load_new_desc(task, desc_id) {
 
         $(".test-io").empty();
         fill_div_with_IO($("#test-io-preview"), TEST_PAIR.input, TEST_PAIR.output);
+        $("#test-io-preview").addClass('neumorphic');
 
         $("#task-title").html(`Task ${task}`);
         get_task_descs_cache(task, DESCRIPTIONS_TYPE).then(function (descriptions) {
@@ -509,6 +510,8 @@ function show_attempts(attempts_json, container) {
         grid_div.appendTo(container);
         fill_div_with_grid(grid_div, grid);
         fit_cells_to_container(grid_div, grid.height, grid.width);
+        // grid_div.addClass('neumorphic');
+
 
         let badge_type = 'badge-danger';
         if ( arraysEqual(attempt, TEST_PAIR.output.grid) ) {
@@ -655,6 +658,8 @@ function repeat_action_sequence_in_div(sequence, container_div) {
 function load_study(study) {
     STUDY_BATCH = study;
     $("#study-title").text(STUDY_BATCHES[study].name);
+    console.log("updating...");
+    console.log(STUDY_BATCH);
     update_fb_config(STUDY_BATCHES[STUDY_BATCH].config, STUDY_BATCH);
 }
 
