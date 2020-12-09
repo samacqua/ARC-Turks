@@ -34,6 +34,7 @@ $(window).on('load', function () {
         use_dev_config();
         $("#ongoing-study-modal").modal('show');
     } else {
+        update_fb_config(firebaseConfigPilot2, 'pilot2');
         console.log("Initialized MTurk database");
         $('#consentModal').modal('show');
     }

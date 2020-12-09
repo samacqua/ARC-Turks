@@ -32,6 +32,7 @@ $(window).on('load', function () {
         console.log('Using DEV Database');
         use_dev_config();
     } else {
+        update_fb_config(firebaseConfigPilot2, 'pilot2');
         console.log("Using MTURK Database");
     }
 
