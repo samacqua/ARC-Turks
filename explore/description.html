@@ -64,10 +64,15 @@
                 <div class="sticky-top">
                     </br>
 
-                    <button class="btn btn-primary" onclick="load_tasks_to_browse();" data-toggle="modal" data-target="#browse-tasks-modal">Change task</button>
-                    </br> 
-            
-                    <h2 id="task-title">Task</h2>
+                    <div>
+                        <h2 id="study-title">Pilot</h2>
+                        <button class="btn btn-light" id="change-study-btn" onclick="toggle_study();">change</button>
+                       </div>
+                    
+                       <div>
+                        <h2 id="task-title">Task</h2>
+                        <button class="btn btn-light" id="change-task-btn" onclick="load_tasks_to_browse();" data-toggle="modal" data-target="#browse-tasks-modal">change</button>
+                       </div>
                     <div id="test-io-preview" class="test-io"></div>
                     </br>
 
@@ -75,12 +80,7 @@
                         <a class="list-group-item list-group-item-action" id="task-overview" data-toggle="list" role="tab" href="../explore/">Overview</a>
                     </ul>
                     </br>
-                    <ul class="list-group" id="descriptions-pager" role="tablist">
-                        <a class="list-group-item list-group-item-action" data-toggle="list" role="tab" href="#a">Description A</a>
-                        <a class="list-group-item list-group-item-action" data-toggle="list" role="tab" href="#b">Description B</a>
-                        <a class="list-group-item list-group-item-action" data-toggle="list" role="tab" href="#c">Description C</a>
-                        <a class="list-group-item list-group-item-action" data-toggle="list" role="tab" href="#d">Description D</a>
-                    </ul>
+                    <ul class="list-group" id="descriptions-pager" role="tablist"></ul>
 
                 </div>
             </div>

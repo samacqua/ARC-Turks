@@ -11,7 +11,21 @@ var STUDY_BATCHES = {
             messagingSenderId: "16504691809",
             appId: "1:16504691809:web:e847b8e2fd07580e6e1e20"
         },
-        tasks: [149, 286, 140, 354, 219, 277, 28, 135, 162, 384, 297, 26, 299, 388, 246, 74, 305, 94, 308, 77]
+        tasks: [149, 286, 140, 354, 219, 277, 28, 135, 162, 384, 297, 26, 299, 388, 246, 74, 305, 94, 308, 77],
+        name: "Pilot 1"
+    },
+    pilot2: {
+        config: {
+            apiKey: "AIzaSyBg9yynastMoRA1fGore-sgjygpVhcoLA8",
+            authDomain: "arc-pilot-2.firebaseapp.com",
+            databaseURL: "https://arc-pilot-2-default-rtdb.firebaseio.com",
+            projectId: "arc-pilot-2",
+            storageBucket: "arc-pilot-2.appspot.com",
+            messagingSenderId: "99669730043",
+            appId: "1:99669730043:web:5e61d0f59dbd8e46f0865e"
+        },
+        tasks: [211, 124, 89, 141, 91, 20, 7, 201, 285, 111, 294, 249, 69, 81, 239, 16, 363, 92, 303, 269],
+        name: "Pilot 2"
     }
 }
 
@@ -19,8 +33,10 @@ var CUR_I;
 
 $(window).on('load', function () {
     PAGE = Pages.ExploreDescs;
-    const url_obj = parseUrl(window.location.search);
-    load_new_desc(url_obj.task, url_obj.desc_id);
+    const { task, desc_id, study } = parseUrl(window.location.search);
+
+    load_study(study);
+    load_new_desc(task, desc_id);
 });
 
 function load_tasks_test_pairs(tasks) {
@@ -61,6 +77,7 @@ function load_tasks_test_pairs(tasks) {
  */
 window.onpopstate = function(e){
     if(e.state){
+        load_study(e.state.study);
         load_new_task(e.state.task);
         document.title = e.state.pageTitle;
     }
@@ -79,10 +96,11 @@ function parseUrl(url) {
     }
 
     let desc_id = urlParams.get('id');
-    if (!desc_id) {
+    let study = urlParams.get('study');
+    if (!study || !desc_id) {
         document.location.href = `../explore?task=${task}`;
     }
-    return {"task": task, "desc_id": desc_id};
+    return {"task": task, "desc_id": desc_id, "study": study };
 }
 
 /**
@@ -119,7 +137,7 @@ function get_task_descs_cache(task, desc_type) {
             return resolve(cached);
         } else {
             get_task_descriptions(task, desc_type).then(function (descriptions) {
-                cache_object(task, descriptions);
+                // cache_object(task, descriptions);
                 return resolve(descriptions);
             }).catch(error => {
                 errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
@@ -541,7 +559,7 @@ function createDescsPager(task, descriptions, desc_id) {
     });
 
     // task overview
-    $("#task-overview").attr("href", `../explore?task=${task}`);
+    $("#task-overview").attr("href", `../explore?task=${task}&study=${STUDY_BATCH}`);
     $('#overview-group a').click(function(){
         document.location.href = $(this).attr('href');
     });
@@ -597,7 +615,7 @@ function load_tasks_to_browse() {
 }
 
 function send_to_new_task(task) {
-    document.location.href = `../explore?task=${task}`;
+    document.location.href = `../explore?task=${task}&study=${STUDY_BATCH}`;
 }
 
 function repeat_action_sequence_in_div(sequence, container_div) {
@@ -632,4 +650,18 @@ function repeat_action_sequence_in_div(sequence, container_div) {
     return setInterval(() => {
         play_action_sequence_item(sequence, container_div, i++%sequence.length);
     }, interval_length);
+}
+
+function load_study(study) {
+    STUDY_BATCH = study;
+    $("#study-title").text(STUDY_BATCHES[study].name);
+    update_fb_config(STUDY_BATCHES[STUDY_BATCH].config, STUDY_BATCH);
+}
+
+function toggle_study() {
+    if (STUDY_BATCH == 'pilot') {
+        window.location.href = `../explore?task=${TASK_ID}&study=pilot2`;
+        return;
+    }
+    window.location.href = `../explore?task=${TASK_ID}&study=pilot`;
 }

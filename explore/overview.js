@@ -11,13 +11,30 @@ var STUDY_BATCHES = {
             messagingSenderId: "16504691809",
             appId: "1:16504691809:web:e847b8e2fd07580e6e1e20"
         },
-        tasks: [149, 286, 140, 354, 219, 277, 28, 135, 162, 384, 297, 26, 299, 388, 246, 74, 305, 94, 308, 77]
+        tasks: [149, 286, 140, 354, 219, 277, 28, 135, 162, 384, 297, 26, 299, 388, 246, 74, 305, 94, 308, 77],
+        name: "Pilot 1"
+    },
+    pilot2: {
+        config: {
+            apiKey: "AIzaSyBg9yynastMoRA1fGore-sgjygpVhcoLA8",
+            authDomain: "arc-pilot-2.firebaseapp.com",
+            databaseURL: "https://arc-pilot-2-default-rtdb.firebaseio.com",
+            projectId: "arc-pilot-2",
+            storageBucket: "arc-pilot-2.appspot.com",
+            messagingSenderId: "99669730043",
+            appId: "1:99669730043:web:5e61d0f59dbd8e46f0865e"
+        },
+        tasks: [211, 124, 89, 141, 91, 20, 7, 201, 285, 111, 294, 249, 69, 81, 239, 16, 363, 92, 303, 269],
+        name: "Pilot 2"
     }
 }
 
 $(window).on('load', function () {
     PAGE = Pages.ExploreTasks;
-    const task = parseUrl(window.location.search);
+
+    const { task, study } = parseUrl(window.location.search);
+
+    load_study(study);
     load_new_task(task);
 });
 
@@ -28,6 +45,7 @@ $(window).on('load', function () {
  */
 window.onpopstate = function(e){
     if(e.state){
+        load_study(e.state.study);
         load_new_task(e.state.task);
         document.title = e.state.pageTitle;
     }
@@ -39,12 +57,27 @@ window.onpopstate = function(e){
  */
 function parseUrl(url) {
     const urlParams = new URLSearchParams(url);
+
+    // if url does not contain both arguments, update url to contain them
+    let url_info = {};
     let task = urlParams.get('task');
     if (!task) {
         task = TASKS[Math.floor(Math.random()*NUM_TASKS)];
-        updateUrl({"task": task});
+        url_info['task'] = task;
+        url_info['study'] = urlParams.get('study') || 'pilot';
     }
-    return task;
+    let study = urlParams.get('study');
+    if (!study) {
+        study = 'pilot';
+        url_info['study'] = 'pilot';
+        url_info['task'] = task;
+    }
+
+    if (!$.isEmptyObject(url_info)) {
+        console.log("update");
+        updateUrl(url_info);
+    }
+    return { "task": task, "study": study };
 }
 
 /**
@@ -56,10 +89,17 @@ function updateUrl(response) {
     if ('URLSearchParams' in window) {
         var searchParams = new URLSearchParams(window.location.search);
         searchParams.set("task", response.task);
+        searchParams.set("study", response.study);
+
+        console.log(response);
+
         var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
-        load_new_task(response.task);
         document.title = "ARC Data: " + response.task.toString();
-        window.history.pushState({"task": response.task, "pageTitle": document.title}, "", newRelativePathQuery);
+
+        load_study(response.study);
+        load_new_task(response.task);
+
+        window.history.pushState({"task": response.task, "study": response.study, "pageTitle": document.title}, "", newRelativePathQuery);
     }
 }
 
@@ -77,7 +117,7 @@ function get_task_descs_cache(task, desc_type) {
             return resolve(cached);
         } else {
             get_task_descriptions(task, desc_type).then(function (descriptions) {
-                cache_object(task, descriptions);
+                // cache_object(task, descriptions);
                 return resolve(descriptions);
             }).catch(error => {
                 errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
@@ -296,7 +336,7 @@ function createDescsPager(descriptions) {
     $("#descriptions-pager").empty();
     $.each(descriptions, (i, desc) => {
         let row = $(`<a class="list-group-item list-group-item-action" data-toggle="list" role="tab" 
-            href="description.html?task=${desc.task}&id=${desc.id}">Description ${i}</a>`);
+            href="description.html?task=${desc.task}&id=${desc.id}&study=${STUDY_BATCH}">Description ${i}</a>`);
         $("#descriptions-pager").append(row);
     });
 
@@ -305,11 +345,18 @@ function createDescsPager(descriptions) {
     });
 }
 
+var LAST_MODAL_LOADED_STUDY;
 /**
  * load tasks into table so user can browse and choose a task
  */
 function load_tasks_to_browse() {
     let study = STUDY_BATCHES[STUDY_BATCH];
+    if (LAST_MODAL_LOADED_STUDY == study) {
+        return;
+    } else {
+        $('#table').bootstrapTable("destroy");
+    }
+    LAST_MODAL_LOADED_STUDY = study;
 
     get_all_descriptions_interactions_count(DESCRIPTIONS_TYPE).then(counts => {
 
@@ -345,7 +392,7 @@ function load_tasks_to_browse() {
                 valign: 'middle',
                 clickToSelect: true,
                 formatter : function(value,row,index) {
-                    return '<button class="btn btn-secondary load-task-btn" onclick="send_to_new_task(' + row.number + ')" task="'+row.number+'" data-dismiss="modal">Select</button> ';
+                    return '<button class="btn btn-secondary load-task-btn" onclick="send_to_new_task(' + row.number + ', \'' + STUDY_BATCH + '\')" task="'+row.number+'" data-dismiss="modal">Select</button> ';
                 }
                 }
             ]      
@@ -354,8 +401,8 @@ function load_tasks_to_browse() {
     });
 }
 
-function send_to_new_task(task) {
-    document.location.href = `../explore?task=${task}`;
+function send_to_new_task(task, study) {
+    document.location.href = `../explore?task=${task}&study=${study}`;
 }
 
 function load_tasks_test_pairs(tasks) {
@@ -388,3 +435,14 @@ function load_tasks_test_pairs(tasks) {
         });
     });
 } 
+
+function load_study(study) {
+    STUDY_BATCH = study;
+    $("#study-title").text(STUDY_BATCHES[study].name);
+    update_fb_config(STUDY_BATCHES[STUDY_BATCH].config, STUDY_BATCH);
+}
+
+function toggle_study() {
+    let new_study = STUDY_BATCH == 'pilot' ? 'pilot2' : 'pilot';
+    updateUrl({"task": TASK_ID, "study": new_study});
+}

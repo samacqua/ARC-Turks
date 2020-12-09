@@ -34,15 +34,20 @@ var db = firebase.firestore();
 var database = firebase.database();
 
 function use_dev_config() {
-    firebase.initializeApp(devFirebaseConfig, 'devApp');
-
-    db = firebase.app('devApp').firestore();
-    database = firebase.app('devApp').database();
+    update_fb_config(devFirebaseConfig, 'devApp');
 }
 
-function use_study_config() {
-    db = firebase.firestore();
-    database = firebase.database();
+function update_fb_config(config, name) {
+    console.log(name);
+    try {
+        firebase.initializeApp(config, name);
+    } catch (err) {
+        if (!err.message.includes('already exists')) {
+            console.err(err.message);
+        }
+    }
+    db = firebase.app(name).firestore();
+    database = firebase.app(name).database();
 }
 
 // ===================================
