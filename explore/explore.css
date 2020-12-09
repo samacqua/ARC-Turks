@@ -291,7 +291,8 @@ body {
 }
 
 #descriptions-pager a.active {
-    background-color: #d3d3d3;
+    background-color:#83aee9;
+    pointer-events: none;
 }
 
 .neumorphic-text {
