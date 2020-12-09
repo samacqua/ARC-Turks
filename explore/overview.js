@@ -61,12 +61,16 @@ function parseUrl(url) {
     // if url does not contain both arguments, update url to contain them
     let url_info = {};
     let task = urlParams.get('task');
+    let study = urlParams.get('study');
+
     if (!task) {
-        task = TASKS[Math.floor(Math.random()*NUM_TASKS)];
+        study = study || 'pilot';
+        const study_tasks = STUDY_BATCHES[study].tasks;
+        task = study_tasks[Math.floor(Math.random()*study_tasks.length)];
         url_info['task'] = task;
         url_info['study'] = urlParams.get('study') || 'pilot';
     }
-    let study = urlParams.get('study');
+
     if (!study) {
         study = 'pilot';
         url_info['study'] = 'pilot';
@@ -74,7 +78,6 @@ function parseUrl(url) {
     }
 
     if (!$.isEmptyObject(url_info)) {
-        console.log("update");
         updateUrl(url_info);
     }
     return { "task": task, "study": study };

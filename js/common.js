@@ -2,12 +2,6 @@ var DESCRIPTIONS_TYPE = "nl";  // the type of descriptions ("nl", "ex", or "nl_e
 var PAGE;
 var START_DATE;
 
-// universally sets it impossible to exit modal by tapping outside of it
-$.fn.modal.prototype.constructor.Constructor.Default.backdrop = 'static';
-$.fn.modal.prototype.constructor.Constructor.Default.keyboard = false;
-
-
-
 function add_grid_hover_listeners() {
     $(".pair_preview").hover(function() {
         $(this).css("background-color", "rgb(160, 160, 160)");

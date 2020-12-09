@@ -28,10 +28,13 @@ var firebaseConfigPilot2 = {
     appId: "1:99669730043:web:5e61d0f59dbd8e46f0865e"
 };
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfigPilot2);
-var db = firebase.firestore();
-var database = firebase.database();
+var db, database;
+$(window).on('load', function () {
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfigPilot2);
+    db = firebase.firestore();
+    database = firebase.database();
+});
 
 function use_dev_config() {
     update_fb_config(devFirebaseConfig, 'devApp');
