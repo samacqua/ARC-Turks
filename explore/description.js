@@ -37,38 +37,8 @@ $(window).on('load', function () {
 
     load_study(study);
     load_new_desc(task, desc_id);
+    use_user_preferences();
 });
-
-function load_tasks_test_pairs(tasks) {
-
-    return new Promise((resolve, reject) => {
-        get_task_paths().then(paths => {
-
-            let promises = [];
-
-            $.each(tasks, (_, task) => {
-                let path = paths[task];
-                let promise = new Promise((res, rej) => {
-                    $.getJSON('../' + path, json => {
-                        res({"task": task, "json": json.test[0]});
-                    });
-                });
-                promises.push(promise);
-            });
-
-            Promise.all(promises).then(data => {
-                let data_obj = {};
-                $.each(data, (_, val) => {
-                    const task = val.task;
-                    const json = val.json;
-                    data_obj[task] = json;
-                });
-
-                return resolve(data_obj);
-            });
-        });
-    });
-} 
 
 /**
  * Handle back and forth navigation
@@ -507,27 +477,32 @@ function load_desc_builds(task, desc_id, desc_type) {
     });
 }
 
-var paused = false;
+var PAUSED = false;
+
+function toggle_action_sequences() {
+    console.log(PAUSED);
+
+    if (PAUSED) {
+        $("#play-btn").html("‖");
+        play_action_sequences();
+    } else {
+        $("#play-btn").html("►");
+        stop_action_sequences();
+    }
+    PAUSED = !PAUSED;
+}
 
 function stop_action_sequences() {
-    console.log(ACTION_SEQUENCE_INTERVALS);
     $.each(ACTION_SEQUENCE_INTERVALS, (i, interval) => {
-        console.log(interval);
-        console.log(i);
         clearInterval(interval);
     });
     ACTION_SEQUENCE_INTERVALS = [];
-
-    paused = true;
 }
 
 function play_action_sequences() {
-    if (paused) {
-        $.each(ACTION_SEQUENCE_INTERVAL_FUNCTIONS, (i, fnctn) => {
-            ACTION_SEQUENCE_INTERVALS.push(fnctn());
-        });
-        paused = false;
-    }
+    $.each(ACTION_SEQUENCE_INTERVAL_FUNCTIONS, (i, fnctn) => {
+        ACTION_SEQUENCE_INTERVALS.push(fnctn());
+    });
 }
 
 function show_attempts(attempts_json, container) {
@@ -597,64 +572,6 @@ function createDescsPager(task, descriptions, desc_id) {
     });
 }
 
-/**
- * load tasks into table so user can browse and choose a task
- */
-function load_tasks_to_browse() {
-    let study = STUDY_BATCHES[STUDY_BATCH];
-
-    get_all_descriptions_interactions_count(DESCRIPTIONS_TYPE).then(counts => {
-
-        load_tasks_test_pairs(STUDY_BATCHES[STUDY_BATCH].tasks).then(pairs => {
-
-            var num_descriptions_list = [];
-            var num_interactions_list = [];
-
-            $.each(study.tasks, (i, task) => {
-                num_descriptions_list.push(counts[task]['descriptions']);
-                num_interactions_list.push(counts[task]['interactions']);
-            });
-    
-            task_list = [];
-            for (i=0;i<study.tasks.length;i++) {
-                let task_num = study.tasks[i];
-                let num_descs = num_descriptions_list[i];
-                let num_interactions = num_interactions_list[i];
-    
-                task_list.push({'number': task_num, 'descriptions': num_descs, 'interactions': num_interactions});
-            }
-    
-            $('#table').bootstrapTable({
-                data: task_list,
-                columns: [ { 
-                    formatter : function(value,row,index) {
-                        let test_pair = pairs[row.number];
-                        let div = $("<div></div>");
-                        fill_div_with_IO(div, array_to_grid(test_pair.input), array_to_grid(test_pair.output));
-
-                        return div.wrap('<p/>').parent().html();;
-                    }
-                }, { sortable: true },{ sortable: true },{ sortable: true },  
-                {
-                field: 'operate',
-                title: 'Select',
-                align: 'center',
-                valign: 'middle',
-                clickToSelect: true,
-                formatter : function(value,row,index) {
-                    return '<button class="btn btn-secondary load-task-btn" onclick="send_to_new_task(' + row.number + ')" task="'+row.number+'" data-dismiss="modal">Select</button> ';
-                }
-                }
-            ]      
-            });
-        });
-    });
-}
-
-function send_to_new_task(task) {
-    document.location.href = `../explore?task=${task}&study=${STUDY_BATCH}`;
-}
-
 function repeat_action_sequence_in_div(sequence, container_div) {
 
     function play_action_sequence_item(action_sequence, container, i=0) {
@@ -690,51 +607,10 @@ function repeat_action_sequence_in_div(sequence, container_div) {
     }, interval_length);
 }
 
-function load_study(study) {
-    STUDY_BATCH = study;
-    $("#study-title").text(STUDY_BATCHES[study].name);
-    console.log("updating...");
-    console.log(STUDY_BATCH);
-    update_fb_config(STUDY_BATCHES[STUDY_BATCH].config, STUDY_BATCH);
-}
-
 function toggle_study() {
     if (STUDY_BATCH == 'pilot') {
         window.location.href = `../explore?task=${TASK_ID}&study=pilot2`;
         return;
     }
     window.location.href = `../explore?task=${TASK_ID}&study=pilot`;
-}
-
-function zoom_on_div() {
-    let copy = $(this).clone();
-    $("body").append(copy);
-    copy.css("opacity", "0");
-
-    copy.addClass('grid-focus');
-    copy.removeClass('neumorphic');
-    
-    copy.animate({opacity: 1}, 100);
-
-    let new_div = $("<div></div>");
-    new_div.addClass("blurred-layer");
-    new_div.appendTo($("body"));
-    new_div.css('opacity', '0');
-    new_div.animate({opacity: 1}, 100);
-
-    copy.on('click', function(){
-        $('.grid-focus').fadeOut(100, () => {
-            $('.grid-focus').remove();
-            $('.blurred-layer').remove()
-        });
-        $(".blurred-layer").fadeOut(100);
-    });
-
-    new_div.on('click', function(){
-        $('.grid-focus').fadeOut(100, () => {
-            $('.grid-focus').remove();
-            $('.blurred-layer').remove()
-        });
-        $(".blurred-layer").fadeOut(100);
-    });
 }

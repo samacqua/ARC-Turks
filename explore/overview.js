@@ -36,6 +36,7 @@ $(window).on('load', function () {
 
     load_study(study);
     load_new_task(task);
+    use_user_preferences();
 });
 
 /**
@@ -130,39 +131,6 @@ function get_task_descs_cache(task, desc_type) {
     });
 }
 
-function zoom_on_div(div) {
-    let copy = div.clone();
-    $("body").append(copy);
-    copy.css("opacity", "0");
-
-    copy.addClass('grid-focus');
-    copy.removeClass('neumorphic');
-    
-    copy.animate({opacity: 1}, 100);
-
-    let new_div = $("<div></div>");
-    new_div.addClass("blurred-layer");
-    new_div.appendTo($("body"));
-    new_div.css('opacity', '0');
-    new_div.animate({opacity: 1}, 100);
-
-    copy.on('click', function(){
-        $('.grid-focus').fadeOut(100, () => {
-            $('.grid-focus').remove();
-            $('.blurred-layer').remove()
-        });
-        $(".blurred-layer").fadeOut(100);
-    });
-
-    new_div.on('click', function(){
-        $('.grid-focus').fadeOut(100, () => {
-            $('.grid-focus').remove();
-            $('.blurred-layer').remove()
-        });
-        $(".blurred-layer").fadeOut(100);
-    });
-}
-
 /**
  * load a new task after user selects it
  * @param {number} task the task to load
@@ -175,9 +143,7 @@ function load_new_task(task) {
         fill_div_with_IO($("#test-io-preview"), TEST_PAIR.input, TEST_PAIR.output);
         $('.pair_preview').addClass('neumorphic');
 
-        $(".neumorphic").on('click', function(){
-            zoom_on_div($(this));
-          });
+        $(".neumorphic").on('click', zoom_on_div);
     });
 
     TASK_ID = task;
@@ -194,6 +160,10 @@ function load_new_task(task) {
         console.error(error);
     });
 }
+
+// ====
+// Stat charts
+// ====
 
 function merge_word_counts(word_count_1, word_count_2) {
     let wc = object_copy(word_count_1);
@@ -307,7 +277,7 @@ function create_desc_success_bar(descs) {
     let data = {
         labels: labels,
         datasets: [{
-            label: '3-shot',
+            label: '3 attempts',
             backgroundColor: '#83aee9',
             borderColor: '#83aee9',
             data: data_points,
@@ -375,6 +345,8 @@ function get_word_counts(str) {
     return word_counts;
 }
 
+
+
 /**
  * Create an href on the left for each task description
  * @param {[Objects]} descriptions an array of all description objects
@@ -390,111 +362,6 @@ function createDescsPager(descriptions) {
     $('#descriptions-pager a').click(function(){
         document.location.href = $(this).attr('href');
     });
-
-
-}
-
-var LAST_MODAL_LOADED_STUDY;
-/**
- * load tasks into table so user can browse and choose a task
- */
-function load_tasks_to_browse() {
-
-    let study = STUDY_BATCHES[STUDY_BATCH];
-    if (LAST_MODAL_LOADED_STUDY == study) {
-        return;
-    } else {
-        $('#table').bootstrapTable("destroy");
-    }
-    LAST_MODAL_LOADED_STUDY = study;
-
-    get_all_descriptions_interactions_count(DESCRIPTIONS_TYPE).then(counts => {
-
-        load_tasks_test_pairs(STUDY_BATCHES[STUDY_BATCH].tasks).then(pairs => {
-
-            var num_descriptions_list = [];
-            var num_interactions_list = [];
-
-            $.each(study.tasks, (i, task) => {
-                num_descriptions_list.push(counts[task]['descriptions']);
-                num_interactions_list.push(counts[task]['interactions']);
-            });
-    
-            task_list = [];
-            for (i=0;i<study.tasks.length;i++) {
-                let task_num = study.tasks[i];
-                let num_descs = num_descriptions_list[i];
-                let num_interactions = num_interactions_list[i];
-    
-                task_list.push({'number': task_num, 'descriptions': num_descs, 'interactions': num_interactions});
-            }
-    
-            $('#table').bootstrapTable({
-                data: task_list,
-                columns: [ { 
-                    formatter : function(value,row,index) {
-                        let test_pair = pairs[row.number];
-                        let div = $("<div></div>");
-                        fill_div_with_IO(div, array_to_grid(test_pair.input), array_to_grid(test_pair.output));
-
-                        return div.wrap('<p/>').parent().html();;
-                    }
-                }, { sortable: true },{ sortable: true },{ sortable: true },  
-                {
-                field: 'operate',
-                title: 'Select',
-                align: 'center',
-                valign: 'middle',
-                clickToSelect: true,
-                formatter : function(value,row,index) {
-                    return '<button class="btn btn-secondary load-task-btn" onclick="send_to_new_task(' + row.number + ', \'' + STUDY_BATCH + '\')" task="'+row.number+'" data-dismiss="modal">Select</button> ';
-                }
-                }
-            ]      
-            });
-        });
-    });
-}
-
-function send_to_new_task(task, study) {
-    document.location.href = `../explore?task=${task}&study=${study}`;
-}
-
-function load_tasks_test_pairs(tasks) {
-
-    return new Promise((resolve, reject) => {
-        get_task_paths().then(paths => {
-
-            let promises = [];
-
-            $.each(tasks, (_, task) => {
-                let path = paths[task];
-                let promise = new Promise((res, rej) => {
-                    $.getJSON('../' + path, json => {
-                        res({"task": task, "json": json.test[0]});
-                    });
-                });
-                promises.push(promise);
-            });
-
-            Promise.all(promises).then(data => {
-                let data_obj = {};
-                $.each(data, (_, val) => {
-                    const task = val.task;
-                    const json = val.json;
-                    data_obj[task] = json;
-                });
-
-                return resolve(data_obj);
-            });
-        });
-    });
-} 
-
-function load_study(study) {
-    STUDY_BATCH = study;
-    $("#study-title").text(STUDY_BATCHES[study].name);
-    update_fb_config(STUDY_BATCHES[STUDY_BATCH].config, STUDY_BATCH);
 }
 
 function toggle_study() {

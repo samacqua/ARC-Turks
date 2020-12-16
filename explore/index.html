@@ -31,7 +31,10 @@
 
                 <button class="neumorphic-btn" id="study-title" onclick="toggle_study();">Pilot</button>
                 <button class="neumorphic-btn" id="task-title" onclick="load_tasks_to_browse();" data-toggle="modal" data-target="#browse-tasks-modal">Task</button>
-
+                <div>
+                    <button id="dark-mode-btn" class="neumorphic-btn play-btns" onclick="toggle_dark_mode();">☾</button>
+                    <button id="cell-mode-btn" class="neumorphic-btn play-btns" onclick="toggle_cell_shape();">●</button>
+                </div>
             </br> 
 
                 <div id="test-io-preview" class="test-io"></div>
@@ -139,7 +142,10 @@
     <script src="../js/constants.js"></script>
     <script src="../js/grids.js"></script>
     <script src="../js/more_grids.js"></script>
+    <script src="explore.js"></script>
 
+    <!-- <link href="chardinjs.css" rel="stylesheet">
+    <script src="chardinjs.min.js"></script> -->
 </body>
 
 </html>

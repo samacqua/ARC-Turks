@@ -1,11 +1,18 @@
+/* so can change thru js */
+:root {
+    --cell-corner-radius: 0px;
+    --cell-border-width: 1px;
+}
+
 .cell {
     width: 100px;
     height: 100px;
-    border-left: 1px solid #555;
-    border-top: 1px solid #555;
+    border-left: var(--cell-border-width) solid #555;
+    border-top: var(--cell-border-width) solid #555;
     float: left;
     background-color: #000;
     overflow: hidden;
+    border-radius: var(--cell-corner-radius);
 }
 
 .grid_row {
