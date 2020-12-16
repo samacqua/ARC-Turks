@@ -116,14 +116,19 @@ function get_all_descriptions_interactions_count(type) {
             const data = snapshot.data()
             var interactions_count = [];
             var descriptions_count = [];
+            var ret_data = {};
 
-            for (i = 0; i < NUM_TASKS; i++) {
-                const ii = TASKS[i];
-                interactions_count.push(data[`${ii}_interactions_count`]);
-                descriptions_count.push(data[`${ii}_descriptions_count`]);
+            for (i = 0; i < 400; i++) {
+
+                // if study has task
+                if (data[`${i}_interactions_count`] != null) {
+                    ret_data[i] = {};
+                    ret_data[i]['interactions'] = data[`${i}_interactions_count`];
+                    ret_data[i]['descriptions'] = data[`${i}_descriptions_count`]
+                }
             }
-
-            return resolve([descriptions_count, interactions_count]);
+            console.log(ret_data);
+            return resolve(ret_data);
         })
             .catch(function (err) {
                 return reject(err);

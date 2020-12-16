@@ -607,8 +607,13 @@ function load_tasks_to_browse() {
 
         load_tasks_test_pairs(STUDY_BATCHES[STUDY_BATCH].tasks).then(pairs => {
 
-            var num_descriptions_list = counts[0];
-            var num_interactions_list = counts[1];
+            var num_descriptions_list = [];
+            var num_interactions_list = [];
+
+            $.each(study.tasks, (i, task) => {
+                num_descriptions_list.push(counts[task]['descriptions']);
+                num_interactions_list.push(counts[task]['interactions']);
+            });
     
             task_list = [];
             for (i=0;i<study.tasks.length;i++) {
