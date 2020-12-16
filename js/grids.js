@@ -26,7 +26,8 @@ function array_to_grid(arr) {
     return new Grid(height, width, arr);
 }
 
-// hack ish to manually set pixel values bc can't figure out css
+// size cells dynamically, but keep their square shape
+// strange css hack to make sure each resizes but still equal dimensions
 function fit_cells_to_container(container, height, width) {
 
     if (height > 1.5*width) {

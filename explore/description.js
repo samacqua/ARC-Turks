@@ -147,7 +147,9 @@ function get_task_descs_cache(task, desc_type) {
     });
 }
 
+// for pausing and playing action sequences
 var ACTION_SEQUENCE_INTERVALS = [];
+var ACTION_SEQUENCE_INTERVAL_FUNCTIONS = [];
 
 /**
  * load a new task after user selects it
@@ -156,9 +158,7 @@ var ACTION_SEQUENCE_INTERVALS = [];
  */
 function load_new_desc(task, desc_id) {
 
-    $.each(ACTION_SEQUENCE_INTERVALS, (i, interval) => {
-        clearInterval(interval);
-    });
+    stop_action_sequences();
 
     loadTask(task).then(() => {
 
@@ -167,9 +167,7 @@ function load_new_desc(task, desc_id) {
         fill_div_with_IO($("#test-io-preview"), TEST_PAIR.input, TEST_PAIR.output);
         $("#test-io-preview").addClass('neumorphic');
 
-        $(".neumorphic").on('click', function(){
-            zoom_on_div($(this));
-          });
+        $(".neumorphic").on('click', zoom_on_div);
 
         $("#task-title").html(`Task ${task}`);
         get_task_descs_cache(task, DESCRIPTIONS_TYPE).then(function (descriptions) {
@@ -195,9 +193,10 @@ function load_new_desc(task, desc_id) {
             if (cur_desc.action_sequence != null) {
                 let sequence_interval = repeat_action_sequence_in_div(JSON.parse(cur_desc.action_sequence), $("#verification-grid"));
                 ACTION_SEQUENCE_INTERVALS.push(sequence_interval);
+                ACTION_SEQUENCE_INTERVAL_FUNCTIONS.push(function() {return repeat_action_sequence_in_div(JSON.parse(cur_desc.action_sequence), $("#verification-grid"))});
             } else {
                 console.error("Description collected before action sequences.");
-                $("#verification-grid .action-type-badge:first").text("No action sequence for this description.");
+                $("#verification-grid .action-type-badge:first").text("No action sequence");
             }
     
             load_desc_builds(task, desc_id, DESCRIPTIONS_TYPE).then(builds => {
@@ -259,16 +258,16 @@ function create_build_row(build) {
     row.appendTo($("#description-builds"));
 
     const attempts_col = $("<div class='col-md-9'></div>");
-    const attempts_row = $("<div class='row' style='justify-content: left'></div>");
+    const attempts_row = $("<div class='row into-page' style='justify-content: left; height: 100%'></div>");
     attempts_row.appendTo(attempts_col);
     attempts_col.appendTo(row);
     show_attempts(build.attempt_jsons, attempts_row);
 
     const action_sequence_col = $("<div class='col-md-3'></div>");
-    const action_sequence_row = $("<div class='row' style='justify-content: left'></div>");
+    const action_sequence_row = $("<div class='row into-page' style='justify-content: left; height: 100%'></div>");
     const action_sequence_container = $("<div class='single_grid'></div>");
     const grid_cont = $('<div class="editable_grid selectable_grid">');
-    const action_sequence_label = $('<h5><span class="badge badge-secondary action-type-badge">action sequence</span></h5>')
+    const action_sequence_label = $('<h5 class="action-type-badge">action sequence</h5>')
     grid_cont.appendTo(action_sequence_container);
     action_sequence_label.appendTo(action_sequence_container);
     action_sequence_container.appendTo(action_sequence_row);
@@ -281,8 +280,10 @@ function create_build_row(build) {
     if (build.action_sequence) {
         const sequence_interval = repeat_action_sequence_in_div(JSON.parse(build.action_sequence), action_sequence_container);
         ACTION_SEQUENCE_INTERVALS.push(sequence_interval);
+        ACTION_SEQUENCE_INTERVAL_FUNCTIONS.push(function() {return repeat_action_sequence_in_div(JSON.parse(build.action_sequence), action_sequence_container)});
     } else {
-        action_sequence_container.find(".action-type-badge:first").text("No action sequence for this build.");
+        console.log("NO ACTION SEQUENCE");
+        action_sequence_container.find(".action-type-badge:first").text("No action sequence");
     }
 
     $("</br>").appendTo($("#description-builds"));
@@ -506,6 +507,29 @@ function load_desc_builds(task, desc_id, desc_type) {
     });
 }
 
+var paused = false;
+
+function stop_action_sequences() {
+    console.log(ACTION_SEQUENCE_INTERVALS);
+    $.each(ACTION_SEQUENCE_INTERVALS, (i, interval) => {
+        console.log(interval);
+        console.log(i);
+        clearInterval(interval);
+    });
+    ACTION_SEQUENCE_INTERVALS = [];
+
+    paused = true;
+}
+
+function play_action_sequences() {
+    if (paused) {
+        $.each(ACTION_SEQUENCE_INTERVAL_FUNCTIONS, (i, fnctn) => {
+            ACTION_SEQUENCE_INTERVALS.push(fnctn());
+        });
+        paused = false;
+    }
+}
+
 function show_attempts(attempts_json, container) {
 
     $.each(attempts_json, (i, attempt) => {
@@ -518,11 +542,11 @@ function show_attempts(attempts_json, container) {
         // grid_div.addClass('neumorphic');
 
 
-        let badge_type = 'badge-danger';
+        let badge_type = 'fail-lbl';
         if ( arraysEqual(attempt, TEST_PAIR.output.grid) ) {
-            badge_type = 'badge-success';
+            badge_type = 'suc-lbl';
         }
-        let label = $(`<h4><span class="badge ${badge_type} action-type-badge">attempt ${i+1}</span></h4>`);
+        let label = $(`<h4 class="action-type-badge ${badge_type}" >attempt ${i+1}</h4>`);
         label.appendTo(grid_div);
     });
 }
@@ -632,19 +656,20 @@ function repeat_action_sequence_in_div(sequence, container_div) {
 
         let tool_display = container.find('.action-type-badge:first');
 
-        if (!tool_display.hasClass('badge-secondary')) {
-            tool_display.removeClass('badge-warning');
-            tool_display.removeClass('badge-success');
-            tool_display.addClass('badge-secondary');
-        }
+        tool_display.removeClass('suc-lbl');
+        tool_display.removeClass('fail-lbl');
 
         let tool = action_sequence[i].action.tool;
         if (tool == "check") {
             tool = action_sequence[i].action.correct ? "check: correct" : "check: incorrect";
-            let new_class = action_sequence[i].action.correct ? "badge-success" : "badge-warning";
-            tool_display.removeClass('badge-secondary');
+            let new_class = action_sequence[i].action.correct ? "suc-lbl" : "fail-lbl";
             tool_display.addClass(new_class);
+        } else if (tool == "copyFromInput") {
+            tool = "copy input";
+        } else if (tool == "resizeOutputGrid") {
+            tool = "resize";
         }
+
         tool_display.text(tool);
 
         let grid = array_to_grid(action_sequence[i].grid);
@@ -676,8 +701,8 @@ function toggle_study() {
     window.location.href = `../explore?task=${TASK_ID}&study=pilot`;
 }
 
-function zoom_on_div(div) {
-    let copy = div.clone();
+function zoom_on_div() {
+    let copy = $(this).clone();
     $("body").append(copy);
     copy.css("opacity", "0");
 
