@@ -162,9 +162,14 @@ function load_new_desc(task, desc_id) {
 
     loadTask(task).then(() => {
 
+
         $(".test-io").empty();
         fill_div_with_IO($("#test-io-preview"), TEST_PAIR.input, TEST_PAIR.output);
         $("#test-io-preview").addClass('neumorphic');
+
+        $(".neumorphic").on('click', function(){
+            zoom_on_div($(this));
+          });
 
         $("#task-title").html(`Task ${task}`);
         get_task_descs_cache(task, DESCRIPTIONS_TYPE).then(function (descriptions) {
@@ -669,4 +674,37 @@ function toggle_study() {
         return;
     }
     window.location.href = `../explore?task=${TASK_ID}&study=pilot`;
+}
+
+function zoom_on_div(div) {
+    let copy = div.clone();
+    $("body").append(copy);
+    copy.css("opacity", "0");
+
+    copy.addClass('grid-focus');
+    copy.removeClass('neumorphic');
+    
+    copy.animate({opacity: 1}, 100);
+
+    let new_div = $("<div></div>");
+    new_div.addClass("blurred-layer");
+    new_div.appendTo($("body"));
+    new_div.css('opacity', '0');
+    new_div.animate({opacity: 1}, 100);
+
+    copy.on('click', function(){
+        $('.grid-focus').fadeOut(100, () => {
+            $('.grid-focus').remove();
+            $('.blurred-layer').remove()
+        });
+        $(".blurred-layer").fadeOut(100);
+    });
+
+    new_div.on('click', function(){
+        $('.grid-focus').fadeOut(100, () => {
+            $('.grid-focus').remove();
+            $('.blurred-layer').remove()
+        });
+        $(".blurred-layer").fadeOut(100);
+    });
 }
