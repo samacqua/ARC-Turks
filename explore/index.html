@@ -26,26 +26,27 @@
     <div class="container"> 
         <div class="row">
             <div class="col-lg-3">
-               <div class="sticky-top">
-               </br>
+               <div class="sticky-top" data-intro="">
+                </br>
 
-                <button class="neumorphic-btn" id="study-title" onclick="toggle_study();">Pilot</button>
-                <button class="neumorphic-btn" id="task-title" onclick="load_tasks_to_browse();" data-toggle="modal" data-target="#browse-tasks-modal">Task</button>
-                <div>
-                    <button id="dark-mode-btn" class="neumorphic-btn play-btns" onclick="toggle_dark_mode();">☾</button>
-                    <button id="cell-mode-btn" class="neumorphic-btn play-btns" onclick="toggle_cell_shape();">●</button>
+                    <button class="neumorphic-btn" id="study-title" onclick="toggle_study();" data-intro='Loop through different studies' data-position="right">Pilot</button>
+                    <button class="neumorphic-btn" id="task-title" onclick="load_tasks_to_browse();" data-toggle="modal" data-target="#browse-tasks-modal" data-intro='Choose different ARC tasks' data-position="right">Task</button>
+                    <div data-intro='Toggle dark mode, cell shape, help menu' data-position="right">
+                        <button id="dark-mode-btn" class="neumorphic-btn play-btns" onclick="toggle_dark_mode();">☾</button>
+                        <button id="cell-mode-btn" class="neumorphic-btn play-btns" onclick="toggle_cell_shape();">●</button>
+                        <button id="cell-mode-btn" class="neumorphic-btn play-btns" onclick="start_walkthrough();">?</button>
+                    </div>
+                    </br> 
+
+                    <div id="test-io-preview" class="test-io" data-intro='test input-output for the current task' data-position="right"></div>
+                    </br>
+
+                    <ul class="list-group" data-intro='See the task examples and statistics about all task descriptions' data-position="right">
+                        <a class="list-group-item list-group-item-action neumorphic-btn active" data-toggle="list" role="tab" href="#overview">Overview</a>
+                    </ul>
+                    </br>
+                    <ul class="list-group" id="descriptions-pager" role="tablist" data-intro='Look at specific descriptions' data-position="right"></ul>
                 </div>
-            </br> 
-
-                <div id="test-io-preview" class="test-io"></div>
-                </br>
-
-                <ul class="list-group">
-                    <a class="list-group-item list-group-item-action neumorphic-btn active" data-toggle="list" role="tab" href="#overview">Overview</a>
-                </ul>
-                </br>
-                <ul class="list-group" id="descriptions-pager" role="tablist"></ul>
-            </div>
 
             </div>
             <div class="col-lg-9">
@@ -144,8 +145,8 @@
     <script src="../js/more_grids.js"></script>
     <script src="explore.js"></script>
 
-    <!-- <link href="chardinjs.css" rel="stylesheet">
-    <script src="chardinjs.min.js"></script> -->
+    <script src="chardinjs.min.js"></script>
+    <link href="chardinjs.css" rel="stylesheet">
 </body>
 
 </html>

@@ -206,3 +206,8 @@ function load_tasks_to_browse() {
         });
     });
 }
+
+function start_walkthrough() {
+    $('body').chardinJs({ attribute: 'data-intro' });
+    $('body').chardinJs('start');
+}
