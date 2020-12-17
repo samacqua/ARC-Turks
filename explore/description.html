@@ -28,7 +28,7 @@
     <div class="container"> 
         <div class="row">
             <div class="col-lg-3">
-                <div class="sticky-top" data-intro="">
+                <div class="sticky-top" data-intro="" data-position="left">
                     </br>
 
                     <button class="neumorphic-btn" id="study-title" onclick="toggle_study();" data-intro='Loop through different studies' data-position="right">Pilot</button>
@@ -56,7 +56,7 @@
             
                 </br>
                 <div class="row">
-                    <div class="col">
+                    <div class="col"">
                         <h2 class="neumorphic-text">Description</h2>
                         <p class="into-page" id="ex_see_desc"></p>
                         <p class="into-page" id="ex_size_desc"></p>
@@ -64,8 +64,8 @@
                     </div>
                     <div class="col">
                         <h2 class="neumorphic-text">Describer Attempts</h2>
-                        <div id="verification-attempts"></div>
-                        <div id="verification-grid">
+                        <div id="verification-attempts" data-intro="The describer had 3 attempts to correctly solve the pattern to verify they understand the task." data-position="right"></div>
+                        <div id="verification-grid"  data-intro="The describer's actions to verify the can solve the task." data-position="right">
                             <div class="editable_grid selectable_grid">
                                 <div class="grid_row">
                                     <div class="cell" symbol="0" x="0" y="0"></div>
@@ -91,7 +91,7 @@
 
                 </br>
                 <h2 class="neumorphic-text" id="builds-header">Builds</h2>
-                <div id="description-builds"></div>
+                <div id="description-builds" data-intro="The submitted grids, and the sequence of actions, that each Turker took when interpreting this description." data-position="right"></div>
 
                 <h2 class="neumorphic-text">Action Sequence Graph</h2>
                 <div class="row">
@@ -107,7 +107,7 @@
                         <li><span class="resize_output_grid_color edge">↗</span> resize output grid</li>
                         <li><span class="reset_output_grid_color edge">↗</span> reset output grid</li>
                     </ul>
-                    <div id="graph-container"></div>
+                    <div id="graph-container" data-intro="A depiction of all grid states (nodes) visited by all Turkers. Thicker edges and nodes represent multiple Turkers." data-position="right"></div>
                     <div class="col-lg-4 offset-lg-4">
                         <div id="action-sequence-cur-grid" class="single_grid">
                             <div class="grid_inner_container"></div>
