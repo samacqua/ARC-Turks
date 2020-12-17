@@ -714,12 +714,25 @@ function set_user_start_time(user_id) {
 function give_up_description(task_id, type) {
 
     return new Promise(function (resolve, reject) {
-        const increment = firebase.firestore.FieldValue.increment(1);
 
+        var batch = db.batch();
+
+        const increment = firebase.firestore.FieldValue.increment(1);
         const task_doc_ref = db.collection(type + "_tasks").doc(task_id.toString());
-        task_doc_ref.update({
+
+        batch.update(task_doc_ref, {
             desc_gave_up_count: increment
-        }).then(function () {
+        });
+
+        // if gave up, increment 1 minute of effort
+        const timing_doc_ref = db.collection(type + "_tasks").doc("timing");
+        const time_increment = firebase.firestore.FieldValue.increment(60);
+        const key = task_id.toString() + "_veto";
+        var timing_data = {};
+        timing_data[key] = time_increment;
+        batch.update(timing_doc_ref, timing_data);
+
+        batch.commit().then(function () {
             return resolve();
         }).catch(function (err) {
             return reject(err);
