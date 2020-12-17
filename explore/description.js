@@ -121,6 +121,8 @@ function get_task_descs_cache(task, desc_type) {
 var ACTION_SEQUENCE_INTERVALS = [];
 var ACTION_SEQUENCE_INTERVAL_FUNCTIONS = [];
 
+var GRAPH;
+
 /**
  * load a new task after user selects it
  * @param {number} task the task to load
@@ -185,26 +187,28 @@ function load_new_desc(task, desc_id) {
 
                 $('#graph-container').empty();
 
-                let s = new sigma({
+                GRAPH = new sigma({
                     graph: g,
                     container: 'graph-container',
                     // https://github.com/jacomyal/sigma.js/wiki/Settings
                     settings: {
                         enableCamera: true,
-                        enableHovering: false,
+                        enableHovering: true,
+                        labelHoverShadowColor: "clear",
                         nodeHoverPrecision: 10,
                         drawLabels: true,
-                        labelThreshold: 100, // so doesn't draw labels, turning off drawLabels turns off hover events
-                        minNodeSize: 2,
+                        labelThreshold: 1000, // so doesn't draw labels, turning off drawLabels turns off hover events
+                        minNodeSize: 3,
                         maxNodeSize: 10,
-                        minEdgeSize: 1,
-                        maxEdgeSize: 3,
+                        minEdgeSize: 1.5,
+                        maxEdgeSize: 5,
                         edgesPowRatio: 0.5,
+                        borderSize: 1,
                     }
                 });
 
                 update_uneditable_div_from_grid_state($("#action-sequence-cur-grid .grid_inner_container"), new Grid(3, 3));
-                s.bind('overNode outNode clickNode doubleClickNode rightClickNode', function(e) {
+                GRAPH.bind('overNode outNode clickNode doubleClickNode rightClickNode', function(e) {
                     let node_grid = JSON.parse(e.data.node.id);
                     node_grid = array_to_grid(node_grid);
                     update_uneditable_div_from_grid_state($("#action-sequence-cur-grid .grid_inner_container"), node_grid);
@@ -215,10 +219,10 @@ function load_new_desc(task, desc_id) {
                     strongGravityMode: true,
                     gravity: 0.2,
                     slowDown: 1,
-                    startingIterations: 500,
+                    startingIterations: 200,
                   };
-                s.startForceAtlas2(force_settings);
-                setTimeout(function() { s.stopForceAtlas2(); }, 500);
+                  GRAPH.startForceAtlas2(force_settings);
+                setTimeout(function() { GRAPH.stopForceAtlas2(); }, 500);
             });
     
         }).catch(error => {
@@ -285,18 +289,16 @@ function create_action_sequence_graph_from_builds(desc, builds) {
         nodes: [
             {
                 id: init_state_id,
-                label: 'Start state',
                 x: 0,
                 y: 0,
-                size: 6,
+                size: 10,
                 color: '#0000ff'
             },
             {
                 id: final_state_id,
-                label: 'Final state',
-                x: Math.sqrt(2)/2,
-                y: Math.sqrt(2)/2,
-                size: 6,
+                x: 1,
+                y: 1,
+                size: 10,
                 type: 'arrow',
                 color: '#26A96C'
             }
@@ -308,8 +310,8 @@ function create_action_sequence_graph_from_builds(desc, builds) {
     let desc_as = desc.action_sequence;
     if (desc_as) {
         desc_as = JSON.parse(desc_as);
-        var direction = Math.PI/4;
 
+        var direction = Math.random() * Math.PI/2;
         let dx = Math.cos(direction);
         let dy = Math.sin(direction);
 
@@ -327,7 +329,6 @@ function create_action_sequence_graph_from_builds(desc, builds) {
             if (existing_node == null) {
                 g.nodes.push({
                     id: node_id,
-                    label: i.toString(),
                     x: dx*magnitude*(i+1)+Math.random()/100,
                     y: dy*magnitude*(i+1)+Math.random()/100,
                     size: 1,
@@ -380,7 +381,7 @@ function create_action_sequence_graph_from_builds(desc, builds) {
         if (action_sequence) {
             action_sequence = JSON.parse(action_sequence);
 
-            let direction = Math.random() * Math.PI / 6 + Math.PI / 6;
+            let direction = Math.random() * Math.PI/2;
             let dx = Math.cos(direction);
             let dy = Math.sin(direction);
             let magnitude = 1 / action_sequence.length;
@@ -395,9 +396,8 @@ function create_action_sequence_graph_from_builds(desc, builds) {
                 if (existing_node == null) {
                     g.nodes.push({
                         id: node_id,
-                        label: i.toString(),
-                        x: dx*magnitude*(i+1),
-                        y: dy*magnitude*(i+1),
+                        x: dx*magnitude*(i+1)+Math.random()/100,
+                        y: dy*magnitude*(i+1)+Math.random()/100,
                         size: 1,
                         color: '#666',
                     });
