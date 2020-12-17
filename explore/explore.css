@@ -118,7 +118,7 @@ body {
     height: 100vh;
     margin: 0;
     animation-duration: 3s;
-  }
+}
 
 .neumorphic-list-item, .neumorphic-list-item:hover, .list-group-item {
     border: none;
@@ -221,6 +221,11 @@ h4, h5 {
     position: relative;
     text-transform: uppercase;
 }
+button {
+    outline:none;  
+}
+button:focus {outline:0;}
+
 
 .neumorphic-btn.active {
     background-color:var(--highlight-color);

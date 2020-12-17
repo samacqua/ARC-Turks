@@ -7,8 +7,7 @@
 .cell {
     width: 100px;
     height: 100px;
-    border-left: var(--cell-border-width) solid #555;
-    border-top: var(--cell-border-width) solid #555;
+    outline: var(--cell-border-width) solid #555;
     float: left;
     background-color: #000;
     overflow: hidden;

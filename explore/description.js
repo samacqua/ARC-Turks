@@ -160,6 +160,8 @@ function load_new_desc(task, desc_id) {
             let last_attempt = JSON.parse(cur_desc.attempt_jsons[cur_desc.attempt_jsons.length-1]);
             update_div_from_grid_state($("#verification-grid .editable_grid"), array_to_grid(last_attempt));
 
+            ACTION_SEQUENCE_INTERVAL_FUNCTIONS = [];
+
             if (cur_desc.action_sequence != null) {
                 let sequence_interval = repeat_action_sequence_in_div(JSON.parse(cur_desc.action_sequence), $("#verification-grid"));
                 ACTION_SEQUENCE_INTERVALS.push(sequence_interval);
@@ -168,6 +170,9 @@ function load_new_desc(task, desc_id) {
                 console.error("Description collected before action sequences.");
                 $("#verification-grid .action-type-badge:first").text("No action sequence");
             }
+
+            PAUSED = true;
+            toggle_action_sequences();
     
             load_desc_builds(task, desc_id, DESCRIPTIONS_TYPE).then(builds => {
                 $("#builds-header").text("Builds (" + builds.length.toString() + ")");
@@ -480,7 +485,6 @@ function load_desc_builds(task, desc_id, desc_type) {
 var PAUSED = false;
 
 function toggle_action_sequences() {
-    console.log(PAUSED);
 
     if (PAUSED) {
         $("#play-btn").html("‖");
