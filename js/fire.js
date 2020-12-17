@@ -226,22 +226,25 @@ function get_task_descriptions(task_id, type) {
                 // loop will only run once, just indexing querySnapshot giving issues
                 const data = doc.data();
                 const description = {
-                    'grid_desc': data.grid_description,
-                    'see_desc': data.see_description,
-                    'do_desc': data.do_description,
-                    'selected_ex': data.selected_example,
+                    'action_sequence': data.action_sequence,
+                    'attempts_sequence': data.attempts_sequence,
+                    'attempt_jsons': data.attempt_jsons,
                     'bandit_attempts': data.bandit_attempts,
                     'bandit_success_score': data.bandit_success_score,
                     'confidence': data.confidence,
+                    'description_time': data.description_time,
                     'display_num_attempts': data.display_num_attempts,
                     'display_num_success': data.display_num_success,
-                    'attempt_jsons': data.attempt_jsons,
-                    'attempts_sequence': data.attempts_sequence,
-                    'action_sequence': data.action_sequence,
+                    'do_desc': data.do_description,
+                    'grid_desc': data.grid_description,
+                    'max_idle_time': data.max_idle_time,
                     'num_verification_attempts': data.num_verification_attempts,
+                    'see_desc': data.see_description,
+                    'selected_ex': data.selected_example,
                     'succeeded_verification': data.succeeded_verification,
                     'timestamp': data.timestamp,
                     'uid': data.uid,
+                    'verification_time': data.verification_time,
                     'type': type,
                     'task': task_id,
                     'id': doc.id
@@ -408,7 +411,7 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confi
         const desc_doc_ref = task_doc_ref.collection("descriptions").doc(desc_id);
         batch.set(desc_doc_ref, desc_data);
 
-        // increment num_descriptions and ver_gave_up_count for task in tasks collection (not desc_gave_up_count bc they would not be submitting description, handled seperately)
+        // increment num_descriptions
         const increment = firebase.firestore.FieldValue.increment(1);
 
         var task_update_data = {
@@ -506,22 +509,18 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, acti
 
         // if desc is now task's best desc, update it in summary doc
         const priors = [1, 1];
-        let new_suc_score = past_desc['bandit_success_score'] + 1/attempts;
-        let new_attempts = past_desc['bandit_attempts'] + 1;
+        const new_suc_score = past_desc['bandit_success_score'] + 1/attempts;
+        const new_attempts = past_desc['bandit_attempts'] + 1;
 
         let a = new_suc_score + priors[0];
         let b = new_attempts - new_suc_score + priors[1];
         let desc_new_mean = a / (a + b);
 
         if (desc_new_mean >= best_desc.mean || best_desc.id == desc_id) {
-            console.log("updating best...");
-            summary_data[`${task_id}_best_success_score`] = past_desc['bandit_success_score'] + 1/attempts;
-            summary_data[`${task_id}_best_total_attempts`] = past_desc['bandit_attempts'] + 1;
+            summary_data[`${task_id}_best_success_score`] = new_suc_score;
+            summary_data[`${task_id}_best_total_attempts`] = new_attempts;
             summary_data[`${task_id}_best_id`] = desc_id;
-        } else {
-            console.log("not updating best...");
         }
-
         batch.update(summary_doc, summary_data);
 
         // remove the description from the list of unused descriptions
@@ -537,7 +536,7 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, acti
         // add timing
         const timing_ref = db.collection(type + "_tasks").doc("timing");
         let timing_data = {};
-        timing_data[`${task_id}_${desc_id}_attempts`] = firebase.firestore.FieldValue.arrayUnion(parseInt(total_time) + Math.random()); // add random so unlikely for collisions
+        timing_data[`${task_id}_${desc_id}_attempts`] = firebase.firestore.FieldValue.arrayUnion(parseInt(total_time));
         batch.update(timing_ref, timing_data);
 
         batch.commit().then(function () {
@@ -597,7 +596,7 @@ function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, use
         const desc_doc_ref = task_doc_ref.collection("descriptions").doc(desc_id);
         batch.set(desc_doc_ref, desc_data);
 
-        // increment num_descriptions and ver_gave_up_count for task in tasks collection (not desc_gave_up_count bc they would not be submitting description, handled seperately)
+        // increment desc_failure_count for task in tasks collection 
         const increment = firebase.firestore.FieldValue.increment(1);
         const task_ref = db.collection(type + "_tasks").doc(task_id.toString());
 

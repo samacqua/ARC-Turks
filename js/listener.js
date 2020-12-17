@@ -9,10 +9,13 @@ var maxIdleTime = 0;
 var TIMING_CREDIT;
 
 $(window).on('load', function () {
+
     uid = sessionStorage.getItem('uid') || uuidv4() + "dev";
+
     // get date for making sure they try before giving up
     START_DATE = new Date();
 
+    // initialize correct database
     const isMTurk = sessionStorage.getItem('mturk');
     if (isMTurk == 'false') {
         console.log('Using DEV Database');
@@ -26,7 +29,7 @@ $(window).on('load', function () {
     size_progress_bar();
     update_progress_bar();
 
-    // get listening task
+    // parse url
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const task = urlParams.get('task') || TASKS[Math.floor(Math.random() * NUM_TASKS)].toString();
@@ -42,7 +45,6 @@ $(window).on('load', function () {
     loadTask(task);
 
     DESCRIPTIONS_TYPE = sessionStorage.getItem('type') || "nl";
-
     switch (DESCRIPTIONS_TYPE) {
         case "nl":
             $("#examples_area").remove();
@@ -121,8 +123,8 @@ $(window).on('load', function () {
 
 });
 
+//  Make it so modal with sliders has labels of slider values
 $(document).ready(function () {
-    //  Make it so modal with sliders has labels of slider values
     $("#conf_result").html($("#conf_form").val());
     $("#conf_form").change(function(){
         $("#conf_result").html($(this).val());
@@ -178,7 +180,7 @@ function check() {
     /**
      * check if output grid same as correct answer. if so, store info and move to next task
      */
-    if (SENDING_TO_NEXT == true) {
+    if (SENDING_TO_NEXT) {
         return;
     }
     update_grid_from_div($(`#output_grid .editable_grid`), CURRENT_OUTPUT_GRID);
@@ -207,7 +209,7 @@ function check() {
             SENDING_TO_NEXT = true;
             used_all_attempts();
         }
-        return
+        return;
     }
 
     for (var i = 0; i < reference_output.length; i++) {
@@ -220,7 +222,7 @@ function check() {
                     "grid": array_copy(CURRENT_OUTPUT_GRID.grid),
                     "time": (new Date() - START_DATE) / 1000
                 });
-                    // used all attempts
+                // used all attempts
                 if (ATTEMPT_JSONS.length == MAX_ATTEMPTS_BUILDER) {
                     SENDING_TO_NEXT = true;
                     used_all_attempts();
@@ -269,12 +271,13 @@ function check() {
             }).catch(err => {
                 console.error(err);
             });
-
         });
     }
 }
 
 function submit_description() {
+
+    show_loader();
 
     const newDate = new Date();
     const verification_time = (newDate - START_DATE) / 1000;
@@ -282,16 +285,13 @@ function submit_description() {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
 
+    // get all stats/vals
     const grid_desc = urlParams.get('grid') || "";
     const see_desc = urlParams.get('see') || "";
     const do_desc = urlParams.get('do') || "";
     const desc_time = parseInt(urlParams.get('time') || "0");
-
     const total_time = verification_time + desc_time;
-
-    var conf = parseInt($('#conf_form').val().trim());
-
-    show_loader();
+    const conf = parseInt($('#conf_form').val().trim());
 
     if (conf <= MIN_CONFIDENCE) {
         store_failed_ver_description(see_desc, do_desc, grid_desc, TASK_ID, uid, conf, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), desc_time, verification_time, null, DESCRIPTIONS_TYPE, maxIdleTime)

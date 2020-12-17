@@ -2,7 +2,7 @@
  * Returns the casino (task) with the most variance in success of the best description scaled by the effort already put into that casino
  * @param {string} type the type of descriptions ("nl", "ex", or "nl_ex")
  */
-function new_select_casino(type) {
+function select_casino(type) {
     return new Promise(function (resolve, reject) {
         get_bandit_doc(type).then(bandit_doc => {
             get_timing_doc(type).then(timing => {
@@ -16,8 +16,9 @@ function new_select_casino(type) {
                     efforts_ratio[task_id] = (task_effort_sum/avg_efforts);
                 });
 
-                // calculate variance (scaled by effort ratio) of best description of each task, ignoring tasks already done
+                // calculate variance (scaled by effort ratio) of best descriptions of each task, ignoring tasks already done
                 let cas_scores = {};
+                let cas_scores_unweighted = {}; // unused, for dev
                 let casinos = parse_bandit_doc(bandit_doc);
                 const tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
 
@@ -28,12 +29,12 @@ function new_select_casino(type) {
                         task_best_arms.push(bandit_vals);
                     });
 
+                    // sort by mean and slice so only top half
                     let priors = [1, 1];
-                    if (task_best_arms.length == 0) {
-                        task_best_arms = [{a: priors[0], b: priors[1]}];
+                    function band_mean(i, j) {
+                        return (i + priors[0]) / (i + priors[0] + priors[1] + j);
                     }
-
-                    task_best_arms.sort((c,d) => c.mean < d.mean);
+                    task_best_arms.sort((c,d) => band_mean(c.a, c.b) < band_mean(d.a, d.b) ? 1 : -1);
 
                     let half_i = Math.ceil(task_best_arms.length / 2);
                     let best_half = task_best_arms.splice(0, half_i);
@@ -48,6 +49,8 @@ function new_select_casino(type) {
                     }
 
                     let variance = super_a*super_b / ((super_a+super_b)**2 * (super_a+super_b+1));
+                    cas_scores_unweighted[task_id] = variance;
+                    
                     if (tasks_done.includes(task_id)) {
                         variance = -1;
                     }
@@ -58,6 +61,27 @@ function new_select_casino(type) {
                     }
                     cas_scores[task_id] = variance;
                 });
+
+                // console.log("all efforts:", all_efforts);
+                // console.log("effort ratios:", efforts_ratio);
+                // console.log("casino scores:", cas_scores_unweighted);
+
+                // var sortable = [];
+                // for (var score in cas_scores) {
+                //     sortable.push([score, cas_scores[score]]);
+                // }
+                // sortable.sort(function(a, b) {
+                //     return a[1] - b[1];
+                // });
+                // console.log("sorted casino scores:", sortable);
+                // sortable = [];
+                // for (var score in cas_scores_unweighted) {
+                //     sortable.push([score, cas_scores_unweighted[score]]);
+                // }
+                // sortable.sort(function(a, b) {
+                //     return a[1] - b[1];
+                // });
+                // console.log("sorted casino scores unweighted by time:", sortable);
 
                 let max = -Infinity;
                 let argmax = [];
@@ -93,17 +117,20 @@ function new_select_casino(type) {
  * @param {Object} doc the firestore document for timing
  * @returns {Object} an object of the sum of all the times for a task with no outliers
  */
-function parse_timing_doc(doc, ABS_MAX_TIME=60*15) {
+function parse_timing_doc(doc) {
 // noone should spend 15  minutes on a task. TODO: discuss this val
     let all_desc_times = {};
     let all_build_times = {};
+    let veto_times = {};
 
     // organize all times by task and type (speak or build)
     $.each(doc, function(key, value) {
         let split_key = key.split('_');
         let task = split_key[0];
 
-        if (split_key[2] == 'desc') {
+        if (split_key[1] == 'veto') {
+            veto_times[task] = value;
+        } else if (split_key[2] == 'desc') {
             if (all_desc_times.hasOwnProperty(task)) {
                 all_desc_times[task].push(value);
             } else {
@@ -123,9 +150,13 @@ function parse_timing_doc(doc, ABS_MAX_TIME=60*15) {
     let task_times = {};
 
     // Filter outliers and sum
+    $.each(veto_times, (task, time) => {
+        task_times[task] = time;
+    });
     $.each(all_desc_times, function(task, times) {
 
-        let filtered_times = filterOutliers(times, ABS_MAX_TIME, SPEAKER_TIME*60);
+        // filter outliers and anything over double predicted time
+        let filtered_times = filterOutliers(times, SPEAKER_TIME*60*2, SPEAKER_TIME*60*2);
 
         if (task_times.hasOwnProperty(task)) {
             task_times[task] += weight_timing(filtered_times, SPEAKER_TIME*60);
@@ -135,7 +166,8 @@ function parse_timing_doc(doc, ABS_MAX_TIME=60*15) {
     });
     $.each(all_build_times, function(task, times) {
 
-        let filtered_times = filterOutliers(times, ABS_MAX_TIME, BUILDER_TIME*60);
+        // filter outliers and anything over double predicted time
+        let filtered_times = filterOutliers(times, BUILDER_TIME*60*2, BUILDER_TIME*60*2);
 
         if (task_times.hasOwnProperty(task)) {
             task_times[task] += weight_timing(filtered_times, BUILDER_TIME*60);

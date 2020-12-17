@@ -102,7 +102,7 @@ function find_obj(arr, prop, val) {
 }
 function get_task_descs_cache(task, desc_type) {
     return new Promise(function (resolve, reject) {
-        let cached = get_cache(task);
+        let cached = get_cache(task+"_"+STUDY_BATCH);
         if (cached) {
             return resolve(cached);
         } else {
@@ -218,7 +218,7 @@ function load_new_desc(task, desc_id) {
                     startingIterations: 500,
                   };
                 s.startForceAtlas2(force_settings);
-                setTimeout(function() { s.stopForceAtlas2(); }, 2000);
+                setTimeout(function() { s.stopForceAtlas2(); }, 500);
             });
     
         }).catch(error => {
@@ -445,7 +445,7 @@ function create_action_sequence_graph_from_builds(desc, builds) {
 
 function load_desc_builds(task, desc_id, desc_type) {
     return new Promise(function (resolve, reject) {
-        let cached = get_cache(desc_id + "_builds");
+        let cached = get_cache(desc_id + "_builds_"+STUDY_BATCH);
         if (cached) {
             return resolve(cached);
         } else {
@@ -473,7 +473,7 @@ function load_desc_builds(task, desc_id, desc_type) {
                     uses.push(build);
                 });
                 
-                cache_object(desc_id + "_builds", uses);
+                cache_object(desc_id + "_builds_"+STUDY_BATCH, uses);
                 return resolve(uses);
             }).catch(error => {
                 return reject(error);
@@ -627,7 +627,7 @@ function show_desc_info() {
 
         if (['attempt_jsons', 'grid_desc', 'see_desc', 'do_desc', 'action_sequence', 'attempts_sequence', 'selected_ex', 'task',
             'succeeded_verification', 'type', 'bandit_attempts', 'bandit_success_score', 'display_num_attempts', 
-            'display_num_success', 'num_verification_attempts'].includes(key)) {
+            'display_num_success', 'num_verification_attempts'].includes(key) || CUR_DESC[key] == undefined) {
             // pass
         } else if (key == 'timestamp') {
             properties.push(`<li class="list-group-item"><b>${key}</b>: ${timeConverter(CUR_DESC[key].seconds)}</li>`);
