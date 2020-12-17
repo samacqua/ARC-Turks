@@ -10,13 +10,17 @@
 /* fixes bug where modal pushed to left */
 .modal-lg {
     margin: 1.75em auto !important;
+    border-radius: 0.3em;
+}
+.modal, .modal-dialog {
+    border-radius: 0.3em;
+}
+.modal-lg .modal-header {
+    border: none;
 }
 
-.modal-lg * {
-    background-color: var(--background-color);
-}
-.modal-lg .load-task-btn {
-    background-color: #5a6268;
+.table, .modal div:not(.cell) {
+    background-color: var(--background-color) !important;
 }
 
 #verification-grid {
@@ -26,7 +30,6 @@
     background-color: var(--background-color);
     overflow: auto;
     text-align: center;
-    /* height: 30vh; */
 }
 
 .play-btns {
@@ -117,7 +120,7 @@ body {
     animation-duration: 3s;
   }
 
-.list-group-item, .list-group-item:hover {
+.neumorphic-list-item, .neumorphic-list-item:hover, .list-group-item {
     border: none;
     background-color: var(--background-color);
     color: var(--main-font-color);
@@ -231,7 +234,7 @@ h4, h5 {
     text-transform: uppercase;
 }
 
-.neumorphic-btn:after, .neumorphic-btn.active:after, .list-group-item:after {
+.neumorphic-btn:after, .neumorphic-btn.active:after, .neumorphic-list-item:after {
     content: "";
     position: absolute;
     top: 0;
@@ -251,7 +254,7 @@ h4, h5 {
     );
 }
 
-.neumorphic-btn:hover:after, .neumorphic-btn.active:hover:after, .list-group-item:hover:after {
+.neumorphic-btn:hover:after, .neumorphic-btn.active:hover:after, .neumorphic-list-item:hover:after {
     background-color: rgba(0, 0, 0, 0.1);
 
     opacity: 1;

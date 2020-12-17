@@ -38,13 +38,14 @@
                         <button id="cell-mode-btn" class="neumorphic-btn play-btns" onclick="toggle_cell_shape();">●</button>
                         <button class="neumorphic-btn play-btns" id="play-btn" onclick="toggle_action_sequences();">‖</button>
                         <button id="cell-mode-btn" class="neumorphic-btn play-btns" onclick="start_walkthrough();">?</button>
+                        <button id="cell-mode-btn" class="neumorphic-btn play-btns" onclick="show_desc_info();">ⓘ</button>
                     </div>
                 </br> 
                     <div id="test-io-preview" class="test-io" data-intro='test input-output for the current task' data-position="right"></div>
                     </br>
 
                     <ul class="list-group" id="overview-group" data-intro='See the task examples and statistics about all task descriptions' data-position="right">
-                        <a class="list-group-item list-group-item-action neumorphic-btn" id="task-overview" data-toggle="list" role="tab" href="../explore/">Overview</a>
+                        <a class="list-group-item list-group-item-action neumorphic-btn neumorphic-list-item" id="task-overview" data-toggle="list" role="tab" href="../explore/">Overview</a>
                     </ul>
                     </br>
                     <ul class="list-group" id="descriptions-pager" role="tablist" data-intro='Look at specific descriptions' data-position="right"></ul>
@@ -144,6 +145,25 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="info-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="info_modal_title">Description data</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+    
+            <ul class="list-group list-group-flush" id="build_or_desc_info"></ul>
+    
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
             </div>
         </div>
     </div>

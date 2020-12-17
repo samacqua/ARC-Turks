@@ -29,7 +29,7 @@ var STUDY_BATCHES = {
     }
 }
 
-var CUR_I;
+var CUR_DESC;
 
 $(window).on('load', function () {
     PAGE = Pages.ExploreDescs;
@@ -132,7 +132,6 @@ function load_new_desc(task, desc_id) {
 
     loadTask(task).then(() => {
 
-
         $(".test-io").empty();
         fill_div_with_IO($("#test-io-preview"), TEST_PAIR.input, TEST_PAIR.output);
         $("#test-io-preview").addClass('neumorphic');
@@ -150,6 +149,7 @@ function load_new_desc(task, desc_id) {
             createDescsPager(task, descriptions, desc_id);
     
             let cur_desc = find_obj(descriptions, "id", desc_id);
+            CUR_DESC = cur_desc;
     
             $("#ex_size_desc").text(cur_desc['grid_desc']);
             $("#ex_see_desc").text(cur_desc['see_desc']);
@@ -535,7 +535,7 @@ function createDescsPager(task, descriptions, desc_id) {
     // all descriptions
     $("#descriptions-pager").empty();
     $.each(descriptions, (i, desc) => {
-        let row = $(`<a class="list-group-item list-group-item-action" data-toggle="list" role="tab" 
+        let row = $(`<a class="list-group-item list-group-item-action neumorphic-list-item" data-toggle="list" role="tab" 
             href="description.html?task=${desc.task}&id=${desc.id}">Description ${i}</a>`);
         if (desc.id == desc_id) {
             row.addClass("active");
@@ -614,3 +614,44 @@ function toggle_study() {
     }
     window.location.href = `../explore?task=${TASK_ID}&study=pilot`;
 }
+
+function show_desc_info() {
+
+    // loop through use object and get all properties
+    let properties = [];
+    Object.keys(CUR_DESC).forEach(function(key) {
+
+        if (['attempt_jsons', 'grid_desc', 'see_desc', 'do_desc', 'action_sequence', 'attempts_sequence', 'selected_ex', 'task',
+            'succeeded_verification', 'type', 'bandit_attempts', 'bandit_success_score', 'display_num_attempts', 
+            'display_num_success', 'num_verification_attempts'].includes(key)) {
+            // pass
+        } else if (key == 'timestamp') {
+            properties.push(`<li class="list-group-item"><b>${key}</b>: ${timeConverter(CUR_DESC[key].seconds)}</li>`);
+        } else {
+            properties.push(`<li class="list-group-item"><b>${key}</b>: ${CUR_DESC[key]}</li>`);
+        }
+    });
+
+    // set html and show modal
+    $("#build_or_desc_info").html(properties.join(''));
+    $("#info_modal_title").text("Description data");
+    $("#info-modal").modal("show");
+}
+
+/**
+ * Turn a timestamp into a readable string
+ * @param {number} UNIX_timestamp the timestamp to convert
+ * @returns {string} the string displaying the date
+ */
+function timeConverter(UNIX_timestamp){
+    var a = new Date(UNIX_timestamp * 1000);
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var year = a.getFullYear();
+    var month = months[a.getMonth()];
+    var date = a.getDate();
+    var hour = a.getHours();
+    var min = a.getMinutes();
+    var sec = a.getSeconds();
+    var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+    return time;
+  }

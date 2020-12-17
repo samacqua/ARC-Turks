@@ -354,7 +354,7 @@ function get_word_counts(str) {
 function createDescsPager(descriptions) {
     $("#descriptions-pager").empty();
     $.each(descriptions, (i, desc) => {
-        let row = $(`<a class="list-group-item list-group-item-action" data-toggle="list" role="tab" 
+        let row = $(`<a class="list-group-item list-group-item-action neumorphic-list-item" data-toggle="list" role="tab" 
             href="description.html?task=${desc.task}&id=${desc.id}&study=${STUDY_BATCH}">Description ${i}</a>`);
         $("#descriptions-pager").append(row);
     });
