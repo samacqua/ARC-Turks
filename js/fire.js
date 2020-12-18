@@ -530,13 +530,13 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, acti
         // update a and b in bandit summary
         const descs_summary_ref = db.collection(type + "_tasks").doc("descs_bandit");
         let bandit_data = {};
-        bandit_data[`${task_id}_${desc_id}`] = [a-priors[0], b-priors[0]];
+        bandit_data[`${task_id}_${desc_id}`] = [a-priors[0], b-priors[1]];
         batch.update(descs_summary_ref, bandit_data);
 
         // add timing
         const timing_ref = db.collection(type + "_tasks").doc("timing");
         let timing_data = {};
-        timing_data[`${task_id}_${desc_id}_attempts`] = firebase.firestore.FieldValue.arrayUnion(parseInt(total_time));
+        timing_data[`${task_id}_${desc_id}_attempts`] = firebase.firestore.FieldValue.arrayUnion(parseInt(total_time)+(Math.random()-0.5));
         batch.update(timing_ref, timing_data);
 
         batch.commit().then(function () {
