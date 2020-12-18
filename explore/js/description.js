@@ -122,6 +122,7 @@ var ACTION_SEQUENCE_INTERVALS = [];
 var ACTION_SEQUENCE_INTERVAL_FUNCTIONS = [];
 
 var GRAPH;
+var BUILDS = [];
 
 /**
  * load a new task after user selects it
@@ -178,8 +179,11 @@ function load_new_desc(task, desc_id) {
     
             load_desc_builds(task, desc_id, DESCRIPTIONS_TYPE).then(builds => {
                 $("#builds-header").text("Builds (" + builds.length.toString() + ")");
+                console.log(builds);
+                builds.sort((a, b) => { return (a.timestamp.seconds < b.timestamp.seconds ? -1 : 1) });
+                BUILDS = builds;
                 $.each(builds, (i, build) => {
-                    $(`<h4>Builder ${i}</br></h4>`).appendTo($("#description-builds"));
+                    $(`<h4>Builder ${i+1} — ${build.uid} <button class="neumorphic-btn play-btns" onclick="show_build_info(${i});">ⓘ</button> </br></h4>`).appendTo($("#description-builds"));
                     create_build_row(build);
                 });
 
@@ -222,7 +226,7 @@ function load_new_desc(task, desc_id) {
                     startingIterations: 200,
                   };
                   GRAPH.startForceAtlas2(force_settings);
-                setTimeout(function() { GRAPH.stopForceAtlas2(); }, 500);
+                setTimeout(function() { GRAPH.stopForceAtlas2(); }, 1000);
             });
     
         }).catch(error => {
@@ -266,181 +270,6 @@ function create_build_row(build) {
     }
 
     $("</br>").appendTo($("#description-builds"));
-}
-
-function create_action_sequence_graph_from_builds(desc, builds) {
-
-    const ACTION_COLOR_MAP = {
-        'edit': '#CCC',
-        'floodfill': '#FDCA40',
-        'copy': '#2176FF',
-        'paste': '#33A1FD',
-        'copyFromInput': '#eb8b15',
-        'resetOutputGrid': '#31393C',
-        'resizeOutputGrid': '#b239d6',
-        'check': '#CCC'
-    };
-
-    let init_state_id = JSON.stringify([[0, 0, 0], [0, 0, 0], [0, 0, 0]]);
-    let final_state_id = JSON.stringify(TEST_PAIR.output.grid);
-
-    // initialize with start and end states
-    var g = {
-        nodes: [
-            {
-                id: init_state_id,
-                x: 0,
-                y: 0,
-                size: 10,
-                color: '#0000ff'
-            },
-            {
-                id: final_state_id,
-                x: 1,
-                y: 1,
-                size: 10,
-                type: 'arrow',
-                color: '#26A96C'
-            }
-        ],
-        edges: []
-    };
-
-    // draw graph for description verification attempts
-    let desc_as = desc.action_sequence;
-    if (desc_as) {
-        desc_as = JSON.parse(desc_as);
-
-        var direction = Math.random() * Math.PI/2;
-        let dx = Math.cos(direction);
-        let dy = Math.sin(direction);
-
-        let magnitude = 1 / desc_as.length;
-        let last_node_id = init_state_id;
-
-        let visited_nodes = [];
-
-        $.each(desc_as, (i, action) => {
-                
-            // add resulting grid node if does not exist
-            let node_id = JSON.stringify(action.grid);
-            let existing_node = g.nodes.find(node => node.id == node_id);
-
-            if (existing_node == null) {
-                g.nodes.push({
-                    id: node_id,
-                    x: dx*magnitude*(i+1)+Math.random()/100,
-                    y: dy*magnitude*(i+1)+Math.random()/100,
-                    size: 1,
-                    color: '#666',
-                });
-            } else {
-                // only increase size if not final or start state, size is < 4, and has not been visited by this user yet
-                if (existing_node.id != final_state_id && existing_node.id != init_state_id && existing_node.size <= 4 && !visited_nodes.includes(node_id)) {
-                    console.log(visited_nodes);
-                    existing_node.size += 1;
-                }
-            }
-
-            // make red if checked incorrectly
-            if (action.action.correct == false && existing_node.id != init_state_id ) {
-                console.log("Changing color!");
-                existing_node.color = '#FF595E';
-            }
-
-            // add edge from previous state to current
-            let edge_id = last_node_id + "_" + node_id;
-            let exisiting_edge = g.edges.find(edge => edge.id == edge_id);
-            let edge_color = ACTION_COLOR_MAP[action.action.tool];
-            if (exisiting_edge == null) {
-                g.edges.push({
-                    id: edge_id,
-                    source: last_node_id,
-                    target: node_id,
-                    type: 'arrow',
-                    size: 1,
-                    color: edge_color
-                });
-            } else {
-                if (!visited_nodes.includes(node_id)) {
-                    exisiting_edge.size += 1;
-                }
-            }
-
-            visited_nodes.push(node_id);
-            last_node_id = node_id;
-        });
-    }
-
-    // draw graph for builder attempts
-    $.each(builds, (_, build) => {
-
-        let action_sequence = build.action_sequence;
-        visited_nodes = [];
-
-        if (action_sequence) {
-            action_sequence = JSON.parse(action_sequence);
-
-            let direction = Math.random() * Math.PI/2;
-            let dx = Math.cos(direction);
-            let dy = Math.sin(direction);
-            let magnitude = 1 / action_sequence.length;
-
-            let last_node_id = init_state_id;
-            $.each(action_sequence, (i, action) => {
-                
-                // add resulting grid node if does not exist
-                let node_id = JSON.stringify(action.grid);
-                let existing_node = g.nodes.find(node => node.id == node_id);
-
-                if (existing_node == null) {
-                    g.nodes.push({
-                        id: node_id,
-                        x: dx*magnitude*(i+1)+Math.random()/100,
-                        y: dy*magnitude*(i+1)+Math.random()/100,
-                        size: 1,
-                        color: '#666',
-                    });
-                } else {
-                    // only increase size if not final or start state, size is < 4, and has not been visited by this user yet
-                    if (existing_node.id != final_state_id && existing_node.size <= 4 && !visited_nodes.includes(node_id)) {
-                        existing_node.size += 1;
-                    }
-                }
-
-                            // make red if checked incorrectly
-            if (action.action.correct == false && existing_node.id != init_state_id) {
-                console.log("Changing color!");
-                existing_node.color = '#FF595E';
-            }
-
-                // add edge from previous state to current
-                let edge_id = last_node_id + "_" + node_id;
-                let exisiting_edge = g.edges.find(edge => edge.id == edge_id);
-                let edge_color = ACTION_COLOR_MAP[action.action.tool];
-                if (exisiting_edge == null) {
-                    g.edges.push({
-                        id: edge_id,
-                        source: last_node_id,
-                        target: node_id,
-                        size: 1,
-                        color: edge_color,
-                        type: 'arrow',
-                    });
-                } else {
-                    // only increase thickness if new user
-                    if (!visited_nodes.includes(node_id)) {
-                        exisiting_edge.size += 1;
-                    }
-                }
-
-                visited_nodes.push(node_id);
-                last_node_id = node_id;
-            });
-        }
-    });
-
-    return g;
 }
 
 function load_desc_builds(task, desc_id, desc_type) {
@@ -539,8 +368,8 @@ function createDescsPager(task, descriptions, desc_id) {
     // all descriptions
     $("#descriptions-pager").empty();
     $.each(descriptions, (i, desc) => {
-        let row = $(`<a class="list-group-item list-group-item-action neumorphic-list-item" data-toggle="list" role="tab" 
-            href="description.html?task=${desc.task}&id=${desc.id}">Description ${i}</a>`);
+        let row = $(`<a style="line-height: 0.9em;" class="list-group-item list-group-item-action neumorphic-list-item" data-toggle="list" role="tab" 
+            href="description.html?task=${desc.task}&id=${desc.id}">Description ${i+1} </br><span class="desc_item_id">${desc.id}</span></a>`);
         if (desc.id == desc_id) {
             row.addClass("active");
         }
@@ -659,3 +488,24 @@ function timeConverter(UNIX_timestamp){
     var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
     return time;
   }
+
+function show_build_info(i) {
+    const build = BUILDS[i];
+    // loop through use object and get all properties
+    let properties = [];
+    Object.keys(BUILDS[i]).forEach(function(key) {
+
+        if (['attempt_jsons', 'action_sequence', 'desc_type', 'task', 'success'].includes(key) || build[key] == undefined) {
+            // pass
+        } else if (key == 'timestamp') {
+            properties.push(`<li class="list-group-item"><b>${key}</b>: ${timeConverter(build[key].seconds)}</li>`);
+        } else {
+            properties.push(`<li class="list-group-item"><b>${key}</b>: ${build[key]}</li>`);
+        }
+    });
+
+    // set html and show modal
+    $("#build_or_desc_info").html(properties.join(''));
+    $("#info_modal_title").text("Description data");
+    $("#info-modal").modal("show");
+}

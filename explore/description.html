@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
 
     <link rel="stylesheet" type="text/css" href="../css/common.css">
-    <link rel="stylesheet" type="text/css" href="explore.css">
+    <link rel="stylesheet" type="text/css" href="css/explore.css">
     <link rel="stylesheet" type="text/css" href="../css/grids.css">
     <link rel="stylesheet" type="text/css" href="../css/testing_interface.css">
 
@@ -37,8 +37,8 @@
                         <button id="dark-mode-btn" class="neumorphic-btn play-btns" onclick="toggle_dark_mode();">☾</button>
                         <button id="cell-mode-btn" class="neumorphic-btn play-btns" onclick="toggle_cell_shape();">●</button>
                         <button class="neumorphic-btn play-btns" id="play-btn" onclick="toggle_action_sequences();">‖</button>
-                        <button id="cell-mode-btn" class="neumorphic-btn play-btns" onclick="start_walkthrough();">?</button>
-                        <button id="cell-mode-btn" class="neumorphic-btn play-btns" onclick="show_desc_info();">ⓘ</button>
+                        <button class="neumorphic-btn play-btns" onclick="start_walkthrough();">?</button>
+                        <button class="neumorphic-btn play-btns" onclick="show_desc_info();">ⓘ</button>
                     </div>
                 </br> 
                     <div id="test-io-preview" class="test-io" data-intro='test input-output for the current task' data-position="right"></div>
@@ -144,7 +144,7 @@
                 </table>
         
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn neumorphic-btn" style="margin: 0px;" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -163,7 +163,7 @@
             <ul class="list-group list-group-flush" id="build_or_desc_info"></ul>
     
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn neumorphic-btn" style="margin: 0px;" data-dismiss="modal">Close</button>
             </div>
             </div>
         </div>
@@ -186,20 +186,21 @@
         crossorigin="anonymous"></script>
     
     <script src="../js/fire.js"></script>
-    <script src="sigma.min.js"></script>
-    <script src="supervisor.js"></script>
-    <script src="worker.js"></script>
-    <script src="description.js"></script>
+    <script src="js/sigma/sigma.min.js"></script>
+    <script src="js/sigma/supervisor.js"></script>
+    <script src="js/sigma/worker.js"></script>
+    <script src="js/sigma/helper.js"></script>
+    <script src="js/description.js"></script>
     <script src="../js/common.js"></script>
     <script src="../js/constants.js"></script>
     <script src="../js/grids.js"></script>
     <script src="../js/more_grids.js"></script>
     <script src="../js/bandit.js"></script>
     <script src="../js/word_similarity.js"></script>
-    <script src="explore.js"></script>
+    <script src="js/explore.js"></script>
 
-    <script src="chardinjs.min.js"></script>
-    <link href="chardinjs.css" rel="stylesheet">
+    <script src="js/chardinjs.min.js"></script>
+    <link href="css/chardinjs.css" rel="stylesheet">
 </body>
 
 </html>
