@@ -1,34 +1,3 @@
-var STUDY_BATCH = "pilot"; // the current study batch we are looking at
-
-var STUDY_BATCHES = {
-    pilot: {
-        config: {
-            apiKey: "AIzaSyDDDTu85WtFnqwJlwZdon1accivFQzOKFw",
-            authDomain: "arc-pilot.firebaseapp.com",
-            databaseURL: "https://arc-pilot.firebaseio.com",
-            projectId: "arc-pilot",
-            storageBucket: "arc-pilot.appspot.com",
-            messagingSenderId: "16504691809",
-            appId: "1:16504691809:web:e847b8e2fd07580e6e1e20"
-        },
-        tasks: [149, 286, 140, 354, 219, 277, 28, 135, 162, 384, 297, 26, 299, 388, 246, 74, 305, 94, 308, 77],
-        name: "Pilot 1"
-    },
-    pilot2: {
-        config: {
-            apiKey: "AIzaSyBg9yynastMoRA1fGore-sgjygpVhcoLA8",
-            authDomain: "arc-pilot-2.firebaseapp.com",
-            databaseURL: "https://arc-pilot-2-default-rtdb.firebaseio.com",
-            projectId: "arc-pilot-2",
-            storageBucket: "arc-pilot-2.appspot.com",
-            messagingSenderId: "99669730043",
-            appId: "1:99669730043:web:5e61d0f59dbd8e46f0865e"
-        },
-        tasks: [211, 124, 89, 141, 91, 20, 7, 201, 285, 111, 294, 249, 69, 81, 239, 16, 363, 92, 303, 269],
-        name: "Pilot 2"
-    }
-}
-
 $(window).on('load', function () {
     PAGE = Pages.ExploreTasks;
 
@@ -116,7 +85,7 @@ function get_cache(key) {
 }
 function get_task_descs_cache(task, desc_type) {
     return new Promise(function (resolve, reject) {
-        let cached = get_cache(task);
+        let cached = get_cache(task+"_"+STUDY_BATCH);
         if (cached) {
             return resolve(cached);
         } else {

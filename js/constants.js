@@ -26,10 +26,56 @@ const SPEAKER_FAIL_PART_CRED = 0.50;
 // Tasks
 // ========
 
-// Pilot tasks: [149, 286, 140, 354, 219, 277, 28, 135, 162, 384, 297, 26, 299, 388, 246, 74, 305, 94, 308, 77]
-// Pilot 2 tasks: [211, 124, 89, 141, 91, 20, 7, 201, 285, 111, 294, 249, 69, 81, 239, 16, 363, 92, 303, 269]
-const TASKS = [211, 124, 89, 141, 91, 20, 7, 201, 285, 111, 294, 249, 69, 81, 239, 16, 363, 92, 303, 269];  // the ARC tasks to be used in the study
-const NUM_TASKS = TASKS.length;
+const STUDY_BATCHES = {
+    dev: {
+        config: {
+            apiKey: "AIzaSyA9yXW7Tnx3IYdiXMnmO20qp7IKc6lakS8",
+            authDomain: "arc-turk-ex-ios.firebaseapp.com",
+            databaseURL: "https://arc-turk-ex-ios.firebaseio.com",
+            projectId: "arc-turk-ex-ios",
+            storageBucket: "arc-turk-ex-ios.appspot.com",
+            messagingSenderId: "687250358397",
+            appId: "1:687250358397:web:16ac92ca0995b5d117b114"
+        },
+        tasks: [315, 144, 271, 156, 167, 125, 282, 245, 283, 159, 112, 164, 298, 323, 133, 352, 262, 325, 314, 260, 128, 109, 178, 34, 119, 10, 324, 320, 82, 302, 233, 278, 129, 24, 228, 182, 121, 360, 328, 331],
+        name: "Dev"
+    },
+    pilot: {
+        config: {
+            apiKey: "AIzaSyDDDTu85WtFnqwJlwZdon1accivFQzOKFw",
+            authDomain: "arc-pilot.firebaseapp.com",
+            databaseURL: "https://arc-pilot.firebaseio.com",
+            projectId: "arc-pilot",
+            storageBucket: "arc-pilot.appspot.com",
+            messagingSenderId: "16504691809",
+            appId: "1:16504691809:web:e847b8e2fd07580e6e1e20"
+        },
+        tasks: [149, 286, 140, 354, 219, 277, 28, 135, 162, 384, 297, 26, 299, 388, 246, 74, 305, 94, 308, 77],
+        name: "Pilot 1"
+    },
+    pilot2: {
+        config: {
+            apiKey: "AIzaSyBg9yynastMoRA1fGore-sgjygpVhcoLA8",
+            authDomain: "arc-pilot-2.firebaseapp.com",
+            databaseURL: "https://arc-pilot-2-default-rtdb.firebaseio.com",
+            projectId: "arc-pilot-2",
+            storageBucket: "arc-pilot-2.appspot.com",
+            messagingSenderId: "99669730043",
+            appId: "1:99669730043:web:5e61d0f59dbd8e46f0865e"
+        },
+        tasks: [211, 124, 89, 141, 91, 20, 7, 201, 285, 111, 294, 249, 69, 81, 239, 16, 363, 92, 303, 269],
+        name: "Pilot 2"
+    },
+    batch1: {
+        config: {
+
+        },
+        tasks: [315, 144, 271, 156, 167, 125, 282, 245, 283, 159, 112, 164, 298, 323, 133, 352, 262, 325, 314, 260, 128, 109, 178, 34, 119, 10, 324, 320, 82, 302, 233, 278, 129, 24, 228, 182, 121, 360, 328, 331],
+        name: "Batch 1"
+    }
+}
+
+var TASKS = STUDY_BATCHES['dev'];
 
 // ========
 // Common Values

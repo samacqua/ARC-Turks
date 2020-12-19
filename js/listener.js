@@ -16,14 +16,11 @@ $(window).on('load', function () {
     START_DATE = new Date();
 
     // initialize correct database
-    const isMTurk = sessionStorage.getItem('mturk');
-    if (isMTurk == 'false') {
-        console.log('Using DEV Database');
-        use_dev_config();
-    } else {
-        update_fb_config(firebaseConfigPilot2, 'pilot2');
-        console.log("Using MTURK Database");
-    }
+    const study_name = sessionStorage.getItem('study');
+    let study = STUDY_BATCHES[study_name];
+    TASKS = study.tasks;
+    update_fb_config(study.config, study.name);
+    console.log("Initialized " + study.name + " database");
 
     // show progress bar completion
     size_progress_bar();
@@ -32,7 +29,7 @@ $(window).on('load', function () {
     // parse url
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    const task = urlParams.get('task') || TASKS[Math.floor(Math.random() * NUM_TASKS)].toString();
+    const task = urlParams.get('task') || TASKS[Math.floor(Math.random() * TASKS.length)].toString();
     const desc_id = urlParams.get('id');
     IS_VERIFICATION = (urlParams.get('ver') == 'true');
     if (desc_id == null && !IS_VERIFICATION) {

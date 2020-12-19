@@ -38,7 +38,7 @@ $(window).on('load', function () {
     // get speaker task
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    const task = urlParams.get('task') || TASKS[Math.floor(Math.random()*NUM_TASKS)];  // if none provided, give random task
+    const task = urlParams.get('task') || TASKS[Math.floor(Math.random()*TASKS.length)];  // if none provided, give random task
 
     DESCRIPTIONS_TYPE = sessionStorage.getItem('type') || "nl";
 

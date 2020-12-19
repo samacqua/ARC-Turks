@@ -1,4 +1,5 @@
 var DARK_MODE = false;
+var STUDY_BATCH = "dev";
 
 /**
  * switch between light and dark mode
@@ -166,8 +167,10 @@ function load_tasks_to_browse() {
             var num_interactions_list = [];
 
             $.each(study.tasks, (i, task) => {
-                num_descriptions_list.push(counts[task]['descriptions']);
-                num_interactions_list.push(counts[task]['interactions']);
+                // accidentally deleted this section
+                // TODO: Fix this
+                // num_descriptions_list.push(counts[task]['descriptions']);
+                // num_interactions_list.push(counts[task]['interactions']);
             });
     
             task_list = [];

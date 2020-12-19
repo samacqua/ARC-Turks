@@ -26,17 +26,14 @@ $(window).on('load', function () {
     // get task
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    const task = urlParams.get('task') || TASKS[Math.floor(Math.random()*NUM_TASKS)];  // if none provided, give random task (will never happen to Turker)
+    const task = urlParams.get('task') || TASKS[Math.floor(Math.random()*TASKS.length)];  // if none provided, give random task (will never happen to Turker)
 
     // initialize correct database
-    const isMTurk = sessionStorage.getItem('mturk');
-    if (isMTurk == 'false') {
-        console.log('Using DEV Database');
-        use_dev_config();
-    } else {
-        update_fb_config(firebaseConfigPilot2, 'pilot2');
-        console.log("Using MTURK Database");
-    }
+    const study_name = sessionStorage.getItem('study');
+    let study = STUDY_BATCHES[study_name];
+    TASKS = study.tasks;
+    update_fb_config(study.config, study.name);
+    console.log("Initialized " + study.name + " database");
 
     // load task and get descriptions
     DESCRIPTIONS_TYPE = sessionStorage.getItem('type') || "nl";
