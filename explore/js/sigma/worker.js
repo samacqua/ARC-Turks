@@ -728,8 +728,6 @@
           outboundAttCompensation :
           1);
 
-      // TODO: simplify distance
-      // TODO: coefficient is always used as -c --> optimize?
       for (e = 0; e < W.edgesLength; e += W.ppe) {
         n1 = EdgeMatrix[ep(e, 'source')];
         n2 = EdgeMatrix[ep(e, 'target')];
@@ -828,7 +826,6 @@
         }
 
         // Updating nodes' dx and dy
-        // TODO: if condition or factor = 1?
         if (distance > 0) {
 
           // Updating nodes' dx and dy

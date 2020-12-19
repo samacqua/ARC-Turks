@@ -85,12 +85,12 @@ function get_cache(key) {
 }
 function get_task_descs_cache(task, desc_type) {
     return new Promise(function (resolve, reject) {
-        let cached = get_cache(task+"_"+STUDY_BATCH);
+        let cached = get_cache(task+"_"+STUDY_NAME);
         if (cached) {
             return resolve(cached);
         } else {
             get_task_descriptions(task, desc_type).then(function (descriptions) {
-                cache_object(task+"_"+STUDY_BATCH, descriptions);
+                cache_object(task+"_"+STUDY_NAME, descriptions);
                 return resolve(descriptions);
             }).catch(error => {
                 errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry. If the issue persists, please email samacqua@mit.edu");
@@ -324,7 +324,7 @@ function createDescsPager(descriptions) {
     $("#descriptions-pager").empty();
     $.each(descriptions, (i, desc) => {
         let row = $(`<a class="list-group-item list-group-item-action neumorphic-list-item" data-toggle="list" role="tab" 
-            href="description.html?task=${desc.task}&id=${desc.id}&study=${STUDY_BATCH}">Description ${i}</a>`);
+            href="description.html?task=${desc.task}&id=${desc.id}&study=${STUDY_NAME}">Description ${i}</a>`);
         $("#descriptions-pager").append(row);
     });
 
@@ -334,6 +334,8 @@ function createDescsPager(descriptions) {
 }
 
 function toggle_study() {
-    let new_study = STUDY_BATCH == 'pilot' ? 'pilot2' : 'pilot';
-    updateUrl({"task": TASK_ID, "study": new_study});
+    let i = STUDY_LOOP.indexOf(STUDY_NAME);
+    i = (i+1) % STUDY_LOOP.length;
+    STUDY_NAME = STUDY_LOOP[i];
+    updateUrl({"task": TASK_ID, "study": STUDY_NAME});
 }
