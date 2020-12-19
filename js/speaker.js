@@ -56,7 +56,7 @@ $(window).on('load', function () {
             }
         }
     }).catch(error => {
-        errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
+        errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry. If the issue persists, please email samacqua@mit.edu");
     });
 
     // customize tutorial to fit description type
@@ -81,7 +81,7 @@ $(window).on('load', function () {
             get_word_vec_cache(word);
         }
     }).catch(error => {
-        errorMsg("Could not load words that can been used. Please check your internet connection and reload the page.");
+        errorMsg("Could not load words that can been used. Please check your internet connection and reload the page. If the issue persists, please email samacqua@mit.edu");
     });
 });
 

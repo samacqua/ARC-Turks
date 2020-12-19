@@ -68,7 +68,13 @@ const STUDY_BATCHES = {
     },
     batch1: {
         config: {
-
+            apiKey: "AIzaSyDRnL0IDFiFAxBq3HSKUh8ykupp0GuRI0c",
+            authDomain: "arc-batch-1.firebaseapp.com",
+            databaseURL: "https://arc-batch-1-default-rtdb.firebaseio.com",
+            projectId: "arc-batch-1",
+            storageBucket: "arc-batch-1.appspot.com",
+            messagingSenderId: "327194723391",
+            appId: "1:327194723391:web:0a08378e1e0b3c2394a48a"
         },
         tasks: [315, 144, 271, 156, 167, 125, 282, 245, 283, 159, 112, 164, 298, 323, 133, 352, 262, 325, 314, 260, 128, 109, 178, 34, 119, 10, 324, 320, 82, 302, 233, 278, 129, 24, 228, 182, 121, 360, 328, 331],
         name: "Batch 1"

@@ -87,7 +87,7 @@ $(window).on('load', function () {
             }
         }).catch(error => {
             console.error(error);
-            errorMsg("Failed to load the task. Please ensure your internet connection and try again.");
+            errorMsg("Failed to load the task. Please ensure your internet connection and try again. If the issue persists, please email samacqua@mit.edu");
         });
         set_instructions_modal(DESCRIPTIONS_TYPE);
         $('#instructionsModal').modal('show');

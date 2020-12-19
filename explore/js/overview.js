@@ -93,7 +93,7 @@ function get_task_descs_cache(task, desc_type) {
                 cache_object(task+"_"+STUDY_BATCH, descriptions);
                 return resolve(descriptions);
             }).catch(error => {
-                errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
+                errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry. If the issue persists, please email samacqua@mit.edu");
                 console.error(error);
             });
         }
@@ -125,7 +125,7 @@ function load_new_task(task) {
         summarize_descriptions(descriptions);
 
     }).catch(error => {
-        errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
+        errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry. If the issue persists, please email samacqua@mit.edu");
         console.error(error);
     });
 }
