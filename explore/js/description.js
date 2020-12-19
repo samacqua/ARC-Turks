@@ -71,12 +71,12 @@ function find_obj(arr, prop, val) {
 }
 function get_task_descs_cache(task, desc_type) {
     return new Promise(function (resolve, reject) {
-        let cached = get_cache(task+"_"+STUDY_BATCH);
+        let cached = get_cache(task+"_"+STUDY_NAME);
         if (cached) {
             return resolve(cached);
         } else {
             get_task_descriptions(task, desc_type).then(function (descriptions) {
-                cache_object(task+"_"+STUDY_BATCH, descriptions);
+                cache_object(task+"_"+STUDY_NAME, descriptions);
                 return resolve(descriptions);
             }).catch(error => {
                 errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry. If the issue persists, please email samacqua@mit.edu");
@@ -243,7 +243,7 @@ function create_build_row(build) {
 
 function load_desc_builds(task, desc_id, desc_type) {
     return new Promise(function (resolve, reject) {
-        let cached = get_cache(desc_id + "_builds_"+STUDY_BATCH);
+        let cached = get_cache(desc_id + "_builds_"+STUDY_NAME);
         if (cached) {
             return resolve(cached);
         } else {
@@ -271,7 +271,7 @@ function load_desc_builds(task, desc_id, desc_type) {
                     uses.push(build);
                 });
                 
-                cache_object(desc_id + "_builds_"+STUDY_BATCH, uses);
+                cache_object(desc_id + "_builds_"+STUDY_NAME, uses);
                 return resolve(uses);
             }).catch(error => {
                 return reject(error);
@@ -368,7 +368,7 @@ function createDescsPager(task, descriptions, desc_id) {
     });
 
     // task overview
-    $("#task-overview").attr("href", `../explore?task=${task}&study=${STUDY_BATCH}`);
+    $("#task-overview").attr("href", `../explore?task=${task}&study=${STUDY_NAME}`);
     $('#overview-group a').click(function(){
         document.location.href = $(this).attr('href');
     });
@@ -410,11 +410,10 @@ function repeat_action_sequence_in_div(sequence, container_div) {
 }
 
 function toggle_study() {
-    if (STUDY_BATCH == 'pilot') {
-        window.location.href = `../explore?task=${TASK_ID}&study=pilot2`;
-        return;
-    }
-    window.location.href = `../explore?task=${TASK_ID}&study=pilot`;
+    let i = STUDY_LOOP.indexOf(STUDY_NAME);
+    i = (i+1) % STUDY_LOOP.length;
+    STUDY_NAME = STUDY_LOOP[i];
+    window.location.href = `../explore?task=${TASK_ID}&study=${STUDY_NAME}`;
 }
 
 function show_desc_info() {

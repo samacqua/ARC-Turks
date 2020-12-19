@@ -160,7 +160,6 @@
     }
   };
 
-  // TODO: make a better send function
   Supervisor.prototype.applyLayoutChanges = function() {
     var nodes = this.graph.nodes(),
         j = 0,

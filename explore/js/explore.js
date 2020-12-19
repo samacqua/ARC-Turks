@@ -1,5 +1,14 @@
 var DARK_MODE = false;
-var STUDY_BATCH = "dev";
+var STUDY_NAME = "dev";
+
+// list of keys of all studies but dev
+const STUDY_LOOP = removeFirst(Object.keys(STUDY_BATCHES), 'dev');
+
+function removeFirst(src, element) {
+    const index = src.indexOf(element);
+    if (index === -1) return src;
+    return [...src.slice(0, index), ...src.slice(index + 1)];
+}
 
 /**
  * switch between light and dark mode
@@ -136,9 +145,9 @@ function load_tasks_test_pairs(tasks) {
 } 
 
 function load_study(study) {
-    STUDY_BATCH = study;
+    STUDY_NAME = study;
     $("#study-title").text(STUDY_BATCHES[study].name);
-    update_fb_config(STUDY_BATCHES[STUDY_BATCH].config, STUDY_BATCH);
+    update_fb_config(STUDY_BATCHES[STUDY_NAME].config, STUDY_NAME);
 }
 
 function send_to_new_task(task, study) {
@@ -151,7 +160,7 @@ var LAST_MODAL_LOADED_STUDY;
  */
 function load_tasks_to_browse() {
 
-    let study = STUDY_BATCHES[STUDY_BATCH];
+    let study = STUDY_BATCHES[STUDY_NAME];
     if (LAST_MODAL_LOADED_STUDY == study) {
         return;
     } else {
@@ -161,7 +170,7 @@ function load_tasks_to_browse() {
 
     get_all_descriptions_interactions_count(DESCRIPTIONS_TYPE).then(counts => {
 
-        load_tasks_test_pairs(STUDY_BATCHES[STUDY_BATCH].tasks).then(pairs => {
+        load_tasks_test_pairs(STUDY_BATCHES[STUDY_NAME].tasks).then(pairs => {
 
             var num_descriptions_list = [];
             var num_interactions_list = [];
@@ -169,8 +178,10 @@ function load_tasks_to_browse() {
             $.each(study.tasks, (i, task) => {
                 // accidentally deleted this section
                 // TODO: Fix this
-                // num_descriptions_list.push(counts[task]['descriptions']);
-                // num_interactions_list.push(counts[task]['interactions']);
+                if (counts[task]) {
+                    num_descriptions_list.push(counts[task]['descriptions']);
+                    num_interactions_list.push(counts[task]['interactions']);
+                }
             });
     
             task_list = [];
@@ -201,7 +212,7 @@ function load_tasks_to_browse() {
                 valign: 'middle',
                 clickToSelect: true,
                 formatter : function(value,row,index) {
-                    return '<button class="btn btn-secondary load-task-btn" onclick="send_to_new_task(' + row.number + ', \'' + STUDY_BATCH + '\')" task="'+row.number+'" data-dismiss="modal">Select</button> ';
+                    return '<button class="btn btn-secondary load-task-btn" onclick="send_to_new_task(' + row.number + ', \'' + STUDY_NAME + '\')" task="'+row.number+'" data-dismiss="modal">Select</button> ';
                 }
                 }
             ]      
