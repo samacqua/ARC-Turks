@@ -16,7 +16,7 @@ $(window).on('load', function () {
     START_DATE = new Date();
 
     // initialize correct database
-    const study_name = sessionStorage.getItem('study');
+    const study_name = sessionStorage.getItem('study') || 'dev';
     let study = STUDY_BATCHES[study_name];
     TASKS = study.tasks;
     update_fb_config(study.config, study.name);

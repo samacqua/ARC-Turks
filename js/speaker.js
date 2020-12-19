@@ -23,17 +23,17 @@ $(window).on('load', function () {
         $('#instructionsModal').modal('show');
     }
 
-    // get task
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-    const task = urlParams.get('task') || TASKS[Math.floor(Math.random()*TASKS.length)];  // if none provided, give random task (will never happen to Turker)
-
     // initialize correct database
-    const study_name = sessionStorage.getItem('study');
+    const study_name = sessionStorage.getItem('study') || 'dev';
     let study = STUDY_BATCHES[study_name];
     TASKS = study.tasks;
     update_fb_config(study.config, study.name);
     console.log("Initialized " + study.name + " database");
+
+    // get task
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const task = urlParams.get('task') || TASKS[Math.floor(Math.random()*TASKS.length)].toString();  // if none provided, give random task (will never happen to Turker)
 
     // load task and get descriptions
     DESCRIPTIONS_TYPE = sessionStorage.getItem('type') || "nl";
