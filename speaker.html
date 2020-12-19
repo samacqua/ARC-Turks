@@ -7,54 +7,21 @@
     <meta name="Description" content="The creation process of descriptions for an MIT study on the efficacy of human communication of abstract patterns.">
     <title>ARC labeling interface</title>
 
-    <!-- Just to silence warning about not having icon -->
-    <link rel="shortcut icon" href="#" />
+    <!-- jQuery library -->
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 
-    <!-- Bootstrap CSS -->
+    <!-- CSS files -->
+    <!-- highlight-within-textarea-->
+    <link href="css/jquery.highlight-within-textarea.css" rel="stylesheet">
+    <!-- Bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
 
-    <!-- JS Libraries -->
-    <!-- The core Firebase JS SDK is always required and must be listed first -->
-    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-firestore.js"></script>
-
-    <!-- jQuery library -->
-    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-
-    <!-- highlight-within-textarea CSS/JS -->
-    <link href="css/jquery.highlight-within-textarea.css" rel="stylesheet">
-    <script src="js/jquery.highlight-within-textarea.js"></script>
-
-    <!-- Bootstrap JS (must be listed after jQuery) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-        crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-        crossorigin="anonymous"></script>
-
-    <!-- CSS files -->
     <link rel="stylesheet" type="text/css" href="css/common.css">
     <link rel="stylesheet" type="text/css" href="css/speaker.css">
     <link rel="stylesheet" type="text/css" href="css/grids.css">
     <link rel="stylesheet" type="text/css" href="css/testing_interface.css">
-
-    <!-- JS files -->
-    <script src="js/speaker.js"></script>
-    <script src="js/common.js"></script>
-    <script src="js/constants.js"></script>
-    <script src="js/grids.js"></script>
-    <script src="js/more_grids.js"></script>
-    <script src="js/fire.js"></script>
-    <script src="js/bandit.js"></script>
-    <script src="js/word_similarity.js"></script>
-
-    <!-- Font reference -->
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet" />
 </head>
 
 <body>
@@ -100,7 +67,7 @@
             <div id="trans-layer"></div>
         </div>
 
-        <button id="feedback_btn" type="button" class="btn btn-success" onclick="$('#bug_report_modal').modal('show');">Report Bug</button>
+        <button id="feedback_btn" type="button" class="btn btn-success" onclick="$('#bug_report_modal').modal('show');">Report Issue</button>
 
         <div class="row">
             <div class="col-md-4" id="io_ex_col">
@@ -179,8 +146,10 @@
                     <span id="give_up_btn"><button type="button" class="btn btn-danger desc-buttons" data-toggle="modal"
                         data-target="#giveUpModal">Give up</button></span>
                 </div>
+            </br>
                 <button onclick="$('#instructionsModal').modal('show')" type="button" class="btn btn-secondary">Show
                     Instructions</button>
+                </br></br>
             </div>
         </div>
     </div>
@@ -343,7 +312,7 @@
                 </div>
                 <div class="modal-body" id="final-modal-body">
                     <p id="final_message">Thank you for participating in this study! Your survey code is: </p>
-                    <h5 id="finish_modal_uid"></h5>
+                    <h5 id="finish_modal_uid" class="bold"></h5>
                 </div>
 
                 <div class="modal-body" id="gen-modal-body">
@@ -363,10 +332,10 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title" id="gen-modal-title">Bug Report/Feedback</h3>
+                    <h3 class="modal-title" id="gen-modal-title">Report Issue</h3>
                 </div>
                 <div class="modal-body" id="gen-modal-body">
-                    <label for="bug_desc_textarea">Please describe the bug:</label>
+                    <label for="bug_desc_textarea">Please describe the issue. If the issue persists and stops you from completing the study, please email <b>samacqua@mit.edu</b></label>
                     <textarea class="form-control" id="bug_desc_textarea" rows="3"></textarea>
                 </div>
                 <div class="modal-footer">
@@ -376,6 +345,37 @@
             </div>
         </div>
     </div>
+
+    <!-- JS files -->
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-firestore.js"></script>
+
+    <script src="js/jquery.highlight-within-textarea.js"></script>
+
+    <!-- Bootstrap -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <script src="js/speaker.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/constants.js"></script>
+    <script src="js/grids.js"></script>
+    <script src="js/more_grids.js"></script>
+    <script src="js/fire.js"></script>
+    <script src="js/bandit.js"></script>
+    <script src="js/word_similarity.js"></script>
+
+    <!-- Don't allow exit from modal -->
+    <script>
+        $.fn.modal.prototype.constructor.Constructor.Default.backdrop = 'static';
+        $.fn.modal.prototype.constructor.Constructor.Default.keyboard = false;
+    </script>
 
 </body>
 

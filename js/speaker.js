@@ -2,6 +2,7 @@ var GOOD_WORDS = [];
 var PAST_DESCS = [];
 
 $(window).on('load', function () {
+    
     // get date to check they are trying before giving up
     START_DATE = new Date();
 
@@ -22,19 +23,19 @@ $(window).on('load', function () {
         $('#instructionsModal').modal('show');
     }
 
-    // get speaker task
+    // get task
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    const task = urlParams.get('task') || TASKS[Math.floor(Math.random()*NUM_TASKS)];  // if none provided, give random task (just for when messing around w it, won't actually happen)
+    const task = urlParams.get('task') || TASKS[Math.floor(Math.random()*TASKS.length)];  // if none provided, give random task (will never happen to Turker)
 
-    const isMTurk = sessionStorage.getItem('mturk');
-    if (isMTurk == 'false') {
-        console.log('Using DEV Database');
-        use_dev_config();
-    } else {
-        console.log("Using MTURK Database");
-    }
+    // initialize correct database
+    const study_name = sessionStorage.getItem('study');
+    let study = STUDY_BATCHES[study_name];
+    TASKS = study.tasks;
+    update_fb_config(study.config, study.name);
+    console.log("Initialized " + study.name + " database");
 
+    // load task and get descriptions
     DESCRIPTIONS_TYPE = sessionStorage.getItem('type') || "nl";
     loadTask(task);
     get_task_descriptions(task, DESCRIPTIONS_TYPE).then(function (descriptions) {
@@ -55,7 +56,7 @@ $(window).on('load', function () {
             }
         }
     }).catch(error => {
-        errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
+        errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry. If the issue persists, please email samacqua@mit.edu");
     });
 
     // customize tutorial to fit description type
@@ -80,12 +81,14 @@ $(window).on('load', function () {
             get_word_vec_cache(word);
         }
     }).catch(error => {
-        errorMsg("Could not load words that can been used. Please check your internet connection and reload the page.");
+        errorMsg("Could not load words that can been used. Please check your internet connection and reload the page. If the issue persists, please email samacqua@mit.edu");
     });
 });
 
+// set listeners
 $(document).ready(function () {
 
+    // make sure prefix does not change
     $('.descriptions').on("input", function() {
         var value = $(this).val();
         const prefix_mapping = { 'grid_size_desc': GRID_SIZE_PREFIX, 'what_you_see': SHOULD_SEE_PREFIX, 'what_you_do': HAVE_TO_PREFIX }
@@ -97,45 +100,43 @@ $(document).ready(function () {
     // when textarea changes
     $('.descriptions').on("keyup", function () {
 
-        // so they can't delete prefix
         var value = $(this).val();
         const id = $(this).attr("id");
 
-        // for each novel word, add a row with buttons to replace word with similar words in database, or add the word
-        $('#word-warning-' + id).empty();
+        // get all unique words to replace
+        var words_to_replace = value.match(get_bad_words()) || [];
+        words_to_replace = [...new Set(words_to_replace)];
 
-        const words_to_replace = value.match(get_bad_words());
-        if (words_to_replace != null && words_to_replace.length != 0) {
+        var items = [];
+        $.each(words_to_replace, function (i, word) {
 
-            var items = [];
-            $.each(words_to_replace, function (i, word) {
+            // create the html for the list items
+            items.push(
+                `<li><b>${word}</b>
+                <span class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Replace with...
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" id=${word}_${i}_dropdown>
+                </div>
+                <button type="button" onclick="confirm_add_word(\'${word}\')" id="add_word_${word}" class="btn btn-danger add-word">add word</button></li>
+                </span>`);
+        });
 
-                // create the html for the list items
-                items.push(
-                    `<li><b>${word}</b>
-                    <span class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Replace with...
-                    </button>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" id=${word}_${i}_dropdown>
-                    </div>
-                    <button type="button" onclick="confirm_add_word(\'${word}\')" id="add_word_${word}" class="btn btn-danger add-word">add word</button></li>
-                    </span>`);
-            });
-
-            $('#word-warning-' + id).append(items.join(''));
-        }
+        $('#word-warning-' + id).html(items.join(''));
 
         get_replacement_words(words_to_replace).then(replacements => {
 
-            // if by the time retrieved words, there are new words, then recall self
-            if (!arraysEqual($(this).val().match(get_bad_words()), words_to_replace)) {
-                $(".descriptions").keyup();
-                return;
-            }
+            // // if by the time retrieved words, there are new words, then recall self
+            // var present_bad_words = $(this).val().match(get_bad_words()) || [];
+            // present_bad_words = [...new Set(words_to_replace)];
+            // if (!arraysEqual(present_bad_words, words_to_replace)) {
+            //     $(".descriptions").keyup();
+            //     return;
+            // }
 
-            if (words_to_replace != null && words_to_replace.length != 0) {
-
+            // add replacements to each list item
+            if (words_to_replace.length > 0) {
                 replacements.forEach(function(replacement_i, i) {
 
                     const word = replacement_i[0];
@@ -313,6 +314,10 @@ function continue_tutorial() {
 
 var CURRENT_DESC = 0;
 
+/**
+ * create a pager for all past descriptions
+ * @param {int} cur_ex the index of the description to show/highlight
+ */
 function createExampleDescsPager(cur_ex=0) {
 
     if (PAST_DESCS.length >= 1) {
@@ -342,6 +347,10 @@ function createExampleDescsPager(cur_ex=0) {
     }
 }
 
+/**
+ * in the pager, show/highlight a description
+ * @param {int} i the index of the description to show
+ */
 function showDescEx(i) {
     if (PAST_DESCS.length == 0) {
         $("#ex_size_desc").text("There are no descriptions for this task yet.");
@@ -417,12 +426,7 @@ function get_closest_words(word, limit=10) {
         get_word_vec_cache(word).then(vec1 => {
 
             // get word vec for every word in GOOD_WORDS
-            for (i=0;i<=GOOD_WORDS.length;i++) {
-
-                if (i == GOOD_WORDS.length) {
-                    var closest = dists.sort(compare).slice(0,limit);
-                    return resolve(closest);
-                }
+            for (i=0;i<GOOD_WORDS.length;i++) {
 
                 const comp_word = GOOD_WORDS[i];
 
@@ -435,7 +439,8 @@ function get_closest_words(word, limit=10) {
                         const dist = get_dist(vec1, vec2);
                         dists.push([dist, comp_word]);
                     }
-
+                // shouldn't happen because word2vecs fetched at the beginning
+                // but fetching just in case (bc not async for loop, will only help next update)
                 } else {
                     get_word_vec(comp_word).then(vec => {
                         CACHED_W2V[comp_word] = vec;
@@ -449,6 +454,8 @@ function get_closest_words(word, limit=10) {
                     });
                 }
             }
+            var closest = dists.sort(compare).slice(0,limit);
+            return resolve(closest);
         });
     });
 }
@@ -473,16 +480,7 @@ function get_replacement_words(words, limit=10) {
 
                     const word = words[ii].toLowerCase();
                     get_closest_words(word, limit).then(closest => {
-
-                        // if written word, make them replace with num
-                        // better way than writing out mappings? must be.
-                        const str_num_mapping = { 'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10 };
-                        if (str_num_mapping[word] !== undefined) {
-                            closest = [([0, str_num_mapping[word]])];
-                        }
-
                         replace_words.push([words[ii], closest]);
-
                         res2();
                     });
                 });
@@ -495,7 +493,8 @@ function get_replacement_words(words, limit=10) {
 function replace_word(word, replacement, text_area_id) {
 
     const cur_text = $(text_area_id).val();
-    const replaced_text = cur_text.replace(word, replacement);
+    var re = new RegExp("\\b" + word + "\\b", "g");
+    const replaced_text = cur_text.replace(re, replacement);
     $(text_area_id).val(replaced_text);
 
     // so that functions called on textarea changes are called, and so highlights resize
@@ -539,37 +538,36 @@ function submit() {
      */
 
     if ($("#grid_size_desc").val().trim().length - GRID_SIZE_PREFIX.length < 5) {
-        errorMsg("Please enter a description of how the grid size changes.");
-        return
+        errorMsg("Please enter a description of how the grid size changes. Your description is either empty or too short.");
+        return;
     }
     if ($("#what_you_see").val().trim().length - SHOULD_SEE_PREFIX.length < 5) {
-        errorMsg("Please enter a description of what you see.");
-        return
+        errorMsg("Please enter a description of what you see. Your description is either empty or too short.");
+        return;
     }
     if ($("#what_you_do").val().trim().length - HAVE_TO_PREFIX.length < 5) {
-        errorMsg("Please enter a description of what you change.");
-        return
+        errorMsg("Please enter a description of what you change. Your description is either empty or too short.");
+        return;
     }
     if (!$("#what_you_see").val().trim().startsWith(SHOULD_SEE_PREFIX)) {
         errorMsg(`What you see has to start with "${SHOULD_SEE_PREFIX}"`);
-        return
+        return;
     }
     if (!$("#what_you_do").val().trim().startsWith(HAVE_TO_PREFIX)) {
         errorMsg(`What you do has to start with "${HAVE_TO_PREFIX}"`);
-        return
+        return;
     }
     if (!$("#grid_size_desc").val().trim().startsWith(GRID_SIZE_PREFIX)) {
         errorMsg(`The grid size field has to start with "${GRID_SIZE_PREFIX}"`);
-        return
+        return;
     }
 
     if ($('#word-warning-grid_size_desc').children().length + $('#word-warning-what_you_see').children().length + $('#word-warning-what_you_do').children().length != 0) {
         errorMsg("You must get rid of all red-highlighted words. If they are absolutely necessary for your description, add that word.");
-        return
+        return;
     }
 
     verify();
-
 }
 
 function verify() {
@@ -588,14 +586,12 @@ function verify() {
         selected_example = parseInt($.trim($("#selectExampleIO").val()) - 1);
     }
 
-    infoMsg("Bringing you to verfication...")
+    infoMsg("Bringing you to verification...")
 
     const newTime = new Date();
     const totalTime = (newTime - START_DATE) / 1000;
 
-    // Bring the user to the listener page, but show them their own description to ensure they wrote something decent
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
+    // Bring the user to the listener page and show them their own description to ensure they wrote something decent
     window.location.href = `listener.html?task=${TASK_ID}&time=${totalTime}&see=${see_desc}&do=${do_desc}&grid=${grid_size_desc}&se=${selected_example}&ver=true&maxIdle=${maxIdleTime}`;
 }
 
@@ -619,7 +615,6 @@ function give_up() {
             tasks_done.push(TASK_ID);
             sessionStorage.setItem('tasks_completed', tasks_done);
     
-            // TODO: not using variable timing here... is that alright?
             next_task(SPEAKER_TIME*SKIP_PART_CRED);
         });
     });

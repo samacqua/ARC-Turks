@@ -2,12 +2,6 @@ var DESCRIPTIONS_TYPE = "nl";  // the type of descriptions ("nl", "ex", or "nl_e
 var PAGE;
 var START_DATE;
 
-// universally sets it impossible to exit modal by tapping outside of it
-$.fn.modal.prototype.constructor.Constructor.Default.backdrop = 'static';
-$.fn.modal.prototype.constructor.Constructor.Default.keyboard = false;
-
-
-
 function add_grid_hover_listeners() {
     $(".pair_preview").hover(function() {
         $(this).css("background-color", "rgb(160, 160, 160)");
@@ -171,7 +165,7 @@ function get_next_task(time_inc) {
             // if no unused descriptions, then use bandit
             if (task_desc == -1) {
 
-                new_select_casino(DESCRIPTIONS_TYPE).then(task => {
+                select_casino(DESCRIPTIONS_TYPE).then(task => {
 
                     if (task == -1) {
                         return resolve('finish');
@@ -227,7 +221,7 @@ function next_task(time_inc) {
         // if no unused descriptions, then use bandit
         if (task_desc == -1) {
 
-            new_select_casino(DESCRIPTIONS_TYPE).then(task => {
+            select_casino(DESCRIPTIONS_TYPE).then(task => {
 
                 if (task == -1) {
                     finish();
@@ -403,13 +397,10 @@ function show_loader() {
  */
 function filterOutliers(someArray, absMax=null, replace=null) {  
 
-    // Copy the values, rather than operating on references to existing values
-    var values = someArray.concat();
-
-    // Then sort
+    var values = array_copy(someArray);
     values.sort( function(a, b) {
-            return a - b;
-         });
+        return a - b;
+    });
 
     /* Then find a conservative IQR. This is generous because if (values.length / 4) 
      * is not an int, then really you should average the two elements on either 
@@ -424,21 +415,28 @@ function filterOutliers(someArray, absMax=null, replace=null) {
     var maxValue = q3 + iqr*1.5;
     var minValue = q1 - iqr*1.5;
 
-    var filteredValues;
-    if (replace) {
-        filteredValues = values.map(x => ((x <= maxValue) && (x >= minValue)) ? replace : x);
-    } else {
-        // Then filter anything beyond or beneath these values.
-        filteredValues = values.filter(function(x) {
-            return (x <= maxValue) && (x >= minValue);
-        });
+    // if less than 4 datapoints, don't bother trying to find outliers
+    var filteredValues = array_copy(values);
+    if (values.length > 4) {
+        if (replace) {
+            filteredValues = values.map(x => ((x <= maxValue) && (x >= minValue)) ? replace : x);
+        } else {
+            // Then filter anything beyond or beneath these values.
+            filteredValues = values.filter(function(x) {
+                return (x <= maxValue) && (x >= minValue);
+            });
+        }
     }
 
     // constant upper bound
     if (absMax) {
-        filteredValues = filteredValues.filter(function(x) {
-            return x <= absMax;
-        });
+        if (replace) {
+            filteredValues = values.map(x => (x <= absMax) ? x : replace);
+        } else {
+            filteredValues = filteredValues.filter(function(x) {
+                return x <= absMax;
+            });
+        }
     }
 
     // Then return

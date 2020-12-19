@@ -1,38 +1,16 @@
-var devFirebaseConfig = {
-    apiKey: "AIzaSyA9yXW7Tnx3IYdiXMnmO20qp7IKc6lakS8",
-    authDomain: "arc-turk-ex-ios.firebaseapp.com",
-    databaseURL: "https://arc-turk-ex-ios.firebaseio.com",
-    projectId: "arc-turk-ex-ios",
-    storageBucket: "arc-turk-ex-ios.appspot.com",
-    messagingSenderId: "687250358397",
-    appId: "1:687250358397:web:16ac92ca0995b5d117b114"
-};
+var db, database;
 
-var firebaseConfig = {
-    apiKey: "AIzaSyDDDTu85WtFnqwJlwZdon1accivFQzOKFw",
-    authDomain: "arc-pilot.firebaseapp.com",
-    databaseURL: "https://arc-pilot.firebaseio.com",
-    projectId: "arc-pilot",
-    storageBucket: "arc-pilot.appspot.com",
-    messagingSenderId: "16504691809",
-    appId: "1:16504691809:web:e847b8e2fd07580e6e1e20"
-  };
-
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-var db = firebase.firestore();
-var database = firebase.database();
-
-function use_dev_config() {
-    firebase.initializeApp(devFirebaseConfig, 'devApp');
-
-    db = firebase.app('devApp').firestore();
-    database = firebase.app('devApp').database();
-}
-
-function use_study_config() {
-    db = firebase.firestore();
-    database = firebase.database();
+function update_fb_config(config, name) {
+    console.log(name);
+    try {
+        firebase.initializeApp(config, name);
+    } catch (err) {
+        if (!err.message.includes('already exists')) {
+            console.err(err.message);
+        }
+    }
+    db = firebase.app(name).firestore();
+    database = firebase.app(name).database();
 }
 
 // ===================================
@@ -98,14 +76,19 @@ function get_all_descriptions_interactions_count(type) {
             const data = snapshot.data()
             var interactions_count = [];
             var descriptions_count = [];
+            var ret_data = {};
 
-            for (i = 0; i < NUM_TASKS; i++) {
-                const ii = TASKS[i];
-                interactions_count.push(data[`${ii}_interactions_count`]);
-                descriptions_count.push(data[`${ii}_descriptions_count`]);
+            for (i = 0; i < 400; i++) {
+
+                // if study has task
+                if (data[`${i}_interactions_count`] != null) {
+                    ret_data[i] = {};
+                    ret_data[i]['interactions'] = data[`${i}_interactions_count`];
+                    ret_data[i]['descriptions'] = data[`${i}_descriptions_count`]
+                }
             }
-
-            return resolve([descriptions_count, interactions_count]);
+            console.log(ret_data);
+            return resolve(ret_data);
         })
             .catch(function (err) {
                 return reject(err);
@@ -151,7 +134,7 @@ function get_all_tasks_best_desc(type) {
             var best_desc_success_score = [];
             var best_desc_total_attempts = [];
 
-            for (i = 0; i < NUM_TASKS; i++) {
+            for (i = 0; i < TASKS.length; i++) {
                 const ii = TASKS[i];
                 best_desc_success_score.push(data[`${ii}_best_success_score`] || 0);
                 best_desc_total_attempts.push(data[`${ii}_best_total_attempts`] || 0);
@@ -203,22 +186,25 @@ function get_task_descriptions(task_id, type) {
                 // loop will only run once, just indexing querySnapshot giving issues
                 const data = doc.data();
                 const description = {
-                    'grid_desc': data.grid_description,
-                    'see_desc': data.see_description,
-                    'do_desc': data.do_description,
-                    'selected_ex': data.selected_example,
+                    'action_sequence': data.action_sequence,
+                    'attempts_sequence': data.attempts_sequence,
+                    'attempt_jsons': data.attempt_jsons,
                     'bandit_attempts': data.bandit_attempts,
                     'bandit_success_score': data.bandit_success_score,
                     'confidence': data.confidence,
+                    'description_time': data.description_time,
                     'display_num_attempts': data.display_num_attempts,
                     'display_num_success': data.display_num_success,
-                    'attempt_jsons': data.attempt_jsons,
-                    'attempts_sequence': data.attempts_sequence,
-                    'action_sequence': data.action_sequence,
+                    'do_desc': data.do_description,
+                    'grid_desc': data.grid_description,
+                    'max_idle_time': data.max_idle_time,
                     'num_verification_attempts': data.num_verification_attempts,
+                    'see_desc': data.see_description,
+                    'selected_ex': data.selected_example,
                     'succeeded_verification': data.succeeded_verification,
                     'timestamp': data.timestamp,
                     'uid': data.uid,
+                    'verification_time': data.verification_time,
                     'type': type,
                     'task': task_id,
                     'id': doc.id
@@ -385,7 +371,7 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confi
         const desc_doc_ref = task_doc_ref.collection("descriptions").doc(desc_id);
         batch.set(desc_doc_ref, desc_data);
 
-        // increment num_descriptions and ver_gave_up_count for task in tasks collection (not desc_gave_up_count bc they would not be submitting description, handled seperately)
+        // increment num_descriptions
         const increment = firebase.firestore.FieldValue.increment(1);
 
         var task_update_data = {
@@ -395,7 +381,8 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confi
 
         // add to words
         const gen_summary_ref = db.collection("total").doc("summary");    // summary for all desc types
-        const words = see_desc.match(/\b(\w+)\b/g).concat(do_desc.match(/\b(\w+)\b/g)).concat(grid_desc.match(/\b(\w+)\b/g));
+        var words = see_desc.match(/\b(\w+)\b/g).concat(do_desc.match(/\b(\w+)\b/g)).concat(grid_desc.match(/\b(\w+)\b/g));
+        words = words.map(v => v.toLowerCase());
         batch.update(gen_summary_ref, {
             'words': firebase.firestore.FieldValue.arrayUnion(...words)
         });
@@ -463,7 +450,7 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, acti
             num_interactions: increment
         });
 
-        // increment the description's number of attempts and number of times the listener gave up (if they gave up)
+        // increment the description's number of attempts and success
         const desc_doc = task_doc.collection("descriptions").doc(desc_id);
         var desc_update_data = { 
             bandit_attempts: increment,
@@ -483,22 +470,18 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, acti
 
         // if desc is now task's best desc, update it in summary doc
         const priors = [1, 1];
-        let new_suc_score = past_desc['bandit_success_score'] + 1/attempts;
-        let new_attempts = past_desc['bandit_attempts'] + 1;
+        const new_suc_score = past_desc['bandit_success_score'] + 1/attempts;
+        const new_attempts = past_desc['bandit_attempts'] + 1;
 
         let a = new_suc_score + priors[0];
         let b = new_attempts - new_suc_score + priors[1];
         let desc_new_mean = a / (a + b);
 
         if (desc_new_mean >= best_desc.mean || best_desc.id == desc_id) {
-            console.log("updating best...");
-            summary_data[`${task_id}_best_success_score`] = past_desc['bandit_success_score'] + 1/attempts;
-            summary_data[`${task_id}_best_total_attempts`] = past_desc['bandit_attempts'] + 1;
+            summary_data[`${task_id}_best_success_score`] = new_suc_score;
+            summary_data[`${task_id}_best_total_attempts`] = new_attempts;
             summary_data[`${task_id}_best_id`] = desc_id;
-        } else {
-            console.log("not updating best...");
         }
-
         batch.update(summary_doc, summary_data);
 
         // remove the description from the list of unused descriptions
@@ -508,13 +491,13 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, acti
         // update a and b in bandit summary
         const descs_summary_ref = db.collection(type + "_tasks").doc("descs_bandit");
         let bandit_data = {};
-        bandit_data[`${task_id}_${desc_id}`] = [a-priors[0], b-priors[0]];
+        bandit_data[`${task_id}_${desc_id}`] = [a-priors[0], b-priors[1]];
         batch.update(descs_summary_ref, bandit_data);
 
         // add timing
         const timing_ref = db.collection(type + "_tasks").doc("timing");
         let timing_data = {};
-        timing_data[`${task_id}_${desc_id}_attempts`] = firebase.firestore.FieldValue.arrayUnion(parseInt(total_time) + Math.random()); // add random so unlikely for collisions
+        timing_data[`${task_id}_${desc_id}_attempts`] = firebase.firestore.FieldValue.arrayUnion(parseInt(total_time)+(Math.random()-0.5));
         batch.update(timing_ref, timing_data);
 
         batch.commit().then(function () {
@@ -574,7 +557,7 @@ function store_failed_ver_description(see_desc, do_desc, grid_desc, task_id, use
         const desc_doc_ref = task_doc_ref.collection("descriptions").doc(desc_id);
         batch.set(desc_doc_ref, desc_data);
 
-        // increment num_descriptions and ver_gave_up_count for task in tasks collection (not desc_gave_up_count bc they would not be submitting description, handled seperately)
+        // increment desc_failure_count for task in tasks collection 
         const increment = firebase.firestore.FieldValue.increment(1);
         const task_ref = db.collection(type + "_tasks").doc(task_id.toString());
 
@@ -691,12 +674,25 @@ function set_user_start_time(user_id) {
 function give_up_description(task_id, type) {
 
     return new Promise(function (resolve, reject) {
-        const increment = firebase.firestore.FieldValue.increment(1);
 
+        var batch = db.batch();
+
+        const increment = firebase.firestore.FieldValue.increment(1);
         const task_doc_ref = db.collection(type + "_tasks").doc(task_id.toString());
-        task_doc_ref.update({
+
+        batch.update(task_doc_ref, {
             desc_gave_up_count: increment
-        }).then(function () {
+        });
+
+        // if gave up, increment 1 minute of effort
+        const timing_doc_ref = db.collection(type + "_tasks").doc("timing");
+        const time_increment = firebase.firestore.FieldValue.increment(60);
+        const key = task_id.toString() + "_veto";
+        var timing_data = {};
+        timing_data[key] = time_increment;
+        batch.update(timing_doc_ref, timing_data);
+
+        batch.commit().then(function () {
             return resolve();
         }).catch(function (err) {
             return reject(err);
@@ -746,12 +742,15 @@ function store_feedback(description, date, uid) {
 // Initialize
 // ===================================
 
-function init_firestore() {
+function init_firestore(study) {
     /**
      * Just sets 0 value to all tasks in db. 
-     * Be careful! It will overwrite everything.
      */
     console.log("Starting initialization...");
+
+    update_fb_config(study.config, study.name);
+    console.log("Initialized " + study.name + " database");
+
     var summary_data = {};
 
     const task_data = {
@@ -761,24 +760,39 @@ function init_firestore() {
         'desc_failure_count': 0     // number of times someone submitted description, then failed verfication or gave low confidence score (<5)
     }
 
-    let top_100_words = ['the', 'of', 'to', 'and', 'a', 'in', 'is', 'it', 'you', 'that', 'he', 'was', 'for', 'on', 'are', 'with', 'as', 'I', 'his', 'they', 
-        'be', 'at', 'one', 'have', 'this', 'from', 'or', 'had', 'by', 'hot', 'but', 'some', 'what', 'there', 'we', 'can', 'out', 'other', 'were', 
-        'all', 'your', 'when', 'up', 'use', 'word', 'how', 'said', 'an', 'each', 'she', 'which', 'do', 'their', 'time', 'if', 'will', 'way', 'about',
-        'many', 'then', 'them', 'would', 'write', 'like', 'so', 'these', 'her', 'long', 'make', 'thing', 'see', 'him', 'two', 'has', 'look', 'more', 
-        'day', 'could', 'go', 'come', 'did', 'my', 'sound', 'no', 'most', 'number', 'who', 'over', 'know', 'water', 'than', 'call', 'first', 'people', 
-        'may', 'down', 'side', 'been', 'now', 'find', "output", "grid", "size", "input", "should"];
-
     let top_1000_words = ['is', 'a', 'ability', 'able', 'about', 'above', 'accept', 'according', 'account', 'across', 'act', 'action', 'activity', 'actually', 'add', 'address', 'administration', 'admit', 'adult', 'affect', 'after', 'again', 'against', 'age', 'agency', 'agent', 'ago', 'agree', 'agreement', 'ahead', 'air', 'all', 'allow', 'almost', 'alone', 'along', 'already', 'also', 'although', 'always', 'American', 'among', 'amount', 'analysis', 'and', 'animal', 'another', 'answer', 'any', 'anyone', 'anything', 'appear', 'apply', 'approach', 'area', 'argue', 'arm', 'around', 'arrive', 'art', 'article', 'artist', 'as', 'ask', 'assume', 'at', 'attack', 'attention', 'attorney', 'audience', 'author', 'authority', 'available', 'avoid', 'away', 'baby', 'back', 'bad', 'bag', 'ball', 'bank', 'bar', 'base', 'be', 'beat', 'beautiful', 'because', 'become', 'bed', 'before', 'begin', 'behavior', 'behind', 'believe', 'benefit', 'best', 'better', 'between', 'beyond', 'big', 'bill', 'billion', 'bit', 'black', 'blood', 'blue', 'board', 'body', 'book', 'born', 'both', 'box', 'boy', 'break', 'bring', 'brother', 'budget', 'build', 'building', 'business', 'but', 'buy', 'by', 'call', 'camera', 'campaign', 'can', 'cancer', 'candidate', 'capital', 'car', 'card', 'care', 'career', 'carry', 'case', 'catch', 'cause', 'cell', 'center', 'central', 'century', 'certain', 'certainly', 'chair', 'challenge', 'chance', 'change', 'character', 'charge', 'check', 'child', 'choice', 'choose', 'church', 'citizen', 'city', 'civil', 'claim', 'class', 'clear', 'clearly', 'close', 'coach', 'cold', 'collection', 'college', 'color', 'come', 'commercial', 'common', 'community', 'company', 'compare', 'computer', 'concern', 'condition', 'conference', 'Congress', 'consider', 'consumer', 'contain', 'continue', 'control', 'cost', 'could', 'country', 'couple', 'course', 'court', 'cover', 'create', 'crime', 'cultural', 'culture', 'cup', 'current', 'customer', 'cut', 'dark', 'data', 'daughter', 'day', 'dead', 'deal', 'death', 'debate', 'decade', 'decide', 'decision', 'deep', 'defense', 'degree', 'Democrat', 'democratic', 'describe', 'design', 'despite', 'detail', 'determine', 'develop', 'development', 'die', 'difference', 'different', 'difficult', 'dinner', 'direction', 'director', 'discover', 'discuss', 'discussion', 'disease', 'do', 'doctor', 'dog', 'door', 'down', 'draw', 'dream', 'drive', 'drop', 'drug', 'during', 'each', 'early', 'east', 'easy', 'eat', 'economic', 'economy', 'edge', 'education', 'effect', 'effort', 'eight', 'either', 'election', 'else', 'employee', 'end', 'energy', 'enjoy', 'enough', 'enter', 'entire', 'environment', 'environmental', 'especially', 'establish', 'even', 'evening', 'event', 'ever', 'every', 'everybody', 'everyone', 'everything', 'evidence', 'exactly', 'example', 'executive', 'exist', 'expect', 'experience', 'expert', 'explain', 'eye', 'face', 'fact', 'factor', 'fail', 'fall', 'family', 'far', 'fast', 'father', 'fear', 'federal', 'feel', 'feeling', 'few', 'field', 'fight', 'figure', 'fill', 'film', 'final', 'finally', 'financial', 'find', 'fine', 'finger', 'finish', 'fire', 'firm', 'first', 'fish', 'five', 'floor', 'fly', 'focus', 'follow', 'food', 'foot', 'for', 'force', 'foreign', 'forget', 'form', 'former', 'forward', 'four', 'free', 'friend', 'from', 'front', 'full', 'fund', 'future', 'game', 'garden', 'gas', 'general', 'generation', 'get', 'girl', 'give', 'glass', 'go', 'goal', 'good', 'government', 'great', 'green', 'ground', 'group', 'grow', 'growth', 'guess', 'gun', 'guy', 'hair', 'half', 'hand', 'hang', 'happen', 'happy', 'hard', 'have', 'he', 'head', 'health', 'hear', 'heart', 'heat', 'heavy', 'help', 'her', 'here', 'herself', 'high', 'him', 'himself', 'his', 'history', 'hit', 'hold', 'home', 'hope', 'hospital', 'hot', 'hotel', 'hour', 'house', 'how', 'however', 'huge', 'human', 'hundred', 'husband', 'I', 'idea', 'identify', 'if', 'image', 'imagine', 'impact', 'important', 'improve', 'in', 'include', 'including', 'increase', 'indeed', 'indicate', 'individual', 'industry', 'information', 'inside', 'instead', 'institution', 'interest', 'interesting', 'international', 'interview', 'into', 'investment', 'involve', 'issue', 'it', 'item', 'its', 'itself', 'job', 'join', 'just', 'keep', 'key', 'kid', 'kill', 'kind', 'kitchen', 'know', 'knowledge', 'land', 'language', 'large', 'last', 'late', 'later', 'laugh', 'law', 'lawyer', 'lay', 'lead', 'leader', 'learn', 'least', 'leave', 'left', 'leg', 'legal', 'less', 'let', 'letter', 'level', 'lie', 'life', 'light', 'like', 'likely', 'line', 'list', 'listen', 'little', 'live', 'local', 'long', 'look', 'lose', 'loss', 'lot', 'love', 'low', 'machine', 'magazine', 'main', 'maintain', 'major', 'majority', 'make', 'man', 'manage', 'management', 'manager', 'many', 'market', 'marriage', 'material', 'matter', 'may', 'maybe', 'me', 'mean', 'measure', 'media', 'medical', 'meet', 'meeting', 'member', 'memory', 'mention', 'message', 'method', 'middle', 'might', 'military', 'million', 'mind', 'minute', 'miss', 'mission', 'model', 'modern', 'moment', 'money', 'month', 'more', 'morning', 'most', 'mother', 'mouth', 'move', 'movement', 'movie', 'Mr', 'Mrs', 'much', 'music', 'must', 'my', 'myself', 'name', 'nation', 'national', 'natural', 'nature', 'near', 'nearly', 'necessary', 'need', 'network', 'never', 'new', 'news', 'newspaper', 'next', 'nice', 'night', 'no', 'none', 'nor', 'north', 'not', 'note', 'nothing', 'notice', 'now', "n't", 'number', 'occur', 'of', 'off', 'offer', 'office', 'officer', 'official', 'often', 'oh', 'oil', 'ok', 'old', 'on', 'once', 'one', 'only', 'onto', 'open', 'operation', 'opportunity', 'option', 'or', 'order', 'organization', 'other', 'others', 'our', 'out', 'outside', 'over', 'own', 'owner', 'page', 'pain', 'painting', 'paper', 'parent', 'part', 'participant', 'particular', 'particularly', 'partner', 'party', 'pass', 'past', 'patient', 'pattern', 'pay', 'peace', 'people', 'per', 'perform', 'performance', 'perhaps', 'period', 'person', 'personal', 'phone', 'physical', 'pick', 'picture', 'piece', 'place', 'plan', 'plant', 'play', 'player', 'PM', 'point', 'police', 'policy', 'political', 'politics', 'poor', 'popular', 'population', 'position', 'positive', 'possible', 'power', 'practice', 'prepare', 'present', 'president', 'pressure', 'pretty', 'prevent', 'price', 'private', 'probably', 'problem', 'process', 'produce', 'product', 'production', 'professional', 'professor', 'program', 'project', 'property', 'protect', 'prove', 'provide', 'public', 'pull', 'purpose', 'push', 'put', 'quality', 'question', 'quickly', 'quite', 'race', 'radio', 'raise', 'range', 'rate', 'rather', 'reach', 'read', 'ready', 'real', 'reality', 'realize', 'really', 'reason', 'receive', 'recent', 'recently', 'recognize', 'record', 'red', 'reduce', 'reflect', 'region', 'relate', 'relationship', 'religious', 'remain', 'remember', 'remove', 'report', 'represent', 'Republican', 'require', 'research', 'resource', 'respond', 'response', 'responsibility', 'rest', 'result', 'return', 'reveal', 'rich', 'right', 'rise', 'risk', 'road', 'rock', 'role', 'room', 'rule', 'run', 'safe', 'same', 'save', 'say', 'scene', 'school', 'science', 'scientist', 'score', 'sea', 'season', 'seat', 'second', 'section', 'security', 'see', 'seek', 'seem', 'sell', 'send', 'senior', 'sense', 'series', 'serious', 'serve', 'service', 'set', 'seven', 'several', 'sex', 'sexual', 'shake', 'share', 'she', 'shoot', 'short', 'shot', 'should', 'shoulder', 'show', 'side', 'sign', 'significant', 'similar', 'simple', 'simply', 'since', 'sing', 'single', 'sister', 'sit', 'site', 'situation', 'six', 'size', 'skill', 'skin', 'small', 'smile', 'so', 'social', 'society', 'soldier', 'some', 'somebody', 'someone', 'something', 'sometimes', 'son', 'song', 'soon', 'sort', 'sound', 'source', 'south', 'southern', 'space', 'speak', 'special', 'specific', 'speech', 'spend', 'sport', 'spring', 'staff', 'stage', 'stand', 'standard', 'star', 'start', 'state', 'statement', 'station', 'stay', 'step', 'still', 'stock', 'stop', 'store', 'story', 'strategy', 'street', 'strong', 'structure', 'student', 'study', 'stuff', 'style', 'subject', 'success', 'successful', 'such', 'suddenly', 'suffer', 'suggest', 'summer', 'support', 'sure', 'surface', 'system', 'table', 'take', 'talk', 'task', 'tax', 'teach', 'teacher', 'team', 'technology', 'television', 'tell', 'ten', 'tend', 'term', 'test', 'than', 'thank', 'that', 'the', 'their', 'them', 'themselves', 'then', 'theory', 'there', 'these', 'they', 'thing', 'think', 'third', 'this', 'those', 'though', 'thought', 'thousand', 'threat', 'three', 'through', 'throughout', 'throw', 'thus', 'time', 'to', 'today', 'together', 'tonight', 'too', 'top', 'total', 'tough', 'toward', 'town', 'trade', 'traditional', 'training', 'travel', 'treat', 'treatment', 'tree', 'trial', 'trip', 'trouble', 'true', 'truth', 'try', 'turn', 'TV', 'two', 'type', 'under', 'understand', 'unit', 'until', 'up', 'upon', 'us', 'use', 'usually', 'value', 'various', 'very', 'victim', 'view', 'violence', 'visit', 'voice', 'vote', 'wait', 'walk', 'wall', 'want', 'war', 'watch', 'water', 'way', 'we', 'weapon', 'wear', 'week', 'weight', 'well', 'west', 'western', 'what', 'whatever', 'when', 'where', 'whether', 'which', 'while', 'white', 'who', 'whole', 'whom', 'whose', 'why', 'wide', 'wife', 'will', 'win', 'wind', 'window', 'wish', 'with', 'within', 'without', 'woman', 'wonder', 'word', 'work', 'worker', 'world', 'worry', 'would', 'write', 'writer', 'wrong', 'yard', 'yeah', 'year', 'yes', 'yet', 'you', 'young', 'your'];
     top_1000_words = top_1000_words.concat(["output", "grid", "size", "input", "should"]);
     
-    db.collection('total').doc('summary').set({
-        'words': top_1000_words
+    // make sure the database has no users
+    db.collection('users').limit(1).get()
+    .then(function(querySnapshot) {
+        return new Promise((resolve, reject) => {
+            if (querySnapshot.size == 1) {
+                return reject('Only initialize empty database');
+            } else {
+                return resolve();
+            }
+        });
+    }).then(function() {
+        return new Promise((resolve, reject) => {
+            db.collection('nl_tasks').limit(1).get().then(querySnapshot => {
+                if (querySnapshot.size == 1) {
+                    return reject('Only initialize empty database');
+                } else {
+                    return resolve();
+                }
+            });
+        });
+    }).then(function() {
+        return db.collection('total').doc('summary').set({
+            'words': top_1000_words
+        });
     }).then(function () {
         console.log("Initialized words in Firestore.")
 
         // store counts of interactions and descriptions for each description type for bandit algorithm
         // and the success score and the total attempts for the best description for each task
-        for (i = 0; i < NUM_TASKS; i++) {
+        for (i = 0; i < TASKS.length; i++) {
             const ii = TASKS[i];
             summary_data[`${ii}_interactions_count`] = 0;
             summary_data[`${ii}_descriptions_count`] = 0;
@@ -798,7 +812,7 @@ function init_firestore() {
         console.log("Initialized ex summary in Firestore.");
 
         var batch = db.batch();
-        for (task_num = 0; task_num < NUM_TASKS; task_num++) {
+        for (task_num = 0; task_num < TASKS.length; task_num++) {
             const ii = TASKS[task_num];
             batch.set(db.collection("nl_tasks").doc(ii.toString()), task_data);
         }
@@ -808,7 +822,7 @@ function init_firestore() {
         console.log("Initialized all nl tasks in Firestore.");
 
         var batch = db.batch();
-        for (task_num = 0; task_num < NUM_TASKS; task_num++) {
+        for (task_num = 0; task_num < TASKS.length; task_num++) {
             const ii = TASKS[task_num];
             batch.set(db.collection("nl_ex_tasks").doc(ii.toString()), task_data);
         }
@@ -818,7 +832,7 @@ function init_firestore() {
         console.log("Initialized all nl_ex tasks in Firestore.");
 
         var batch = db.batch();
-        for (task_num = 0; task_num < NUM_TASKS; task_num++) {
+        for (task_num = 0; task_num < TASKS.length; task_num++) {
             const ii = TASKS[task_num];
             batch.set(db.collection("ex_tasks").doc(ii.toString()), task_data);
         }

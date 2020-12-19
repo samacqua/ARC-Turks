@@ -26,15 +26,20 @@ $(window).on('load', function () {
     DESCRIPTIONS_TYPE = urlParams.get('type') || "nl";
     sessionStorage.setItem('type', DESCRIPTIONS_TYPE);
 
-    // if not part of MTurk study, set firebase to dev
-    const isMturk = urlParams.get('mturk') || "false";
-    sessionStorage.setItem('mturk', isMturk);
-    if (isMturk != 'true') {
-        console.log("Initialized DEV database");
-        use_dev_config();
+    // initialize firebase to correct database
+    var study_name = urlParams.get('study') || "dev";
+    if (!(study_name in STUDY_BATCHES)) {
+        study_name = 'dev';
+    }
+    sessionStorage.setItem('study', study_name);
+
+    let study = STUDY_BATCHES[study_name];
+    TASKS = study.tasks;
+    update_fb_config(study.config, study.name);
+    console.log("Initialized " + study.name + " database");
+    if (study_name == 'dev') {
         $("#ongoing-study-modal").modal('show');
     } else {
-        console.log("Initialized MTurk database");
         $('#consentModal').modal('show');
     }
 

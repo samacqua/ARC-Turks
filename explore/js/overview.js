@@ -1,24 +1,11 @@
-var STUDY_BATCH = "pilot"; // the current study batch we are looking at
-
-var STUDY_BATCHES = {
-    pilot: {
-        config: {
-            apiKey: "AIzaSyDDDTu85WtFnqwJlwZdon1accivFQzOKFw",
-            authDomain: "arc-pilot.firebaseapp.com",
-            databaseURL: "https://arc-pilot.firebaseio.com",
-            projectId: "arc-pilot",
-            storageBucket: "arc-pilot.appspot.com",
-            messagingSenderId: "16504691809",
-            appId: "1:16504691809:web:e847b8e2fd07580e6e1e20"
-        },
-        tasks: [149, 286, 140, 354, 219, 277, 28, 135, 162, 384, 297, 26, 299, 388, 246, 74, 305, 94, 308, 77]
-    }
-}
-
 $(window).on('load', function () {
     PAGE = Pages.ExploreTasks;
-    const task = parseUrl(window.location.search);
+
+    const { task, study } = parseUrl(window.location.search);
+
+    load_study(study);
     load_new_task(task);
+    use_user_preferences();
 });
 
 /**
@@ -28,6 +15,7 @@ $(window).on('load', function () {
  */
 window.onpopstate = function(e){
     if(e.state){
+        load_study(e.state.study);
         load_new_task(e.state.task);
         document.title = e.state.pageTitle;
     }
@@ -39,12 +27,30 @@ window.onpopstate = function(e){
  */
 function parseUrl(url) {
     const urlParams = new URLSearchParams(url);
+
+    // if url does not contain both arguments, update url to contain them
+    let url_info = {};
     let task = urlParams.get('task');
+    let study = urlParams.get('study');
+
     if (!task) {
-        task = TASKS[Math.floor(Math.random()*NUM_TASKS)];
-        updateUrl({"task": task});
+        study = study || 'pilot';
+        const study_tasks = STUDY_BATCHES[study].tasks;
+        task = study_tasks[Math.floor(Math.random()*study_tasks.length)];
+        url_info['task'] = task;
+        url_info['study'] = urlParams.get('study') || 'pilot';
     }
-    return task;
+
+    if (!study) {
+        study = 'pilot';
+        url_info['study'] = 'pilot';
+        url_info['task'] = task;
+    }
+
+    if (!$.isEmptyObject(url_info)) {
+        updateUrl(url_info);
+    }
+    return { "task": task, "study": study };
 }
 
 /**
@@ -56,10 +62,17 @@ function updateUrl(response) {
     if ('URLSearchParams' in window) {
         var searchParams = new URLSearchParams(window.location.search);
         searchParams.set("task", response.task);
+        searchParams.set("study", response.study);
+
+        console.log(response);
+
         var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
-        load_new_task(response.task);
         document.title = "ARC Data: " + response.task.toString();
-        window.history.pushState({"task": response.task, "pageTitle": document.title}, "", newRelativePathQuery);
+
+        load_study(response.study);
+        load_new_task(response.task);
+
+        window.history.pushState({"task": response.task, "study": response.study, "pageTitle": document.title}, "", newRelativePathQuery);
     }
 }
 
@@ -72,15 +85,15 @@ function get_cache(key) {
 }
 function get_task_descs_cache(task, desc_type) {
     return new Promise(function (resolve, reject) {
-        let cached = get_cache(task);
+        let cached = get_cache(task+"_"+STUDY_BATCH);
         if (cached) {
             return resolve(cached);
         } else {
             get_task_descriptions(task, desc_type).then(function (descriptions) {
-                cache_object(task, descriptions);
+                cache_object(task+"_"+STUDY_BATCH, descriptions);
                 return resolve(descriptions);
             }).catch(error => {
-                errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
+                errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry. If the issue persists, please email samacqua@mit.edu");
                 console.error(error);
             });
         }
@@ -97,10 +110,13 @@ function load_new_task(task) {
         $(".test-io").empty();
         fill_div_with_IO($("#test-io"), TEST_PAIR.input, TEST_PAIR.output);
         fill_div_with_IO($("#test-io-preview"), TEST_PAIR.input, TEST_PAIR.output);
+        $('.pair_preview').addClass('neumorphic');
+
+        $(".neumorphic").on('click', zoom_on_div);
     });
 
     TASK_ID = task;
-    $("#task-title").html(`Task ${task}`);
+    $("#task-title").text(`Task ${task}`);
     get_task_descs_cache(task, DESCRIPTIONS_TYPE).then(function (descriptions) {
         descriptions.sort(sort_descs_bandit_score());
         PAST_DESCS = descriptions;
@@ -109,10 +125,14 @@ function load_new_task(task) {
         summarize_descriptions(descriptions);
 
     }).catch(error => {
-        errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry.");
+        errorMsg("Failed to load past task descriptions. Please ensure your internet connection, and retry. If the issue persists, please email samacqua@mit.edu");
         console.error(error);
     });
 }
+
+// ====
+// Stat charts
+// ====
 
 function merge_word_counts(word_count_1, word_count_2) {
     let wc = object_copy(word_count_1);
@@ -171,8 +191,8 @@ function create_word_count_graph(canvas_id, word_count, graph_title) {
         labels: labels,
         datasets: [{
             label: 'frequency',
-            backgroundColor: 'rgb(255, 99, 132)',
-            borderColor: 'rgb(255, 99, 132)',
+            backgroundColor: '#83aee9',
+            borderColor: '#83aee9',
             data: data_points,
         }]
     };
@@ -193,7 +213,10 @@ function create_word_count_graph(canvas_id, word_count, graph_title) {
                     }
                 }
             }]
-        }
+        },
+        legend: {
+            display: false
+         },
     };
 
     new Chart(ctx, {
@@ -223,9 +246,9 @@ function create_desc_success_bar(descs) {
     let data = {
         labels: labels,
         datasets: [{
-            label: '3-shot',
-            backgroundColor: 'rgb(255, 99, 132)',
-            borderColor: 'rgb(255, 99, 132)',
+            label: '3 attempts',
+            backgroundColor: '#83aee9',
+            borderColor: '#83aee9',
             data: data_points,
             suggestedMax: 1,
         }]
@@ -242,7 +265,10 @@ function create_desc_success_bar(descs) {
                     suggestedMax: 1
                 }
             }]
-        }
+        },
+        legend: {
+            display: false
+         },
     };
 
      new Chart(ctx, {
@@ -288,6 +314,8 @@ function get_word_counts(str) {
     return word_counts;
 }
 
+
+
 /**
  * Create an href on the left for each task description
  * @param {[Objects]} descriptions an array of all description objects
@@ -295,8 +323,8 @@ function get_word_counts(str) {
 function createDescsPager(descriptions) {
     $("#descriptions-pager").empty();
     $.each(descriptions, (i, desc) => {
-        let row = $(`<a class="list-group-item list-group-item-action" data-toggle="list" role="tab" 
-            href="description.html?task=${desc.task}&id=${desc.id}">Description ${i}</a>`);
+        let row = $(`<a class="list-group-item list-group-item-action neumorphic-list-item" data-toggle="list" role="tab" 
+            href="description.html?task=${desc.task}&id=${desc.id}&study=${STUDY_BATCH}">Description ${i}</a>`);
         $("#descriptions-pager").append(row);
     });
 
@@ -305,86 +333,7 @@ function createDescsPager(descriptions) {
     });
 }
 
-/**
- * load tasks into table so user can browse and choose a task
- */
-function load_tasks_to_browse() {
-    let study = STUDY_BATCHES[STUDY_BATCH];
-
-    get_all_descriptions_interactions_count(DESCRIPTIONS_TYPE).then(counts => {
-
-        load_tasks_test_pairs(STUDY_BATCHES[STUDY_BATCH].tasks).then(pairs => {
-
-            var num_descriptions_list = counts[0];
-            var num_interactions_list = counts[1];
-    
-            task_list = [];
-            for (i=0;i<study.tasks.length;i++) {
-                let task_num = study.tasks[i];
-                let num_descs = num_descriptions_list[i];
-                let num_interactions = num_interactions_list[i];
-    
-                task_list.push({'number': task_num, 'descriptions': num_descs, 'interactions': num_interactions});
-            }
-    
-            $('#table').bootstrapTable({
-                data: task_list,
-                columns: [ { 
-                    formatter : function(value,row,index) {
-                        let test_pair = pairs[row.number];
-                        let div = $("<div></div>");
-                        fill_div_with_IO(div, array_to_grid(test_pair.input), array_to_grid(test_pair.output));
-
-                        return div.wrap('<p/>').parent().html();;
-                    }
-                }, { sortable: true },{ sortable: true },{ sortable: true },  
-                {
-                field: 'operate',
-                title: 'Select',
-                align: 'center',
-                valign: 'middle',
-                clickToSelect: true,
-                formatter : function(value,row,index) {
-                    return '<button class="btn btn-secondary load-task-btn" onclick="send_to_new_task(' + row.number + ')" task="'+row.number+'" data-dismiss="modal">Select</button> ';
-                }
-                }
-            ]      
-            });
-        });
-    });
+function toggle_study() {
+    let new_study = STUDY_BATCH == 'pilot' ? 'pilot2' : 'pilot';
+    updateUrl({"task": TASK_ID, "study": new_study});
 }
-
-function send_to_new_task(task) {
-    document.location.href = `../explore?task=${task}`;
-}
-
-function load_tasks_test_pairs(tasks) {
-
-    return new Promise((resolve, reject) => {
-        get_task_paths().then(paths => {
-
-            let promises = [];
-
-            $.each(tasks, (_, task) => {
-                let path = paths[task];
-                let promise = new Promise((res, rej) => {
-                    $.getJSON('../' + path, json => {
-                        res({"task": task, "json": json.test[0]});
-                    });
-                });
-                promises.push(promise);
-            });
-
-            Promise.all(promises).then(data => {
-                let data_obj = {};
-                $.each(data, (_, val) => {
-                    const task = val.task;
-                    const json = val.json;
-                    data_obj[task] = json;
-                });
-
-                return resolve(data_obj);
-            });
-        });
-    });
-} 
