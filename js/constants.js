@@ -37,7 +37,7 @@ const STUDY_BATCHES = {
             messagingSenderId: "687250358397",
             appId: "1:687250358397:web:16ac92ca0995b5d117b114"
         },
-        tasks: [315, 144, 271, 156, 167, 125, 282, 245, 283, 159, 112, 164, 298, 323, 133, 352, 262, 325, 314, 260, 128, 109, 178, 34, 119, 10, 324, 320, 82, 302, 233, 278, 129, 24, 228, 182, 121, 360, 328, 331],
+        tasks: [208, 95, 76, 154, 49, 71, 310, 40, 2, 361, 321, 252, 330, 200, 275, 349, 379, 67, 97, 85, 279, 29, 120, 240, 126, 47, 376, 5, 134, 131, 25, 65, 235, 389, 326, 247, 338, 334, 58, 295, 168, 87, 70, 383, 193, 364, 311, 264, 232, 57, 253, 216, 207, 215, 175, 108, 309, 337, 212, 32, 340, 399, 117, 210, 318, 35, 63, 391, 381, 115],
         name: "Dev"
     },
     pilot: {
@@ -153,7 +153,7 @@ const GEN_QUIZ_QUESTIONS = [
         correctAnswer: 'a'
     },
     {
-        question: "If you give up, will you be given a bonus for completing that task?",
+        question: "If you do not try your best and just submit random answers to get through the study, will you be approved?",
         answers: {
             a: 'Yes.',
             b: 'No.',

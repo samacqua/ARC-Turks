@@ -539,12 +539,16 @@ function check_quiz() {
     var quizContainer = document.getElementById('quiz');
     var answerContainers = quizContainer.querySelectorAll('.answers');
 
+    let num_incorrect = 0;
     for (var i = 0; i < QUIZ_QUESTIONS.length; i++) {
         userAnswer = (answerContainers[i].querySelector('input[name=question' + i + ']:checked') || {}).value;
         if (userAnswer != QUIZ_QUESTIONS[i].correctAnswer) {
-            errorMsg("You incorrectly answered question " + (i + 1).toString() + ". Please retry the quiz.");
-            return;
+            num_incorrect++;     
         }
+    }
+    if (num_incorrect > 0) {
+        errorMsg("You incorrectly answered " + (num_incorrect).toString() + " questions. Please retry the quiz.");
+        return;
     }
 
     $('#quiz_modal').one('hidden.bs.modal', function () { $('#instructionsModal').modal('show'); }).modal('hide');
