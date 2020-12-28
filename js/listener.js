@@ -89,7 +89,6 @@ $(window).on('load', function () {
             console.error(error);
             errorMsg("Failed to load the task. Please ensure your internet connection and try again. If the issue persists, please email samacqua@mit.edu");
         });
-        set_instructions_modal(DESCRIPTIONS_TYPE);
         $('#instructionsModal').modal('show');
     }
 
@@ -155,22 +154,6 @@ $(document).ready(function () {
         idleTime = 0;
     });
 });
-
-function set_instructions_modal(desc_type) {
-    switch (desc_type) {
-        case "nl":
-            $("#instruction_reminder").text("For this task, you will do exactly what you did in the practice tasks: use a description to create a grid.");
-            break;
-        case "nl_ex":
-            $("#instruction_reminder").text("For this task, you will do exactly what you did in the practice tasks: use a description and an example translation to create a grid.");
-            break;
-        case "ex":
-            $("#instruction_reminder").text("For this task, you will do exactly what you did in the practice tasks: use an example of a pattern to create a grid.");
-            break;
-        default:
-            break;
-    }
-}
 
 var SENDING_TO_NEXT = false;    // while waiting for async calls, don't let user submit multiple times
 function check() {
@@ -257,7 +240,7 @@ function check() {
                 let mean = a / (a + b);
                 task_best.mean = mean;
 
-                store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), build_time, success = true, DESCRIPTIONS_TYPE, maxIdleTime, task_best, desc_to_update)
+                store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), build_time, true, DESCRIPTIONS_TYPE, maxIdleTime, task_best, desc_to_update, null, null)
                 .then(function () { 
                     set_user_complete_time(uid, build_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_listener`).then(function() {
                         next_task(TIMING_CREDIT / 60); 
@@ -311,11 +294,11 @@ function submit_description() {
 
 function used_all_attempts() {
     const build_time = ((new Date()) - START_DATE) / 1000;
-    errorMsg("Wrong answer. You have used all of your attempts. Bringing you to your next task...");
-
-    show_loader();
+    errorMsg("Wrong answer. You have used all of your attempts.");
 
     if (IS_VERIFICATION) {
+
+        show_loader();
                     
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
@@ -333,26 +316,67 @@ function used_all_attempts() {
         })
     .catch(function (error) { console.error('Error storing response ' + error); });
     } else {
-        get_description_by_id(TASK_ID, DESC_ID, DESCRIPTIONS_TYPE).then(desc_to_update => {
-            get_task_best_desc(TASK_ID, DESCRIPTIONS_TYPE).then(task_best => {
-                const priors = [1, 1];
-                let a = task_best.success_score + priors[0];
-                let b = task_best.attempts - task_best.success_score + priors[1];
-    
-                let mean = a / (a + b);
-                task_best.mean = mean;
-
-                store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), build_time, success = false, DESCRIPTIONS_TYPE, maxIdleTime, task_best, desc_to_update)
-                .then(function () { 
-                    set_user_complete_time(uid, build_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_listener_(fail)`).then(function() {
-                        next_task(TIMING_CREDIT / 60); 
-                    }).catch(function (error) { console.error('Error storing response ' + error); });
-                })
-                .catch(function (error) { console.error("Error storing response: " + error); });
-            }).catch(err => {
-                console.error(err);
-            });
-
-        });
+        show_recap_modal();
     }
+}
+
+function exit_recap_modal() {
+
+    let checked_val = $('input[name=exampleRadios]:checked', '#myForm').val();
+
+    if (checked_val == undefined) {
+        errorMsg("Please select an option about how good the description is.");
+        return;
+    }
+    $("#fail_recap_modal").modal('hide');
+
+    checked_val = (checked_val == 'true') ? true : false;    
+    show_loader();
+
+    const build_time = ((new Date()) - START_DATE) / 1000;
+
+    get_description_by_id(TASK_ID, DESC_ID, DESCRIPTIONS_TYPE).then(desc_to_update => {
+        get_task_best_desc(TASK_ID, DESCRIPTIONS_TYPE).then(task_best => {
+            
+            const priors = [1, 1];
+            let a = task_best.success_score + priors[0];
+            let b = task_best.attempts - task_best.success_score + priors[1];
+
+            let mean = a / (a + b);
+            task_best.mean = mean;
+
+            store_listener(DESC_ID, TASK_ID, uid, ATTEMPT_JSONS.length, ATTEMPT_JSONS, JSON.stringify(ATTEMPTS_SEQUENCE), build_time, success = false, DESCRIPTIONS_TYPE, maxIdleTime, task_best, desc_to_update, checked_val, $("#build_recap_textarea").val())
+            .then(function () { 
+                set_user_complete_time(uid, build_time, `${TASK_ID}_${DESCRIPTIONS_TYPE}_listener_(fail)`).then(function() {
+                    next_task(TIMING_CREDIT / 60); 
+                }).catch(function (error) { console.error('Error storing response ' + error); });
+            })
+            .catch(function (error) { console.error("Error storing response: " + error); });
+        }).catch(err => {
+            console.error(err);
+        });
+
+    });
+}
+
+function show_recap_modal() {
+    fill_div_with_IO($("#test-io-preview"), TEST_PAIR.input, TEST_PAIR.output);
+    show_attempts();
+    $("#grid_size_p_recap").text($("#grid_size_p").text());
+    $("#see_p_recap").text($("#see_p").text());
+    $("#do_p_recap").text($("#do_p").text());
+    $("#fail_recap_modal").modal('show');
+}
+
+function show_attempts() {
+
+    let attempts_json = ATTEMPT_JSONS;
+
+    $.each(attempts_json, (i, attempt) => {
+        attempt = JSON.parse(attempt);
+        let grid = array_to_grid(attempt);
+        let grid_div = $(`#attempt${i+1}`);
+        fill_div_with_grid(grid_div, grid);
+        fit_cells_to_container(grid_div, grid.height, grid.width);
+    });
 }

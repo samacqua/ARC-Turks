@@ -168,6 +168,9 @@ function resizeOutputGrid(replay=false) {
 
 function resetOutputGrid(replay=false) {
     CURRENT_OUTPUT_GRID = new Grid(3, 3);
+    jqGrid = $('#output_grid .editable_grid');
+    update_div_from_grid_state(jqGrid, CURRENT_OUTPUT_GRID);
+
     resizeOutputGrid(replay=true);
 
     if (!replay) {

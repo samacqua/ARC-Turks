@@ -420,7 +420,7 @@ function store_description(see_desc, do_desc, grid_desc, task_id, user_id, confi
     });
 }
 
-function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, action_sequence, total_time, success = true, type, max_idle_time, best_desc, past_desc) {
+function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, action_sequence, total_time, success, type, max_idle_time, best_desc, past_desc, selected_feedback, open_feedback) {
     /**
      * store info for listener task in firebase
      * returns promise so that can transition to next task after storing
@@ -432,7 +432,7 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, acti
 
         // store attempt use in description doc's attempts collection
         const desc_use_ref = task_doc.collection("descriptions").doc(desc_id).collection("uses").doc();
-        batch.set(desc_use_ref, {
+        let build_data = {
             'num_attempts': attempts,
             'attempt_jsons': attempt_jsons,
             'action_sequence': action_sequence,
@@ -441,8 +441,17 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, acti
             'max_idle_time': parseInt(max_idle_time),
 
             'uid': user_id,
-            'time': parseInt(total_time)
-        });
+            'time': total_time
+        };
+
+        if (!success) {
+            build_data['desc_good_faith'] = selected_feedback;
+            if (open_feedback != '') {
+                build_data['desc_feedback'] = open_feedback;
+            }
+        }
+
+        batch.set(desc_use_ref, build_data);
 
         // increment number interactions for task
         const increment = firebase.firestore.FieldValue.increment(1);
@@ -497,7 +506,7 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, acti
         // add timing
         const timing_ref = db.collection(type + "_tasks").doc("timing");
         let timing_data = {};
-        timing_data[`${task_id}_${desc_id}_attempts`] = firebase.firestore.FieldValue.arrayUnion(parseInt(total_time)+(Math.random()-0.5));
+        timing_data[`${task_id}_${desc_id}_attempts`] = firebase.firestore.FieldValue.arrayUnion(total_time);
         batch.update(timing_ref, timing_data);
 
         batch.commit().then(function () {
@@ -684,7 +693,7 @@ function give_up_description(task_id, type) {
             desc_gave_up_count: increment
         });
 
-        // if gave up, increment 1 minute of effort
+        // increment 1 minute of effort
         const timing_doc_ref = db.collection(type + "_tasks").doc("timing");
         const time_increment = firebase.firestore.FieldValue.increment(60);
         const key = task_id.toString() + "_veto";
@@ -704,6 +713,7 @@ function store_bug_report() {
     return new Promise(function (resolve, reject) {
         db.collection("bug_reports").add({
             'description': $("#bug_desc_textarea").val(),
+            'email': $("#email-input").val(),
             'timestamp': firebase.firestore.FieldValue.serverTimestamp(),
             'uid': sessionStorage.getItem('uid'),
             'url': window.location.href,
