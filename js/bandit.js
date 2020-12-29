@@ -50,14 +50,16 @@ function select_casino(type) {
                     let variance = super_a*super_b / ((super_a+super_b)**2 * (super_a+super_b+1));
                     cas_scores_unweighted[task_id] = variance;
                     
-                    if (tasks_done.includes(task_id)) {
-                        variance = -1;
-                    }
                     if (efforts_ratio.hasOwnProperty(task_id)) {
                         variance /= efforts_ratio[task_id];
                     } else {
                         variance = Infinity;
                     }
+
+                    if (tasks_done.includes(task_id)) {
+                        variance = -1;
+                    }
+
                     cas_scores[task_id] = variance;
                 });
 
