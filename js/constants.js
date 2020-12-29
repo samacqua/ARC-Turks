@@ -15,6 +15,17 @@ const SPEAKER_TIME = 346.4/60;
 const BUILDER_TIME = 103.0/60;
 
 
+// =======
+// Bandit
+// =======
+
+const PRIORS = [1, 1];
+function suc_score_addition(num_attempts) {
+    // return 1/num_attempts;
+    // 1st attempt = 1, 2nd = 4/5, 3rd = 3/5
+    return (6 - num_attempts) / 5;
+}
+
 // ========
 // Partial Credit
 // ========

@@ -466,7 +466,7 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, acti
             display_num_attempts: increment
         };
         if (success) {
-            const success_inc = firebase.firestore.FieldValue.increment(1/attempts);
+            const success_inc = firebase.firestore.FieldValue.increment(suc_score_addition(attempts));
             desc_update_data['display_num_success'] = increment;
             desc_update_data['bandit_success_score'] = success_inc;
         }
@@ -478,12 +478,14 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, acti
         summary_data[`${task_id}_interactions_count`] = increment;
 
         // if desc is now task's best desc, update it in summary doc
-        const priors = [1, 1];
-        const new_suc_score = past_desc['bandit_success_score'] + 1/attempts;
+        let new_suc_score = past_desc['bandit_success_score'];
+        if (success) {
+            new_suc_score += suc_score_addition(attempts);
+        }
         const new_attempts = past_desc['bandit_attempts'] + 1;
 
-        let a = new_suc_score + priors[0];
-        let b = new_attempts - new_suc_score + priors[1];
+        let a = new_suc_score + PRIORS[0];
+        let b = new_attempts - new_suc_score + PRIORS[1];
         let desc_new_mean = a / (a + b);
 
         if (desc_new_mean >= best_desc.mean || best_desc.id == desc_id) {
@@ -500,7 +502,7 @@ function store_listener(desc_id, task_id, user_id, attempts, attempt_jsons, acti
         // update a and b in bandit summary
         const descs_summary_ref = db.collection(type + "_tasks").doc("descs_bandit");
         let bandit_data = {};
-        bandit_data[`${task_id}_${desc_id}`] = [a-priors[0], b-priors[1]];
+        bandit_data[`${task_id}_${desc_id}`] = [a-PRIORS[0], b-PRIORS[1]];
         batch.update(descs_summary_ref, bandit_data);
 
         // add timing

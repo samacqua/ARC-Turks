@@ -233,9 +233,8 @@ function check() {
         get_description_by_id(TASK_ID, DESC_ID, DESCRIPTIONS_TYPE).then(desc_to_update => {
             get_task_best_desc(TASK_ID, DESCRIPTIONS_TYPE).then(task_best => {
 
-                const priors = [1, 1];
-                let a = task_best.success_score + priors[0];
-                let b = (task_best.attempts - task_best.success_score) + priors[1];
+                let a = task_best.success_score + PRIORS[0];
+                let b = (task_best.attempts - task_best.success_score) + PRIORS[1];
     
                 let mean = a / (a + b);
                 task_best.mean = mean;
@@ -338,9 +337,8 @@ function exit_recap_modal() {
     get_description_by_id(TASK_ID, DESC_ID, DESCRIPTIONS_TYPE).then(desc_to_update => {
         get_task_best_desc(TASK_ID, DESCRIPTIONS_TYPE).then(task_best => {
             
-            const priors = [1, 1];
-            let a = task_best.success_score + priors[0];
-            let b = task_best.attempts - task_best.success_score + priors[1];
+            let a = task_best.success_score + PRIORS[0];
+            let b = task_best.attempts - task_best.success_score + PRIORS[1];
 
             let mean = a / (a + b);
             task_best.mean = mean;

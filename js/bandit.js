@@ -30,17 +30,16 @@ function select_casino(type) {
                     });
 
                     // sort by mean and slice so only top half
-                    let priors = [1, 1];
                     function band_mean(i, j) {
-                        return (i + priors[0]) / (i + priors[0] + priors[1] + j);
+                        return (i + PRIORS[0]) / (i + PRIORS[0] + PRIORS[1] + j);
                     }
                     task_best_arms.sort((c,d) => band_mean(c.a, c.b) < band_mean(d.a, d.b) ? 1 : -1);
 
                     let half_i = Math.ceil(task_best_arms.length / 2);
                     let best_half = task_best_arms.splice(0, half_i);
 
-                    let super_a = priors[0];
-                    let super_b = priors[1];
+                    let super_a = PRIORS[0];
+                    let super_b = PRIORS[1];
 
                     for (i=0;i<best_half.length;i++) {
                         let arm = best_half[i];
@@ -224,11 +223,10 @@ function select_arm(task, type) {
             get_task_descriptions(task, type).then(descriptions => {
 
                 var best_mean = 0;
-                const priors = [1, 1];
                 // calculate successfulness mean of best description
                 for (i = 0; i < descriptions.length; i++) {
-                    const a = descriptions[i]['bandit_success_score'] + priors[0];
-                    const b = descriptions[i]['bandit_attempts'] - descriptions[i]['bandit_success_score'] + priors[1];
+                    const a = descriptions[i]['bandit_success_score'] + PRIORS[0];
+                    const b = descriptions[i]['bandit_attempts'] - descriptions[i]['bandit_success_score'] + PRIORS[1];
                     const mean = a / (a + b);
                     if (mean > best_mean) {
                         best_mean = mean;
@@ -245,8 +243,8 @@ function select_arm(task, type) {
                 var ucbs = [];
                 for (i = 0; i < descriptions.length; i++) {
 
-                    const a = descriptions[i]['bandit_success_score'] + priors[0];
-                    const b = descriptions[i]['bandit_attempts'] - descriptions[i]['bandit_success_score'] + priors[1];
+                    const a = descriptions[i]['bandit_success_score'] + PRIORS[0];
+                    const b = descriptions[i]['bandit_attempts'] - descriptions[i]['bandit_success_score'] + PRIORS[1];
 
                     const mean = a / (a + b);
                     const variance = (a * b) / ((a + b)**2 * (a + b + 1));
