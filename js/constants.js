@@ -4,15 +4,15 @@
 
 // expected time for each portion of the interface
 const TOTAL_TIME = 45;
-const WALKTHROUGH_TIME = 146.1/60;
-const CONSENT_INSTRUCT_TIME = 53.9/60;
-const QUIZ_TIME = 39.6/60;
+const WALKTHROUGH_TIME = 136.8/60;
+const CONSENT_INSTRUCT_TIME = 45.4/60;
+const QUIZ_TIME = 40.2/60;
 const INSTRUCTIONS_TIME = WALKTHROUGH_TIME + CONSENT_INSTRUCT_TIME + QUIZ_TIME;
 
-const PRAC_TASK_TIME = 91.6/60;
+const PRAC_TASK_TIME = 106.0/60;
 
-const SPEAKER_TIME = 346.4/60;
-const BUILDER_TIME = 103.0/60;
+const SPEAKER_TIME = 340.5/60;
+const BUILDER_TIME = 102.0/60;
 
 
 // =======
@@ -31,7 +31,7 @@ function suc_score_addition(num_attempts) {
 // ========
 
 const SKIP_PART_CRED = 0.10;
-const SPEAKER_FAIL_PART_CRED = 0.50;
+const SPEAKER_FAIL_PART_CRED = 1.0;
 
 // ========
 // Tasks
