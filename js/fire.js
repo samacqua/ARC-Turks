@@ -713,8 +713,14 @@ function give_up_description(task_id, type) {
 
 function store_bug_report() {
     return new Promise(function (resolve, reject) {
+
+        const issue_desc = $("#bug_desc_textarea").val();
+        if (issue_desc == '') {
+            return resolve();
+        }
+
         db.collection("bug_reports").add({
-            'description': $("#bug_desc_textarea").val(),
+            'description': issue_desc,
             'email': $("#email-input").val(),
             'timestamp': firebase.firestore.FieldValue.serverTimestamp(),
             'uid': sessionStorage.getItem('uid'),
@@ -733,7 +739,9 @@ function store_bug_report() {
 function store_feedback(description, date, uid) {
     return new Promise(function (resolve, reject) {
 
-        console.log(description, date, uid);
+        if (description == '') {
+            return resolve();
+        }
 
         db.collection("feedback").add({
             'description': description,
