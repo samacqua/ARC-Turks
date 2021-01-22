@@ -406,20 +406,22 @@ function filterOutliers(someArray, absMax=null, replace=null) {
      * is not an int, then really you should average the two elements on either 
      * side to find q1.
      */     
-    var q1 = values[Math.ceil((values.length / 4))];
-    // Likewise for q3. 
-    var q3 = values[Math.floor((values.length * (3 / 4)))];
-    var iqr = q3 - q1;
-
-    // Then find min and max values
-    var maxValue = q3 + iqr*1.5;
-    var minValue = q1 - iqr*1.5;
 
     // if less than 4 datapoints, don't bother trying to find outliers
     var filteredValues = array_copy(values);
     if (values.length > 4) {
+
+        var q1 = values[Math.ceil((values.length / 4))];
+        // Likewise for q3. 
+        var q3 = values[Math.floor((values.length * (3 / 4)))];
+        var iqr = q3 - q1;
+    
+        // Then find min and max values
+        var maxValue = q3 + iqr*1.5;
+        var minValue = q1 - iqr*1.5;
+
         if (replace) {
-            filteredValues = values.map(x => ((x <= maxValue) && (x >= minValue)) ? replace : x);
+            filteredValues = values.map(x => ((x <= maxValue) && (x >= minValue)) ? x : replace);
         } else {
             // Then filter anything beyond or beneath these values.
             filteredValues = values.filter(function(x) {
@@ -431,7 +433,7 @@ function filterOutliers(someArray, absMax=null, replace=null) {
     // constant upper bound
     if (absMax) {
         if (replace) {
-            filteredValues = values.map(x => (x <= absMax) ? x : replace);
+            filteredValues = filteredValues.map(x => (x <= absMax) ? x : replace);
         } else {
             filteredValues = filteredValues.filter(function(x) {
                 return x <= absMax;

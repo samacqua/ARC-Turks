@@ -19,6 +19,7 @@ function select_casino(type) {
                 // calculate variance (scaled by effort ratio) of best descriptions of each task, ignoring tasks already done
                 let cas_scores = {};
                 let cas_scores_unweighted = {}; // unused, for dev
+                let bandit_arm_vals = {};   // unused, for dev
                 let casinos = parse_bandit_doc(bandit_doc);
                 const tasks_done = (sessionStorage.getItem('tasks_completed') || "").split(',');
 
@@ -49,6 +50,7 @@ function select_casino(type) {
 
                     let variance = super_a*super_b / ((super_a+super_b)**2 * (super_a+super_b+1));
                     cas_scores_unweighted[task_id] = variance;
+                    bandit_arm_vals[task_id] = [super_a, super_b];
                     
                     if (efforts_ratio.hasOwnProperty(task_id)) {
                         variance /= efforts_ratio[task_id];
@@ -66,6 +68,7 @@ function select_casino(type) {
                 // console.log("all efforts:", all_efforts);
                 // console.log("effort ratios:", efforts_ratio);
                 // console.log("casino scores:", cas_scores_unweighted);
+                // console.log("casino vals:", bandit_arm_vals);
 
                 // var sortable = [];
                 // for (var score in cas_scores) {
@@ -83,6 +86,12 @@ function select_casino(type) {
                 //     return a[1] - b[1];
                 // });
                 // console.log("sorted casino scores unweighted by time:", sortable);
+
+                // var sorted_keys = [];
+                // $.each(sortable, function(key, value) {
+                //     sorted_keys.push(value[0]);
+                // });
+                // console.log(JSON.stringify(sorted_keys));
 
                 let max = -Infinity;
                 let argmax = [];
