@@ -67,8 +67,9 @@ function select_casino(type) {
 
                 // console.log("all efforts:", all_efforts);
                 // console.log("effort ratios:", efforts_ratio);
-                // console.log("casino scores:", cas_scores_unweighted);
-                // console.log("casino vals:", bandit_arm_vals);
+                // console.log("casino scores unweighted by time:", cas_scores_unweighted);
+                // console.log("casino bandit vals:", bandit_arm_vals);
+                // console.log("casino scores:", cas_scores);
 
                 // var sortable = [];
                 // for (var score in cas_scores) {
@@ -246,7 +247,7 @@ function select_arm(task, type) {
 
                 // check if should sample new arm
                 const task_difficulty = (1 - best_mean);
-                if (num_arms <= Math.sqrt(num_interactions) ** task_difficulty) {
+                if (num_arms <= num_interactions ** task_difficulty) {
                     return resolve(-1);
                 }
 
