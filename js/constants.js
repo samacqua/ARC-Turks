@@ -128,23 +128,34 @@ const STUDY_BATCHES = {
     },
     batch4: {
         config: {
-            apiKey: "AIzaSyAQeL-WUI4Kk7LkItj-pWRLKokl7USIbkM",
-            authDomain: "arc-batch-4.firebaseapp.com",
-            databaseURL: "https://arc-batch-4-default-rtdb.firebaseio.com",
-            projectId: "arc-batch-4",
-            storageBucket: "arc-batch-4.appspot.com",
-            messagingSenderId: "490648088932",
-            appId: "1:490648088932:web:08687c5abb4d74a63b4a71"
+            apiKey: "AIzaSyC2-WdZfyYjuMRroa29Hy1jU24tmAdsmLE",
+            authDomain: "arc-batch-4-42c9a.firebaseapp.com",
+            databaseURL: "https://arc-batch-4-42c9a-default-rtdb.firebaseio.com",
+            projectId: "arc-batch-4-42c9a",
+            storageBucket: "arc-batch-4-42c9a.appspot.com",
+            messagingSenderId: "821659442296",
+            appId: "1:821659442296:web:6d5d73d7d019b88540a18d"
         },
-        tasks: [231, 66, 64, 287, 36, 68, 205, 319, 345, 56, 317, 306, 50, 327, 374, 185, 362, 173, 161, 
-            274, 18, 347, 397, 174, 158, 98, 101, 372, 90, 386, 102, 358, 138, 214, 280, 263, 304, 146, 
-            236, 225, 370, 242, 224, 276, 110, 187, 336, 17, 130, 238, 116, 369, 51, 223, 366, 54, 199, 
-            204, 136, 118, 371, 86, 151, 132, 177, 290, 160, 251, 296, 357, 39, 96, 237, 183, 170, 78, 
-            220, 292, 218, 8, 11, 209, 333, 344, 300, 142, 176, 79, 127, 21, 353, 398, 84, 342, 171, 206, 
-            217, 234, 22, 113, 37, 241, 257, 394, 172, 250, 335, 272, 19, 188, 148, 393, 378, 157, 30, 
-            180, 33, 196, 107, 184, 163, 229, 105, 367, 179, 80, 316, 387, 313, 46, 83, 248, 155, 27, 341, 
-            267, 41, 301, 192, 380, 284, 72, 48, 346, 222, 213, 23, 147, 9, 75],
+        tasks: [231, 66, 64, 287, 36, 68, 205, 319, 345, 56, 317, 306, 50, 327, 374, 185, 362, 173, 161, 274],
         name: "Batch 4"
+    },
+    batch5: {
+        config: {
+            apiKey: "AIzaSyBn2K9VHSKi9jYJANItyewx1OrGgs-MQ0A",
+            authDomain: "arc-batch-5.firebaseapp.com",
+            databaseURL: "https://arc-batch-5-default-rtdb.firebaseio.com",
+            projectId: "arc-batch-5",
+            storageBucket: "arc-batch-5.appspot.com",
+            messagingSenderId: "1061768553175",
+            appId: "1:1061768553175:web:c755c6ad70c3f6397e0692"
+          },
+        tasks: [18, 347, 397, 174, 158, 98, 101, 372, 90, 386, 102, 358, 138, 214, 280, 263, 304, 146, 236, 225, 370, 242,
+            224, 276, 110, 187, 336, 17, 130, 238, 116, 369, 51, 223, 366, 54, 199, 204, 136, 118, 371, 86, 151, 132,
+            177, 290, 160, 251, 296, 357, 39, 96, 237, 183, 170, 78, 220, 292, 218, 8, 11, 209, 333, 344, 300, 142, 176,
+            79, 127, 21, 353, 398, 84, 342, 171, 206, 217, 234, 22, 113, 37, 241, 257, 394, 172, 250, 335, 272, 19, 188,
+            148, 393, 378, 157, 30, 180, 33, 196, 107, 184, 163, 229, 105, 367, 179, 80, 316, 387, 313, 46, 83, 248, 155,
+            27, 341, 267, 41, 301, 192, 380, 284, 72, 48, 346, 222, 213, 23, 147, 9, 75],
+        name: "Batch 5"
     }
 }
 
