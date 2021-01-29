@@ -2,6 +2,31 @@ var DESCRIPTIONS_TYPE = "nl";  // the type of descriptions ("nl", "ex", or "nl_e
 var PAGE;
 var START_DATE;
 
+function print_timings(desc_type, is_desc) {
+    const timing_credit = is_desc ? SPEAKER_TIME*60 : BUILDER_TIME*60
+    get_timing_doc(desc_type).then(timing_doc => {
+
+        $.each(TASKS, function(i, task) {
+            console.log(task);
+            var task_times = [];
+            $.each(timing_doc, function(key, value) {
+                if (is_desc) {
+                    if (key.includes(task.toString()) && key.includes("desc")) {
+                        task_times.push(value);
+                    }
+                } else {
+                    if (key.includes(task.toString()) && key.includes("attempts")) {
+                        task_times.push(...value);
+                    }
+                }
+            });
+            weighted_credit = weight_timing(task_times, timing_credit, summed=false);
+        });
+    }).catch(error => {
+        console.error("Error getting past description timing: ", error);
+    });
+}
+
 function add_grid_hover_listeners() {
     $(".pair_preview").hover(function() {
         $(this).css("background-color", "rgb(160, 160, 160)");
@@ -431,7 +456,7 @@ function filterOutliers(someArray, absMax=null, replace=null) {
     }
 
     // constant upper bound
-    if (absMax) {
+    if (absMax != null) {
         if (replace) {
             filteredValues = filteredValues.map(x => (x <= absMax) ? x : replace);
         } else {
@@ -453,7 +478,9 @@ function filterOutliers(someArray, absMax=null, replace=null) {
  */
 function weight_timing(times, avg, summed=true) {
 
-    let lambda = Math.exp(-times.length/5); // very arbitrary, vals seemed to line up with intuition: https://www.desmos.com/calculator/u78jjqkhfm
+    let lambda = Math.exp(-times.length/10); // very arbitrary, vals seemed to line up with intuition: https://www.desmos.com/calculator/u78jjqkhfm
+
+    times = filterOutliers(times, 3*avg, null);
 
     let avgd = lambda * avg + (1 - lambda) * avg_array(times, avg);
 
