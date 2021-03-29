@@ -57,6 +57,16 @@ $(window).on('load', function () {
     QUIZ_QUESTIONS = GEN_QUIZ_QUESTIONS;
     var quizContainer = document.getElementById('quiz');
     showQuestions(QUIZ_QUESTIONS, quizContainer);
+
+    // check if study complete
+    check_if_study_complete().then((complete) => {
+        if (complete) {
+            setTimeout(function () {
+                $('#consentModal').modal('hide');
+                $('#study_complete_modal').modal('show');
+            }, 500);
+        }
+    });
 });
 
 // get the max amount of time doing nothing (to nearest 5 seconds)

@@ -118,7 +118,31 @@ function load_new_task(task) {
     TASK_ID = task;
     $("#task-title").text(`Task ${task}`);
     get_task_descs_cache(task, DESCRIPTIONS_TYPE).then(function (descriptions) {
-        descriptions.sort(sort_descs_bandit_score());
+
+        function sortBy(field, reverse=false) {
+            return function(a, b) {
+              if (a[field] > b[field]) {
+                return reverse ? -1 : 1;
+              } else if (a[field] < b[field]) {
+                return reverse ? 1 : -1;
+              }
+              return 0;
+            };
+        }
+
+        function sortByTimestamp(reverse=false) {
+            return function(a, b) {
+                if (a['timestamp']['seconds'] > b['timestamp']['seconds']) {
+                  return reverse ? -1 : 1;
+                } else if (a['timestamp']['seconds'] < b['timestamp']['seconds']) {
+                  return reverse ? 1 : -1;
+                }
+                return 0;
+              };
+        }
+
+        descriptions.sort(sortByTimestamp());
+
         PAST_DESCS = descriptions;
         createDescsPager(descriptions);
 

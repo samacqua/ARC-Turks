@@ -2,6 +2,19 @@ var DESCRIPTIONS_TYPE = "nl";  // the type of descriptions ("nl", "ex", or "nl_e
 var PAGE;
 var START_DATE;
 
+
+function check_if_study_complete() {
+    return new Promise(function (resolve, reject) {
+        select_casino('nl').then(cas => {
+            if (cas == -1) {
+                return resolve(true);
+            } else {
+                return resolve(false);
+            }
+        });
+    });
+}
+
 function print_timings(desc_type, is_desc) {
     const timing_credit = is_desc ? SPEAKER_TIME*60 : BUILDER_TIME*60
     get_timing_doc(desc_type).then(timing_doc => {

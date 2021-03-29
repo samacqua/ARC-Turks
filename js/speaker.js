@@ -77,10 +77,15 @@ $(window).on('load', function () {
         // get word vecs from db and cache them
         for (i=0;i<words.length;i++) {
             let word = words[i];
-            GOOD_WORDS.push(word.toLowerCase());
-            get_word_vec_cache(word);
+
+            // must be non-empty strings and can't contain ".", "#", "$", "[", or "]"
+            if (word.match(/^[0-9a-z]+$/)) {
+                GOOD_WORDS.push(word.toLowerCase());
+                get_word_vec_cache(word);
+            }
         }
     }).catch(error => {
+        console.error(error);
         errorMsg("Could not load words that can been used. Please check your internet connection and reload the page. If the issue persists, please email samacqua@mit.edu");
     });
 });

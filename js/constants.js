@@ -14,6 +14,7 @@ const PRAC_TASK_TIME = 106.0/60;
 const SPEAKER_TIME = 340.5/60;
 const BUILDER_TIME = 102.0/60;
 
+const STOP_AFTER_SUCCESS = true;
 
 // =======
 // Bandit
@@ -156,7 +157,23 @@ const STUDY_BATCHES = {
             148, 393, 378, 157, 30, 180, 33, 196, 107, 184, 163, 229, 105, 367, 179, 80, 316, 387, 313, 46, 83, 248, 155,
             27, 341, 267, 41, 301, 192, 380, 284, 72, 48, 346, 222, 213, 23, 147, 9, 75],
         name: "Batch 5"
-    }
+    },
+    batch6: {
+        config: {
+            apiKey: "AIzaSyDFuYpJPi_ubrb0nQqtrHmNjpgnsdrt7S0",
+            authDomain: "arc-batch-6.firebaseapp.com",
+            databaseURL: "https://arc-batch-6-default-rtdb.firebaseio.com",
+            projectId: "arc-batch-6",
+            storageBucket: "arc-batch-6.appspot.com",
+            messagingSenderId: "493207405839",
+            appId: "1:493207405839:web:55abe115da57f6a1c9ea7a"
+          },
+        tasks: [0, 2, 3, 4, 6, 10, 11, 17, 18, 20, 33, 42, 45, 53, 54, 70, 71, 72, 81, 85, 93, 100, 105, 106, 107, 108, 
+            109, 116, 132, 137, 142, 147, 153, 157, 160, 167, 172, 174, 177, 184, 189, 199, 206, 208, 210, 216, 220, 224, 
+            225, 237, 239, 256, 259, 261, 265, 267, 268, 273, 279, 280, 284, 312, 313, 315, 323, 326, 327, 331, 340, 350, 
+            359, 375, 382, 385, 386, 394, 396, 397, 398],
+        name: "Batch 6"
+    },
 }
 
 var TASKS = STUDY_BATCHES['dev'];

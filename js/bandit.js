@@ -62,6 +62,10 @@ function select_casino(type) {
                         variance = -1;
                     }
 
+                    if (super_a - PRIORS[0] > 0 && STOP_AFTER_SUCCESS) {  // if task has a successful communication, ignore it
+                        variance = -1;
+                    }
+
                     cas_scores[task_id] = variance;
                 });
 

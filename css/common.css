@@ -18,6 +18,10 @@ video {
     margin: 0;
 }
 
+p {
+    background-color: inherit;
+}
+
 /* Loading Animation */
 
 @keyframes spinner-border {
