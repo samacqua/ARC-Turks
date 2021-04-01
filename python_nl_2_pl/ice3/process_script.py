@@ -30,13 +30,14 @@ for line in lines:
 task_proglabels = []
 for task_number in task_func:
     func_str = task_func[task_number]
-    # get the prims again, deduplicate with set
-    func_prims = set(re.findall(r'[a-zA-Z]+\(', func_str))
+    # get the prims again
+    func_prims = re.findall(r'[a-zA-Z]+\(', func_str)
+    prog_length = len(func_prims)
     # generate the multi-label class for the particular task_number
-    labels = sorted([primitives.index(prim) for prim in func_prims])
-    task_proglabels.append((task_number, labels))
+    labels = sorted([primitives.index(prim) for prim in set(func_prims)])
+    task_proglabels.append((task_number, prog_length, labels))
 
 print ("the primitive name list")
 print (primitives)
-print ("the small set of multi-labels, format: [(task_id_str, [primitive_name_id.. ]) .. ]")
+print ("the small set of multi-labels, format: [(task_id_str, task_prog_length, [primitive_name_id.. ]) .. ]")
 print (task_proglabels)
