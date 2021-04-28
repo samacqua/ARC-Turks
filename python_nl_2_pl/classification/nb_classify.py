@@ -69,8 +69,6 @@ for words, concepts in D_train:
     Concepts_train = Concepts_train.union(concepts)
     Words_train = Words_train.union(words)
 
-# @ sam you should use these following objects for your modeling
-
 # print (Concepts_train)
 # print (D_train)
 # print (D_test)
@@ -125,31 +123,28 @@ for words, concepts in D_train:
 # it is built from the dictionary c_to_words
 # i.e. if word occured 3 times in the list of words of length 100
 # then P(word | concept) = 3 / 100
-prob_table = dict()
+nb_prob_table = dict()
 for c in c_to_words:
     c_denum = len(c_to_words[c])
     for word in Words_train:
         word_freq = c_to_words[c].count(word)
-        prob_table[(c, word)] = word_freq / c_denum
+        nb_prob_table[(c, word)] = word_freq / c_denum
 
 # print (prob_table)
 
 # wrap the probability table around a function to give a smoothing for unseen words
 # so basically the same as prob_table, except has a small default value for unseen words
-def get_w_given_t(w, c):
-    if (c,w) not in prob_table:
-        return 0.0001
-    else:
-        return 0.0001 + prob_table[(c,w)]
+def get_w_given_t(w, c, prob_table, df=0.0001):
+    return prob_table.get((c, w), 0) + df
 
 # given a set of words, what is the probability that 
 # concept c will generate this set, i.e. P(words | c) ?
 # it is naive bayes, so it is P(wrd1 | c) * ... * P(wrdn | c)
 # we model it as logP(wrd1 | c) + ... + logP(wrdn | c)
-def get_logpr_words_given_c(words, c):
+def get_logpr_words_given_c(words, c, prob_table, df=0.0001):
     logpr = 0
     for wrd in words:
-        logpr += np.log(get_w_given_t(wrd, c))
+        logpr += np.log(get_w_given_t(wrd, c, prob_table, df))
     return logpr
 
 # given a set of words, we rank ALL the concepts in Concept_train
@@ -157,7 +152,7 @@ def get_logpr_words_given_c(words, c):
 def nb_ranker(words):
     score_c_list = []
     for c in Concepts_train:
-        score_c_list.append((get_logpr_words_given_c(words, c), c))
+        score_c_list.append((get_logpr_words_given_c(words, c, nb_prob_table), c))
     return [x[1] for x in reversed(sorted(score_c_list))]
 
 print ('performance of the naive bayes ranker')
@@ -176,7 +171,7 @@ for words, concepts in D_train:
         word_to_concepts[w] |= concepts
 
 # create term-frequency-list
-tf = prob_table
+tf = nb_prob_table
 
 # create inverse-document frequency
 idf = dict()
@@ -184,30 +179,21 @@ D = len(Concepts_train) # num concepts
 for word in word_to_concepts:
     num_concepts = len(word_to_concepts[word])    # number of concepts that the word maps to
     for concept in Concepts_train:
-        idf[(concept, word)] = np.log(D / num_concepts)     # log(total num concepts / num concepts w/ word)
+        idf[(concept, word)] = D / num_concepts     # total num concepts / num concepts w/ word
 
 # calculate TD-IDF
 tfidf = dict()
-for key in prob_table:
+for key in tf:
     tfidf[key] = tf[key] * idf[key]
 
-def get_tfidf(w, c):
-    return 0.0001 + tfidf.get((c,w), 0)
-
-def get_logpr_words_given_c_tfidf(words, c):
-    logpr = 0
-    for wrd in words:
-        logpr += np.log(get_tfidf(wrd, c))
-    return logpr
-
-def nb_ranker(words):
+def tfidf_ranker(words):
     score_c_list = []
     for c in Concepts_train:
-        score_c_list.append((get_logpr_words_given_c_tfidf(words, c), c))
+        score_c_list.append((get_logpr_words_given_c(words, c, tfidf), c))
     return [x[1] for x in reversed(sorted(score_c_list))]
 
 print ('performance of the TF-IDF ranker')
-evaluation(nb_ranker, repetition = 1)
+evaluation(tfidf_ranker, repetition = 1)
 
 # ======= BEGIN OF NAIVE BAYES MODELING w/ Word-embedding =======
 
@@ -242,11 +228,11 @@ for word1, vec1 in word_embeddings.items():
           tot_similarity += similarity(vec1, vec2)
 avg_similarity = tot_similarity / len(word_embeddings)**2
 
-print("Average similarity between a pair of words:", avg_similarity)
+print("\taverage similarity between a pair of words:", avg_similarity)
 
 # instead of P(word | concept), now using fuzzy P(word | concept) 
 # = P(word | concept) + alpha * sum(P(word_i | concept) * similarity(word_i, word))
-prob_table = dict()
+w2v_prob_table = dict()
 alpha = 1
 for c in c_to_words:
     c_denum = len(c_to_words[c])
@@ -261,37 +247,19 @@ for c in c_to_words:
             except KeyError:    # if one of the words not in the w2v, just use avg similarity
                 weighted_sim_word_freq += avg_similarity
 
-        prob_table[(c, word)] = (word_count + alpha * weighted_sim_word_freq) / (c_denum + tot_similarity*alpha)
-        assert prob_table[(c, word)] > 0
+        w2v_prob_table[(c, word)] = (word_count + alpha * weighted_sim_word_freq) / (c_denum + tot_similarity*alpha)
+        assert w2v_prob_table[(c, word)] > 0
 
     for word in Words_train - set(c_to_words[c]):
-        prob_table[(c, word)] = 0
-
-# wrap the probability table around a function to give a smoothing for unseen words
-# so basically the same as prob_table, except has a small default value for unseen words
-def get_w_given_t(w, c):
-    if (c,w) not in prob_table:
-        return 0.0001
-    else:
-        return 0.0001 + prob_table[(c,w)]
-
-# given a set of words, what is the probability that 
-# concept c will generate this set, i.e. P(words | c) ?
-# it is naive bayes, so it is P(wrd1 | c) * ... * P(wrdn | c)
-# we model it as logP(wrd1 | c) + ... + logP(wrdn | c)
-def get_logpr_words_given_c(words, c):
-    logpr = 0
-    for wrd in words:
-        logpr += np.log(get_w_given_t(wrd, c))
-    return logpr
+        w2v_prob_table[(c, word)] = 0
 
 # given a set of words, we rank ALL the concepts in Concept_train
 # in descending logPr according to logP(words | c)
-def nb_ranker(words):
+def w2v_nb_ranker(words):
     score_c_list = []
     for c in Concepts_train:
-        score_c_list.append((get_logpr_words_given_c(words, c), c))
+        score_c_list.append((get_logpr_words_given_c(words, c, w2v_prob_table), c))
     return [x[1] for x in reversed(sorted(score_c_list))]
 
-print ('performance of the w2v naive bayes ranker')
-evaluation(nb_ranker, repetition = 1)
+print('performance of the w2v naive bayes ranker')
+evaluation(w2v_nb_ranker, repetition = 1)
