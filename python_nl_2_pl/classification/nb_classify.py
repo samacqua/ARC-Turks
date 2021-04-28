@@ -3,6 +3,8 @@ import numpy as np
 import random
 import pickle
 
+NUM_REPETITIONS = 10
+
 # the set of words
 Words = set()
 # a mapping from task_id to words used in that task
@@ -23,8 +25,8 @@ with open('gridWords.csv', newline='') as csvfile:
 Concepts = set()
 # a mapping from task_id to concepts used in that task
 task_to_primitives = {}
-# fname = 'gridIC.csv'
-fname = 'gridTheo.csv'
+fname = 'gridIC.csv'
+# fname = 'gridTheo.csv'
 with open(fname, newline='') as csvfile:
     reader = csv.DictReader(csvfile)
 
@@ -100,12 +102,39 @@ def evaluation(concept_ranker, repetition = 100):
     print ('average fraction predicted ', np.mean(fractions))
 
 print ('performance of the random ranker')
-evaluation(random_ranker)
+evaluation(random_ranker, repetition=NUM_REPETITIONS)
 
 
 # ======= END OF DATA PROCESSING / EVAL / BASELINE =======
 
 
+# ======= BEGIN OF MODELING HELPERS =======
+
+# wrap the probability table around a function to give a smoothing for unseen words
+# so basically the same as prob_table, except has a small default value for unseen words
+def get_w_given_t(w, c, prob_table, df=0.0001):
+    return prob_table.get((c, w), 0) + df
+
+# given a set of words, what is the probability that 
+# concept c will generate this set, i.e. P(words | c) ?
+# it is naive bayes, so it is P(wrd1 | c) * ... * P(wrdn | c)
+# we model it as logP(wrd1 | c) + ... + logP(wrdn | c)
+def get_logpr_words_given_c(words, c, prob_table, df=0.0001):
+    logpr = 0
+    for wrd in words:
+        logpr += np.log(get_w_given_t(wrd, c, prob_table, df))
+    return logpr
+
+# make a ranker for some probability table
+def make_classifier_ranker(prob_table):
+    # given a set of words, we rank ALL the concepts in Concept_train
+    # in descending logPr according to logP(words | c)
+    def ranker(words):
+        score_c_list = []
+        for c in Concepts_train:
+            score_c_list.append((get_logpr_words_given_c(words, c, prob_table), c))
+        return [x[1] for x in reversed(sorted(score_c_list))]
+    return ranker
 
 # ======= BEGIN OF NAIVE BAYES MODELING =======
     
@@ -132,31 +161,8 @@ for c in c_to_words:
 
 # print (prob_table)
 
-# wrap the probability table around a function to give a smoothing for unseen words
-# so basically the same as prob_table, except has a small default value for unseen words
-def get_w_given_t(w, c, prob_table, df=0.0001):
-    return prob_table.get((c, w), 0) + df
-
-# given a set of words, what is the probability that 
-# concept c will generate this set, i.e. P(words | c) ?
-# it is naive bayes, so it is P(wrd1 | c) * ... * P(wrdn | c)
-# we model it as logP(wrd1 | c) + ... + logP(wrdn | c)
-def get_logpr_words_given_c(words, c, prob_table, df=0.0001):
-    logpr = 0
-    for wrd in words:
-        logpr += np.log(get_w_given_t(wrd, c, prob_table, df))
-    return logpr
-
-# given a set of words, we rank ALL the concepts in Concept_train
-# in descending logPr according to logP(words | c)
-def nb_ranker(words):
-    score_c_list = []
-    for c in Concepts_train:
-        score_c_list.append((get_logpr_words_given_c(words, c, nb_prob_table), c))
-    return [x[1] for x in reversed(sorted(score_c_list))]
-
 print ('performance of the naive bayes ranker')
-evaluation(nb_ranker, repetition = 1)
+evaluation(make_classifier_ranker(nb_prob_table), repetition = NUM_REPETITIONS)
 
 # ======= BEGIN OF NAIVE BAYES MODELING w/ TD-IDF =======
 
@@ -186,14 +192,8 @@ tfidf = dict()
 for key in tf:
     tfidf[key] = tf[key] * idf[key]
 
-def tfidf_ranker(words):
-    score_c_list = []
-    for c in Concepts_train:
-        score_c_list.append((get_logpr_words_given_c(words, c, tfidf), c))
-    return [x[1] for x in reversed(sorted(score_c_list))]
-
 print ('performance of the TF-IDF ranker')
-evaluation(tfidf_ranker, repetition = 1)
+evaluation(make_classifier_ranker(tfidf), repetition = NUM_REPETITIONS)
 
 # ======= BEGIN OF NAIVE BAYES MODELING w/ Word-embedding =======
 
@@ -228,7 +228,7 @@ for word1, vec1 in word_embeddings.items():
           tot_similarity += similarity(vec1, vec2)
 avg_similarity = tot_similarity / len(word_embeddings)**2
 
-print("\taverage similarity between a pair of words:", avg_similarity)
+# print("average similarity between a pair of words:", avg_similarity)
 
 # instead of P(word | concept), now using fuzzy P(word | concept) 
 # = P(word | concept) + alpha * sum(P(word_i | concept) * similarity(word_i, word))
@@ -253,13 +253,5 @@ for c in c_to_words:
     for word in Words_train - set(c_to_words[c]):
         w2v_prob_table[(c, word)] = 0
 
-# given a set of words, we rank ALL the concepts in Concept_train
-# in descending logPr according to logP(words | c)
-def w2v_nb_ranker(words):
-    score_c_list = []
-    for c in Concepts_train:
-        score_c_list.append((get_logpr_words_given_c(words, c, w2v_prob_table), c))
-    return [x[1] for x in reversed(sorted(score_c_list))]
-
 print('performance of the w2v naive bayes ranker')
-evaluation(w2v_nb_ranker, repetition = 1)
+evaluation(make_classifier_ranker(w2v_prob_table), repetition = NUM_REPETITIONS)
