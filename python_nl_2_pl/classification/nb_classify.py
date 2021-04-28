@@ -22,7 +22,8 @@ with open('gridWords.csv', newline='') as csvfile:
 Concepts = set()
 # a mapping from task_id to concepts used in that task
 task_to_primitives = {}
-with open('gridTheo.csv', newline='') as csvfile:
+fname = 'gridIC.csv'    # 'gridTheo.csv'
+with open(fname, newline='') as csvfile:
     reader = csv.DictReader(csvfile)
 
     for row in reader:
@@ -61,8 +62,10 @@ for i, task_id in enumerate(words_primitives_join):
 # the concepts in the train set to keep in mind in case
 # train/test might have not overlapping concepts
 Concepts_train = set()
+Words_train = set()
 for words, concepts in D_train:
     Concepts_train = Concepts_train.union(concepts)
+    Words_train = Words_train.union(words)
 
 # @ sam you should use these following objects for your modeling
 
@@ -123,7 +126,7 @@ for words, concepts in D_train:
 prob_table = dict()
 for c in c_to_words:
     c_denum = len(c_to_words[c])
-    for word in Words:
+    for word in Words_train:
         word_freq = c_to_words[c].count(word)
         prob_table[(c, word)] = word_freq / c_denum
 
@@ -157,3 +160,52 @@ def nb_ranker(words):
 
 print ('performance of the naive bayes ranker')
 evaluation(nb_ranker, repetition = 1)
+
+# ======= BEGIN OF NAIVE BAYES MODELING w/ TD-IDF =======
+
+# creating a map of the form:
+# word -> set of concepts it co-occurred with, no duplicates
+word_to_concepts = dict()
+
+for words, concepts in D_train:
+    for w in words:
+        if w not in word_to_concepts:
+            word_to_concepts[w] = set()
+        word_to_concepts[w] |= concepts
+
+# create term-frequency-list
+tf = prob_table
+
+# create inverse-document frequency
+idf = dict()
+D = len(Concepts_train) # num concepts
+for word in word_to_concepts:
+    num_concepts = len(word_to_concepts[word])    # number of concepts that the word maps to
+    for concept in Concepts_train:
+        idf[(concept, word)] = np.log(D / num_concepts)     # log(total num concepts / num concepts w/ word)
+
+# calculate TD-IDF
+tfidf = dict()
+for key in prob_table:
+    tfidf[key] = tf[key] * idf[key]
+
+def get_tfidf(w, c):
+    return 0.0001 + tfidf.get((c,w), 0)
+
+def get_logpr_words_given_c_tfidf(words, c):
+    logpr = 0
+    for wrd in words:
+        logpr += np.log(get_tfidf(wrd, c))
+    return logpr
+
+def nb_ranker(words):
+    score_c_list = []
+    for c in Concepts_train:
+        score_c_list.append((get_logpr_words_given_c_tfidf(words, c), c))
+    return [x[1] for x in reversed(sorted(score_c_list))]
+
+print ('performance of the TF-IDF ranker')
+evaluation(nb_ranker, repetition = 1)
+
+# ======= BEGIN OF NAIVE BAYES MODELING w/ Word-embedding =======
+
