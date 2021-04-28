@@ -1,6 +1,7 @@
 import csv
 import numpy as np
 import random
+import pickle
 
 # the set of words
 Words = set()
@@ -22,7 +23,8 @@ with open('gridWords.csv', newline='') as csvfile:
 Concepts = set()
 # a mapping from task_id to concepts used in that task
 task_to_primitives = {}
-fname = 'gridIC.csv'    # 'gridTheo.csv'
+# fname = 'gridIC.csv'
+fname = 'gridTheo.csv'
 with open(fname, newline='') as csvfile:
     reader = csv.DictReader(csvfile)
 
@@ -209,3 +211,87 @@ evaluation(nb_ranker, repetition = 1)
 
 # ======= BEGIN OF NAIVE BAYES MODELING w/ Word-embedding =======
 
+# # create word embeddings
+# with open('glove/glove.6B.50d.txt') as word2vec:    # if using w2v file
+#     word_embeddings = dict()
+#     for i, line in enumerate(word2vec):
+
+#         word, *vec = line.split()
+#         if word not in Words: # ignore words that are not in our vocab
+#             continue
+#         vec = np.array([float(v) for v in vec])
+
+#         word_embeddings[word] = vec
+
+#     with open('word_embeddings.pickle', 'wb') as handle:
+#         pickle.dump(word_embeddings, handle)
+
+with open('word_embeddings.pickle', 'rb') as handle:   # if using pickled version
+    word_embeddings = pickle.load(handle)
+
+def similarity(v1, v2):
+    """
+    get the similarity between two vectors
+    """
+    return abs(np.dot(v1, v2)/(np.linalg.norm(v1)*np.linalg.norm(v2)))      # using abs is sus here but idk what to do
+
+# get avg word similarity bc some words not in w2v
+tot_similarity = 0
+for word1, vec1 in word_embeddings.items():
+      for word2, vec2 in word_embeddings.items():
+          tot_similarity += similarity(vec1, vec2)
+avg_similarity = tot_similarity / len(word_embeddings)**2
+
+print("Average similarity between a pair of words:", avg_similarity)
+
+# instead of P(word | concept), now using fuzzy P(word | concept) 
+# = P(word | concept) + alpha * sum(P(word_i | concept) * similarity(word_i, word))
+prob_table = dict()
+alpha = 1
+for c in c_to_words:
+    c_denum = len(c_to_words[c])
+    for word in c_to_words[c]:
+        word_count = c_to_words[c].count(word)
+        weighted_sim_word_freq = 0
+        for word_i in Words_train:
+
+            try:
+                word_similarity = similarity(word_embeddings[word], word_embeddings[word_i])
+                weighted_sim_word_freq += word_similarity
+            except KeyError:    # if one of the words not in the w2v, just use avg similarity
+                weighted_sim_word_freq += avg_similarity
+
+        prob_table[(c, word)] = (word_count + alpha * weighted_sim_word_freq) / (c_denum + tot_similarity*alpha)
+        assert prob_table[(c, word)] > 0
+
+    for word in Words_train - set(c_to_words[c]):
+        prob_table[(c, word)] = 0
+
+# wrap the probability table around a function to give a smoothing for unseen words
+# so basically the same as prob_table, except has a small default value for unseen words
+def get_w_given_t(w, c):
+    if (c,w) not in prob_table:
+        return 0.0001
+    else:
+        return 0.0001 + prob_table[(c,w)]
+
+# given a set of words, what is the probability that 
+# concept c will generate this set, i.e. P(words | c) ?
+# it is naive bayes, so it is P(wrd1 | c) * ... * P(wrdn | c)
+# we model it as logP(wrd1 | c) + ... + logP(wrdn | c)
+def get_logpr_words_given_c(words, c):
+    logpr = 0
+    for wrd in words:
+        logpr += np.log(get_w_given_t(wrd, c))
+    return logpr
+
+# given a set of words, we rank ALL the concepts in Concept_train
+# in descending logPr according to logP(words | c)
+def nb_ranker(words):
+    score_c_list = []
+    for c in Concepts_train:
+        score_c_list.append((get_logpr_words_given_c(words, c), c))
+    return [x[1] for x in reversed(sorted(score_c_list))]
+
+print ('performance of the w2v naive bayes ranker')
+evaluation(nb_ranker, repetition = 1)
