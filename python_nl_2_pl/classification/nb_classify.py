@@ -83,10 +83,10 @@ def random_ranker(words):
 
 # for a given ranker of concepts given words, 
 # we can test the ranker's performance as follows
-def evaluation(concept_ranker, repetition = 100):
+def evaluation(concept_ranker, repetition = 100, D=D_test, verbose=True):
     fractions = []
     for i in range(repetition):
-        for words, concepts in D_test:
+        for words, concepts in D:
             # no need to bother with concepts that are unseen during training
             shared_concepts = Concepts_train.intersection(concepts)
             if len(shared_concepts) == 0:
@@ -99,7 +99,9 @@ def evaluation(concept_ranker, repetition = 100):
             fraction = len(intersect) / len(shared_concepts)
             fractions.append(fraction)
     # return the average fraction predicted as the performance of the ranker
-    print ('average fraction predicted ', np.mean(fractions))
+    score = np.mean(fractions)
+    if verbose: print('average fraction predicted ', score)
+    return score
 
 print ('performance of the random ranker')
 evaluation(random_ranker, repetition=NUM_REPETITIONS)
@@ -231,27 +233,36 @@ avg_similarity = tot_similarity / len(word_embeddings)**2
 # print("average similarity between a pair of words:", avg_similarity)
 
 # instead of P(word | concept), now using fuzzy P(word | concept) 
-# = P(word | concept) + alpha * sum(P(word_i | concept) * similarity(word_i, word))
-w2v_prob_table = dict()
-alpha = 1
-for c in c_to_words:
-    c_denum = len(c_to_words[c])
-    for word in c_to_words[c]:
-        word_count = c_to_words[c].count(word)
-        weighted_sim_word_freq = 0
-        for word_i in Words_train:
+# = sum(P(word_i | concept) * e^(alpha * similarity(word_i, word)) )
+alpha_vals = [0, 1/4, 1/2, 1]   # a quick way to get better alpha -- try a few values
+best_alpha, best_sore, best_w2v_prob_table = 0, 0, dict()
+for alpha in alpha_vals:
+    w2v_prob_table = dict()
 
-            try:
-                word_similarity = similarity(word_embeddings[word], word_embeddings[word_i])
-                weighted_sim_word_freq += word_similarity
-            except KeyError:    # if one of the words not in the w2v, just use avg similarity
-                weighted_sim_word_freq += avg_similarity
+    for c in c_to_words:
+        c_denum = len(c_to_words[c])
+        for word in c_to_words[c]:
+            weighted_sim_word_freq = 0
+            for word_i in Words_train:
+                p_wordi = nb_prob_table.get((c, word_i), 0)     # prob of word i given concept
 
-        w2v_prob_table[(c, word)] = (word_count + alpha * weighted_sim_word_freq) / (c_denum + tot_similarity*alpha)
-        assert w2v_prob_table[(c, word)] > 0
+                word_similarity = avg_similarity    # if one of the words not in the w2v, just use avg similarity
+                if word in word_embeddings and word_i in word_embeddings:
+                    word_similarity = similarity(word_embeddings[word], word_embeddings[word_i])
 
-    for word in Words_train - set(c_to_words[c]):
-        w2v_prob_table[(c, word)] = 0
+                weighted_sim_word_freq += p_wordi * np.exp(alpha * word_similarity) # P(word_i | concept) * e^(alpha * similarity(word_i, word))
 
-print('performance of the w2v naive bayes ranker')
-evaluation(make_classifier_ranker(w2v_prob_table), repetition = NUM_REPETITIONS)
+            w2v_prob_table[(c, word)] = weighted_sim_word_freq
+            assert w2v_prob_table[(c, word)] >= 0
+
+    print(f'performance of the w2v naive bayes ranker (alpha={alpha}) on train')
+    score = evaluation(make_classifier_ranker(w2v_prob_table), repetition=1, D=D_train, verbose=True)   # something is going wrong here bc all alphas get same accuracy on train
+    # print(f'performance of the best w2v naive bayes ranker (alpha={alpha})')
+    # evaluation(make_classifier_ranker(w2v_prob_table), repetition = NUM_REPETITIONS)
+    if score > best_sore:
+        best_alpha = alpha
+        best_sore = score
+        best_w2v_prob_table = w2v_prob_table
+
+print(f'performance of the best w2v naive bayes ranker (alpha={best_alpha})')
+evaluation(make_classifier_ranker(best_w2v_prob_table), repetition = NUM_REPETITIONS)
