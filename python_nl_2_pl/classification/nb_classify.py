@@ -2,6 +2,7 @@ import csv
 import numpy as np
 import random
 import pickle
+import matplotlib.pyplot as plt
 
 NUM_REPETITIONS = 10
 
@@ -15,8 +16,9 @@ with open('gridWords.csv', newline='') as csvfile:
         if row['used'] == 'TRUE':
             if row['task_id'] not in task_to_words:
                 task_to_words[row['task_id']] = set()
-            task_to_words[row['task_id']].add(row['word'])
-            Words.add(row['word'])
+            word = row['word'].lower()
+            task_to_words[row['task_id']].add(word)
+            Words.add(word)
 
 # print (words)
 # print (task_to_words)
@@ -26,7 +28,7 @@ Concepts = set()
 # a mapping from task_id to concepts used in that task
 task_to_primitives = {}
 fname = 'gridIC.csv'
-# fname = 'gridTheo.csv'
+fname = 'gridTheo.csv'
 with open(fname, newline='') as csvfile:
     reader = csv.DictReader(csvfile)
 
@@ -156,17 +158,19 @@ for words, concepts in D_train:
 # then P(word | concept) = 3 / 100
 nb_prob_table = dict()
 for c in c_to_words:
-    c_denum = len(c_to_words[c])
+    words_in_c  = c_to_words[c]
     for word in Words_train:
-        word_freq = c_to_words[c].count(word)
-        nb_prob_table[(c, word)] = word_freq / c_denum
+        word_freq = words_in_c.count(word)
+        nb_prob_table[(c, word)] = word_freq / len(words_in_c)
 
 # print (prob_table)
 
-print ('performance of the naive bayes ranker')
+print ('\nperformance of the naive bayes ranker')
 evaluation(make_classifier_ranker(nb_prob_table), repetition = NUM_REPETITIONS)
 
 # ======= BEGIN OF NAIVE BAYES MODELING w/ TD-IDF =======
+# doing Naive Bayes, but instead of just using word frequency in concept for P(word | concept), we are using the
+# tdidf = word frequency in concept * log ( total num concepts / num concepts w/ word )
 
 # creating a map of the form:
 # word -> set of concepts it co-occurred with, no duplicates
@@ -178,26 +182,32 @@ for words, concepts in D_train:
             word_to_concepts[w] = set()
         word_to_concepts[w] |= concepts
 
-# create term-frequency-list
+# create term-frequency
+# here, defining term-frequency as # times word occurs for a concept / # total words in that concept 
 tf = nb_prob_table
 
 # create inverse-document frequency
+# defining IDF as log(D / d_w) where D is the total number of concepts and d_w is the number of concepts that co-occur w/ the word
 idf = dict()
-D = len(Concepts_train) # num concepts
+D = len(Concepts_train)     # total num concepts
 for word in word_to_concepts:
     num_concepts = len(word_to_concepts[word])    # number of concepts that the word maps to
     for concept in Concepts_train:
-        idf[(concept, word)] = D / num_concepts     # total num concepts / num concepts w/ word
+        idf[(concept, word)] = np.log(D / num_concepts)     # log ( total num concepts / num concepts w/ word )
 
 # calculate TD-IDF
 tfidf = dict()
 for key in tf:
     tfidf[key] = tf[key] * idf[key]
 
-print ('performance of the TF-IDF ranker')
+print ('\nperformance of the TF-IDF ranker')
 evaluation(make_classifier_ranker(tfidf), repetition = NUM_REPETITIONS)
 
 # ======= BEGIN OF NAIVE BAYES MODELING w/ Word-embedding =======
+# doing Naive Bayes, but instead of just using word frequency in concept for P(word | concept), we are trying
+# to get at similar words by predicting roughly P(some word | concept) * similarity(some word, word).
+# concretely, we are predicting a fuzzy P(word | concept) = sum(P(word_i | concept) * e^(alpha * similarity(word_i, word)) )
+# where alpha is a learned parameter which weights how much to take into account the similarity between words.
 
 # # create word embeddings
 # with open('glove/glove.6B.50d.txt') as word2vec:    # if using w2v file
@@ -224,39 +234,49 @@ def similarity(v1, v2):
     return abs(np.dot(v1, v2)/(np.linalg.norm(v1)*np.linalg.norm(v2)))      # using abs is sus here but idk what to do
 
 # get avg word similarity bc some words not in w2v
-tot_similarity = 0
+similarities = []
 for word1, vec1 in word_embeddings.items():
       for word2, vec2 in word_embeddings.items():
-          tot_similarity += similarity(vec1, vec2)
-avg_similarity = tot_similarity / len(word_embeddings)**2
+          similarities.append(similarity(vec1, vec2))
+similarities = np.array(similarities)
+avg_similarity = np.mean(similarities)
 
-# print("average similarity between a pair of words:", avg_similarity)
+print("\naverage similarity between a pair of words:", avg_similarity)
+print("similarity std:", np.std(similarities))
+# fig, ax = plt.subplots()
+# ax.hist(similarities, bins=30)
+# plt.show()
 
 # instead of P(word | concept), now using fuzzy P(word | concept) 
-# = sum(P(word_i | concept) * e^(alpha * similarity(word_i, word)) )
+# = sum(P(word_i | concept) * e^(alpha * similarity(word_i, word)) ) for each word_i in the vocab
+p_wordi_for_conc = nb_prob_table
 alpha_vals = [0, 1/4, 1/2, 1]   # a quick way to get better alpha -- try a few values
 best_alpha, best_sore, best_w2v_prob_table = 0, 0, dict()
 for alpha in alpha_vals:
     w2v_prob_table = dict()
 
     for c in c_to_words:
-        c_denum = len(c_to_words[c])
         for word in c_to_words[c]:
-            weighted_sim_word_freq = 0
+            fuzzy_p = 0
             for word_i in Words_train:
-                p_wordi = nb_prob_table.get((c, word_i), 0)     # prob of word i given concept
+                p_wordi = p_wordi_for_conc[(c, word_i)]     # prob of word i given concept
 
                 word_similarity = avg_similarity    # if one of the words not in the w2v, just use avg similarity
                 if word in word_embeddings and word_i in word_embeddings:
                     word_similarity = similarity(word_embeddings[word], word_embeddings[word_i])
+                # else:     # see words not in w2v
+                #     if word not in word_embeddings:
+                #         print(word)
+                #     if word_i not in word_embeddings:
+                #         print(word_i)   
 
-                weighted_sim_word_freq += p_wordi * np.exp(alpha * word_similarity) # P(word_i | concept) * e^(alpha * similarity(word_i, word))
+                fuzzy_p += p_wordi * np.exp(alpha * word_similarity) # P(word_i | concept) * e^(alpha * similarity(word_i, word))
 
-            w2v_prob_table[(c, word)] = weighted_sim_word_freq
-            assert w2v_prob_table[(c, word)] >= 0
+            assert fuzzy_p >= 0
+            w2v_prob_table[(c, word)] = fuzzy_p
 
     print(f'performance of the w2v naive bayes ranker (alpha={alpha}) on train')
-    score = evaluation(make_classifier_ranker(w2v_prob_table), repetition=1, D=D_train, verbose=True)   # something is going wrong here bc all alphas get same accuracy on train
+    score = evaluation(make_classifier_ranker(w2v_prob_table), repetition=1, D=D_train)   # something is going wrong here bc all alphas get same accuracy on train
     # print(f'performance of the best w2v naive bayes ranker (alpha={alpha})')
     # evaluation(make_classifier_ranker(w2v_prob_table), repetition = NUM_REPETITIONS)
     if score > best_sore:
