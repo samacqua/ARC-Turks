@@ -67,11 +67,14 @@ for i, task_id in enumerate(words_primitives_join):
 
 # the concepts in the train set to keep in mind in case
 # train/test might have not overlapping concepts
+Concepts_count = dict()
 Concepts_train = set()
 Words_train = set()
 for words, concepts in D_train:
-    Concepts_train = Concepts_train.union(concepts)
-    Words_train = Words_train.union(words)
+    Concepts_train |= concepts
+    Words_train |= words
+    for c in concepts:
+        Concepts_count[c] = Concepts_count.get(c, 0) + 1
 
 # print (Concepts_train)
 # print (D_train)
@@ -89,14 +92,15 @@ def evaluation(concept_ranker, repetition = 100, D=D_test, verbose=True):
     fractions = []
     for i in range(repetition):
         for words, concepts in D:
-            # no need to bother with concepts that are unseen during training
-            shared_concepts = Concepts_train.intersection(concepts)
+            shared_concepts = Concepts_train & concepts     # no need to bother with concepts that are unseen during training
             if len(shared_concepts) == 0:
                 continue
+
             # use the concept ranker to predict the top-k concepts given words
             # here k is the number of unique concepts used in the ground-truth program
-            predicted_concepts = concept_ranker(words)[:len(shared_concepts)]
-            intersect = set(predicted_concepts).intersection(shared_concepts)
+            predicted_concepts = set(concept_ranker(words)[:len(shared_concepts)])
+            intersect = predicted_concepts & shared_concepts
+
             # measure the fraction of concepts in the ground-truth correctly predicted by the ranker
             fraction = len(intersect) / len(shared_concepts)
             fractions.append(fraction)
@@ -168,9 +172,20 @@ for c in c_to_words:
 print ('\nperformance of the naive bayes ranker')
 evaluation(make_classifier_ranker(nb_prob_table), repetition = NUM_REPETITIONS)
 
-# ======= BEGIN OF NAIVE BAYES MODELING w/ TD-IDF =======
-# doing Naive Bayes, but instead of just using word frequency in concept for P(word | concept), we are using the
-# tdidf = word frequency in concept * log ( total num concepts / num concepts w/ word )
+# ======= BEGIN OF FREQUENCY RANK ========
+# just rank based on number of times concept appears
+
+Concept_Freq_rank = sorted(Concepts_count.items(), key=lambda x: -x[1])
+Concept_Freq_rank = [x[0] for x in Concept_Freq_rank]
+def frequency_ranker(words):
+    return Concept_Freq_rank
+
+print ('\nperformance of the frequency ranker')
+evaluation(frequency_ranker, repetition = NUM_REPETITIONS)
+
+# ======= BEGIN OF TD-IDF =======
+# tfidf = word frequency in concept * log ( total num concepts / num concepts w/ word )
+# score(W, c) = tfidf(w_0) + tfidf(w_1) + ... + tfidf(w_i)
 
 # creating a map of the form:
 # word -> set of concepts it co-occurred with, no duplicates
@@ -200,8 +215,17 @@ tfidf = dict()
 for key in tf:
     tfidf[key] = tf[key] * idf[key]
 
+def tfidf_ranker(words):
+    score_list = []
+    for c in Concepts_train:
+        c_score = 0
+        for word in words:
+            c_score += get_w_given_t(word, c, tfidf)
+        score_list.append((c_score, c))
+    return [x[1] for x in reversed(sorted(score_list))]
+
 print ('\nperformance of the TF-IDF ranker')
-evaluation(make_classifier_ranker(tfidf), repetition = NUM_REPETITIONS)
+evaluation(tfidf_ranker, repetition = NUM_REPETITIONS)
 
 # ======= BEGIN OF NAIVE BAYES MODELING w/ Word-embedding =======
 # doing Naive Bayes, but instead of just using word frequency in concept for P(word | concept), we are trying
@@ -250,7 +274,7 @@ print("similarity std:", np.std(similarities))
 # instead of P(word | concept), now using fuzzy P(word | concept) 
 # = sum(P(word_i | concept) * e^(alpha * similarity(word_i, word)) ) for each word_i in the vocab
 p_wordi_for_conc = nb_prob_table
-alpha_vals = [0, 1/4, 1/2, 1]   # a quick way to get better alpha -- try a few values
+alpha_vals = np.arange(10) / 2   # a quick way to get better alpha -- try a few values
 best_alpha, best_sore, best_w2v_prob_table = 0, 0, dict()
 for alpha in alpha_vals:
     w2v_prob_table = dict()
@@ -275,10 +299,10 @@ for alpha in alpha_vals:
             assert fuzzy_p >= 0
             w2v_prob_table[(c, word)] = fuzzy_p
 
-    print(f'performance of the w2v naive bayes ranker (alpha={alpha}) on train')
-    score = evaluation(make_classifier_ranker(w2v_prob_table), repetition=1, D=D_train)   # something is going wrong here bc all alphas get same accuracy on train
-    # print(f'performance of the best w2v naive bayes ranker (alpha={alpha})')
-    # evaluation(make_classifier_ranker(w2v_prob_table), repetition = NUM_REPETITIONS)
+    # print(f'performance of the w2v naive bayes ranker (alpha={alpha}) on train')
+    # score = evaluation(make_classifier_ranker(w2v_prob_table), repetition=1, D=D_train)   # something is going wrong here bc all alphas get same accuracy on train
+    print(f'performance of the best w2v naive bayes ranker (alpha={alpha}) on test')    # TODO: make & use validation set!!!
+    score = evaluation(make_classifier_ranker(w2v_prob_table), repetition = NUM_REPETITIONS)
     if score > best_sore:
         best_alpha = alpha
         best_sore = score
