@@ -176,7 +176,7 @@ const STUDY_BATCHES = {
     },
 }
 
-var TASKS = STUDY_BATCHES['dev'];
+var TASKS = STUDY_BATCHES['dev'].tasks;
 
 // ========
 // Common Values
